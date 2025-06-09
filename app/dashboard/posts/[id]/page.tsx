@@ -162,6 +162,7 @@ export default function PostEditor({ params }: PostEditorProps) {
       console.error('Error fetching categories:', error);
     }
   };
+  
 
   const fetchMedia = async () => {
     try {
@@ -478,39 +479,30 @@ Ova objava će biti dostupna građanima na portalu institucije."
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Label>Kategorija</Label>
-                  {formInitialized && watchedCategoryId !== undefined ? (
-                    <Select
-                      value={watchedCategoryId}
-                      onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
-                      disabled={categories.length === 0}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={
-                          categories.length === 0 ? 'Učitavanje...' : 'Izaberite kategoriju'
-                        } />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">
-                          <div className="flex items-center">
-                            <Tag className="mr-2 h-4 w-4" />
-                            Bez kategorije
-                          </div>
+                <Label>Kategorija</Label>
+                <Select
+                    value={watchedStatus || 'draft'}
+                    onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Izaberite kategoriju" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                        {cat.name}
                         </SelectItem>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            <div className="flex items-center">
-                              <Tag className="mr-2 h-4 w-4" />
-                              {category.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="h-10 bg-gray-100 rounded-md animate-pulse"></div>
-                  )}
+                    ))}
+                    </SelectContent>
+                </Select>
+                {errors.categoryId && (
+                    <p className="text-sm text-red-600 flex items-center">
+                    <AlertCircle className="mr-1 h-3 w-3" />
+                    {errors.categoryId.message}
+                    </p>
+                )}
                 </div>
+
               </CardContent>
             </Card>
 
