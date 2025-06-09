@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -31,6 +30,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { postsApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Category, Media, CreatePostDto, UpdatePostDto, PostStatus } from '@/lib/types';
 import { toast } from 'sonner';
@@ -66,7 +66,6 @@ export default function PostEditor({ params }: PostEditorProps) {
   const [media, setMedia] = useState<Media[]>([]);
   const [isLoading, setIsLoading] = useState(!isNewPost);
   const [isSaving, setSaving] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);
 
   // Memoized default values
@@ -322,10 +321,11 @@ export default function PostEditor({ params }: PostEditorProps) {
 
                 <div className="space-y-2">
                   <Label htmlFor="excerpt">Kratak opis (opciono)</Label>
-                  <Textarea
+                  <textarea
                     id="excerpt"
                     placeholder="Kratak opis objave koji će se prikazati u pregledu..."
                     rows={3}
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     {...register('excerpt')}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -335,58 +335,21 @@ export default function PostEditor({ params }: PostEditorProps) {
               </CardContent>
             </Card>
 
-            {/* Content Editor */}
+            {/* Rich Text Editor */}
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Sadržaj objave</CardTitle>
-                    <CardDescription>
-                      Napišite sadržaj objave koristeći Markdown format
-                    </CardDescription>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPreviewMode(!previewMode)}
-                  >
-                    {previewMode ? 'Uredi' : 'Pregled'}
-                  </Button>
-                </div>
+                <CardTitle>Sadržaj objave</CardTitle>
+                <CardDescription>
+                  Koristite rich text editor za kreiranje profesionalnog sadržaja
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {previewMode ? (
-                  <div className="min-h-[400px] p-4 border rounded-md bg-gray-50">
-                    <div className="prose max-w-none">
-                      {watchedContent ? (
-                        <div dangerouslySetInnerHTML={{ 
-                          __html: watchedContent.replace(/\n/g, '<br>') 
-                        }} />
-                      ) : (
-                        <p className="text-muted-foreground">
-                          Nema sadržaja za pregled
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <Textarea
-                    placeholder="Napišite sadržaj objave ovde...
-
-Možete koristiti:
-- **bold tekst**
-- *italic tekst*
-- [linkovi](https://example.com)
-- # Naslovi
-
-Ova objava će biti dostupna građanima na portalu institucije."
-                    rows={20}
-                    className="font-mono"
-                    {...register('content', { required: 'Sadržaj je obavezan' })}
-                  />
-                )}
-                {errors.content && !previewMode && (
+                <RichTextEditor
+                  content={watchedContent || ''}
+                  onChange={(content) => setValue('content', content, { shouldDirty: true })}
+                  placeholder="Napišite sadržaj objave ovde... Koristite toolbar za formatiranje teksta, dodavanje linkova, slika i tabela."
+                />
+                {errors.content && (
                   <p className="text-sm text-red-600 flex items-center mt-2">
                     <AlertCircle className="mr-1 h-3 w-3" />
                     {errors.content.message}
@@ -481,7 +444,7 @@ Ova objava će biti dostupna građanima na portalu institucije."
                 <div className="space-y-2">
                 <Label>Kategorija</Label>
                 <Select
-                    value={watchedStatus || 'draft'}
+                    value={watchedCategoryId || ''}
                     onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
                 >
                     <SelectTrigger>
