@@ -1,7 +1,7 @@
 // app/objave/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +22,8 @@ import Link from 'next/link';
 import { postsApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Category } from '@/lib/types';
 
-export default function PostsListingPage() {
+// Separatna komponenta koja koristi useSearchParams
+function PostsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   
@@ -427,5 +428,43 @@ export default function PostsListingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Loading komponenta
+function PostsLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <Building className="h-8 w-8 text-blue-600" />
+              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Glavna komponenta
+export default function PostsListingPage() {
+  return (
+    <Suspense fallback={<PostsLoading />}>
+      <PostsContent />
+    </Suspense>
   );
 }
