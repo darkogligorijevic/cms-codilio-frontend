@@ -1,4 +1,4 @@
-// lib/types.ts
+// lib/types.ts - Updated with page assignment support
 export enum PostStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published'
@@ -33,6 +33,21 @@ export interface Category {
   posts?: Post[];
 }
 
+export interface Page {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  status: PageStatus;
+  template: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  authorId: number;
+  author: User;
+  posts?: Post[]; // Many-to-many relationship with posts
+}
+
 export interface Post {
   id: number;
   title: string;
@@ -49,20 +64,7 @@ export interface Post {
   categoryId?: number;
   author: User;
   category?: Category;
-}
-
-export interface Page {
-  id: number;
-  title: string;
-  slug: string;
-  content: string;
-  status: PageStatus;
-  template: string;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
-  authorId: number;
-  author: User;
+  pages?: Page[]; // Many-to-many relationship with pages
 }
 
 export interface Media {
@@ -71,6 +73,7 @@ export interface Media {
   originalName: string;
   mimetype: string;
   size: number;
+  path: string;
   alt?: string;
   caption?: string;
   createdAt: string;
@@ -103,7 +106,7 @@ export interface AuthResponse {
   user: User;
 }
 
-// DTO types
+// DTO types with page assignment support
 export interface CreatePostDto {
   title: string;
   slug: string;
@@ -112,9 +115,13 @@ export interface CreatePostDto {
   status?: PostStatus;
   categoryId?: number;
   featuredImage?: string;
+  pageIds?: number[]; // Array of page IDs to assign the post to
+  publishedAt?: Date;
 }
 
-export interface UpdatePostDto extends Partial<CreatePostDto> {}
+export interface UpdatePostDto extends Partial<CreatePostDto> {
+  pageIds?: number[]; // Array of page IDs to assign the post to
+}
 
 export interface CreatePageDto {
   title: string;
@@ -138,4 +145,11 @@ export interface UpdateCategoryDto extends Partial<CreateCategoryDto> {}
 export interface CreateMediaDto {
   alt?: string;
   caption?: string;
+}
+
+// Page selection interface for dropdown
+export interface PageSelectionOption {
+  id: number;
+  title: string;
+  slug: string;
 }

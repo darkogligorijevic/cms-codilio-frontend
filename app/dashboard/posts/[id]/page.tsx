@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -27,12 +28,15 @@ import {
   FileText,
   Upload,
   Image as ImageIcon,
-  AlertCircle
+  AlertCircle,
+  Globe,
+  Layout,
+  CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import { postsApi, categoriesApi, mediaApi } from '@/lib/api';
-import type { Post, Category, Media, CreatePostDto, UpdatePostDto, PostStatus } from '@/lib/types';
+import { postsApi, categoriesApi, mediaApi, pagesApi } from '@/lib/api';
+import type { Post, Category, Media, Page, CreatePostDto, UpdatePostDto, PostStatus } from '@/lib/types';
 import { toast } from 'sonner';
 
 interface PostEditorProps {
@@ -49,21 +53,25 @@ interface PostFormData {
   status: PostStatus;
   categoryId: string;
   featuredImage: string;
+  pageIds: number[];
+}
+
+interface PageOption {
+  id: number;
+  title: string;
+  slug: string;
 }
 
 export default function PostEditor({ params }: PostEditorProps) {
   const resolvedParams = use(params);
   const isNewPost = resolvedParams.id === 'new';
   
-  console.log('🔍 PostEditor params:', resolvedParams);
-  console.log('🔍 Is new post:', isNewPost);
-  console.log('🔍 Post ID:', resolvedParams.id);
-
   const router = useRouter();
   
   const [post, setPost] = useState<Post | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
+  const [pages, setPages] = useState<PageOption[]>([]);
   const [isLoading, setIsLoading] = useState(!isNewPost);
   const [isSaving, setSaving] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);
@@ -76,7 +84,8 @@ export default function PostEditor({ params }: PostEditorProps) {
     content: '',
     status: 'draft' as PostStatus,
     categoryId: '',
-    featuredImage: ''
+    featuredImage: '',
+    pageIds: [0] // Default to homepage (id: 0)
   }), []);
 
   const {
@@ -95,11 +104,13 @@ export default function PostEditor({ params }: PostEditorProps) {
   const watchedContent = watch('content');
   const watchedCategoryId = watch('categoryId');
   const watchedFeaturedImage = watch('featuredImage');
+  const watchedPageIds = watch('pageIds');
 
   useEffect(() => {
     const initializeForm = async () => {
       await fetchCategories();
       await fetchMedia();
+      await fetchPages();
       
       if (!isNewPost) {
         await fetchPost();
@@ -108,6 +119,7 @@ export default function PostEditor({ params }: PostEditorProps) {
         setValue('status', 'draft' as PostStatus);
         setValue('categoryId', '');
         setValue('featuredImage', '');
+        setValue('pageIds', [0]); // Default to homepage
         setFormInitialized(true);
       }
     };
@@ -128,30 +140,25 @@ export default function PostEditor({ params }: PostEditorProps) {
     }
   }, [watchedTitle, isNewPost, formInitialized, setValue]);
 
-  // Listener za poruke iz media page-a (popup komunikacija)
+  // Message listener for media selection
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Proveriti da li je poruka iz naše media page
       if (event.data && event.data.type === 'MEDIA_SELECTED') {
         const selectedFiles = event.data.data;
         if (selectedFiles && selectedFiles.length > 0) {
-          // Uzeti prvi izabrani fajl
           setValue('featuredImage', selectedFiles[0], { shouldDirty: true });
           toast.success('Slika je uspešno izabrana');
         }
       }
     };
 
-    // Dodati event listener
     window.addEventListener('message', handleMessage);
-
-    // Cleanup
     return () => {
       window.removeEventListener('message', handleMessage);
     };
   }, [setValue]);
 
-  // Listener za localStorage (backup metoda)
+  // LocalStorage backup listener
   useEffect(() => {
     const checkForSelectedMedia = () => {
       const selectedMedia = localStorage.getItem('selectedMedia');
@@ -161,7 +168,6 @@ export default function PostEditor({ params }: PostEditorProps) {
           if (parsedMedia && parsedMedia.length > 0) {
             setValue('featuredImage', parsedMedia[0], { shouldDirty: true });
             toast.success('Slika je uspešno izabrana');
-            // Očisti localStorage
             localStorage.removeItem('selectedMedia');
           }
         } catch (error) {
@@ -170,13 +176,9 @@ export default function PostEditor({ params }: PostEditorProps) {
       }
     };
 
-    // Proveravaj localStorage svake sekunde dok je komponenta mounted
     const interval = setInterval(checkForSelectedMedia, 1000);
-
-    // Proveraj odmah kada se komponenta mount-uje
     checkForSelectedMedia();
 
-    // Cleanup
     return () => {
       clearInterval(interval);
     };
@@ -196,6 +198,10 @@ export default function PostEditor({ params }: PostEditorProps) {
       setValue('status', response.status);
       setValue('categoryId', response.categoryId?.toString() || '');
       setValue('featuredImage', response.featuredImage || '');
+      
+      // Set page IDs - convert from pages array
+      const pageIds = response.pages?.map(page => page.id) || [0];
+      setValue('pageIds', pageIds);
       
       setFormInitialized(true);
     } catch (error) {
@@ -219,10 +225,22 @@ export default function PostEditor({ params }: PostEditorProps) {
   const fetchMedia = async () => {
     try {
       const response = await mediaApi.getAll();
-      console.log(response)
       setMedia(response.filter(item => item.mimetype?.startsWith('image/')));
     } catch (error) {
       console.error('Error fetching media:', error);
+    }
+  };
+
+  const fetchPages = async () => {
+    try {
+      const response = await pagesApi.getAllForSelection();
+      setPages(response);
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+      // Fallback to default pages if API fails
+      setPages([
+        { id: 0, title: 'Početna strana', slug: 'home' }
+      ]);
     }
   };
 
@@ -237,7 +255,8 @@ export default function PostEditor({ params }: PostEditorProps) {
         content: data.content,
         status: data.status,
         categoryId: data.categoryId ? parseInt(data.categoryId) : undefined,
-        featuredImage: data.featuredImage || undefined
+        featuredImage: data.featuredImage || undefined,
+        pageIds: data.pageIds.filter(id => id !== null && id !== undefined)
       };
 
       if (isNewPost) {
@@ -271,7 +290,6 @@ export default function PostEditor({ params }: PostEditorProps) {
     );
   };
 
-  // Funkcija za otvaranje media page u popup-u
   const openMediaSelector = () => {
     const mediaWindow = window.open(
       '/dashboard/media?select=true',
@@ -279,14 +297,43 @@ export default function PostEditor({ params }: PostEditorProps) {
       'width=1200,height=800,scrollbars=yes,resizable=yes'
     );
 
-    // Fokusiraj popup
     if (mediaWindow) {
       mediaWindow.focus();
     }
   };
 
-  const handleImageSelect = (filename: string) => {
-    setValue('featuredImage', filename, { shouldDirty: true });
+  const handlePageToggle = (pageId: number, checked: boolean) => {
+    const currentPageIds = watchedPageIds || [];
+    
+    if (checked) {
+      // Add page ID if not already present
+      if (!currentPageIds.includes(pageId)) {
+        setValue('pageIds', [...currentPageIds, pageId], { shouldDirty: true });
+      }
+    } else {
+      // Remove page ID, but ensure at least one page is selected
+      const newPageIds = currentPageIds.filter(id => id !== pageId);
+      if (newPageIds.length === 0) {
+        // If trying to uncheck all pages, keep homepage selected
+        setValue('pageIds', [0], { shouldDirty: true });
+        toast.info('Objava mora biti dodeljena barem jednoj stranici. Početna strana ostaje izabrana.');
+      } else {
+        setValue('pageIds', newPageIds, { shouldDirty: true });
+      }
+    }
+  };
+
+  const getSelectedPagesText = () => {
+    if (!watchedPageIds || watchedPageIds.length === 0) return 'Nijedna stranica nije izabrana';
+    
+    const selectedPages = pages.filter(page => watchedPageIds.includes(page.id));
+    if (selectedPages.length === 0) return 'Nijedna stranica nije izabrana';
+    
+    if (selectedPages.length === 1) {
+      return `Prikazuje se na: ${selectedPages[0].title}`;
+    }
+    
+    return `Prikazuje se na ${selectedPages.length} stranica`;
   };
 
   if (isLoading) {
@@ -327,7 +374,7 @@ export default function PostEditor({ params }: PostEditorProps) {
         <div className="flex items-center space-x-2">
           {!isNewPost && post?.status === 'published' && (
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/posts/${post.slug}`} target="_blank">
+              <Link href={`/objave/${post.slug}`} target="_blank">
                 <Eye className="mr-2 h-4 w-4" />
                 Pogledaj
               </Link>
@@ -500,6 +547,59 @@ export default function PostEditor({ params }: PostEditorProps) {
               </CardContent>
             </Card>
 
+            {/* Page Assignment */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Prikaz na stranicama</CardTitle>
+                <CardDescription>
+                  Izaberite na kojim stranicama se objava prikazuje
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Current selection summary */}
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Globe className="h-4 w-4 text-blue-600" />
+                    <span className="text-blue-800">{getSelectedPagesText()}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Dostupne stranice:</Label>
+                  
+                  {pages.map((page) => (
+                    <div key={page.id} className="flex items-center space-x-3">
+                      <Checkbox
+                        id={`page-${page.id}`}
+                        checked={watchedPageIds?.includes(page.id) || false}
+                        onCheckedChange={(checked) => 
+                          handlePageToggle(page.id, checked as boolean)
+                        }
+                      />
+                      <Label
+                        htmlFor={`page-${page.id}`}
+                        className="flex items-center space-x-2 cursor-pointer flex-1"
+                      >
+                        <Layout className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <div className="text-sm font-medium">{page.title}</div>
+                          <div className="text-xs text-muted-foreground">/{page.slug}</div>
+                        </div>
+                      </Label>
+                      {watchedPageIds?.includes(page.id) && (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-xs text-muted-foreground p-3 bg-gray-50 rounded">
+                  <strong>Napomena:</strong> Objava mora biti dodeljena barem jednoj stranici. 
+                  Ako nije ručno izabrana nijedna, biće automatski dodeljena početnoj strani.
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Category */}
             <Card>
               <CardHeader>
@@ -510,30 +610,38 @@ export default function PostEditor({ params }: PostEditorProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                <Label>Kategorija</Label>
-                <Select
+                  <Label>Kategorija</Label>
+                  <Select
                     value={watchedCategoryId || ''}
                     onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
-                >
+                  >
                     <SelectTrigger>
-                        <SelectValue placeholder="Izaberite kategoriju" />
+                      <SelectValue placeholder="Izaberite kategoriju" />
                     </SelectTrigger>
                     <SelectContent>
-                    {categories.map((cat) => (
+                      <SelectItem value="">
+                        <div className="flex items-center">
+                          <Tag className="mr-2 h-4 w-4" />
+                          Bez kategorije
+                        </div>
+                      </SelectItem>
+                      {categories.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
-                        {cat.name}
+                          <div className="flex items-center">
+                            <Tag className="mr-2 h-4 w-4" />
+                            {cat.name}
+                          </div>
                         </SelectItem>
-                    ))}
+                      ))}
                     </SelectContent>
-                </Select>
-                {errors.categoryId && (
+                  </Select>
+                  {errors.categoryId && (
                     <p className="text-sm text-red-600 flex items-center">
-                    <AlertCircle className="mr-1 h-3 w-3" />
-                    {errors.categoryId.message}
+                      <AlertCircle className="mr-1 h-3 w-3" />
+                      {errors.categoryId.message}
                     </p>
-                )}
+                  )}
                 </div>
-
               </CardContent>
             </Card>
 
@@ -595,7 +703,6 @@ export default function PostEditor({ params }: PostEditorProps) {
                       variant="link"
                       size="sm"
                       onClick={() => {
-                        // Otvori media page za upload u novom tabu
                         window.open('/dashboard/media', '_blank');
                       }}
                       className="text-xs"
@@ -618,7 +725,6 @@ export default function PostEditor({ params }: PostEditorProps) {
                           key={item.id}
                           type="button"
                           onClick={() => {
-                            console.log('Quick selecting image:', item.filename);
                             setValue('featuredImage', item.filename, { shouldDirty: true });
                           }}
                           className="aspect-square border-2 border-gray-200 rounded-md overflow-hidden hover:border-blue-500 transition-colors"
