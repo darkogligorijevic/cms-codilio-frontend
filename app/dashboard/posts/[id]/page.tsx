@@ -76,14 +76,14 @@ export default function PostEditor({ params }: PostEditorProps) {
   const [isSaving, setSaving] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);
 
-  // Memoized default values
+  // Memoized default values - FIXED: categoryId now uses 'none' instead of empty string
   const defaultFormValues = useMemo(() => ({
     title: '',
     slug: '',
     excerpt: '',
     content: '',
     status: 'draft' as PostStatus,
-    categoryId: '',
+    categoryId: 'none', // FIXED: Changed from ''
     featuredImage: '',
     pageIds: [0] // Default to homepage (id: 0)
   }), []);
@@ -115,9 +115,9 @@ export default function PostEditor({ params }: PostEditorProps) {
       if (!isNewPost) {
         await fetchPost();
       } else {
-        // For new posts, explicitly set default values
+        // For new posts, explicitly set default values - FIXED: categoryId uses 'none'
         setValue('status', 'draft' as PostStatus);
-        setValue('categoryId', '');
+        setValue('categoryId', 'none'); // FIXED: Changed from ''
         setValue('featuredImage', '');
         setValue('pageIds', [0]); // Default to homepage
         setFormInitialized(true);
@@ -190,13 +190,13 @@ export default function PostEditor({ params }: PostEditorProps) {
       const response = await postsApi.getById(parseInt(resolvedParams.id));
       setPost(response);
       
-      // Populate form with fetched data
+      // Populate form with fetched data - FIXED: categoryId handling
       setValue('title', response.title);
       setValue('slug', response.slug);
       setValue('excerpt', response.excerpt || '');
       setValue('content', response.content);
       setValue('status', response.status);
-      setValue('categoryId', response.categoryId?.toString() || '');
+      setValue('categoryId', response.categoryId?.toString() || 'none'); // FIXED: Use 'none' as fallback
       setValue('featuredImage', response.featuredImage || '');
       
       // Set page IDs - convert from pages array
@@ -248,13 +248,14 @@ export default function PostEditor({ params }: PostEditorProps) {
     try {
       setSaving(true);
       
+      // FIXED: Handle 'none' value for categoryId
       const postData = {
         title: data.title,
         slug: data.slug,
         excerpt: data.excerpt || undefined,
         content: data.content,
         status: data.status,
-        categoryId: data.categoryId ? parseInt(data.categoryId) : undefined,
+        categoryId: data.categoryId && data.categoryId !== 'none' ? parseInt(data.categoryId) : undefined,
         featuredImage: data.featuredImage || undefined,
         pageIds: data.pageIds.filter(id => id !== null && id !== undefined)
       };
@@ -600,7 +601,7 @@ export default function PostEditor({ params }: PostEditorProps) {
               </CardContent>
             </Card>
 
-            {/* Category */}
+            {/* Category - FIXED: Removed empty value SelectItem */}
             <Card>
               <CardHeader>
                 <CardTitle>Kategorija</CardTitle>
@@ -612,14 +613,14 @@ export default function PostEditor({ params }: PostEditorProps) {
                 <div className="space-y-2">
                   <Label>Kategorija</Label>
                   <Select
-                    value={watchedCategoryId || ''}
-                    onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
+                    value={watchedCategoryId || 'none'}
+                    onValueChange={(value) => setValue('categoryId', value === 'none' ? '' : value, { shouldDirty: true })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Izaberite kategoriju" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">
+                      <SelectItem value="none">
                         <div className="flex items-center">
                           <Tag className="mr-2 h-4 w-4" />
                           Bez kategorije

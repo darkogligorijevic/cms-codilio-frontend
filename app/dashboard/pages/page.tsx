@@ -471,7 +471,7 @@ export default function PagesPage() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters - FIXED: No empty values in SelectItems */}
       <Card>
         <CardHeader>
           <CardTitle>Pretraga i filteri</CardTitle>
