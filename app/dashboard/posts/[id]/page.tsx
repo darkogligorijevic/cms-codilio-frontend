@@ -128,6 +128,60 @@ export default function PostEditor({ params }: PostEditorProps) {
     }
   }, [watchedTitle, isNewPost, formInitialized, setValue]);
 
+  // Listener za poruke iz media page-a (popup komunikacija)
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Proveriti da li je poruka iz naše media page
+      if (event.data && event.data.type === 'MEDIA_SELECTED') {
+        const selectedFiles = event.data.data;
+        if (selectedFiles && selectedFiles.length > 0) {
+          // Uzeti prvi izabrani fajl
+          setValue('featuredImage', selectedFiles[0], { shouldDirty: true });
+          toast.success('Slika je uspešno izabrana');
+        }
+      }
+    };
+
+    // Dodati event listener
+    window.addEventListener('message', handleMessage);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [setValue]);
+
+  // Listener za localStorage (backup metoda)
+  useEffect(() => {
+    const checkForSelectedMedia = () => {
+      const selectedMedia = localStorage.getItem('selectedMedia');
+      if (selectedMedia) {
+        try {
+          const parsedMedia = JSON.parse(selectedMedia);
+          if (parsedMedia && parsedMedia.length > 0) {
+            setValue('featuredImage', parsedMedia[0], { shouldDirty: true });
+            toast.success('Slika je uspešno izabrana');
+            // Očisti localStorage
+            localStorage.removeItem('selectedMedia');
+          }
+        } catch (error) {
+          console.error('Error parsing selected media:', error);
+        }
+      }
+    };
+
+    // Proveravaj localStorage svake sekunde dok je komponenta mounted
+    const interval = setInterval(checkForSelectedMedia, 1000);
+
+    // Proveraj odmah kada se komponenta mount-uje
+    checkForSelectedMedia();
+
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+    };
+  }, [setValue]);
+
   const fetchPost = async () => {
     try {
       setIsLoading(true);
@@ -162,11 +216,11 @@ export default function PostEditor({ params }: PostEditorProps) {
     }
   };
   
-
   const fetchMedia = async () => {
     try {
       const response = await mediaApi.getAll();
-      setMedia(response.filter(item => item.mimetype.startsWith('image/')));
+      console.log(response)
+      setMedia(response.filter(item => item.mimetype?.startsWith('image/')));
     } catch (error) {
       console.error('Error fetching media:', error);
     }
@@ -217,8 +271,22 @@ export default function PostEditor({ params }: PostEditorProps) {
     );
   };
 
-  const handleImageSelect = (imageUrl: string) => {
-    setValue('featuredImage', imageUrl, { shouldDirty: true });
+  // Funkcija za otvaranje media page u popup-u
+  const openMediaSelector = () => {
+    const mediaWindow = window.open(
+      '/dashboard/media?select=true',
+      'mediaSelector',
+      'width=1200,height=800,scrollbars=yes,resizable=yes'
+    );
+
+    // Fokusiraj popup
+    if (mediaWindow) {
+      mediaWindow.focus();
+    }
+  };
+
+  const handleImageSelect = (filename: string) => {
+    setValue('featuredImage', filename, { shouldDirty: true });
   };
 
   if (isLoading) {
@@ -485,45 +553,74 @@ export default function PostEditor({ params }: PostEditorProps) {
                       alt="Featured image"
                       className="w-full h-32 object-cover rounded-md border"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setValue('featuredImage', '', { shouldDirty: true })}
-                      className="w-full"
-                    >
-                      Ukloni sliku
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={openMediaSelector}
+                        className="flex-1"
+                      >
+                        <ImageIcon className="mr-2 h-4 w-4" />
+                        Promeni sliku
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setValue('featuredImage', '', { shouldDirty: true })}
+                        className="flex-1"
+                      >
+                        Ukloni sliku
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-md">
                     <ImageIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500 mb-2">Nema izabrane slike</p>
+                    <p className="text-sm text-gray-500 mb-4">Nema izabrane slike</p>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      asChild
+                      onClick={openMediaSelector}
+                      className="mb-2"
                     >
-                      <Link href="/dashboard/media" target="_blank">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Učitaj sliku
-                      </Link>
+                      <ImageIcon className="mr-2 h-4 w-4" />
+                      Izaberi sliku
+                    </Button>
+                    <p className="text-xs text-muted-foreground">ili</p>
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      onClick={() => {
+                        // Otvori media page za upload u novom tabu
+                        window.open('/dashboard/media', '_blank');
+                      }}
+                      className="text-xs"
+                    >
+                      <Upload className="mr-1 h-3 w-3" />
+                      Učitaj novu sliku
                     </Button>
                   </div>
                 )}
 
-                {media.length > 0 && (
+                {/* Quick preview grid */}
+                {media.length > 0 && !watchedFeaturedImage && (
                   <div>
                     <Label className="text-sm font-medium mb-2 block">
-                      Ili izaberite postojeću:
+                      Brza selekcija:
                     </Label>
-                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                    <div className="grid grid-cols-3 gap-2">
                       {media.slice(0, 6).map((item) => (
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => handleImageSelect(item.filename)}
+                          onClick={() => {
+                            console.log('Quick selecting image:', item.filename);
+                            setValue('featuredImage', item.filename, { shouldDirty: true });
+                          }}
                           className="aspect-square border-2 border-gray-200 rounded-md overflow-hidden hover:border-blue-500 transition-colors"
                         >
                           <img
@@ -534,6 +631,17 @@ export default function PostEditor({ params }: PostEditorProps) {
                         </button>
                       ))}
                     </div>
+                    {media.length > 6 && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        onClick={openMediaSelector}
+                        className="w-full mt-2 text-xs"
+                      >
+                        Prikaži sve slike ({media.length})
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>

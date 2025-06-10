@@ -41,7 +41,8 @@ import {
   CheckCircle,
   X,
   Calendar,
-  HardDrive
+  HardDrive,
+  Check  // Dodato za selection
 } from 'lucide-react';
 import { mediaApi } from '@/lib/api';
 import type { Media, CreateMediaDto } from '@/lib/types';
@@ -71,6 +72,10 @@ export default function MediaPage() {
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Selection mode states
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const {
     register,
@@ -87,6 +92,13 @@ export default function MediaPage() {
 
   useEffect(() => {
     fetchMedia();
+    
+    // Check if page opened in selection mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectMode = urlParams.get('select');
+    if (selectMode === 'true') {
+      setSelectionMode(true);
+    }
   }, []);
 
   const fetchMedia = async () => {
@@ -113,32 +125,32 @@ export default function MediaPage() {
     
     setUploadFiles(prev => [...prev, ...newUploadFiles]);
     
-    // Auto-start upload
-    uploadFiles.forEach(uploadFile => {
-      if (uploadFile.status === 'pending') {
-        handleUpload(uploadFile);
-      }
+    newUploadFiles.forEach(uploadFile => {
+      handleUpload(uploadFile);
     });
+    
+    if (event.target) {
+      event.target.value = '';
+    }
   };
 
   const handleUpload = async (uploadFile: UploadFile) => {
     try {
-      setIsUploading(true);
       setUploadFiles(prev => prev.map(f => 
         f.id === uploadFile.id ? { ...f, status: 'uploading', progress: 0 } : f
       ));
 
-      // Simulate upload progress
       const progressInterval = setInterval(() => {
         setUploadFiles(prev => prev.map(f => {
-          if (f.id === uploadFile.id && f.progress < 90) {
-            return { ...f, progress: f.progress + 10 };
+          if (f.id === uploadFile.id && f.status === 'uploading' && f.progress < 90) {
+            return { ...f, progress: Math.min(f.progress + Math.random() * 15, 90) };
           }
           return f;
         }));
-      }, 200);
+      }, 300);
 
       const response = await mediaApi.upload(uploadFile.file);
+      console.log('Upload response:', response);
 
       clearInterval(progressInterval);
       setUploadFiles(prev => prev.map(f => 
@@ -146,9 +158,8 @@ export default function MediaPage() {
       ));
 
       toast.success(`Fajl "${uploadFile.file.name}" je uspešno učitan`);
-      fetchMedia();
+      await fetchMedia();
 
-      // Remove from upload list after 2 seconds
       setTimeout(() => {
         setUploadFiles(prev => prev.filter(f => f.id !== uploadFile.id));
       }, 2000);
@@ -159,12 +170,11 @@ export default function MediaPage() {
         f.id === uploadFile.id ? { 
           ...f, 
           status: 'error', 
-          error: 'Greška pri učitavanju fajla'
+          progress: 0,
+          error: error instanceof Error ? error.message : 'Greška pri učitavanju fajla'
         } : f
       ));
       toast.error(`Greška pri učitavanju fajla "${uploadFile.file.name}"`);
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -219,10 +229,36 @@ export default function MediaPage() {
     toast.success('URL je kopiran u clipboard');
   };
 
+  // Selection mode functions
+  const toggleSelection = (filename: string) => {
+    setSelectedItems(prev => {
+      if (prev.includes(filename)) {
+        return prev.filter(item => item !== filename);
+      } else {
+        return [...prev, filename];
+      }
+    });
+  };
+
+  const confirmSelection = () => {
+    if (selectedItems.length > 0) {
+      if (window.opener) {
+        window.opener.postMessage({
+          type: 'MEDIA_SELECTED',
+          data: selectedItems
+        }, '*');
+        window.close();
+      } else {
+        localStorage.setItem('selectedMedia', JSON.stringify(selectedItems));
+        window.close();
+      }
+    }
+  };
+
   const getFileIcon = (mimetype: string) => {
-    if (mimetype.startsWith('image/')) {
+    if (mimetype?.startsWith('image/')) {
       return <ImageIcon className="h-4 w-4" />;
-    } else if (mimetype.includes('pdf')) {
+    } else if (mimetype?.includes('pdf')) {
       return <FileText className="h-4 w-4" />;
     } else {
       return <File className="h-4 w-4" />;
@@ -230,10 +266,10 @@ export default function MediaPage() {
   };
 
   const getFileTypeLabel = (mimetype: string) => {
-    if (mimetype.startsWith('image/')) return 'Slika';
-    if (mimetype.includes('pdf')) return 'PDF';
-    if (mimetype.includes('document')) return 'Dokument';
-    if (mimetype.includes('spreadsheet')) return 'Tabela';
+    if (mimetype?.startsWith('image/')) return 'Slika';
+    if (mimetype?.includes('pdf')) return 'PDF';
+    if (mimetype?.includes('document')) return 'Dokument';
+    if (mimetype?.includes('spreadsheet')) return 'Tabela';
     return 'Fajl';
   };
 
@@ -259,8 +295,8 @@ export default function MediaPage() {
                          item.caption?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesType = typeFilter === 'all' || 
-                       (typeFilter === 'images' && item.mimetype.startsWith('image/')) ||
-                       (typeFilter === 'documents' && !item.mimetype.startsWith('image/'));
+                       (typeFilter === 'images' && item.mimetype?.startsWith('image/')) ||
+                       (typeFilter === 'documents' && !item.mimetype?.startsWith('image/'));
     
     return matchesSearch && matchesType;
   });
@@ -275,10 +311,12 @@ export default function MediaPage() {
             Upravljajte slikama, dokumentima i ostalim fajlovima
           </p>
         </div>
-        <Button onClick={() => fileInputRef.current?.click()}>
-          <Upload className="mr-2 h-4 w-4" />
-          Učitaj fajlove
-        </Button>
+        {!selectionMode && (
+          <Button onClick={() => fileInputRef.current?.click()}>
+            <Upload className="mr-2 h-4 w-4" />
+            Učitaj fajlove
+          </Button>
+        )}
         <input
           ref={fileInputRef}
           type="file"
@@ -288,6 +326,48 @@ export default function MediaPage() {
           className="hidden"
         />
       </div>
+
+      {/* Selection Mode Toolbar */}
+      {selectionMode && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <p className="text-sm font-medium text-blue-800">
+                  Režim selekcije - Izabrano: {selectedItems.length}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedItems([])}
+                  disabled={selectedItems.length === 0}
+                >
+                  Poništi selekciju
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectionMode(false);
+                    setSelectedItems([]);
+                  }}
+                >
+                  Otkaži
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={confirmSelection}
+                  disabled={selectedItems.length === 0}
+                >
+                  Potvrdi selekciju ({selectedItems.length})
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Upload Progress */}
       {uploadFiles.length > 0 && (
@@ -416,62 +496,114 @@ export default function MediaPage() {
               {filteredMedia.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {filteredMedia.map((item) => (
-                    <Card key={item.id} className="overflow-hidden">
+                    <Card 
+                      key={item.id} 
+                      className={`overflow-hidden transition-all ${
+                        selectionMode 
+                          ? `cursor-pointer ${
+                              selectedItems.includes(item.filename)
+                                ? 'ring-2 ring-blue-500 border-blue-500'
+                                : 'hover:ring-2 hover:ring-blue-200'
+                            }`
+                          : ''
+                      }`}
+                      onClick={() => {
+                        if (selectionMode) {
+                          toggleSelection(item.filename);
+                        }
+                      }}
+                    >
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">
-                        {item.mimetype.startsWith('image/') ? (
+                        {item.mimetype?.startsWith('image/') ? (
                           <img
                             src={mediaApi.getFileUrl(item.filename)}
                             alt={item.alt || item.originalName}
                             className="w-full h-full object-cover"
                           />
+                        ) : item.mimetype?.includes('pdf') ? (
+                          <div className="flex flex-col items-center space-y-3 text-center p-4">
+                            <div className="bg-red-100 p-4 rounded-lg">
+                              <FileText className="h-8 w-8 text-red-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm mb-1">PDF Dokument</div>
+                              <div className="text-xs text-muted-foreground truncate max-w-full">
+                                {item.originalName}
+                              </div>
+                            </div>
+                          </div>
                         ) : (
-                          <div className="flex flex-col items-center space-y-2">
-                            {getFileIcon(item.mimetype)}
-                            <span className="text-xs text-center px-2">
-                              {item.originalName}
-                            </span>
+                          <div className="flex flex-col items-center space-y-3 text-center p-4">
+                            <div className="bg-gray-100 p-4 rounded-lg">
+                              <File className="h-8 w-8 text-gray-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm mb-1">Fajl</div>
+                              <div className="text-xs text-muted-foreground truncate max-w-full">
+                                {item.originalName}
+                              </div>
+                            </div>
                           </div>
                         )}
                         
-                        {/* Overlay actions */}
-                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => window.open(mediaApi.getFileUrl(item.filename), '_blank')}
-                            title="Otvori fajl"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => copyToClipboard(mediaApi.getFileUrl(item.filename))}
-                            title="Kopiraj URL"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleEditMedia(item)}
-                            title="Uredi"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedMedia(item);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                            title="Obriši"
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {/* Selection indicator */}
+                        {selectionMode && selectedItems.includes(item.filename) && (
+                          <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
+                            <Check className="h-4 w-4" />
+                          </div>
+                        )}
+                        
+                        {/* Overlay actions - only show when NOT in selection mode */}
+                        {!selectionMode && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(mediaApi.getFileUrl(item.filename), '_blank');
+                              }}
+                              title="Otvori fajl"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(mediaApi.getFileUrl(item.filename));
+                              }}
+                              title="Kopiraj URL"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditMedia(item);
+                              }}
+                              title="Uredi"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedMedia(item);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                              title="Obriši"
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
 
                         {/* File type badge */}
                         <Badge
@@ -536,10 +668,12 @@ export default function MediaPage() {
                         <ImageIcon className="mx-auto h-12 w-12 mb-4" />
                         <h3 className="text-lg font-medium mb-2">Nema fajlova</h3>
                         <p className="mb-4">Počnite učitavanjem prvog fajla</p>
-                        <Button onClick={() => fileInputRef.current?.click()}>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Učitaj fajlove
-                        </Button>
+                        {!selectionMode && (
+                          <Button onClick={() => fileInputRef.current?.click()}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Učitaj fajlove
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>
@@ -551,7 +685,7 @@ export default function MediaPage() {
       </Card>
 
       {/* Media Statistics */}
-      {media.length > 0 && (
+      {media.length > 0 && !selectionMode && (
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -577,7 +711,7 @@ export default function MediaPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {media.filter(item => item.mimetype.startsWith('image/')).length}
+                {media.filter(item => item.mimetype?.startsWith('image/')).length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Slikovni fajlovi
@@ -594,7 +728,7 @@ export default function MediaPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {media.filter(item => !item.mimetype.startsWith('image/')).length}
+                {media.filter(item => !item.mimetype?.startsWith('image/')).length}
               </div>
               <p className="text-xs text-muted-foreground">
                 PDF i ostali dokumenti
@@ -633,7 +767,7 @@ export default function MediaPage() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {selectedMedia?.mimetype.startsWith('image/') && (
+              {selectedMedia?.mimetype?.startsWith('image/') && (
                 <div className="space-y-2">
                   <Label htmlFor="alt">Alt tekst (za slike)</Label>
                   <Input
@@ -712,7 +846,7 @@ export default function MediaPage() {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedMedia?.mimetype.startsWith('image/') && (
+          {selectedMedia?.mimetype?.startsWith('image/') && (
             <div className="py-4">
               <img
                 src={mediaApi.getFileUrl(selectedMedia.filename)}

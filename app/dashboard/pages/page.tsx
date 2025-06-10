@@ -627,7 +627,7 @@ export default function PagesPage() {
                             asChild
                             title="Pogledaj na sajtu"
                           >
-                            <Link href={`/pages/${page.slug}`} target="_blank">
+                            <Link href={`/${page.slug}`} target="_blank">
                               <ExternalLink className="h-4 w-4" />
                             </Link>
                           </Button>
