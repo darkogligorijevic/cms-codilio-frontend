@@ -250,21 +250,6 @@ export default function PostEditor({ params }: PostEditorProps) {
       const response = await pagesApi.getAllForSelection();
       setPages(response);
       
-      // FIXED: Find homepage or use first available page as default
-      const homepage = response.find(page =>
-        page.slug === '' ||  
-        page.slug === 'home' || 
-        page.slug === 'pocetna' || 
-        page.slug === 'homepage' ||
-        page.title.toLowerCase().includes('početna') ||
-        page.title.toLowerCase().includes('home') ||
-        page.isHomepage === true
-      );
-      
-      const defaultPage = homepage || response[0]; // Use first page if no homepage found
-      if (defaultPage) {
-        setDefaultPageId(defaultPage.id);
-      }
     } catch (error) {
       console.error('Error fetching pages:', error);
       // FIXED: Better fallback handling

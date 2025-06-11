@@ -143,6 +143,7 @@ export default function PagesPage() {
         status: data.status,
         template: data.template,
         // provalio sam da ga salje kao string ovde tako da sam samo castleovao u number
+        // PROVERI
         sortOrder: Number(data.sortOrder)
       };
 
