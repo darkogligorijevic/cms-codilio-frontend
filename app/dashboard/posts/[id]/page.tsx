@@ -18,10 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ArrowLeft, 
-  Save, 
-  Eye, 
+import {
+  ArrowLeft,
+  Save,
+  Eye,
   Calendar,
   Tag,
   User as UserIcon,
@@ -41,7 +41,7 @@ import type { Post, Category, Media, Page, CreatePostDto, UpdatePostDto, PostSta
 import { toast } from 'sonner';
 
 interface PostEditorProps {
-  params: Promise<{  
+  params: Promise<{
     id: string;
   }>;
 }
@@ -68,8 +68,12 @@ export default function PostEditor({ params }: PostEditorProps) {
   const resolvedParams = use(params);
   const isNewPost = resolvedParams.id === 'new';
   
+  console.log('🔍 PostEditor params:', resolvedParams);
+  console.log('🔍 Is new post:', isNewPost);
+  console.log('🔍 Post ID:', resolvedParams.id);
+
   const router = useRouter();
-  
+
   const [post, setPost] = useState<Post | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
@@ -113,7 +117,6 @@ export default function PostEditor({ params }: PostEditorProps) {
     const initializeForm = async () => {
       await fetchCategories();
       await fetchMedia();
-      await fetchPages(); // This will set defaultPageId
       
       if (!isNewPost) {
         await fetchPost();
@@ -153,12 +156,17 @@ export default function PostEditor({ params }: PostEditorProps) {
   // Message listener for media selection
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Proveriti da li je poruka iz naše media page
       if (event.data && event.data.type === 'MEDIA_SELECTED') {
         const selectedFiles = event.data.data;
         if (selectedFiles && selectedFiles.length > 0) {
+          // Uzeti prvi izabrani fajl
           setValue('featuredImage', selectedFiles[0], { shouldDirty: true });
           toast.success('Slika je uspešno izabrana');
         }
+      }
+      catch(e){
+        console.log(e);
       }
     };
 
@@ -199,7 +207,7 @@ export default function PostEditor({ params }: PostEditorProps) {
       setIsLoading(true);
       const response = await postsApi.getById(parseInt(resolvedParams.id));
       setPost(response);
-      
+
       // Populate form with fetched data
       setValue('title', response.title);
       setValue('slug', response.slug);
@@ -208,14 +216,6 @@ export default function PostEditor({ params }: PostEditorProps) {
       setValue('status', response.status);
       setValue('categoryId', response.categoryId || null);
       setValue('featuredImage', response.featuredImage || '');
-      
-      // Set page IDs - convert from pages array
-      const pageIds = response.pages?.map(page => page.id) || [];
-      // FIXED: If no pages assigned, use default page
-      if (pageIds.length === 0 && defaultPageId !== null) {
-        pageIds.push(defaultPageId);
-      }
-      setValue('pageIds', pageIds);
       
       setFormInitialized(true);
     } catch (error) {
@@ -235,10 +235,11 @@ export default function PostEditor({ params }: PostEditorProps) {
       console.error('Error fetching categories:', error);
     }
   };
-  
+
   const fetchMedia = async () => {
     try {
       const response = await mediaApi.getAll();
+      console.log(response)
       setMedia(response.filter(item => item.mimetype?.startsWith('image/')));
     } catch (error) {
       console.error('Error fetching media:', error);
@@ -264,13 +265,6 @@ export default function PostEditor({ params }: PostEditorProps) {
   const onSubmit: SubmitHandler<PostFormData> = async (data) => {
     try {
       setSaving(true);
-      
-      // FIXED: Ensure at least one page is selected
-      let pageIds = data.pageIds.filter(id => id !== null && id !== undefined);
-      if (pageIds.length === 0 && defaultPageId !== null) {
-        pageIds = [defaultPageId];
-        toast.info('Objava je automatski dodeljena početnoj stranici.');
-      }
       
       const postData = {
         title: data.title,
@@ -467,7 +461,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    URL adresa objave će biti: /posts/{watch('slug')}
+                    URL adresa objave će biti: /objave/{watch('slug')}
                   </p>
                 </div>
 
@@ -572,9 +566,9 @@ export default function PostEditor({ params }: PostEditorProps) {
                 )}
 
                 <div className="pt-4 border-t">
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
+                  <Button
+                    type="submit"
+                    className="w-full"
                     disabled={isSaving || !isDirty || !formInitialized}
                   >
                     <Save className="mr-2 h-4 w-4" />
@@ -660,30 +654,18 @@ export default function PostEditor({ params }: PostEditorProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Label>Kategorija</Label>
-                  <Select
-                    value={watchedCategoryId?.toString() || 'none'}
-                    onValueChange={(value) => {
-                      const categoryId = value === 'none' ? null : parseInt(value);
-                      setValue('categoryId', categoryId, { shouldDirty: true });
-                    }}
-                  >
+                <Label>Kategorija</Label>
+                <Select
+                    value={watchedCategoryId || ''}
+                    onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
+                >
                     <SelectTrigger>
                       <SelectValue placeholder="Izaberite kategoriju" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">
-                        <div className="flex items-center">
-                          <Tag className="mr-2 h-4 w-4" />
-                          Bez kategorije
-                        </div>
-                      </SelectItem>
-                      {categories.map((cat) => (
+                    {categories.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>
-                          <div className="flex items-center">
-                            <Tag className="mr-2 h-4 w-4" />
-                            {cat.name}
-                          </div>
+                        {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

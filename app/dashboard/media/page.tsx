@@ -230,7 +230,8 @@ export default function MediaPage() {
   };
 
   // Selection mode functions
-  const toggleSelection = (filename: string) => {
+  const toggleSelection = (filename: any) => {
+
     setSelectedItems(prev => {
       if (prev.includes(filename)) {
         return prev.filter(item => item !== filename);
@@ -255,21 +256,21 @@ export default function MediaPage() {
     }
   };
 
-  const getFileIcon = (mimetype: string) => {
-    if (mimetype?.startsWith('image/')) {
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType?.startsWith('image/')) {
       return <ImageIcon className="h-4 w-4" />;
-    } else if (mimetype?.includes('pdf')) {
+    } else if (mimeType?.includes('pdf')) {
       return <FileText className="h-4 w-4" />;
     } else {
       return <File className="h-4 w-4" />;
     }
   };
 
-  const getFileTypeLabel = (mimetype: string) => {
-    if (mimetype?.startsWith('image/')) return 'Slika';
-    if (mimetype?.includes('pdf')) return 'PDF';
-    if (mimetype?.includes('document')) return 'Dokument';
-    if (mimetype?.includes('spreadsheet')) return 'Tabela';
+  const getFileTypeLabel = (mimeType: string) => {
+    if (mimeType?.startsWith('image/')) return 'Slika';
+    if (mimeType?.includes('pdf')) return 'PDF';
+    if (mimeType?.includes('document')) return 'Dokument';
+    if (mimeType?.includes('spreadsheet')) return 'Tabela';
     return 'Fajl';
   };
 
@@ -295,9 +296,10 @@ export default function MediaPage() {
                          item.caption?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesType = typeFilter === 'all' || 
-                       (typeFilter === 'images' && item.mimetype?.startsWith('image/')) ||
-                       (typeFilter === 'documents' && !item.mimetype?.startsWith('image/'));
+                       (typeFilter === 'images' && item.mimeType?.startsWith('image/')) ||
+                       (typeFilter === 'documents' && !item.mimeType?.startsWith('image/'));
     
+    console.log(item.mimeType);
     return matchesSearch && matchesType;
   });
 
@@ -509,18 +511,18 @@ export default function MediaPage() {
                       }`}
                       onClick={() => {
                         if (selectionMode) {
-                          toggleSelection(item.filename);
+                          toggleSelection(item);
                         }
                       }}
                     >
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">
-                        {item.mimetype?.startsWith('image/') ? (
+                        {item.mimeType?.startsWith('image/') ? (
                           <img
                             src={mediaApi.getFileUrl(item.filename)}
                             alt={item.alt || item.originalName}
                             className="w-full h-full object-cover"
                           />
-                        ) : item.mimetype?.includes('pdf') ? (
+                        ) : item.mimeType?.includes('pdf') ? (
                           <div className="flex flex-col items-center space-y-3 text-center p-4">
                             <div className="bg-red-100 p-4 rounded-lg">
                               <FileText className="h-8 w-8 text-red-600" />
@@ -610,7 +612,7 @@ export default function MediaPage() {
                           variant="secondary"
                           className="absolute top-2 left-2 text-xs"
                         >
-                          {getFileTypeLabel(item.mimetype)}
+                          {getFileTypeLabel(item.mimeType)}
                         </Badge>
                       </div>
 
@@ -711,7 +713,7 @@ export default function MediaPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {media.filter(item => item.mimetype?.startsWith('image/')).length}
+                {media.filter(item => item.mimeType?.startsWith('image/')).length}
               </div>
               <p className="text-xs text-muted-foreground">
                 Slikovni fajlovi
@@ -728,7 +730,7 @@ export default function MediaPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {media.filter(item => !item.mimetype?.startsWith('image/')).length}
+                {media.filter(item => !item.mimeType?.startsWith('image/')).length}
               </div>
               <p className="text-xs text-muted-foreground">
                 PDF i ostali dokumenti
@@ -767,7 +769,7 @@ export default function MediaPage() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {selectedMedia?.mimetype?.startsWith('image/') && (
+              {selectedMedia?.mimeType?.startsWith('image/') && (
                 <div className="space-y-2">
                   <Label htmlFor="alt">Alt tekst (za slike)</Label>
                   <Input
@@ -802,7 +804,7 @@ export default function MediaPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Tip:</span>
-                  <span>{selectedMedia?.mimetype}</span>
+                  <span>{selectedMedia?.mimeType}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Veličina:</span>
@@ -846,7 +848,7 @@ export default function MediaPage() {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedMedia?.mimetype?.startsWith('image/') && (
+          {selectedMedia?.mimeType?.startsWith('image/') && (
             <div className="py-4">
               <img
                 src={mediaApi.getFileUrl(selectedMedia.filename)}

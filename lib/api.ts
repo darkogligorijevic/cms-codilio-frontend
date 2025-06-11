@@ -210,6 +210,7 @@ export const categoriesApi = {
 export const mediaApi = {
   getAll: async (): Promise<Media[]> => {
     const response: AxiosResponse<Media[]> = await api.get('/media');
+    console.log(response);
     return response.data;
   },
   
