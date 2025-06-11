@@ -511,7 +511,11 @@ export default function MediaPage() {
                       }`}
                       onClick={() => {
                         if (selectionMode) {
-                          toggleSelection(item);
+                          if (item.mimeType.startsWith('image/')) {
+                            toggleSelection(item);
+                          } else {
+                            toast.error("Mozete izabrati samo slike!")
+                          }
                         }
                       }}
                     >

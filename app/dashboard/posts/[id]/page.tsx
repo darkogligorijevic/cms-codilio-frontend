@@ -52,7 +52,7 @@ interface PostFormData {
   excerpt: string;
   content: string;
   status: PostStatus;
-  categoryId: number | null;
+  categoryId: string;
   featuredImage: string;
   pageIds: number[];
 }
@@ -90,7 +90,7 @@ export default function PostEditor({ params }: PostEditorProps) {
     excerpt: '',
     content: '',
     status: 'draft' as PostStatus,
-    categoryId: null as number | null,
+    categoryId: '',
     featuredImage: '',
     pageIds: [] as number[] // FIXED: Start with empty array
   }), []);
@@ -117,13 +117,14 @@ export default function PostEditor({ params }: PostEditorProps) {
     const initializeForm = async () => {
       await fetchCategories();
       await fetchMedia();
+      await fetchPages();
       
       if (!isNewPost) {
         await fetchPost();
       } else {
         // For new posts, set default values after pages are loaded
         setValue('status', 'draft' as PostStatus);
-        setValue('categoryId', null);
+        setValue('categoryId', '');
         setValue('featuredImage', '');
         // pageIds will be set after fetchPages completes
         setFormInitialized(true);
@@ -164,9 +165,6 @@ export default function PostEditor({ params }: PostEditorProps) {
           setValue('featuredImage', selectedFiles[0], { shouldDirty: true });
           toast.success('Slika je uspešno izabrana');
         }
-      }
-      catch(e){
-        console.log(e);
       }
     };
 
@@ -214,7 +212,7 @@ export default function PostEditor({ params }: PostEditorProps) {
       setValue('excerpt', response.excerpt || '');
       setValue('content', response.content);
       setValue('status', response.status);
-      setValue('categoryId', response.categoryId || null);
+      setValue('categoryId', response.categoryId?.toString() || '');
       setValue('featuredImage', response.featuredImage || '');
       
       setFormInitialized(true);
@@ -240,7 +238,7 @@ export default function PostEditor({ params }: PostEditorProps) {
     try {
       const response = await mediaApi.getAll();
       console.log(response)
-      setMedia(response.filter(item => item.mimetype?.startsWith('image/')));
+      setMedia(response.filter(item => item.mimeType?.startsWith('image/')));
     } catch (error) {
       console.error('Error fetching media:', error);
     }
@@ -272,9 +270,9 @@ export default function PostEditor({ params }: PostEditorProps) {
         excerpt: data.excerpt || undefined,
         content: data.content,
         status: data.status,
-        categoryId: data.categoryId || undefined,
+        categoryId: data.categoryId ? parseInt(data.categoryId) : undefined,
         featuredImage: data.featuredImage || undefined,
-        pageIds: pageIds
+        pageIds: data.pageIds
       };
 
       if (isNewPost) {
@@ -603,8 +601,8 @@ export default function PostEditor({ params }: PostEditorProps) {
                       <Checkbox
                         id={`page-${page.id}`}
                         checked={watchedPageIds?.includes(page.id) || false}
-                        onCheckedChange={(checked) => 
-                          handlePageToggle(page.id, checked as boolean)
+                        onCheckedChange={(checked : boolean) => 
+                          handlePageToggle(page.id, checked)
                         }
                       />
                       <Label
