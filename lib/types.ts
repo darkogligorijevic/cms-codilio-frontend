@@ -69,7 +69,7 @@ export interface Media {
   id: number;
   filename: string;
   originalName: string;
-  mimetype: string;
+  mimeType: string;
   size: number;
   alt?: string;
   caption?: string;

@@ -220,7 +220,7 @@ export default function PostEditor({ params }: PostEditorProps) {
     try {
       const response = await mediaApi.getAll();
       console.log(response)
-      setMedia(response.filter(item => item.mimetype?.startsWith('image/')));
+      setMedia(response.filter(item => item.mimeType?.startsWith('image/')));
     } catch (error) {
       console.error('Error fetching media:', error);
     }
