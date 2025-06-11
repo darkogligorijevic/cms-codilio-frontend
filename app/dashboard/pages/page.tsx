@@ -142,7 +142,7 @@ export default function PagesPage() {
         content: data.content,
         status: data.status,
         template: data.template,
-        sortOrder: data.sortOrder
+        sortOrder: Number(data.sortOrder)
       };
 
       if (editingPage) {
