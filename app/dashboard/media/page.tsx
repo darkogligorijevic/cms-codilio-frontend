@@ -230,7 +230,8 @@ export default function MediaPage() {
   };
 
   // Selection mode functions
-  const toggleSelection = (filename: string) => {
+  const toggleSelection = (filename: any) => {
+
     setSelectedItems(prev => {
       if (prev.includes(filename)) {
         return prev.filter(item => item !== filename);
@@ -299,6 +300,7 @@ export default function MediaPage() {
                        (typeFilter === 'images' && item.mimeType?.startsWith('image/')) ||
                        (typeFilter === 'documents' && !item.mimeType?.startsWith('image/'));
     
+    console.log(item.mimeType);
     return matchesSearch && matchesType;
   });
 
@@ -510,6 +512,7 @@ export default function MediaPage() {
                       }`}
                       onClick={() => {
                         if (selectionMode) {
+<<<<<<< HEAD
                           if(item.mimeType.startsWith('image/')){
                           toggleSelection(item.filename);
                           }
@@ -517,6 +520,10 @@ export default function MediaPage() {
                             toast.error("Ne mozete da odaberete fajl koji nije slika!")
                           }
                         } 
+=======
+                          toggleSelection(item);
+                        }
+>>>>>>> darko-dev
                       }}
                     >
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">

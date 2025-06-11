@@ -1,4 +1,4 @@
-// app/[slug]/page.tsx
+// app/[slug]/page.tsx - FIXED VERSION
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { 
   Building,
   ArrowLeft,
@@ -16,11 +17,13 @@ import {
   FileText,
   Users,
   TrendingUp,
-  ChevronRight
+  ChevronRight,
+  Eye,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
-import { pagesApi } from '@/lib/api';
-import type { Page } from '@/lib/types';
+import { pagesApi, postsApi, mediaApi } from '@/lib/api';
+import type { Page, Post } from '@/lib/types';
 
 interface DynamicPageProps {
   params: Promise<{ slug: string }>;
@@ -36,8 +39,10 @@ interface ContactForm {
 
 export default function DynamicPage({ params }: DynamicPageProps) {
   const resolvedParams = use(params);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<Page | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Contact form state
@@ -69,6 +74,58 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   };
 
+  // FIX: Fetch posts specific to this page
+  const fetchPosts = async () => {
+    if (!page?.id) return; // Wait for page to load first
+    
+    try {
+      setIsLoadingPosts(true);
+      console.log('Fetching posts for page:', page.id);
+
+      // Get posts that are assigned to this specific page
+      const allPosts = await postsApi.getPublished(1, 50); // Get more posts to filter
+      const pageSpecificPosts = allPosts.posts.filter(post => 
+        post.pages && post.pages.some(p => p.id === page.id))
+      
+      console.log('Posts for this page:', pageSpecificPosts);
+      setPosts(pageSpecificPosts.slice(0, 6)); // Limit to 6
+
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setIsLoadingPosts(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof ContactForm, value: string) => {
+    setContactForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  // FIX: Fetch posts after page is loaded
+  useEffect(() => {
+    if (page?.id) {
+      fetchPosts(); // Only fetch posts when we have page data
+    }
+  }, [page?.id]); // Depend on page.id
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('sr-RS', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+      
+    if (diffInHours < 24) return `pre ${diffInHours} sati`;
+    if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
+    return formatDate(dateString);
+  };
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -86,9 +143,109 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   };
 
-  const handleInputChange = (field: keyof ContactForm, value: string) => {
-    setContactForm(prev => ({ ...prev, [field]: value }));
-  };
+  // Helper function to render posts section
+  const renderPostsSection = () => (
+    <div className="mt-12">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900">Objave za ovu stranicu</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            {posts.length > 0 ? `Prikazuje se ${posts.length} objava` : 'Nema objava za ovu stranicu'}
+          </p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link href="/objave">
+            Sve objave
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+
+      {isLoadingPosts ? (
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : posts.length > 0 ? (
+        <div className="space-y-6">
+          {posts.map((post) => (
+            <Card key={post.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      {post.category && (
+                        <Badge variant="secondary">
+                          {post.category.name}
+                        </Badge>
+                      )}
+                      <span className="text-sm text-gray-500">
+                        {getTimeAgo(post.publishedAt || post.createdAt)}
+                      </span>
+                    </div>
+                    
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">
+                      <Link href={`/objave/${post.slug}`}>
+                        {post.title}
+                      </Link>
+                    </h4>
+                    
+                    {post.excerpt && (
+                      <p className="text-gray-600 mb-3 text-sm lg:text-base">
+                        {post.excerpt}
+                      </p>
+                    )}
+                    
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center">
+                        <Eye className="mr-1 h-3 w-3" />
+                        {post.viewCount}
+                      </span>
+                      <span className="flex items-center">
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {formatDate(post.publishedAt || post.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {post.featuredImage && (
+                    <div className="ml-4 flex-shrink-0 hidden sm:block">
+                      <img
+                        src={mediaApi.getFileUrl(post.featuredImage)}
+                        alt={post.title}
+                        className="w-24 h-16 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Nema objava za ovu stranicu</h3>
+            <p className="text-gray-500 mb-4">
+              Trenutno nema objava dodeljenih ovoj stranici. 
+              Administrator može dodeliti objave ovoj stranici iz CMS-a.
+            </p>
+            <Button variant="outline" asChild>
+              <Link href="/objave">Pogledaj sve objave</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 
   const renderPageContent = () => {
     if (!page) return null;
@@ -109,153 +266,158 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   };
 
   const renderContactTemplate = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-      {/* Contact Information */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Kontakt informacije</h2>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <MapPin className="h-6 w-6 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="font-semibold mb-1">Adresa</h3>
-                  <p className="text-gray-600">Trg Oslobođenja 1, 11400 Mladenovac</p>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Contact Information */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Kontakt informacije</h2>
+          
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <MapPin className="h-6 w-6 text-blue-600 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-1">Adresa</h3>
+                    <p className="text-gray-600">Trg Oslobođenja 1, 11400 Mladenovac</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <Phone className="h-6 w-6 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="font-semibold mb-1">Telefon</h3>
-                  <p className="text-gray-600">+381 11 823 4567</p>
-                  <p className="text-gray-600">+381 11 823 4568 (fax)</p>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <Phone className="h-6 w-6 text-blue-600 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-1">Telefon</h3>
+                    <p className="text-gray-600">+381 11 823 4567</p>
+                    <p className="text-gray-600">+381 11 823 4568 (fax)</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <Mail className="h-6 w-6 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="font-semibold mb-1">Email</h3>
-                  <p className="text-gray-600">info@mladenovac.rs</p>
-                  <p className="text-gray-600">poverenik@mladenovac.rs</p>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <Mail className="h-6 w-6 text-blue-600 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-1">Email</h3>
+                    <p className="text-gray-600">info@mladenovac.rs</p>
+                    <p className="text-gray-600">poverenik@mladenovac.rs</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <Clock className="h-6 w-6 text-blue-600 mt-1" />
+                  <div>
+                    <h3 className="font-semibold mb-1">Radno vreme</h3>
+                    <p className="text-gray-600">Ponedeljak - Petak: 07:30 - 15:30</p>
+                    <p className="text-gray-600">Šalter za građane: 08:00 - 16:00</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Content from CMS */}
+          <div className="mt-8">
+            <div 
+              className="prose max-w-none"
+              dangerouslySetInnerHTML={{ __html: page?.content || '' }}
+            />
+          </div>
+        </div>
+
+        {/* Contact Form */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Pošaljite nam poruku</h2>
+          
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <Clock className="h-6 w-6 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="font-semibold mb-1">Radno vreme</h3>
-                  <p className="text-gray-600">Ponedeljak - Petak: 07:30 - 15:30</p>
-                  <p className="text-gray-600">Šalter za građane: 08:00 - 16:00</p>
+              {submitMessage && (
+                <div className={`mb-6 p-4 rounded-lg ${
+                  submitMessage.includes('Hvala') 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {submitMessage}
                 </div>
-              </div>
+              )}
+
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium mb-2">
+                    Ime i prezime *
+                  </label>
+                  <Input
+                    id="name"
+                    type="text"
+                    required
+                    value={contactForm.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Vaše ime i prezime"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2">
+                    Email adresa *
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={contactForm.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="vaš@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium mb-2">
+                    Naslov poruke *
+                  </label>
+                  <Input
+                    id="subject"
+                    type="text"
+                    required
+                    value={contactForm.subject}
+                    onChange={(e) => handleInputChange('subject', e.target.value)}
+                    placeholder="Naslov vaše poruke"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium mb-2">
+                    Poruka *
+                  </label>
+                  <Textarea
+                    id="message"
+                    required
+                    rows={6}
+                    value={contactForm.message}
+                    onChange={(e) => handleInputChange('message', e.target.value)}
+                    placeholder="Ovde upišite vašu poruku..."
+                  />
+                </div>
+
+                <Button type="submit" disabled={isSubmitting} className="w-full">
+                  {isSubmitting ? 'Šalje se...' : 'Pošalji poruku'}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
-
-        {/* Content from CMS */}
-        <div className="mt-8">
-          <div 
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: page?.content || '' }}
-          />
-        </div>
       </div>
 
-      {/* Contact Form */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Pošaljite nam poruku</h2>
-        
-        <Card>
-          <CardContent className="p-6">
-            {submitMessage && (
-              <div className={`mb-6 p-4 rounded-lg ${
-                submitMessage.includes('Hvala') 
-                  ? 'bg-green-50 text-green-800 border border-green-200' 
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}>
-                {submitMessage}
-              </div>
-            )}
-
-            <form onSubmit={handleContactSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2">
-                  Ime i prezime *
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  required
-                  value={contactForm.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Vaše ime i prezime"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
-                  Email adresa *
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={contactForm.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="vaš@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                  Naslov poruke *
-                </label>
-                <Input
-                  id="subject"
-                  type="text"
-                  required
-                  value={contactForm.subject}
-                  onChange={(e) => handleInputChange('subject', e.target.value)}
-                  placeholder="Naslov vaše poruke"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  Poruka *
-                </label>
-                <Textarea
-                  id="message"
-                  required
-                  rows={6}
-                  value={contactForm.message}
-                  onChange={(e) => handleInputChange('message', e.target.value)}
-                  placeholder="Ovde upišite vašu poruku..."
-                />
-              </div>
-
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? 'Šalje se...' : 'Pošalji poruku'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Posts Section for Contact Page */}
+      {renderPostsSection()}
     </div>
   );
 
@@ -333,6 +495,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Posts Section for About Page */}
+      {renderPostsSection()}
     </div>
   );
 
@@ -407,6 +572,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Posts Section for Services Page */}
+      {renderPostsSection()}
     </div>
   );
 
@@ -479,6 +647,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           </p>
         </CardContent>
       </Card>
+
+      {/* Posts Section for Transparency Page */}
+      {renderPostsSection()}
     </div>
   );
 

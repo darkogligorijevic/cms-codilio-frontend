@@ -1,7 +1,7 @@
 // app/objave/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +22,8 @@ import Link from 'next/link';
 import { postsApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Category } from '@/lib/types';
 
-export default function PostsListingPage() {
+// Separatna komponenta koja koristi useSearchParams
+function PostsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   
@@ -33,7 +34,7 @@ export default function PostsListingPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalPosts, setTotalPosts] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || 'all');
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
 
   const postsPerPage = 12;
@@ -81,8 +82,8 @@ export default function PostsListingPage() {
       );
     }
 
-    // Filter by category
-    if (selectedCategory) {
+    // Filter by category - FIXED: Handle 'all' instead of empty string
+    if (selectedCategory && selectedCategory !== 'all') {
       filtered = filtered.filter(post => 
         post.categoryId === parseInt(selectedCategory)
       );
@@ -98,7 +99,7 @@ export default function PostsListingPage() {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedCategory('');
+    setSelectedCategory('all'); // FIXED: Use 'all' instead of empty string
   };
 
   const formatDate = (dateString: string) => {
@@ -120,7 +121,7 @@ export default function PostsListingPage() {
   };
 
   const selectedCategoryName = categories.find(cat => cat.id === parseInt(selectedCategory))?.name;
-  const displayPosts = searchTerm || selectedCategory ? filteredPosts : posts;
+  const displayPosts = searchTerm || selectedCategory !== 'all' ? filteredPosts : posts;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -185,14 +186,14 @@ export default function PostsListingPage() {
               </div>
             </form>
 
-            {/* Category Filter */}
+            {/* Category Filter - FIXED: No empty value option */}
             <div>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="">Sve kategorije</option>
+                <option value="all">Sve kategorije</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id.toString()}>
                     {category.name}
@@ -202,7 +203,7 @@ export default function PostsListingPage() {
             </div>
 
             {/* Clear Filters */}
-            {(searchTerm || selectedCategory) && (
+            {(searchTerm || selectedCategory !== 'all') && (
               <div className="flex items-center">
                 <Button variant="outline" onClick={clearFilters} size="sm">
                   <Filter className="mr-2 h-4 w-4" />
@@ -213,7 +214,7 @@ export default function PostsListingPage() {
           </div>
 
           {/* Active Filters Display */}
-          {(searchTerm || selectedCategory) && (
+          {(searchTerm || selectedCategory !== 'all') && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
                 <Badge variant="secondary">
@@ -310,7 +311,7 @@ export default function PostsListingPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && !searchTerm && !selectedCategory && (
+            {totalPages > 1 && !searchTerm && selectedCategory === 'all' && (
               <div className="flex items-center justify-center mt-12 space-x-4">
                 <Button
                   variant="outline"
@@ -366,15 +367,15 @@ export default function PostsListingPage() {
           <div className="text-center py-16">
             <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {searchTerm || selectedCategory ? 'Nema rezultata' : 'Nema objava'}
+              {searchTerm || selectedCategory !== 'all' ? 'Nema rezultata' : 'Nema objava'}
             </h2>
             <p className="text-gray-600 mb-6">
-              {searchTerm || selectedCategory 
+              {searchTerm || selectedCategory !== 'all'
                 ? 'Pokušajte sa drugačijim kriterijumima pretrage.'
                 : 'Trenutno nema objavljenih objava.'
               }
             </p>
-            {(searchTerm || selectedCategory) && (
+            {(searchTerm || selectedCategory !== 'all') && (
               <Button onClick={clearFilters}>
                 Prikaži sve objave
               </Button>
@@ -393,9 +394,9 @@ export default function PostsListingPage() {
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 <Badge
-                  variant={selectedCategory === '' ? 'default' : 'outline'}
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
                   className="cursor-pointer hover:bg-blue-50"
-                  onClick={() => setSelectedCategory('')}
+                  onClick={() => setSelectedCategory('all')}
                 >
                   Sve ({totalPosts})
                 </Badge>
@@ -427,5 +428,43 @@ export default function PostsListingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Loading komponenta
+function PostsLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <Building className="h-8 w-8 text-blue-600" />
+              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Glavna komponenta
+export default function PostsListingPage() {
+  return (
+    <Suspense fallback={<PostsLoading />}>
+      <PostsContent />
+    </Suspense>
   );
 }

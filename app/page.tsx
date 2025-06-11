@@ -1,4 +1,4 @@
-// app/page.tsx
+// app/page.tsx - Updated to use page-specific posts
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -75,14 +75,15 @@ export default function HomePage() {
     try {
       setIsLoading(true);
       
-      // Fetch real data from backend
-      const [postsResponse, pagesResponse, categoriesResponse] = await Promise.all([
-        postsApi.getPublished(1, 6), // Get first 6 published posts
-        pagesApi.getPublished(), // Get all published pages
-        categoriesApi.getAll() // Get all categories
+      // Fetch data for homepage
+      const [homepagePosts, pagesResponse, categoriesResponse] = await Promise.all([
+        // Use the new homepage-specific endpoint
+        postsApi.getForHomePage(6),
+        pagesApi.getPublished(),
+        categoriesApi.getAll()
       ]);
 
-      setPosts(postsResponse.posts);
+      setPosts(homepagePosts);
       setPages(pagesResponse);
       setCategories(categoriesResponse);
     } catch (error) {
@@ -105,7 +106,7 @@ export default function HomePage() {
       
       // Fetch search results from API
       const [postsResponse, pagesResponse] = await Promise.all([
-        postsApi.getPublished(1, 20), // Get more posts for search
+        postsApi.getPublished(1, 20),
         pagesApi.getPublished()
       ]);
 
@@ -117,12 +118,12 @@ export default function HomePage() {
         post.excerpt?.toLowerCase().includes(searchLower) ||
         post.content.toLowerCase().includes(searchLower) ||
         post.category?.name.toLowerCase().includes(searchLower)
-      ).slice(0, 5); // Limit to 5 results
+      ).slice(0, 5);
 
       const filteredPages = pagesResponse.filter(page => 
         page.title.toLowerCase().includes(searchLower) ||
         page.content.toLowerCase().includes(searchLower)
-      ).slice(0, 3); // Limit to 3 results
+      ).slice(0, 3);
 
       setSearchResults({
         posts: filteredPosts,
@@ -477,10 +478,15 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Latest News */}
+          {/* Latest News - Now shows homepage-specific posts */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Najnovije objave</h3>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">Najnovije objave</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {posts.length > 0 ? `Prikazuje se ${posts.length} najnovijih objava` : 'Nema objava za prikazivanje'}
+                </p>
+              </div>
               <Button variant="outline" asChild>
                 <Link href="/objave">
                   Sve objave
@@ -517,6 +523,15 @@ export default function HomePage() {
                             <span className="text-sm text-gray-500">
                               {getTimeAgo(post.publishedAt || post.createdAt)}
                             </span>
+                            {/* Show which pages this post appears on */}
+                            {post.pages && post.pages.length > 0 && (
+                              <div className="flex items-center space-x-1">
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs text-gray-500">
+                                  Prikazuje se na: {post.pages.map(p => p.title).join(', ')}
+                                </span>
+                              </div>
+                            )}
                           </div>
                           
                           <h4 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">
@@ -561,8 +576,14 @@ export default function HomePage() {
               <Card>
                 <CardContent className="p-12 text-center">
                   <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nema objava</h3>
-                  <p className="text-gray-500">Trenutno nema objavljenih objava.</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nema objava na početnoj strani</h3>
+                  <p className="text-gray-500 mb-4">
+                    Trenutno nema objava dodeljenih početnoj strani. 
+                    Administrator može dodeliti objave ovoj stranici iz CMS-a.
+                  </p>
+                  <Button variant="outline" asChild>
+                    <Link href="/objave">Pogledaj sve objave</Link>
+                  </Button>
                 </CardContent>
               </Card>
             )}

@@ -142,8 +142,10 @@ export default function PagesPage() {
         content: data.content,
         status: data.status,
         template: data.template,
-        sortOrder: Number(data.sortOrder)
+        sortOrder: data.sortOrder
       };
+
+      console.log(pageData)
 
       if (editingPage) {
         await pagesApi.update(editingPage.id, pageData);
@@ -317,7 +319,7 @@ export default function PagesPage() {
                     <Input
                       id="slug"
                       placeholder="o-nama"
-                      {...register('slug', { required: 'Slug je obavezan' })}
+                      {...register('slug')}
                     />
                     {errors.slug && (
                       <p className="text-sm text-red-600 flex items-center">
@@ -471,7 +473,7 @@ export default function PagesPage() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters - FIXED: No empty values in SelectItems */}
       <Card>
         <CardHeader>
           <CardTitle>Pretraga i filteri</CardTitle>
@@ -682,7 +684,7 @@ export default function PagesPage() {
                             <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
                             <h3 className="text-lg font-medium">Nema stranica</h3>
                             <p>Počnite kreiranjem prve stranice za vašu instituciju</p>
-                            <Dialog>
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button className="mt-4">
                                   <Plus className="mr-2 h-4 w-4" />

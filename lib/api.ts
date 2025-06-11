@@ -1,4 +1,4 @@
-// lib/api.ts
+// lib/api.ts - Updated API functions
 import axios, { AxiosResponse } from 'axios';
 import type {
   Post,
@@ -90,6 +90,24 @@ export const postsApi = {
     return response.data;
   },
   
+  // New method to get posts by page ID
+  getByPageId: async (pageId: number, limit = 10): Promise<Post[]> => {
+    const response: AxiosResponse<Post[]> = await api.get(`/posts/by-page/${pageId}?limit=${limit}`);
+    return response.data;
+  },
+  
+  // New method to get posts by page slug
+  getByPageSlug: async (pageSlug: string, limit = 10): Promise<Post[]> => {
+    const response: AxiosResponse<Post[]> = await api.get(`/posts/by-page-slug/${pageSlug}?limit=${limit}`);
+    return response.data;
+  },
+  
+  // New method to get posts for homepage
+  getForHomePage: async (limit = 6): Promise<Post[]> => {
+    const response: AxiosResponse<Post[]> = await api.get(`/posts/homepage?limit=${limit}`);
+    return response.data;
+  },
+  
   create: async (data: CreatePostDto): Promise<Post> => {
     const response: AxiosResponse<Post> = await api.post('/posts', data);
     return response.data;
@@ -104,6 +122,14 @@ export const postsApi = {
     await api.delete(`/posts/${id}`);
   }
 };
+
+// Interface for page selection options
+interface PageSelectionOption {
+  isHomepage: boolean;
+  id: number;
+  title: string;
+  slug: string;
+}
 
 // Pages API
 export const pagesApi = {
@@ -124,6 +150,12 @@ export const pagesApi = {
   
   getBySlug: async (slug: string): Promise<Page> => {
     const response: AxiosResponse<Page> = await api.get(`/pages/slug/${slug}`);
+    return response.data;
+  },
+  
+  // New method for getting pages for selection dropdown
+  getAllForSelection: async (): Promise<PageSelectionOption[]> => {
+    const response: AxiosResponse<PageSelectionOption[]> = await api.get('/pages/for-selection');
     return response.data;
   },
   
@@ -178,6 +210,7 @@ export const categoriesApi = {
 export const mediaApi = {
   getAll: async (): Promise<Media[]> => {
     const response: AxiosResponse<Media[]> = await api.get('/media');
+    console.log(response);
     return response.data;
   },
   
