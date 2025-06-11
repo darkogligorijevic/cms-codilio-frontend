@@ -522,6 +522,7 @@ export default function MediaPage() {
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">
                         {item.mimeType?.startsWith('image/') ? (
                           <img
+                            crossOrigin="anonymous"
                             src={mediaApi.getFileUrl(item.filename)}
                             alt={item.alt || item.originalName}
                             className="w-full h-full object-cover"
