@@ -125,6 +125,7 @@ export const postsApi = {
 
 // Interface for page selection options
 interface PageSelectionOption {
+  isHomepage: boolean;
   id: number;
   title: string;
   slug: string;

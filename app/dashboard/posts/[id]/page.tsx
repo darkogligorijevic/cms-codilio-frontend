@@ -31,7 +31,8 @@ import {
   AlertCircle,
   Globe,
   Layout,
-  CheckCircle2
+  CheckCircle2,
+  Home
 } from 'lucide-react';
 import Link from 'next/link';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
@@ -51,7 +52,7 @@ interface PostFormData {
   excerpt: string;
   content: string;
   status: PostStatus;
-  categoryId: string;
+  categoryId: number | null;
   featuredImage: string;
   pageIds: number[];
 }
@@ -60,6 +61,7 @@ interface PageOption {
   id: number;
   title: string;
   slug: string;
+  isHomepage?: boolean; // ADDED: Flag to identify homepage
 }
 
 export default function PostEditor({ params }: PostEditorProps) {
@@ -75,17 +77,18 @@ export default function PostEditor({ params }: PostEditorProps) {
   const [isLoading, setIsLoading] = useState(!isNewPost);
   const [isSaving, setSaving] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);
+  const [defaultPageId, setDefaultPageId] = useState<number | null>(null); // ADDED: Dynamic default page
 
-  // Memoized default values - FIXED: categoryId now uses 'none' instead of empty string
+  // FIXED: Dynamic default values based on available pages
   const defaultFormValues = useMemo(() => ({
     title: '',
     slug: '',
     excerpt: '',
     content: '',
     status: 'draft' as PostStatus,
-    categoryId: 'none', // FIXED: Changed from ''
+    categoryId: null as number | null,
     featuredImage: '',
-    pageIds: [0] // Default to homepage (id: 0)
+    pageIds: [] as number[] // FIXED: Start with empty array
   }), []);
 
   const {
@@ -110,22 +113,29 @@ export default function PostEditor({ params }: PostEditorProps) {
     const initializeForm = async () => {
       await fetchCategories();
       await fetchMedia();
-      await fetchPages();
+      await fetchPages(); // This will set defaultPageId
       
       if (!isNewPost) {
         await fetchPost();
       } else {
-        // For new posts, explicitly set default values - FIXED: categoryId uses 'none'
+        // For new posts, set default values after pages are loaded
         setValue('status', 'draft' as PostStatus);
-        setValue('categoryId', 'none'); // FIXED: Changed from ''
+        setValue('categoryId', null);
         setValue('featuredImage', '');
-        setValue('pageIds', [0]); // Default to homepage
+        // pageIds will be set after fetchPages completes
         setFormInitialized(true);
       }
     };
 
     initializeForm();
   }, [isNewPost, resolvedParams.id, setValue]);
+
+  // ADDED: Set default page when pages are loaded and it's a new post
+  useEffect(() => {
+    if (defaultPageId !== null && isNewPost && formInitialized && watchedPageIds.length === 0) {
+      setValue('pageIds', [defaultPageId]);
+    }
+  }, [defaultPageId, isNewPost, formInitialized, watchedPageIds.length, setValue]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -190,17 +200,21 @@ export default function PostEditor({ params }: PostEditorProps) {
       const response = await postsApi.getById(parseInt(resolvedParams.id));
       setPost(response);
       
-      // Populate form with fetched data - FIXED: categoryId handling
+      // Populate form with fetched data
       setValue('title', response.title);
       setValue('slug', response.slug);
       setValue('excerpt', response.excerpt || '');
       setValue('content', response.content);
       setValue('status', response.status);
-      setValue('categoryId', response.categoryId?.toString() || 'none'); // FIXED: Use 'none' as fallback
+      setValue('categoryId', response.categoryId || null);
       setValue('featuredImage', response.featuredImage || '');
       
       // Set page IDs - convert from pages array
-      const pageIds = response.pages?.map(page => page.id) || [0];
+      const pageIds = response.pages?.map(page => page.id) || [];
+      // FIXED: If no pages assigned, use default page
+      if (pageIds.length === 0 && defaultPageId !== null) {
+        pageIds.push(defaultPageId);
+      }
       setValue('pageIds', pageIds);
       
       setFormInitialized(true);
@@ -235,12 +249,30 @@ export default function PostEditor({ params }: PostEditorProps) {
     try {
       const response = await pagesApi.getAllForSelection();
       setPages(response);
+      
+      // FIXED: Find homepage or use first available page as default
+      const homepage = response.find(page =>
+        page.slug === '' ||  
+        page.slug === 'home' || 
+        page.slug === 'pocetna' || 
+        page.slug === 'homepage' ||
+        page.title.toLowerCase().includes('početna') ||
+        page.title.toLowerCase().includes('home') ||
+        page.isHomepage === true
+      );
+      
+      const defaultPage = homepage || response[0]; // Use first page if no homepage found
+      if (defaultPage) {
+        setDefaultPageId(defaultPage.id);
+      }
     } catch (error) {
       console.error('Error fetching pages:', error);
-      // Fallback to default pages if API fails
-      setPages([
-        { id: 0, title: 'Početna strana', slug: 'home' }
-      ]);
+      // FIXED: Better fallback handling
+      const fallbackPages = [
+        { id: 1, title: 'Početna strana', slug: '', isHomepage: true }
+      ];
+      setPages(fallbackPages);
+      setDefaultPageId(1);
     }
   };
 
@@ -248,16 +280,22 @@ export default function PostEditor({ params }: PostEditorProps) {
     try {
       setSaving(true);
       
-      // FIXED: Handle 'none' value for categoryId
+      // FIXED: Ensure at least one page is selected
+      let pageIds = data.pageIds.filter(id => id !== null && id !== undefined);
+      if (pageIds.length === 0 && defaultPageId !== null) {
+        pageIds = [defaultPageId];
+        toast.info('Objava je automatski dodeljena početnoj stranici.');
+      }
+      
       const postData = {
         title: data.title,
         slug: data.slug,
         excerpt: data.excerpt || undefined,
         content: data.content,
         status: data.status,
-        categoryId: data.categoryId && data.categoryId !== 'none' ? parseInt(data.categoryId) : undefined,
+        categoryId: data.categoryId || undefined,
         featuredImage: data.featuredImage || undefined,
-        pageIds: data.pageIds.filter(id => id !== null && id !== undefined)
+        pageIds: pageIds
       };
 
       if (isNewPost) {
@@ -315,9 +353,11 @@ export default function PostEditor({ params }: PostEditorProps) {
       // Remove page ID, but ensure at least one page is selected
       const newPageIds = currentPageIds.filter(id => id !== pageId);
       if (newPageIds.length === 0) {
-        // If trying to uncheck all pages, keep homepage selected
-        setValue('pageIds', [0], { shouldDirty: true });
-        toast.info('Objava mora biti dodeljena barem jednoj stranici. Početna strana ostaje izabrana.');
+        // FIXED: Use dynamic default page instead of hardcoded 0
+        const fallbackPageId = defaultPageId || (pages.length > 0 ? pages[0].id : pageId);
+        setValue('pageIds', [fallbackPageId], { shouldDirty: true });
+        const fallbackPageName = pages.find(p => p.id === fallbackPageId)?.title || 'početna strana';
+        toast.info(`Objava mora biti dodeljena barem jednoj stranici. ${fallbackPageName} ostaje izabrana.`);
       } else {
         setValue('pageIds', newPageIds, { shouldDirty: true });
       }
@@ -335,6 +375,17 @@ export default function PostEditor({ params }: PostEditorProps) {
     }
     
     return `Prikazuje se na ${selectedPages.length} stranica`;
+  };
+
+  // ADDED: Helper function to check if page is homepage
+  const isHomepage = (page: PageOption) => {
+    return page.id === defaultPageId || 
+           page.isHomepage === true ||
+           page.slug === '' || 
+           page.slug === 'home' || 
+           page.slug === 'pocetna' ||
+           page.title.toLowerCase().includes('početna') ||
+           page.title.toLowerCase().includes('home');
   };
 
   if (isLoading) {
@@ -581,9 +632,22 @@ export default function PostEditor({ params }: PostEditorProps) {
                         htmlFor={`page-${page.id}`}
                         className="flex items-center space-x-2 cursor-pointer flex-1"
                       >
-                        <Layout className="h-4 w-4 text-muted-foreground" />
+                        {/* ADDED: Show home icon for homepage */}
+                        {isHomepage(page) ? (
+                          <Home className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <Layout className="h-4 w-4 text-muted-foreground" />
+                        )}
                         <div>
-                          <div className="text-sm font-medium">{page.title}</div>
+                          <div className="text-sm font-medium flex items-center space-x-2">
+                            <span>{page.title}</span>
+                            {/* ADDED: Homepage badge */}
+                            {isHomepage(page) && (
+                              <Badge variant="secondary" className="text-xs">
+                                Početna
+                              </Badge>
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground">/{page.slug}</div>
                         </div>
                       </Label>
@@ -596,12 +660,12 @@ export default function PostEditor({ params }: PostEditorProps) {
 
                 <div className="text-xs text-muted-foreground p-3 bg-gray-50 rounded">
                   <strong>Napomena:</strong> Objava mora biti dodeljena barem jednoj stranici. 
-                  Ako nije ručno izabrana nijedna, biće automatski dodeljena početnoj strani.
+                  Ako nije izabrana nijedna stranica, biće automatski dodeljena početnoj strani.
                 </div>
               </CardContent>
             </Card>
 
-            {/* Category - FIXED: Removed empty value SelectItem */}
+            {/* Category */}
             <Card>
               <CardHeader>
                 <CardTitle>Kategorija</CardTitle>
@@ -613,8 +677,11 @@ export default function PostEditor({ params }: PostEditorProps) {
                 <div className="space-y-2">
                   <Label>Kategorija</Label>
                   <Select
-                    value={watchedCategoryId || 'none'}
-                    onValueChange={(value) => setValue('categoryId', value === 'none' ? '' : value, { shouldDirty: true })}
+                    value={watchedCategoryId?.toString() || 'none'}
+                    onValueChange={(value) => {
+                      const categoryId = value === 'none' ? null : parseInt(value);
+                      setValue('categoryId', categoryId, { shouldDirty: true });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Izaberite kategoriju" />
