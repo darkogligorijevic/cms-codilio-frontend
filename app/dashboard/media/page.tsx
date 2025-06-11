@@ -509,11 +509,14 @@ export default function MediaPage() {
                           : ''
                       }`}
                       onClick={() => {
-                        if (selectionMode && item.mimeType.startsWith('image/')) {
+                        if (selectionMode) {
+                          if(item.mimeType.startsWith('image/')){
                           toggleSelection(item.filename);
-                        } else{
-                          toast.error("Ne mozete odabrati file koji nije slika!")
-                        }
+                          }
+                          else{ 
+                            toast.error("Ne mozete da odaberete fajl koji nije slika!")
+                          }
+                        } 
                       }}
                     >
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">

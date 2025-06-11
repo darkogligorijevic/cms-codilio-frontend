@@ -457,7 +457,7 @@ export default function PostsPage() {
                               asChild
                               title="Pogledaj na sajtu"
                             >
-                              <Link href={`/posts/${post.slug}`} target="_blank">
+                              <Link href={`/objave/${post.slug}`} target="_blank">
                                 <ExternalLink className="h-4 w-4" />
                               </Link>
                             </Button>

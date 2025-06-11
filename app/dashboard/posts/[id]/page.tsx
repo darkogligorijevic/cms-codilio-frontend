@@ -327,7 +327,7 @@ export default function PostEditor({ params }: PostEditorProps) {
         <div className="flex items-center space-x-2">
           {!isNewPost && post?.status === 'published' && (
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/posts/${post.slug}`} target="_blank">
+              <Link href={`/objave/${post.slug}`} target="_blank">
                 <Eye className="mr-2 h-4 w-4" />
                 Pogledaj
               </Link>
@@ -383,7 +383,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    URL adresa objave će biti: /posts/{watch('slug')}
+                    URL adresa objave će biti: /objave/{watch('slug')}
                   </p>
                 </div>
 
