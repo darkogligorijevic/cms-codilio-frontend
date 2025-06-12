@@ -23,8 +23,16 @@ import { postsApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Category } from '@/lib/types';
 
 export default function PostsListingPage() {
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get('category');
+  //const searchParams = useSearchParams();
+  //const categoryParam = searchParams.get('category');
+
+  const [categoryParam, setCategoryParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get('category');
+    setCategoryParam(category);
+  }, []);
   
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
