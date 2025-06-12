@@ -65,10 +65,10 @@ export function MediaPicker({
       // Filter by allowed types
       const filteredMedia = response.filter(item => 
         allowedTypes.some(type => {
-          if (type === 'image/*') return item.mimetype.startsWith('image/');
-          if (type === 'video/*') return item.mimetype.startsWith('video/');
-          if (type === 'audio/*') return item.mimetype.startsWith('audio/');
-          return item.mimetype === type;
+          if (type === 'image/*') return item.mimeType.startsWith('image/');
+          if (type === 'video/*') return item.mimeType.startsWith('video/');
+          if (type === 'audio/*') return item.mimeType.startsWith('audio/');
+          return item.mimeType === type;
         })
       );
       
@@ -201,7 +201,7 @@ export function MediaPicker({
                     onClick={() => setSelectedFile(item)}
                   >
                     <div className="aspect-square bg-gray-50 flex items-center justify-center relative overflow-hidden rounded-t-lg">
-                      {item.mimetype.startsWith('image/') ? (
+                      {item.mimeType.startsWith('image/') ? (
                         <img
                           src={mediaApi.getFileUrl(item.filename)}
                           alt={item.alt || item.originalName}
@@ -209,7 +209,7 @@ export function MediaPicker({
                         />
                       ) : (
                         <div className="flex flex-col items-center space-y-2">
-                          {getFileIcon(item.mimetype)}
+                          {getFileIcon(item.mimeType)}
                           <span className="text-xs text-center px-2 line-clamp-2">
                             {item.originalName}
                           </span>
@@ -226,7 +226,7 @@ export function MediaPicker({
                         variant="secondary"
                         className="absolute top-2 left-2 text-xs"
                       >
-                        {getFileTypeLabel(item.mimetype)}
+                        {getFileTypeLabel(item.mimeType)}
                       </Badge>
                     </div>
 
