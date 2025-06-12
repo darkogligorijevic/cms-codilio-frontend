@@ -176,6 +176,7 @@ export interface CreatePostDto {
   featuredImage?: string;
   pageIds?: number[]; // Array of page IDs to assign the post to
   publishedAt?: Date;
+  viewCount?: number;
 }
 
 export interface CreateEmailTemplateDto {

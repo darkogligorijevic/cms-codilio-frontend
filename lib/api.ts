@@ -129,6 +129,10 @@ export const postsApi = {
   
   delete: async (id: number): Promise<void> => {
     await api.delete(`/posts/${id}`);
+  },
+
+  incrementView: async (slug: string): Promise<void> => {
+    await api.patch(`/posts/${slug}/increment-view`);
   }
 };
 

@@ -36,6 +36,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
     fetchPost();
   }, [resolvedParams.slug]);
 
+
   const fetchPost = async () => {
     try {
       setIsLoading(true);
@@ -84,6 +85,20 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       alert('Link je kopiran u clipboard');
     }
   };
+
+    useEffect(() => {
+    const increaseView = async () => {
+      if (post?.id) {
+        try {
+          await postsApi.incrementView(resolvedParams.slug); // PATCH poziv ka backendu
+        } catch (e) {
+          console.error('Greška prilikom povećanja pregleda', e);
+        }
+      }
+    };
+
+    increaseView();
+  }, [post?.id]);
 
   if (isLoading) {
     return (
@@ -254,7 +269,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
               </div>
               <div className="flex items-center">
                 <Eye className="mr-2 h-4 w-4" />
-                <span>{post.viewCount} pregleda</span>
+                <span>{post.viewCount + 1} pregleda</span> 
               </div>
             </div>
           </header>
