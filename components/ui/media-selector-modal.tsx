@@ -57,9 +57,9 @@ export function MediaSelectorModal({
       let filteredMedia = response;
       
       if (filter === 'images') {
-        filteredMedia = response.filter(item => item.mimetype?.startsWith('image/'));
+        filteredMedia = response.filter(item => item.mimeType?.startsWith('image/'));
       } else if (filter === 'documents') {
-        filteredMedia = response.filter(item => !item.mimetype?.startsWith('image/'));
+        filteredMedia = response.filter(item => !item.mimeType?.startsWith('image/'));
       }
       
       setMedia(filteredMedia);
@@ -147,7 +147,7 @@ export function MediaSelectorModal({
                   onClick={() => setSelectedMedia(item)}
                 >
                   <div className="aspect-square bg-gray-50 flex items-center justify-center relative">
-                    {item.mimetype?.startsWith('image/') ? (
+                    {item.mimeType?.startsWith('image/') ? (
                       <img
                         src={mediaApi.getFileUrl(item.filename)}
                         alt={item.alt || item.originalName}
@@ -156,7 +156,7 @@ export function MediaSelectorModal({
                     ) : (
                       <div className="flex flex-col items-center space-y-2 p-4">
                         <div className="bg-gray-100 p-3 rounded-lg">
-                          {getFileIcon(item.mimetype)}
+                          {getFileIcon(item.mimeType)}
                         </div>
                         <span className="text-xs text-center truncate max-w-full">
                           {item.originalName}
@@ -176,7 +176,7 @@ export function MediaSelectorModal({
                       variant="secondary"
                       className="absolute top-2 left-2 text-xs"
                     >
-                      {getFileTypeLabel(item.mimetype)}
+                      {getFileTypeLabel(item.mimeType)}
                     </Badge>
                   </div>
 
