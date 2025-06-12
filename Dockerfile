@@ -2,15 +2,23 @@
 FROM node:18-alpine AS builder
 
 WORKDIR /app
+
+# Kopiraj dependencies i instaliraj
 COPY package*.json ./
 RUN npm install
-COPY . .
-RUN npm run build
 
-# Production stage – samo serve build foldera
+# Kopiraj sve ostalo i build-uj + export
+COPY . .
+RUN npm run build && npm run export
+
+# Production stage (serve preko nginx)
 FROM nginx:alpine
 
-COPY --from=builder /app/build /usr/share/nginx/html
+# Kopiraj statički eksportovane fajlove u nginx root
+COPY --from=builder /app/out /usr/share/nginx/html
+
+# Otvori port 80
 EXPOSE 80
 
+# Pokreni nginx
 CMD ["nginx", "-g", "daemon off;"]
