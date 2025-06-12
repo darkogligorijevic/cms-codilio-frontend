@@ -328,7 +328,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           {/* Content from CMS */}
           <div className="mt-8">
             <div 
-              className="prose max-w-none"
+              className="prose max-w-none "
               dangerouslySetInnerHTML={{ __html: page?.content || '' }}
             />
           </div>

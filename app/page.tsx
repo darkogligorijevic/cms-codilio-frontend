@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
+import {
   Calendar,
   Eye,
   Search,
@@ -35,7 +35,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState<{posts: Post[], pages: Page[]}>({posts: [], pages: []});
+  const [searchResults, setSearchResults] = useState<{ posts: Post[], pages: Page[] }>({ posts: [], pages: [] });
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -53,7 +53,7 @@ export default function HomePage() {
       return () => clearTimeout(timeoutId);
     } else {
       setShowSearchResults(false);
-      setSearchResults({posts: [], pages: []});
+      setSearchResults({ posts: [], pages: [] });
     }
   }, [searchTerm]);
 
@@ -74,7 +74,7 @@ export default function HomePage() {
   const fetchHomeData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Fetch data for homepage
       const [homepagePosts, pagesResponse, categoriesResponse] = await Promise.all([
         // Use the new homepage-specific endpoint
@@ -88,7 +88,7 @@ export default function HomePage() {
       setCategories(categoriesResponse);
     } catch (error) {
       console.error('Error fetching home data:', error);
-      
+
       // Fallback to empty arrays if API fails
       setPosts([]);
       setPages([]);
@@ -100,10 +100,10 @@ export default function HomePage() {
 
   const performSearch = async (query: string) => {
     if (!query.trim() || query.length < 3) return;
-    
+
     try {
       setIsSearching(true);
-      
+
       // Fetch search results from API
       const [postsResponse, pagesResponse] = await Promise.all([
         postsApi.getPublished(1, 20),
@@ -112,15 +112,15 @@ export default function HomePage() {
 
       // Client-side filtering - u realnoj aplikaciji bi ovo bio backend search endpoint
       const searchLower = query.toLowerCase();
-      
-      const filteredPosts = postsResponse.posts.filter(post => 
+
+      const filteredPosts = postsResponse.posts.filter(post =>
         post.title.toLowerCase().includes(searchLower) ||
         post.excerpt?.toLowerCase().includes(searchLower) ||
         post.content.toLowerCase().includes(searchLower) ||
         post.category?.name.toLowerCase().includes(searchLower)
       ).slice(0, 5);
 
-      const filteredPages = pagesResponse.filter(page => 
+      const filteredPages = pagesResponse.filter(page =>
         page.title.toLowerCase().includes(searchLower) ||
         page.content.toLowerCase().includes(searchLower)
       ).slice(0, 3);
@@ -129,11 +129,11 @@ export default function HomePage() {
         posts: filteredPosts,
         pages: filteredPages
       });
-      
+
       setShowSearchResults(true);
     } catch (error) {
       console.error('Search error:', error);
-      setSearchResults({posts: [], pages: []});
+      setSearchResults({ posts: [], pages: [] });
     } finally {
       setIsSearching(false);
     }
@@ -148,17 +148,17 @@ export default function HomePage() {
 
   const clearSearch = () => {
     setSearchTerm('');
-    setSearchResults({posts: [], pages: []});
+    setSearchResults({ posts: [], pages: [] });
     setShowSearchResults(false);
   };
 
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
-    
+
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
-    
-    return parts.map((part, index) => 
+
+    return parts.map((part, index) =>
       regex.test(part) ? (
         <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
           {part}
@@ -179,7 +179,7 @@ export default function HomePage() {
     const now = new Date();
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 24) return `pre ${diffInHours} sati`;
     if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
     return formatDate(dateString);
@@ -212,7 +212,7 @@ export default function HomePage() {
                 <p className="text-xs text-gray-500 hidden sm:block">{institutionData.description}</p>
               </div>
             </Link>
-            
+
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
               <Link href="/objave" className="text-gray-700 hover:text-blue-600 transition-colors">
@@ -288,10 +288,10 @@ export default function HomePage() {
                 Dobrodošli u {institutionData.name}
               </h2>
               <p className="text-lg lg:text-xl text-blue-100 mb-6">
-                Transparentnost, dostupnost i efikasnost u službi građana. 
+                Transparentnost, dostupnost i efikasnost u službi građana.
                 Ovde možete pronaći sve važne informacije o radu naše institucije.
               </p>
-              
+
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4 mt-8">
                 <div className="text-center">
@@ -308,7 +308,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            
+
             <div>
               {/* Search Card */}
               <Card className="bg-white/10 backdrop-blur-sm border-white/20">
@@ -321,151 +321,151 @@ export default function HomePage() {
                 <CardContent>
                   <div ref={searchRef}>
                     <form onSubmit={handleSearchSubmit} className="space-y-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Unesite ključne reči..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9 bg-white/90"
-                        autoComplete="off"
-                      />
-                      {searchTerm && (
-                        <button
-                          type="button"
-                          onClick={clearSearch}
-                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                      
-                      {/* Search Results Dropdown */}
-                      {showSearchResults && (searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border z-50 max-h-96 overflow-y-auto">
-                          {/* Posts Results */}
-                          {searchResults.posts.length > 0 && (
-                            <div className="p-3">
-                              <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                <FileText className="mr-2 h-4 w-4" />
-                                Objave ({searchResults.posts.length})
-                              </h4>
-                              <div className="space-y-2">
-                                {searchResults.posts.map((post) => (
-                                  <Link
-                                    key={post.id}
-                                    href={`/objave/${post.slug}`}
-                                    onClick={clearSearch}
-                                    className="block p-2 hover:bg-gray-50 rounded-md transition-colors"
-                                  >
-                                    <div className="flex items-start space-x-3">
-                                      {post.featuredImage && (
-                                        <img
-                                          src={mediaApi.getFileUrl(post.featuredImage)}
-                                          alt=""
-                                          className="w-12 h-8 object-cover rounded flex-shrink-0"
-                                        />
-                                      )}
-                                      <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                                          {highlightText(post.title, searchTerm)}
-                                        </div>
-                                        {post.excerpt && (
-                                          <div className="text-xs text-gray-600 line-clamp-2 mt-1">
-                                            {highlightText(post.excerpt.substring(0, 100), searchTerm)}
-                                          </div>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Unesite ključne reči..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-9 bg-white/90"
+                          autoComplete="off"
+                        />
+                        {searchTerm && (
+                          <button
+                            type="button"
+                            onClick={clearSearch}
+                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+
+                        {/* Search Results Dropdown */}
+                        {showSearchResults && (searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border z-50 max-h-96 overflow-y-auto">
+                            {/* Posts Results */}
+                            {searchResults.posts.length > 0 && (
+                              <div className="p-3">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Objave ({searchResults.posts.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {searchResults.posts.map((post) => (
+                                    <Link
+                                      key={post.id}
+                                      href={`/objave/${post.slug}`}
+                                      onClick={clearSearch}
+                                      className="block p-2 hover:bg-gray-50 rounded-md transition-colors"
+                                    >
+                                      <div className="flex items-start space-x-3">
+                                        {post.featuredImage && (
+                                          <img
+                                            src={mediaApi.getFileUrl(post.featuredImage)}
+                                            alt=""
+                                            className="w-12 h-8 object-cover rounded flex-shrink-0"
+                                          />
                                         )}
-                                        <div className="flex items-center space-x-2 mt-1">
-                                          {post.category && (
-                                            <Badge variant="secondary" className="text-xs">
-                                              {post.category.name}
-                                            </Badge>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                                            {highlightText(post.title, searchTerm)}
+                                          </div>
+                                          {post.excerpt && (
+                                            <div className="text-xs text-gray-600 line-clamp-2 mt-1">
+                                              {highlightText(post.excerpt.substring(0, 100), searchTerm)}
+                                            </div>
                                           )}
-                                          <span className="text-xs text-gray-500">
-                                            {getTimeAgo(post.publishedAt || post.createdAt)}
-                                          </span>
+                                          <div className="flex items-center space-x-2 mt-1">
+                                            {post.category && (
+                                              <Badge variant="secondary" className="text-xs">
+                                                {post.category.name}
+                                              </Badge>
+                                            )}
+                                            <span className="text-xs text-gray-500">
+                                              {getTimeAgo(post.publishedAt || post.createdAt)}
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  </Link>
-                                ))}
+                                    </Link>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
-                          
-                          {/* Pages Results */}
-                          {searchResults.pages.length > 0 && (
-                            <div className="p-3 border-t">
-                              <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                <Building className="mr-2 h-4 w-4" />
-                                Stranice ({searchResults.pages.length})
-                              </h4>
-                              <div className="space-y-2">
-                                {searchResults.pages.map((page) => (
-                                  <Link
-                                    key={page.id}
-                                    href={`/${page.slug}`}
-                                    onClick={clearSearch}
-                                    className="block p-2 hover:bg-gray-50 rounded-md transition-colors"
-                                  >
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {highlightText(page.title, searchTerm)}
-                                    </div>
-                                    <div className="text-xs text-gray-600 line-clamp-2 mt-1">
-                                      {highlightText(
-                                        page.content.replace(/<[^>]*>/g, '').substring(0, 100),
-                                        searchTerm
-                                      )}
-                                    </div>
-                                  </Link>
-                                ))}
+                            )}
+
+                            {/* Pages Results */}
+                            {searchResults.pages.length > 0 && (
+                              <div className="p-3 border-t">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                  <Building className="mr-2 h-4 w-4" />
+                                  Stranice ({searchResults.pages.length})
+                                </h4>
+                                <div className="space-y-2">
+                                  {searchResults.pages.map((page) => (
+                                    <Link
+                                      key={page.id}
+                                      href={`/${page.slug}`}
+                                      onClick={clearSearch}
+                                      className="block p-2 hover:bg-gray-50 rounded-md transition-colors"
+                                    >
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {highlightText(page.title, searchTerm)}
+                                      </div>
+                                      <div className="text-xs text-gray-600 line-clamp-2 mt-1">
+                                        {highlightText(
+                                          page.content.replace(/<[^>]*>/g, '').substring(0, 100),
+                                          searchTerm
+                                        )}
+                                      </div>
+                                    </Link>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
-                          
-                          {/* No Results */}
-                          {searchResults.posts.length === 0 && searchResults.pages.length === 0 && !isSearching && (
-                            <div className="p-4 text-center text-gray-500">
-                              <Search className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-                              <p className="text-sm">Nema rezultata za "{searchTerm}"</p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                Pokušajte sa drugim ključnim rečima
-                              </p>
-                            </div>
-                          )}
-                          
-                          {/* Loading */}
-                          {isSearching && (
-                            <div className="p-4 text-center">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                              <p className="text-sm text-gray-500 mt-2">Pretraživanje...</p>
-                            </div>
-                          )}
-                          
-                          {/* Show more results link */}
-                          {(searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                            <div className="p-3 border-t bg-gray-50">
-                              <Link
-                                href={`/pretraga?q=${encodeURIComponent(searchTerm)}`}
-                                onClick={clearSearch}
-                                className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center"
-                              >
-                                Prikaži sve rezultate
-                                <ChevronRight className="ml-1 h-4 w-4" />
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <Button 
-                      type="submit"
-                      className="w-full bg-white text-blue-600 hover:bg-blue-50"
-                    >
-                      <Search className="mr-2 h-4 w-4" />
-                      Pretraži
-                    </Button>
-                  </form>
+                            )}
+
+                            {/* No Results */}
+                            {searchResults.posts.length === 0 && searchResults.pages.length === 0 && !isSearching && (
+                              <div className="p-4 text-center text-gray-500">
+                                <Search className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                                <p className="text-sm">Nema rezultata za "{searchTerm}"</p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Pokušajte sa drugim ključnim rečima
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Loading */}
+                            {isSearching && (
+                              <div className="p-4 text-center">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                                <p className="text-sm text-gray-500 mt-2">Pretraživanje...</p>
+                              </div>
+                            )}
+
+                            {/* Show more results link */}
+                            {(searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
+                              <div className="p-3 border-t bg-gray-50">
+                                <Link
+                                  href={`/pretraga?q=${encodeURIComponent(searchTerm)}`}
+                                  onClick={clearSearch}
+                                  className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center"
+                                >
+                                  Prikaži sve rezultate
+                                  <ChevronRight className="ml-1 h-4 w-4" />
+                                </Link>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full bg-white text-blue-600 hover:bg-blue-50"
+                      >
+                        <Search className="mr-2 h-4 w-4" />
+                        Pretraži
+                      </Button>
+                    </form>
                   </div>
                 </CardContent>
               </Card>
@@ -477,7 +477,7 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Latest News - Now shows homepage-specific posts */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
@@ -533,19 +533,20 @@ export default function HomePage() {
                               </div>
                             )}
                           </div>
-                          
+
                           <h4 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">
                             <Link href={`/objave/${post.slug}`}>
                               {post.title}
                             </Link>
                           </h4>
-                          
+
                           {post.excerpt && (
-                            <p className="text-gray-600 mb-3 text-sm lg:text-base">
-                              {post.excerpt}
-                            </p>
+                            <div
+                              className="text-gray-600 mb-3 text-sm lg:text-base prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ __html: post.excerpt }}
+                            />
                           )}
-                          
+
                           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center">
                               <Eye className="mr-1 h-3 w-3" />
@@ -557,7 +558,7 @@ export default function HomePage() {
                             </span>
                           </div>
                         </div>
-                        
+
                         {post.featuredImage && (
                           <div className="ml-4 flex-shrink-0 hidden sm:block">
                             <img
@@ -578,7 +579,7 @@ export default function HomePage() {
                   <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Nema objava na početnoj strani</h3>
                   <p className="text-gray-500 mb-4">
-                    Trenutno nema objava dodeljenih početnoj strani. 
+                    Trenutno nema objava dodeljenih početnoj strani.
                     Administrator može dodeliti objave ovoj stranici iz CMS-a.
                   </p>
                   <Button variant="outline" asChild>
@@ -591,7 +592,7 @@ export default function HomePage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            
+
             {/* Quick Links */}
             {pages.length > 0 && (
               <Card>
@@ -612,7 +613,7 @@ export default function HomePage() {
                       <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
                     </Link>
                   ))}
-                  
+
                   <div className="pt-2 border-t">
                     <Link
                       href="/dokumenti"
@@ -642,7 +643,7 @@ export default function HomePage() {
                     <div className="text-gray-600">{institutionData.address}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <Phone className="h-4 w-4 text-gray-500 mt-0.5" />
                   <div className="text-sm">
@@ -650,7 +651,7 @@ export default function HomePage() {
                     <div className="text-gray-600">{institutionData.phone}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <Mail className="h-4 w-4 text-gray-500 mt-0.5" />
                   <div className="text-sm">
@@ -658,7 +659,7 @@ export default function HomePage() {
                     <div className="text-gray-600">{institutionData.email}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <Clock className="h-4 w-4 text-gray-500 mt-0.5" />
                   <div className="text-sm">
@@ -666,7 +667,7 @@ export default function HomePage() {
                     <div className="text-gray-600">{institutionData.workingHours}</div>
                   </div>
                 </div>
-                
+
                 <Button className="w-full mt-4" asChild>
                   <Link href="/kontakt">Kontaktiraj nas</Link>
                 </Button>
@@ -748,14 +749,14 @@ export default function HomePage() {
                 <span className="text-lg font-bold">{institutionData.name}</span>
               </div>
               <p className="text-gray-300 mb-4 text-sm">
-                Službeni portal lokalne samouprave posvećen transparentnosti 
+                Službeni portal lokalne samouprave posvećen transparentnosti
                 i dostupnosti informacija građanima.
               </p>
               <p className="text-sm text-gray-400">
                 © 2024 {institutionData.name}. Sva prava zadržana.
               </p>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-semibold mb-4">Korisni linkovi</h4>
               <div className="space-y-2">
@@ -776,7 +777,7 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            
+
             <div>
               <h4 className="text-lg font-semibold mb-4">Kontakt</h4>
               <div className="space-y-2 text-gray-300 text-sm">

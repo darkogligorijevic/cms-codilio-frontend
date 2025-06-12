@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
+import {
   Calendar,
   Eye,
   Search,
@@ -26,7 +26,7 @@ import type { Post, Category } from '@/lib/types';
 function PostsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
-  
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +51,7 @@ function PostsContent() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      
+
       const [postsResponse, categoriesResponse] = await Promise.all([
         postsApi.getPublished(currentPage, postsPerPage),
         categoriesApi.getAll()
@@ -75,7 +75,7 @@ function PostsContent() {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(post => 
+      filtered = filtered.filter(post =>
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.content.toLowerCase().includes(searchTerm.toLowerCase())
@@ -84,7 +84,7 @@ function PostsContent() {
 
     // Filter by category - FIXED: Handle 'all' instead of empty string
     if (selectedCategory && selectedCategory !== 'all') {
-      filtered = filtered.filter(post => 
+      filtered = filtered.filter(post =>
         post.categoryId === parseInt(selectedCategory)
       );
     }
@@ -114,7 +114,7 @@ function PostsContent() {
     const now = new Date();
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 24) return `pre ${diffInHours} sati`;
     if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
     return formatDate(dateString);
@@ -265,7 +265,7 @@ function PostsContent() {
                       />
                     </div>
                   )}
-                  
+
                   <CardContent className="p-6">
                     {/* Category Badge */}
                     {post.category && (
@@ -283,9 +283,10 @@ function PostsContent() {
 
                     {/* Excerpt */}
                     {post.excerpt && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {post.excerpt}
-                      </p>
+                      <div
+                        className="text-gray-600 text-sm mb-4 line-clamp-3 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: post.excerpt }}
+                      />
                     )}
 
                     {/* Meta Information */}
@@ -445,7 +446,7 @@ function PostsLoading() {
           </div>
         </div>
       </header>
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/3"></div>

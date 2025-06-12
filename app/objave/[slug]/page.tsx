@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Calendar,
   Eye,
   User,
@@ -40,7 +40,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Fetch the post by slug
       const postData = await postsApi.getBySlug(resolvedParams.slug);
       setPost(postData);
@@ -219,15 +219,16 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                 {post.category.name}
               </Badge>
             )}
-            
+
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               {post.title}
             </h1>
-            
+
             {post.excerpt && (
-              <p className="text-lg text-gray-600 mb-6">
-                {post.excerpt}
-              </p>
+              <div
+                className="text-gray-600 text-sm mb-4 line-clamp-3 prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: post.excerpt }}
+              />
             )}
 
             {/* Featured Image */}
@@ -259,8 +260,8 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           </header>
 
           {/* Post Content */}
-          <div 
-            className="prose prose-lg max-w-none mb-12"
+          <div
+            className="prose prose-lg prose-gray max-w-none mb-12"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
@@ -272,8 +273,8 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                 <Share2 className="mr-2 h-4 w-4" />
                 Podeli
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
@@ -301,25 +302,25 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                         className="w-full h-32 object-cover rounded-lg mb-4"
                       />
                     )}
-                    
+
                     {relatedPost.category && (
                       <Badge variant="secondary" className="mb-2">
                         {relatedPost.category.name}
                       </Badge>
                     )}
-                    
+
                     <h3 className="font-semibold text-gray-900 mb-2 hover:text-blue-600">
                       <Link href={`/objave/${relatedPost.slug}`}>
                         {relatedPost.title}
                       </Link>
                     </h3>
-                    
+
                     {relatedPost.excerpt && (
                       <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                         {relatedPost.excerpt}
                       </p>
                     )}
-                    
+
                     <div className="flex items-center text-xs text-gray-500">
                       <Calendar className="mr-1 h-3 w-3" />
                       <span>{formatDate(relatedPost.publishedAt || relatedPost.createdAt)}</span>

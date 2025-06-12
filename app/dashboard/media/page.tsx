@@ -1,4 +1,4 @@
-// app/dashboard/media/page.tsx
+// app/dashboard/media/page.tsx - Updated with Drag & Drop
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -42,8 +42,9 @@ import {
   X,
   Calendar,
   HardDrive,
-  Check  // Dodato za selection
+  Check
 } from 'lucide-react';
+import { DragDropUpload } from '@/components/ui/drag-drop-upload';
 import { mediaApi } from '@/lib/api';
 import type { Media, CreateMediaDto } from '@/lib/types';
 import { toast } from 'sonner';
@@ -51,14 +52,6 @@ import { toast } from 'sonner';
 interface MediaFormData {
   alt: string;
   caption: string;
-}
-
-interface UploadFile {
-  file: File;
-  id: string;
-  progress: number;
-  status: 'pending' | 'uploading' | 'success' | 'error';
-  error?: string;
 }
 
 export default function MediaPage() {
@@ -69,9 +62,7 @@ export default function MediaPage() {
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Selection mode states
   const [selectionMode, setSelectionMode] = useState(false);
@@ -114,72 +105,22 @@ export default function MediaPage() {
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const newUploadFiles: UploadFile[] = files.map(file => ({
-      file,
-      id: Math.random().toString(36).substr(2, 9),
-      progress: 0,
-      status: 'pending'
-    }));
-    
-    setUploadFiles(prev => [...prev, ...newUploadFiles]);
-    
-    newUploadFiles.forEach(uploadFile => {
-      handleUpload(uploadFile);
-    });
-    
-    if (event.target) {
-      event.target.value = '';
-    }
-  };
-
-  const handleUpload = async (uploadFile: UploadFile) => {
+  const handleFileUpload = async (file: File) => {
     try {
-      setUploadFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, status: 'uploading', progress: 0 } : f
-      ));
-
-      const progressInterval = setInterval(() => {
-        setUploadFiles(prev => prev.map(f => {
-          if (f.id === uploadFile.id && f.status === 'uploading' && f.progress < 90) {
-            return { ...f, progress: Math.min(f.progress + Math.random() * 15, 90) };
-          }
-          return f;
-        }));
-      }, 300);
-
-      const response = await mediaApi.upload(uploadFile.file);
+      setIsUploading(true);
+      const response = await mediaApi.upload(file);
       console.log('Upload response:', response);
 
-      clearInterval(progressInterval);
-      setUploadFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, status: 'success', progress: 100 } : f
-      ));
-
-      toast.success(`Fajl "${uploadFile.file.name}" je uspešno učitan`);
+      toast.success(`Fajl "${file.name}" je uspešno učitan`);
       await fetchMedia();
-
-      setTimeout(() => {
-        setUploadFiles(prev => prev.filter(f => f.id !== uploadFile.id));
-      }, 2000);
 
     } catch (error) {
       console.error('Error uploading file:', error);
-      setUploadFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { 
-          ...f, 
-          status: 'error', 
-          progress: 0,
-          error: error instanceof Error ? error.message : 'Greška pri učitavanju fajla'
-        } : f
-      ));
-      toast.error(`Greška pri učitavanju fajla "${uploadFile.file.name}"`);
+      toast.error(`Greška pri učitavanju fajla "${file.name}"`);
+      throw error; // Re-throw to handle in DragDropUpload component
+    } finally {
+      setIsUploading(false);
     }
-  };
-
-  const removeUploadFile = (id: string) => {
-    setUploadFiles(prev => prev.filter(f => f.id !== id));
   };
 
   const onSubmit = async (data: MediaFormData) => {
@@ -231,7 +172,6 @@ export default function MediaPage() {
 
   // Selection mode functions
   const toggleSelection = (filename: any) => {
-
     setSelectedItems(prev => {
       if (prev.includes(filename)) {
         return prev.filter(item => item !== filename);
@@ -299,7 +239,6 @@ export default function MediaPage() {
                        (typeFilter === 'images' && item.mimeType?.startsWith('image/')) ||
                        (typeFilter === 'documents' && !item.mimeType?.startsWith('image/'));
     
-    console.log(item.mimeType);
     return matchesSearch && matchesType;
   });
 
@@ -313,20 +252,6 @@ export default function MediaPage() {
             Upravljajte slikama, dokumentima i ostalim fajlovima
           </p>
         </div>
-        {!selectionMode && (
-          <Button onClick={() => fileInputRef.current?.click()}>
-            <Upload className="mr-2 h-4 w-4" />
-            Učitaj fajlove
-          </Button>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
       </div>
 
       {/* Selection Mode Toolbar */}
@@ -371,56 +296,15 @@ export default function MediaPage() {
         </Card>
       )}
 
-      {/* Upload Progress */}
-      {uploadFiles.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Učitavanje fajlova</CardTitle>
-            <CardDescription>
-              Status učitavanja fajlova
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {uploadFiles.map((uploadFile) => (
-                <div key={uploadFile.id} className="flex items-center space-x-3">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">{uploadFile.file.name}</span>
-                      <div className="flex items-center space-x-2">
-                        {uploadFile.status === 'success' && (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        )}
-                        {uploadFile.status === 'error' && (
-                          <AlertCircle className="h-4 w-4 text-red-600" />
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeUploadFile(uploadFile.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          uploadFile.status === 'success' ? 'bg-green-600' :
-                          uploadFile.status === 'error' ? 'bg-red-600' : 'bg-blue-600'
-                        }`}
-                        style={{ width: `${uploadFile.progress}%` }}
-                      ></div>
-                    </div>
-                    {uploadFile.error && (
-                      <p className="text-xs text-red-600 mt-1">{uploadFile.error}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Drag & Drop Upload Area */}
+      {!selectionMode && (
+        <DragDropUpload
+          onFileUpload={handleFileUpload}
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+          maxSize={10}
+          multiple={true}
+          disabled={isUploading}
+        />
       )}
 
       {/* Filters */}
@@ -512,7 +396,7 @@ export default function MediaPage() {
                       onClick={() => {
                         if (selectionMode) {
                           if (item.mimeType.startsWith('image/')) {
-                            toggleSelection(item);
+                            toggleSelection(item.filename);
                           } else {
                             toast.error("Mozete izabrati samo slike!")
                           }
@@ -676,10 +560,11 @@ export default function MediaPage() {
                         <h3 className="text-lg font-medium mb-2">Nema fajlova</h3>
                         <p className="mb-4">Počnite učitavanjem prvog fajla</p>
                         {!selectionMode && (
-                          <Button onClick={() => fileInputRef.current?.click()}>
-                            <Upload className="mr-2 h-4 w-4" />
-                            Učitaj fajlove
-                          </Button>
+                          <div className="mt-4">
+                            <p className="text-sm text-gray-500 mb-4">
+                              Prevucite fajlove ovde ili koristite dugme za učitavanje
+                            </p>
+                          </div>
                         )}
                       </>
                     )}
@@ -856,6 +741,7 @@ export default function MediaPage() {
           {selectedMedia?.mimeType?.startsWith('image/') && (
             <div className="py-4">
               <img
+                crossOrigin='anonymous'
                 src={mediaApi.getFileUrl(selectedMedia.filename)}
                 alt={selectedMedia.alt || selectedMedia.originalName}
                 className="w-full h-32 object-cover rounded border"

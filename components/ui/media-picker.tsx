@@ -1,4 +1,4 @@
-// components/ui/media-picker.tsx
+// components/ui/media-picker.tsx - Updated with Drag & Drop
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,6 +24,7 @@ import {
   CheckCircle,
   X
 } from 'lucide-react';
+import { DragDropUpload } from '@/components/ui/drag-drop-upload';
 import { mediaApi } from '@/lib/api';
 import type { Media } from '@/lib/types';
 import { toast } from 'sonner';
@@ -65,10 +66,10 @@ export function MediaPicker({
       // Filter by allowed types
       const filteredMedia = response.filter(item => 
         allowedTypes.some(type => {
-          if (type === 'image/*') return item.mimetype.startsWith('image/');
-          if (type === 'video/*') return item.mimetype.startsWith('video/');
-          if (type === 'audio/*') return item.mimetype.startsWith('audio/');
-          return item.mimetype === type;
+          if (type === 'image/*') return item.mimeType.startsWith('image/');
+          if (type === 'video/*') return item.mimeType.startsWith('video/');
+          if (type === 'audio/*') return item.mimeType.startsWith('audio/');
+          return item.mimeType === type;
         })
       );
       
@@ -81,19 +82,16 @@ export function MediaPicker({
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const handleFileUpload = async (file: File) => {
     try {
       setIsUploading(true);
       const newMedia = await mediaApi.upload(file);
       setMedia(prev => [newMedia, ...prev]);
       toast.success('Fajl je uspešno učitan');
-      event.target.value = ''; // Clear the input
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('Greška pri učitavanju fajla');
+      throw error; // Re-throw to handle in DragDropUpload component
     } finally {
       setIsUploading(false);
     }
@@ -107,16 +105,16 @@ export function MediaPicker({
     }
   };
 
-  const getFileIcon = (mimetype: string) => {
-    if (mimetype.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
-    if (mimetype.includes('pdf')) return <FileText className="h-4 w-4" />;
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
+    if (mimeType.includes('pdf')) return <FileText className="h-4 w-4" />;
     return <File className="h-4 w-4" />;
   };
 
-  const getFileTypeLabel = (mimetype: string) => {
-    if (mimetype.startsWith('image/')) return 'Slika';
-    if (mimetype.includes('pdf')) return 'PDF';
-    if (mimetype.includes('document')) return 'Dokument';
+  const getFileTypeLabel = (mimeType: string) => {
+    if (mimeType.startsWith('image/')) return 'Slika';
+    if (mimeType.includes('pdf')) return 'PDF';
+    if (mimeType.includes('document')) return 'Dokument';
     return 'Fajl';
   };
 
@@ -142,41 +140,37 @@ export function MediaPicker({
         </DialogHeader>
 
         <div className="flex-1 flex flex-col space-y-4 overflow-hidden">
-          {/* Upload Section */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Label htmlFor="file-upload" className="cursor-pointer">
-                    <Button asChild disabled={isUploading}>
-                      <span>
-                        <Upload className="mr-2 h-4 w-4" />
-                        {isUploading ? 'Učitava se...' : 'Učitaj novi fajl'}
-                      </span>
-                    </Button>
-                  </Label>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    accept={allowedTypes.join(',')}
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    disabled={isUploading}
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Pretraži fajlove..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Drag & Drop Upload Section */}
+          <DragDropUpload
+            onFileUpload={handleFileUpload}
+            accept={allowedTypes.join(',')}
+            maxSize={10}
+            multiple={false}
+            disabled={isUploading}
+            className="border-dashed border-2 border-gray-300 rounded-lg p-4"
+          />
+
+          {/* Search */}
+          <div className="flex items-center space-x-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pretraži postojeće fajlove..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {searchTerm && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSearchTerm('')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
 
           {/* Media Grid */}
           <div className="flex-1 overflow-y-auto">
@@ -196,12 +190,12 @@ export function MediaPicker({
                   <Card 
                     key={item.id} 
                     className={`cursor-pointer transition-all hover:shadow-md ${
-                      selectedFile?.id === item.id ? 'ring-2 ring-blue-500' : ''
+                      selectedFile?.id === item.id ? 'ring-2 ring-blue-500 border-blue-500' : ''
                     }`}
                     onClick={() => setSelectedFile(item)}
                   >
                     <div className="aspect-square bg-gray-50 flex items-center justify-center relative overflow-hidden rounded-t-lg">
-                      {item.mimetype.startsWith('image/') ? (
+                      {item.mimeType.startsWith('image/') ? (
                         <img
                           src={mediaApi.getFileUrl(item.filename)}
                           alt={item.alt || item.originalName}
@@ -209,7 +203,9 @@ export function MediaPicker({
                         />
                       ) : (
                         <div className="flex flex-col items-center space-y-2">
-                          {getFileIcon(item.mimetype)}
+                          <div className="bg-gray-100 p-3 rounded-lg">
+                            {getFileIcon(item.mimeType)}
+                          </div>
                           <span className="text-xs text-center px-2 line-clamp-2">
                             {item.originalName}
                           </span>
@@ -226,7 +222,7 @@ export function MediaPicker({
                         variant="secondary"
                         className="absolute top-2 left-2 text-xs"
                       >
-                        {getFileTypeLabel(item.mimetype)}
+                        {getFileTypeLabel(item.mimeType)}
                       </Badge>
                     </div>
 
@@ -260,7 +256,7 @@ export function MediaPicker({
                 <p className="text-gray-500 mb-4">
                   {searchTerm 
                     ? `Nema fajlova koji odgovaraju pretrazi "${searchTerm}"`
-                    : 'Učitajte prvi fajl da biste počeli'
+                    : 'Učitajte prvi fajl koristeći drag & drop ili dugme za učitavanje'
                   }
                 </p>
                 {searchTerm && (

@@ -1,4 +1,6 @@
-// components/ui/rich-text-editor.tsx
+// Step 1: Update your existing rich-text-editor.tsx file
+// Replace the existing file with this enhanced version
+
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -26,13 +28,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import {
   Bold,
@@ -55,14 +50,19 @@ import {
   Table as TableIcon,
   Palette,
   Highlighter,
-  Type,
   Heading1,
   Heading2,
   Heading3,
   Maximize2,
+  Upload,
+  Loader2,
+  X,
+  CheckCircle
 } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, DragEvent, useRef } from 'react';
 import { MediaPicker } from '@/components/ui/media-picker';
+import { mediaApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface RichTextEditorProps {
   content: string;
@@ -71,10 +71,17 @@ interface RichTextEditorProps {
   className?: string;
 }
 
+interface UploadingFile {
+  id: string;
+  name: string;
+  progress: number;
+  status: 'uploading' | 'success' | 'error';
+}
+
 export function RichTextEditor({
   content,
   onChange,
-  placeholder = "Počnite da kucate...",
+  placeholder = "Počnite da kucate ili prevucite slike ovde...",
   className
 }: RichTextEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
@@ -84,6 +91,9 @@ export function RichTextEditor({
   const [imageUrl, setImageUrl] = useState('');
   const [textColor, setTextColor] = useState('#000000');
   const [highlightColor, setHighlightColor] = useState('#ffff00');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -122,11 +132,171 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4',
+        class: cn(
+          'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4',
+          'drag-drop-editor' // Add custom class for styling
+        ),
+      },
+      // Handle paste events for images
+      handlePaste: (view, event, slice) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItems = items.filter(item => item.type.startsWith('image/'));
+        
+        if (imageItems.length > 0) {
+          event.preventDefault();
+          imageItems.forEach(item => {
+            const file = item.getAsFile();
+            if (file) {
+              handleFileUpload(file);
+            }
+          });
+          return true;
+        }
+        return false;
       },
     },
   });
 
+  // File upload handler
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!editor) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Možete dodati samo slike u editor');
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Slika je prevelika. Maksimalna veličina je 10MB.');
+      return;
+    }
+
+    const uploadId = Math.random().toString(36).substr(2, 9);
+    
+    // Add to uploading files list
+    setUploadingFiles(prev => [...prev, {
+      id: uploadId,
+      name: file.name,
+      progress: 0,
+      status: 'uploading'
+    }]);
+
+    try {
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setUploadingFiles(prev => prev.map(f => 
+          f.id === uploadId && f.progress < 90 
+            ? { ...f, progress: Math.min(f.progress + Math.random() * 20, 90) }
+            : f
+        ));
+      }, 200);
+
+      // Upload file to media library
+      const uploadedMedia = await mediaApi.upload(file);
+      
+      // Clear progress interval
+      clearInterval(progressInterval);
+      
+      // Update progress to 100%
+      setUploadingFiles(prev => prev.map(f => 
+        f.id === uploadId ? { ...f, progress: 100, status: 'success' } : f
+      ));
+
+      // Get the URL and insert into editor
+      const imageUrl = mediaApi.getFileUrl(uploadedMedia.filename);
+      
+      // Insert image at current cursor position
+      editor.chain().focus().setImage({ 
+        src: imageUrl,
+        alt: uploadedMedia.alt || file.name
+      }).run();
+
+      toast.success(`${file.name} je uspešno dodato`);
+      
+      // Remove from uploading files after 2 seconds
+      setTimeout(() => {
+        setUploadingFiles(prev => prev.filter(f => f.id !== uploadId));
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      
+      // Update status to error
+      setUploadingFiles(prev => prev.map(f => 
+        f.id === uploadId ? { ...f, status: 'error' } : f
+      ));
+      
+      toast.error(`Greška pri učitavanju ${file.name}`);
+      
+      // Remove from uploading files after 3 seconds
+      setTimeout(() => {
+        setUploadingFiles(prev => prev.filter(f => f.id !== uploadId));
+      }, 3000);
+    }
+  }, [editor]);
+
+  // Drag and Drop handlers
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if dragged items contain images
+    const hasImages = Array.from(e.dataTransfer.items).some(item => 
+      item.type.startsWith('image/')
+    );
+    
+    if (hasImages) {
+      setIsDragOver(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only hide drag overlay if we're actually leaving the editor area
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(async (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+    if (imageFiles.length === 0) {
+      toast.error('Možete postaviti samo slike u editor');
+      return;
+    }
+
+    // Upload all image files
+    for (const file of imageFiles) {
+      await handleFileUpload(file);
+    }
+  }, [handleFileUpload]);
+
+  // Handle file input change
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(handleFileUpload);
+    
+    // Clear input
+    if (e.target) {
+      e.target.value = '';
+    }
+  }, [handleFileUpload]);
+
+  // Other editor functions (same as before)
   const addLink = useCallback(() => {
     if (linkUrl && editor) {
       editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
@@ -177,7 +347,7 @@ export function RichTextEditor({
         small: 200,
         medium: 400, 
         large: 600,
-        full: null // null for 100% width
+        full: null
       };
       
       const selectedSize = sizes[size];
@@ -186,7 +356,6 @@ export function RichTextEditor({
           width: selectedSize
         }).run();
       } else {
-        // For full width, remove width constraint
         editor.chain().focus().updateAttributes('imageResize', {
           width: null,
           style: 'width: 100%;'
@@ -201,6 +370,16 @@ export function RichTextEditor({
 
   return (
     <div className={cn("border rounded-lg", className)}>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleFileInputChange}
+        className="hidden"
+      />
+
       {/* Toolbar */}
       <div className="border-b p-2 flex flex-wrap gap-1">
         {/* Text Formatting */}
@@ -304,90 +483,6 @@ export function RichTextEditor({
           </div>
         </div>
 
-        {/* Alignment */}
-        <div className="flex items-center border-r pr-2 mr-2">
-          <Button
-            type="button"
-            variant={editor.isActive({ textAlign: 'left' }) ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            title="Align Left"
-          >
-            <AlignLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={editor.isActive({ textAlign: 'center' }) ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            title="Align Center"
-          >
-            <AlignCenter className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={editor.isActive({ textAlign: 'right' }) ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            title="Align Right"
-          >
-            <AlignRight className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={editor.isActive({ textAlign: 'justify' }) ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-            title="Justify"
-          >
-            <AlignJustify className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Lists */}
-        <div className="flex items-center border-r pr-2 mr-2">
-          <Button
-            type="button"
-            variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            title="Bullet List"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            title="Numbered List"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Misc */}
-        <div className="flex items-center border-r pr-2 mr-2">
-          <Button
-            type="button"
-            variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            title="Quote"
-          >
-            <Quote className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant={editor.isActive('code') ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            title="Code"
-          >
-            <Code className="h-4 w-4" />
-          </Button>
-        </div>
-
         {/* Media & Links */}
         <div className="flex items-center border-r pr-2 mr-2">
           <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
@@ -439,13 +534,24 @@ export function RichTextEditor({
             <Unlink className="h-4 w-4" />
           </Button>
 
+          {/* Image Upload Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            title="Upload Image"
+          >
+            <Upload className="h-4 w-4" />
+          </Button>
+
           <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
             <DialogTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                title="Add Image"
+                title="Add Image URL"
               >
                 <ImageIcon className="h-4 w-4" />
               </Button>
@@ -504,7 +610,7 @@ export function RichTextEditor({
             <TableIcon className="h-4 w-4" />
           </Button>
 
-          {/* Image Size Controls - only show when image is selected */}
+          {/* Image Size Controls */}
           {editor.isActive('imageResize') && (
             <>
               <div className="h-4 w-px bg-gray-300 mx-1" />
@@ -577,8 +683,59 @@ export function RichTextEditor({
         </div>
       </div>
 
-      {/* Editor Content */}
-      <div className="min-h-[300px]">
+      {/* Upload Progress Display */}
+      {uploadingFiles.length > 0 && (
+        <div className="border-b p-3 bg-gray-50">
+          <div className="space-y-2">
+            {uploadingFiles.map((file) => (
+              <div key={file.id} className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  {file.status === 'uploading' && (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  )}
+                  {file.status === 'success' && (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  )}
+                  {file.status === 'error' && (
+                    <X className="h-4 w-4 text-red-600" />
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium truncate">{file.name}</span>
+                    <span className="text-xs text-gray-500">
+                      {file.status === 'uploading' && `${Math.round(file.progress)}%`}
+                      {file.status === 'success' && 'Završeno'}
+                      {file.status === 'error' && 'Greška'}
+                    </span>
+                  </div>
+                  
+                  {file.status === 'uploading' && (
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                        style={{ width: `${file.progress}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Editor Content with Drag & Drop */}
+      <div 
+        className={cn(
+          "relative min-h-[300px]",
+          isDragOver && "bg-blue-50"
+        )}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <EditorContent 
           editor={editor} 
           className="prose max-w-none"
@@ -587,6 +744,31 @@ export function RichTextEditor({
             outline: 'none'
           }}
         />
+        
+        {/* Drag Overlay */}
+        {isDragOver && (
+          <div className="absolute inset-0 bg-blue-100 bg-opacity-90 flex items-center justify-center border-2 border-dashed border-blue-400 rounded-b-lg z-10">
+            <div className="text-center p-6">
+              <Upload className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-blue-800 mb-1">
+                Otpustite slike ovde
+              </h3>
+              <p className="text-blue-600 text-sm">
+                Slike će biti automatski učitane i ubačene u tekst
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!content && !isDragOver && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center text-gray-400">
+              <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">{placeholder}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Media Picker */}
