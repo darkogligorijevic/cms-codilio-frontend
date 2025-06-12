@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                git url: 'https://github.com/tvoj-user/frontend-repo.git', branch: 'luka-dev'
+                git url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git', branch: 'luka-dev'
             }
         }
 
