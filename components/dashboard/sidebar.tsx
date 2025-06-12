@@ -1,4 +1,4 @@
-// components/dashboard/sidebar.tsx
+// components/dashboard/sidebar.tsx - Updated with Mailer
 'use client';
 
 import Link from 'next/link';
@@ -11,7 +11,8 @@ import {
   FolderOpen, 
   Image, 
   Settings,
-  PenTool
+  PenTool,
+  Mail
 } from 'lucide-react';
 
 const menuItems = [
@@ -39,6 +40,11 @@ const menuItems = [
     title: 'Mediji',
     href: '/dashboard/media',
     icon: Image,
+  },
+  {
+    title: 'Mailer',
+    href: '/dashboard/mailer',
+    icon: Mail,
   },
   {
     title: 'Korisnici',
