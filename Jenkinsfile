@@ -1,29 +1,33 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "codilio/frontend:latest"
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+    }
+
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git', branch: 'luka-dev'
+                git branch: 'luka-dev',
+                    url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git',
+                    credentialsId: 'dockerhub-creds'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    def image = docker.build("codilio/frontend:${BUILD_NUMBER}")
+                    bat "docker build -t ${IMAGE_NAME} ."
                 }
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    script {
-                        bat "docker login -u %USERNAME% -p %PASSWORD%"
-                        bat "docker tag codilio/frontend:${BUILD_NUMBER} codilio/frontend:${BUILD_NUMBER}"
-                        bat "docker push codilio/frontend:${BUILD_NUMBER}"
-                    }
+                script {
+                    bat "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    bat "docker push ${IMAGE_NAME}"
                 }
             }
         }
