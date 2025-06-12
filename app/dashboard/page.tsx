@@ -74,7 +74,7 @@ export default function DashboardPage() {
         const publishedPosts = postsResponse.posts.filter(post => post.status === 'published').length;
         const draftPosts = postsResponse.posts.filter(post => post.status === 'draft').length;
         const publishedPages = pagesResponse.filter(page => page.status === 'published').length;
-        const totalViews = postsResponse.posts.reduce((sum, post) => sum + post.viewCount, 0);
+        const totalViews = postsResponse.posts.reduce((sum, post) => sum + post.viewCount, 0); 
 
         setStats({
           totalPosts: postsResponse.total,
