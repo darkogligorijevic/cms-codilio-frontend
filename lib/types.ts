@@ -106,6 +106,65 @@ export interface AuthResponse {
   user: User;
 }
 
+// Contact status enum
+export enum ContactStatus {
+  NEW = 'new',
+  READ = 'read',
+  REPLIED = 'replied',
+  ARCHIVED = 'archived'
+}
+
+export enum SubscriberStatus {
+  ACTIVE = 'active',
+  UNSUBSCRIBED = 'unsubscribed',
+  BOUNCED = 'bounced'
+}
+
+export enum TemplateType {
+  CONTACT_CONFIRMATION = 'contact_confirmation',
+  CONTACT_NOTIFICATION = 'contact_notification',
+  NEWSLETTER_WELCOME = 'newsletter_welcome',
+  NEWSLETTER_UNSUBSCRIBE = 'newsletter_unsubscribe',
+  CUSTOM = 'custom',
+}
+
+// Contact Interface
+export interface Contact {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  status: ContactStatus;
+  isRead: boolean;
+  createdAt: Date;
+}
+
+// Newsletter Subscribe Interface
+export interface NewsletterSubscribe {
+  id: number;
+  email: string;
+  name: string;
+  status: SubscriberStatus;
+  unsubscribeToken: string;
+  subscribedAt: Date;
+  updatedAt: Date;
+}
+
+// Email Template
+export interface EmailTemplate {
+  id: number;
+  name: string;
+  type: TemplateType;
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // DTO types with page assignment support
 export interface CreatePostDto {
   title: string;
@@ -117,6 +176,41 @@ export interface CreatePostDto {
   featuredImage?: string;
   pageIds?: number[]; // Array of page IDs to assign the post to
   publishedAt?: Date;
+}
+
+export interface CreateEmailTemplateDto {
+  name: string;
+  type: TemplateType;
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+  isActive: boolean;
+}
+
+export interface SendNewsletterDto {
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+  testEmails: string[];
+}
+
+export interface SubscribeToNewsletterDto {
+  email: string;
+  name: string;
+}
+
+export interface CreateContactDto {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+}
+
+export interface UpdateEmailTemplateDto extends CreateEmailTemplateDto {}
+
+export interface UpdateContactDto extends Partial<CreateContactDto> {
+  status: ContactStatus;
 }
 
 export interface UpdatePostDto extends Partial<CreatePostDto> {
