@@ -9,7 +9,7 @@ RUN npm install
 
 # Kopiraj sve ostalo i build-uj + export
 COPY . .
-RUN npm run build && npm run export
+RUN npm run build
 
 # Production stage (serve preko nginx)
 FROM nginx:alpine
