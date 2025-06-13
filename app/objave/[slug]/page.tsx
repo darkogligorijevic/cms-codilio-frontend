@@ -269,6 +269,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
               </div>
               <div className="flex items-center">
                 <Eye className="mr-2 h-4 w-4" />
+                {/* +1 kada se udje da ga odma racuna */}
                 <span>{post.viewCount + 1} pregleda</span> 
               </div>
             </div>

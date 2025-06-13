@@ -113,7 +113,7 @@ export default function MailerPage() {
   const templateForm = useForm<TemplateFormData>({
     defaultValues: {
       name: '',
-      type: 'CUSTOM' as TemplateType,
+      type: 'custom' as TemplateType,
       subject: '',
       htmlContent: '',
       textContent: '',
@@ -811,11 +811,11 @@ export default function MailerPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="CUSTOM">Custom</SelectItem>
-                      <SelectItem value="CONTACT_CONFIRMATION">Potvrda kontakta</SelectItem>
-                      <SelectItem value="CONTACT_NOTIFICATION">Obaveštenje o kontaktu</SelectItem>
-                      <SelectItem value="NEWSLETTER_WELCOME">Dobrodošlica newsletter</SelectItem>
-                      <SelectItem value="NEWSLETTER_UNSUBSCRIBE">Odjava newsletter</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                      <SelectItem value="contact_confirmation">Potvrda kontakta</SelectItem>
+                      <SelectItem value="contact_notification">Obaveštenje o kontaktu</SelectItem>
+                      <SelectItem value="newsletter_welcome">Dobrodošlica newsletter</SelectItem>
+                      <SelectItem value="newsletter_unsubscribe">Odjava newsletter</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
