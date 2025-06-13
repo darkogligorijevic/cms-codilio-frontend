@@ -1,21 +1,35 @@
-# Build stage
-FROM node:18-alpine AS builder
+pipeline {
+    agent any
 
-WORKDIR /app
+    environment {
+        IMAGE_NAME = "codilio/frontend:latest"
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+    }
 
-COPY package*.json ./
-RUN npm install
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'luka-dev',
+                    url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git',
+                    credentialsId: 'dockerhub-creds'
+            }
+        }
 
-COPY . .
-RUN npm run build
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    bat "docker build -t ${IMAGE_NAME} ."
+                }
+            }
+        }
 
-# Production stage (pokreće se kao Node server)
-FROM node:18-alpine
-
-WORKDIR /app
-
-COPY --from=builder /app ./
-
-EXPOSE 3000
-
-CMD ["npm", "run", "start"]
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    bat "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    bat "docker push ${IMAGE_NAME}"
+                }
+            }
+        }
+    }
+}
