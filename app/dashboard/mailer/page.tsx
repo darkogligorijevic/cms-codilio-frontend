@@ -126,7 +126,6 @@ const TemplateVariableHelper = ({ context = 'both' }: { context?: 'newsletter' |
         
         <div className="space-y-4">
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-            {/* eslint-disable-next-line no-template-curly-in-string */}
             <p><strong>Kako koristiti:</strong> Ukucajte varijablu u template (npr. <code>{'{{firstName}}'}</code>) i biće zamenjena pravom vrednošću.</p>
           </div>
 
@@ -377,9 +376,17 @@ export default function MailerPage() {
         toast.success('Template je kreiran');
       }
 
+      // Reset all states
       setIsTemplateDialogOpen(false);
       setSelectedTemplate(null);
-      templateForm.reset();
+      templateForm.reset({
+        name: '',
+        type: 'custom' as TemplateType,
+        subject: '',
+        htmlContent: '',
+        textContent: '',
+        isActive: true
+      });
       fetchAllData();
     } catch (error) {
       console.error('Error saving template:', error);
@@ -411,12 +418,14 @@ export default function MailerPage() {
 
   const handleEditTemplate = (template: EmailTemplate) => {
     setSelectedTemplate(template);
-    templateForm.setValue('name', template.name);
-    templateForm.setValue('type', template.type);
-    templateForm.setValue('subject', template.subject);
-    templateForm.setValue('htmlContent', template.htmlContent);
-    templateForm.setValue('textContent', template.textContent || '');
-    templateForm.setValue('isActive', template.isActive);
+    templateForm.reset({
+      name: template.name,
+      type: template.type,
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      textContent: template.textContent || '',
+      isActive: template.isActive
+    });
     setIsTemplateDialogOpen(true);
   };
 
@@ -874,9 +883,27 @@ export default function MailerPage() {
                     Upravljajte template-ima za email poruke
                   </CardDescription>
                 </div>
-                <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+                <Dialog open={isTemplateDialogOpen} onOpenChange={(open) => {
+                  setIsTemplateDialogOpen(open);
+                  if (!open) {
+                    // Reset when closing
+                    setSelectedTemplate(null);
+                    templateForm.reset();
+                  }
+                }}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button onClick={() => {
+                      // Reset when opening for new template
+                      setSelectedTemplate(null);
+                      templateForm.reset({
+                        name: '',
+                        type: 'custom' as TemplateType,
+                        subject: '',
+                        htmlContent: '',
+                        textContent: '',
+                        isActive: true
+                      });
+                    }}>
                       <Plus className="mr-2 h-4 w-4" />
                       Novi Template
                     </Button>
