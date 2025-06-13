@@ -1,4 +1,4 @@
-// app/dashboard/mailer/page.tsx - Enhanced with template selection and email viewer
+// app/dashboard/mailer/page.tsx - Fixed version
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -139,7 +139,7 @@ export default function MailerPage() {
   });
   const newsletterForm = useForm<NewsletterFormData>({
     defaultValues: {
-      templateId: '', // New: Template selection
+      templateId: 'none', // Changed from empty string to 'none'
       subject: '',
       htmlContent: '',
       textContent: '',
@@ -160,14 +160,14 @@ export default function MailerPage() {
     fetchAllData();
   }, []);
 
-  // New: Handle template selection for newsletter
+  // New: Handle template selection for newsletter - FIXED
   useEffect(() => {
-    if (watchedTemplateId && watchedTemplateId !== '') {
+    if (watchedTemplateId && watchedTemplateId !== '' && watchedTemplateId !== 'none') {
       const selectedTemplate = templates.find(t => t.id.toString() === watchedTemplateId);
       if (selectedTemplate) {
         newsletterForm.setValue('subject', selectedTemplate.subject);
         newsletterForm.setValue('htmlContent', selectedTemplate.htmlContent);
-        newsletterForm.setValue('textContent', selectedTemplate.textContent);
+        newsletterForm.setValue('textContent', selectedTemplate.textContent || '');
         toast.info(`Template "${selectedTemplate.name}" je učitan. Možete ga urediti pre slanja.`);
       }
     }
@@ -338,7 +338,7 @@ export default function MailerPage() {
     templateForm.setValue('type', template.type);
     templateForm.setValue('subject', template.subject);
     templateForm.setValue('htmlContent', template.htmlContent);
-    templateForm.setValue('textContent', template.textContent);
+    templateForm.setValue('textContent', template.textContent || '');
     templateForm.setValue('isActive', template.isActive);
     setIsTemplateDialogOpen(true);
   };
@@ -354,7 +354,7 @@ export default function MailerPage() {
     }
   };
 
-  // New: Clear newsletter template selection
+  // New: Clear newsletter template selection - FIXED
   const handleClearTemplate = () => {
     newsletterForm.setValue('templateId', '');
     newsletterForm.setValue('subject', '');
@@ -994,7 +994,7 @@ export default function MailerPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Enhanced Newsletter Dialog with Template Selection */}
+      {/* Enhanced Newsletter Dialog with Template Selection - FIXED */}
       <Dialog open={isNewsletterDialogOpen} onOpenChange={setIsNewsletterDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
           <form onSubmit={newsletterForm.handleSubmit(handleSendNewsletter)}>
@@ -1006,19 +1006,19 @@ export default function MailerPage() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {/* Template Selection */}
+              {/* Template Selection - FIXED */}
               <div className="space-y-2">
                 <Label>Izaberi template (opciono)</Label>
                 <div className="flex items-center space-x-2">
                   <Select 
-                    value={newsletterForm.watch('templateId')} 
-                    onValueChange={(value) => newsletterForm.setValue('templateId', value)}
+                    value={newsletterForm.watch('templateId') || 'none'} 
+                    onValueChange={(value) => newsletterForm.setValue('templateId', value === 'none' ? '' : value)}
                   >
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Izaberi postojeći template ili napiši od početka" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Bez template-a (piši od početka)</SelectItem>
+                      <SelectItem value="none">Bez template-a (piši od početka)</SelectItem>
                       {templates.filter(t => t.isActive).map((template) => (
                         <SelectItem key={template.id} value={template.id.toString()}>
                           <div className="flex items-center justify-between w-full">
@@ -1031,7 +1031,7 @@ export default function MailerPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {watchedTemplateId && (
+                  {watchedTemplateId && watchedTemplateId !== '' && (
                     <Button
                       type="button"
                       variant="outline"
@@ -1043,7 +1043,7 @@ export default function MailerPage() {
                     </Button>
                   )}
                 </div>
-                {watchedTemplateId && (
+                {watchedTemplateId && watchedTemplateId !== '' && (
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center space-x-2 text-sm">
                       <FileText className="h-4 w-4 text-blue-600" />
@@ -1136,7 +1136,7 @@ export default function MailerPage() {
         </DialogContent>
       </Dialog>
 
-      {/* New: Email Viewer Dialog */}
+      {/* Email Viewer Dialog */}
       <Dialog open={isEmailViewerOpen} onOpenChange={setIsEmailViewerOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
@@ -1212,7 +1212,7 @@ export default function MailerPage() {
         </DialogContent>
       </Dialog>
 
-      {/* New: Reply Dialog */}
+      {/* Reply Dialog */}
       <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
           <form onSubmit={replyForm.handleSubmit(handleSendReply)}>

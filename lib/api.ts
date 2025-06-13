@@ -205,14 +205,13 @@ export const mailerApi = {
     return response.data;
   },
 
-  updateContact: async (id:number, data: UpdateContactDto): Promise<Contact> => {
+  updateContact: async (id: number, data: UpdateContactDto): Promise<Contact> => {
     const response: AxiosResponse<Contact> = await api.patch(`/mailer/contacts/${id}`, data);
     return response.data;
   },
 
-  deleteContact: async (id: number): Promise<Contact> => {
-    const response: AxiosResponse<Contact> = await api.delete(`/mailer/contacts/${id}`);
-    return response.data;
+  deleteContact: async (id: number): Promise<void> => {
+    await api.delete(`/mailer/contacts/${id}`);
   },
 
   markAsRead: async (id: number): Promise<Contact> => {
@@ -226,25 +225,23 @@ export const mailerApi = {
     return response.data;
   },
 
-  // ovo moze biti i patch (vise mi ima smisla)
   unsubscribeToNewsletter: async (token: string): Promise<NewsletterSubscribe> => {
     const response: AxiosResponse<NewsletterSubscribe> = await api.post(`/mailer/newsletter/unsubscribe/${token}`);
     return response.data;
   },
  
-  getAllSubscribers: async (): Promise<NewsletterSubscribe> => {
-    const response: AxiosResponse<NewsletterSubscribe> = await api.get('/mailer/newsletter/subscribers');
+  getAllSubscribers: async (): Promise<NewsletterSubscribe[]> => {
+    const response: AxiosResponse<NewsletterSubscribe[]> = await api.get('/mailer/newsletter/subscribers');
     return response.data;
   },
 
-  getAllActiveSubscribers: async (): Promise<NewsletterSubscribe> => {
-    const response: AxiosResponse<NewsletterSubscribe> = await api.get('/mailer/newsletter/subscribers/active');
+  getAllActiveSubscribers: async (): Promise<NewsletterSubscribe[]> => {
+    const response: AxiosResponse<NewsletterSubscribe[]> = await api.get('/mailer/newsletter/subscribers/active');
     return response.data;
   },
 
-  // Ovo me zbunilo jer koristi podatke kao kod templates a spada pod newsletter
-  sendNewsletter: async (data: SendNewsletterDto): Promise<NewsletterSubscribe> => {
-    const response: AxiosResponse<NewsletterSubscribe> = await api.post('mailer/newsletter/send', data);
+  sendNewsletter: async (data: SendNewsletterDto): Promise<{ sent: number, failed: number }> => {
+    const response: AxiosResponse<{ sent: number, failed: number }> = await api.post('/mailer/newsletter/send', data);
     return response.data;
   },
 
@@ -254,8 +251,8 @@ export const mailerApi = {
     return response.data;
   },
 
-  getAllEmailTemplates: async (): Promise<EmailTemplate> => {
-    const response: AxiosResponse<EmailTemplate> = await api.get('/mailer/templates');
+  getAllEmailTemplates: async (): Promise<EmailTemplate[]> => {
+    const response: AxiosResponse<EmailTemplate[]> = await api.get('/mailer/templates');
     return response.data;
   },
 
@@ -269,16 +266,14 @@ export const mailerApi = {
     return response.data;
   },
 
-  deleteEmailTemplate: async (id: number): Promise<EmailTemplate> => {
-    const response: AxiosResponse<EmailTemplate> = await api.delete(`/mailer/templates/${id}`);
-    return response.data;
+  deleteEmailTemplate: async (id: number): Promise<void> => {
+    await api.delete(`/mailer/templates/${id}`);
   },
 
+  // NEW: Reply to contact
   sendReply: async (contactId: number, data: ReplyToContactDto): Promise<void> => {
-    const response = await api.post(`/mailer/contacts/${contactId}/reply`, data);
-    return response.data;
+    await api.post(`/mailer/contacts/${contactId}/reply`, data);
   },
-
 }
 
 // Categories API
