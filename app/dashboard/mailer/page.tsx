@@ -526,6 +526,26 @@ export default function MailerPage() {
     unsubscribed: subscribers.filter(s => s.status === 'unsubscribed').length
   };
 
+  // for downloading (converting objArray to CSV) 
+  const convertToCSV = (objArray: NewsletterSubscribe[]) => {
+    const headers = Object.keys(objArray[0]).join(",");
+    const rows = objArray.map(obj => Object.values(obj).join(",")).join("\n");
+    return `${headers}\n${rows}`;
+  }
+
+  // download csv logic
+  const downloadCSV = () => {
+    const csv = convertToCSV(subscribers);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "preplatnici.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -786,7 +806,7 @@ export default function MailerPage() {
                     Korisnici koji su se pretplatili na newsletter
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button onClick={downloadCSV} className="cursor-pointer" variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
                   Izvezi CSV
                 </Button>
