@@ -1,7 +1,8 @@
-// app/page.tsx - Updated to use page-specific posts
+// app/page.tsx - Complete file with settings integration
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useSettings } from '@/lib/settings-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,13 +23,19 @@ import {
   ChevronRight,
   ExternalLink,
   Menu,
-  X
+  X,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube
 } from 'lucide-react';
 import Link from 'next/link';
 import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Page, Category } from '@/lib/types';
 
 export default function HomePage() {
+  const { settings, isLoading: settingsLoading } = useSettings();
   const [posts, setPosts] = useState<Post[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -39,6 +46,21 @@ export default function HomePage() {
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Use settings for institution data
+  const institutionData = {
+    name: settings?.siteName || "Lokalna institucija",
+    description: settings?.siteTagline || "Službeni portal lokalne samouprave",
+    address: settings?.contactAddress || "Adresa institucije",
+    phone: settings?.contactPhone || "+381 11 123 4567",
+    email: settings?.contactEmail || "info@institucija.rs",
+    workingHours: settings?.contactWorkingHours || "Ponedeljak - Petak: 07:30 - 15:30",
+    mapUrl: settings?.contactMapUrl,
+    // These would come from additional settings or API
+    citizens: "53.096",
+    villages: "32",
+    area: "339 km²"
+  };
 
   useEffect(() => {
     fetchHomeData();
@@ -185,18 +207,14 @@ export default function HomePage() {
     return formatDate(dateString);
   };
 
-  // Mock institutional data - ovo će kasnije doći iz settings/wizard-a
-  const institutionData = {
-    name: "Opština Mladenovac",
-    description: "Službeni portal lokalne samouprave",
-    address: "Trg Oslobođenja 1, 11400 Mladenovac",
-    phone: "+381 11 823 4567",
-    email: "info@mladenovac.rs",
-    workingHours: "Ponedeljak - Petak: 07:30 - 15:30",
-    citizens: "53.096",
-    villages: "32",
-    area: "339 km²"
-  };
+  // Show loading state while settings are loading
+  if (settingsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -206,7 +224,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Logo'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-blue-600" />
+              )}
               <div>
                 <h1 className="text-lg font-bold text-gray-900">{institutionData.name}</h1>
                 <p className="text-xs text-gray-500 hidden sm:block">{institutionData.description}</p>
@@ -745,14 +771,82 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <Building className="h-6 w-6" />
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Logo'} 
+                    className="h-6 object-contain brightness-0 invert"
+                  />
+                ) : (
+                  <Building className="h-6 w-6" />
+                )}
                 <span className="text-lg font-bold">{institutionData.name}</span>
               </div>
               <p className="text-gray-300 mb-4 text-sm">
                 Službeni portal lokalne samouprave posvećen transparentnosti
                 i dostupnosti informacija građanima.
               </p>
-              <p className="text-sm text-gray-400">
+              
+              {/* Social Media Links */}
+              <div className="flex items-center space-x-4">
+                {settings?.socialFacebook && (
+                  <a 
+                    href={settings.socialFacebook} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="Facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialTwitter && (
+                  <a 
+                    href={settings.socialTwitter} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="Twitter"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialInstagram && (
+                  <a 
+                    href={settings.socialInstagram} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialLinkedin && (
+                  <a 
+                    href={settings.socialLinkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="LinkedIn"
+                  >
+                    <Linkedin className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialYoutube && (
+                  <a 
+                    href={settings.socialYoutube} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="YouTube"
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+              
+              <p className="text-sm text-gray-400 mt-4">
                 © 2024 {institutionData.name}. Sva prava zadržana.
               </p>
             </div>
@@ -786,6 +880,18 @@ export default function HomePage() {
                 <p>{institutionData.email}</p>
                 <p>{institutionData.workingHours}</p>
               </div>
+              {institutionData.mapUrl && (
+                <Button variant="outline" size="sm" className="mt-4" asChild>
+                  <a 
+                    href={institutionData.mapUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Prikaži na mapi
+                  </a>
+                </Button>
+              )}
             </div>
           </div>
         </div>

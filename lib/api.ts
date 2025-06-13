@@ -1,31 +1,38 @@
 // lib/api.ts - Updated API functions
 import axios, { AxiosResponse } from 'axios';
-import type {
-  Post,
-  Page,
-  Category,
-  Media,
-  User,
-  PostsResponse,
-  AuthResponse,
-  LoginCredentials,
-  CreatePostDto,
-  UpdatePostDto,
-  CreatePageDto,
-  UpdatePageDto,
-  CreateCategoryDto,
-  UpdateCategoryDto,
-  CreateMediaDto,
-  Contact,
-  CreateContactDto,
-  UpdateContactDto,
-  SubscribeToNewsletterDto,
-  NewsletterSubscribe,
-  SendNewsletterDto,
-  CreateEmailTemplateDto,
-  EmailTemplate,
-  UpdateEmailTemplateDto,
-  ReplyToContactDto
+import {
+  type Post,
+  type Page,
+  type Category,
+  type Media,
+  type User,
+  type PostsResponse,
+  type AuthResponse,
+  type LoginCredentials,
+  type CreatePostDto,
+  type UpdatePostDto,
+  type CreatePageDto,
+  type UpdatePageDto,
+  type CreateCategoryDto,
+  type UpdateCategoryDto,
+  type CreateMediaDto,
+  type Contact,
+  type CreateContactDto,
+  type UpdateContactDto,
+  type SubscribeToNewsletterDto,
+  type NewsletterSubscribe,
+  type SendNewsletterDto,
+  type CreateEmailTemplateDto,
+  type EmailTemplate,
+  type UpdateEmailTemplateDto,
+  type ReplyToContactDto,
+  ImportSettingsDto,
+  Setting,
+  SettingCategory,
+  SettingType,
+  SiteSettings,
+  UpdateMultipleSettingsDto,
+  UpdateSettingDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -361,3 +368,86 @@ export const mediaApi = {
 };
 
 export { api };
+
+export const settingsApi = {
+  getAll: async (): Promise<Setting[]> => {
+    const response: AxiosResponse<Setting[]> = await api.get('/settings');
+    return response.data;
+  },
+  
+  getByCategory: async (category: SettingCategory): Promise<Setting[]> => {
+    const response: AxiosResponse<Setting[]> = await api.get(`/settings/category/${category}`);
+    return response.data;
+  },
+  
+  getByKey: async (key: string): Promise<Setting> => {
+    const response: AxiosResponse<Setting> = await api.get(`/settings/${key}`);
+    return response.data;
+  },
+  
+  update: async (key: string, data: UpdateSettingDto): Promise<Setting> => {
+    const response: AxiosResponse<Setting> = await api.put(`/settings/${key}`, data);
+    return response.data;
+  },
+  
+  updateMultiple: async (data: UpdateMultipleSettingsDto): Promise<Setting[]> => {
+    const response: AxiosResponse<Setting[]> = await api.put('/settings', data);
+    return response.data;
+  },
+  
+  uploadFile: async (key: string, file: File): Promise<Setting> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response: AxiosResponse<Setting> = await api.post(`/settings/${key}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  
+  reset: async (category?: SettingCategory): Promise<Setting[]> => {
+    const response: AxiosResponse<Setting[]> = await api.post('/settings/reset', { category });
+    return response.data;
+  },
+  
+  export: async (): Promise<Record<string, string>> => {
+    const response: AxiosResponse<Record<string, string>> = await api.get('/settings/export');
+    return response.data;
+  },
+  
+  import: async (data: ImportSettingsDto): Promise<Setting[]> => {
+    const response: AxiosResponse<Setting[]> = await api.post('/settings/import', data);
+    return response.data;
+  },
+  
+  // Helper method to get all settings as a structured object
+  getStructured: async (): Promise<SiteSettings> => {
+    const settings = await settingsApi.getAll();
+    const structured: any = {};
+    
+    settings.forEach(setting => {
+      // Convert key format from snake_case to camelCase
+      const camelKey = setting.key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+      
+      // Parse value based on type
+      let value: any = setting.value;
+      if (setting.type === SettingType.NUMBER) {
+        value = parseInt(setting.value, 10);
+      } else if (setting.type === SettingType.BOOLEAN) {
+        value = setting.value === 'true';
+      } else if (setting.type === SettingType.JSON) {
+        try {
+          value = JSON.parse(setting.value);
+        } catch {
+          value = setting.value;
+        }
+      }
+      
+      structured[camelKey] = value;
+    });
+    
+    return structured as SiteSettings;
+  }
+};

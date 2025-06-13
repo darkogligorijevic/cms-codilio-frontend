@@ -2,6 +2,7 @@
 'use client';
 
 import { useAuth } from '../../lib/auth-context';
+import { useSettings } from '../../lib/settings-context';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,11 +13,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { LogOut, User, Eye } from 'lucide-react';
+import { LogOut, User, Eye, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { mediaApi } from '@/lib/api';
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
+  const { settings } = useSettings();
 
   const handleLogout = () => {
     logout();
@@ -26,9 +29,21 @@ export function DashboardHeader() {
   return (
     <header className="h-16 bg-white border-b flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
-        <h1 className="text-lg font-semibold text-gray-900">
-          Administracioni panel
-        </h1>
+        {settings?.siteLogo && (
+          <img 
+            src={mediaApi.getFileUrl(settings.siteLogo)} 
+            alt={settings.siteName || 'Logo'} 
+            className="h-8 object-contain"
+          />
+        )}
+        <div>
+          <h1 className="text-lg font-semibold text-gray-900">
+            {settings?.siteName || 'Administracioni panel'}
+          </h1>
+          {settings?.siteTagline && (
+            <p className="text-xs text-gray-500">{settings.siteTagline}</p>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center space-x-4">
@@ -63,6 +78,14 @@ export function DashboardHeader() {
               <User className="mr-2 h-4 w-4" />
               <span>Profil</span>
             </DropdownMenuItem>
+            {user?.role === 'admin' && (
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Podešavanja</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
