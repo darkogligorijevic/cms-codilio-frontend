@@ -60,7 +60,8 @@ import {
   ArrowLeft,
   ExternalLink,
   Phone,
-  X
+  X,
+  Info
 } from 'lucide-react';
 import { mailerApi } from '@/lib/api';
 import type { 
@@ -76,6 +77,82 @@ import type {
   ReplyToContactDto
 } from '@/lib/types';
 import { toast } from 'sonner';
+
+// Add TemplateVariableHelper component inline
+const TemplateVariableHelper = ({ context = 'both' }: { context?: 'newsletter' | 'contact' | 'both' }) => {
+  const [copiedVariable, setCopiedVariable] = useState<string | null>(null);
+
+  const templateVariables = [
+    { variable: '{{firstName}}', description: 'Ime korisnika', example: 'Marko', context: 'both' },
+    { variable: '{{fullName}}', description: 'Puno ime korisnika', example: 'Marko Petrović', context: 'both' },
+    { variable: '{{email}}', description: 'Email adresa', example: 'marko@example.com', context: 'both' },
+    { variable: '{{year}}', description: 'Trenutna godina', example: '2025', context: 'both' },
+    { variable: '{{date}}', description: 'Trenutni datum', example: '13.6.2025.', context: 'both' },
+    { variable: '{{companyName}}', description: 'Naziv kompanije', example: 'CodilioCMS', context: 'both' },
+    { variable: '{{unsubscribeUrl}}', description: 'Link za otkazivanje', example: 'https://...', context: 'newsletter' },
+    { variable: '{{subject}}', description: 'Naslov poruke', example: 'Upit', context: 'contact' },
+    { variable: '{{message}}', description: 'Sadržaj poruke', example: 'Zanima me...', context: 'contact' }
+  ];
+
+  const filteredVariables = templateVariables.filter(
+    variable => context === 'both' || variable.context === 'both' || variable.context === context
+  );
+
+  const copyToClipboard = async (variable: string) => {
+    try {
+      await navigator.clipboard.writeText(variable);
+      setCopiedVariable(variable);
+      setTimeout(() => setCopiedVariable(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" type="button">
+          <Info className="mr-2 h-4 w-4" />
+          Template varijable
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Template varijable</DialogTitle>
+          <DialogDescription>
+            Koristite ove varijable u vašim email template-ima
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+            {/* eslint-disable-next-line no-template-curly-in-string */}
+            <p><strong>Kako koristiti:</strong> Ukucajte varijablu u template (npr. <code>{'{{firstName}}'}</code>) i biće zamenjena pravom vrednošću.</p>
+          </div>
+
+          <div className="grid gap-2">
+            {filteredVariables.map((variable) => (
+              <div key={variable.variable} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex-1">
+                  <code className="bg-gray-100 px-2 py-1 rounded text-sm">{variable.variable}</code>
+                  <p className="text-xs text-gray-600 mt-1">{variable.description}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(variable.variable)}
+                  className="h-8 w-8 p-0"
+                >
+                  {copiedVariable === variable.variable ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Info className="h-4 w-4" />}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 interface ContactFormData {
   status: ContactStatus;
@@ -944,7 +1021,10 @@ export default function MailerPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="template-html">HTML sadržaj</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="template-html">HTML sadržaj</Label>
+                  <TemplateVariableHelper />
+                </div>
                 <Textarea
                   id="template-html"
                   placeholder="HTML sadržaj email-a"
@@ -1066,7 +1146,10 @@ export default function MailerPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newsletter-html">HTML sadržaj</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="newsletter-html">HTML sadržaj</Label>
+                  <TemplateVariableHelper context="newsletter" />
+                </div>
                 <Textarea
                   id="newsletter-html"
                   placeholder="HTML sadržaj newsletter-a"
