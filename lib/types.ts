@@ -128,6 +128,11 @@ export enum TemplateType {
   CUSTOM = 'custom',
 }
 
+export interface ReplyToContactDto {
+  subject: string;
+  message: string;
+}
+
 // Contact Interface
 export interface Contact {
   id: number;

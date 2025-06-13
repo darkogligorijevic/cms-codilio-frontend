@@ -24,7 +24,8 @@ import type {
   SendNewsletterDto,
   CreateEmailTemplateDto,
   EmailTemplate,
-  UpdateEmailTemplateDto
+  UpdateEmailTemplateDto,
+  ReplyToContactDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -271,7 +272,12 @@ export const mailerApi = {
   deleteEmailTemplate: async (id: number): Promise<EmailTemplate> => {
     const response: AxiosResponse<EmailTemplate> = await api.delete(`/mailer/templates/${id}`);
     return response.data;
-  }
+  },
+
+  sendReply: async (contactId: number, data: ReplyToContactDto): Promise<void> => {
+    const response = await api.post(`/mailer/contacts/${contactId}/reply`, data);
+    return response.data;
+  },
 
 }
 
