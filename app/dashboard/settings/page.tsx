@@ -346,7 +346,7 @@ export default function SettingsPage() {
               />
               <Input
                 type="text"
-                value={(value) as string}
+                value={value as any}
                 onChange={(e) => setValue(setting.key, e.target.value)}
                 placeholder="#000000"
                 className="flex-1"
@@ -360,7 +360,7 @@ export default function SettingsPage() {
           <div className="space-y-2">
             <Label>{setting.label}</Label>
             <Select
-              value={(value) as string}
+              value={value as any}
               onValueChange={(val) => setValue(setting.key, val)}
             >
               <SelectTrigger>
@@ -588,7 +588,7 @@ export default function SettingsPage() {
                       placeholder="Moja institucija"
                     />
                     {errors[SETTING_KEYS.SITE_NAME] && (
-                      <p className="text-sm text-red-600">{errors[SETTING_KEYS.SITE_NAME]?.message}</p>
+                      <p className="text-sm text-red-600">{errors[SETTING_KEYS.SITE_NAME]!.message}</p>
                     )}
                   </div>
 
@@ -744,7 +744,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.SITE_LANGUAGE}>Jezik</Label>
                     <Select
-                      value={String(formValues[SETTING_KEYS.SITE_LANGUAGE]) || 'sr'}
+                      value={formValues[SETTING_KEYS.SITE_LANGUAGE] as any || 'sr'}
                       onValueChange={(value) => setValue(SETTING_KEYS.SITE_LANGUAGE, value)}
                     >
                       <SelectTrigger>
@@ -761,7 +761,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.TIMEZONE}>Vremenska zona</Label>
                     <Select
-                      value={String(formValues[SETTING_KEYS.TIMEZONE]) || 'Europe/Belgrade'}
+                      value={formValues[SETTING_KEYS.TIMEZONE] as any || 'Europe/Belgrade'}
                       onValueChange={(value) => setValue(SETTING_KEYS.TIMEZONE, value)}
                     >
                       <SelectTrigger>
