@@ -48,7 +48,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import type { User, UserRole } from '@/lib/types';
+import type { User, UserRole, CreateUserDto, UpdateUserDto } from '@/lib/types';
 import { usersApi } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -59,22 +59,23 @@ interface UserFormData {
   role: UserRole;
 }
 
-interface MockUser extends User {
-  isActive: boolean;
+// Extend User interface for additional UI data
+interface ExtendedUser extends User {
+  isActive?: boolean;
   lastLogin?: string;
-  postsCount: number;
+  postsCount?: number;
 }
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
-  const [users, setUsers] = useState<MockUser[]>([]);
+  const [users, setUsers] = useState<ExtendedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<MockUser | null>(null);
+  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<MockUser | null>(null);
+  const [userToDelete, setUserToDelete] = useState<ExtendedUser | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -85,12 +86,12 @@ export default function UsersPage() {
     reset,
     formState: { errors, isSubmitting }
   } = useForm<UserFormData>({
-  defaultValues: {
-    name: '',
-    email: '',
-    password: '',
-    role: 'author' as UserRole 
-  }
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      role: 'author' as UserRole 
+    }
   });
 
   useEffect(() => {
@@ -100,48 +101,16 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      // Mock data - u realnoj aplikaciji bi ovo došlo iz API-ja
-
-      // ovde sam ih pozvao i radi
-      const users = await usersApi.getAll();
-      console.log(users);
-
-      const mockUsers: MockUser[] = [
-        {
-          id: 1,
-          name: 'Marko Petrović',
-          email: 'marko.petrovic@opstina.rs',
-          role: 'admin' as UserRole,
-          createdAt: '2024-01-15T10:00:00Z',
-          updatedAt: '2024-06-01T10:00:00Z',
-          isActive: true,
-          lastLogin: '2024-06-08T14:30:00Z',
-          postsCount: 25
-        },
-        {
-          id: 2,
-          name: 'Ana Nikolić',
-          email: 'ana.nikolic@opstina.rs',
-          role: 'author' as UserRole,
-          createdAt: '2024-02-10T10:00:00Z',
-          updatedAt: '2024-06-01T10:00:00Z',
-          isActive: true,
-          lastLogin: '2024-06-07T09:15:00Z',
-          postsCount: 12
-        },
-        {
-          id: 3,
-          name: 'Stefan Jovanović',
-          email: 'stefan.jovanovic@opstina.rs',
-          role: 'author' as UserRole,
-          createdAt: '2024-03-05T10:00:00Z',
-          updatedAt: '2024-05-15T10:00:00Z',
-          isActive: false,
-          lastLogin: '2024-05-10T16:45:00Z',
-          postsCount: 3
-        }
-      ];
-      setUsers(mockUsers);
+      const apiUsers = await usersApi.getAll();
+      
+      // Transform API users to extended format for UI
+      const extendedUsers: ExtendedUser[] = apiUsers.map(user => ({
+        ...user,
+        isActive: true, 
+        postsCount: 0 
+      }));
+      
+      setUsers(extendedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Greška pri učitavanju korisnika');
@@ -153,40 +122,58 @@ export default function UsersPage() {
   const onSubmit = async (data: UserFormData) => {
     try {
       if (editingUser) {
-        // Update user logic
-        const updatedUser = {
-          ...editingUser,
+        // Update user
+        const updateData: UpdateUserDto = {
           name: data.name,
           email: data.email,
           role: data.role,
-          updatedAt: new Date().toISOString()
+          // Only include password if it's provided
+          ...(data.password && { password: data.password })
         };
-        setUsers(prev => prev.map(u => u.id === editingUser.id ? updatedUser : u));
+        
+        const updatedUser = await usersApi.update(editingUser.id.toString(), updateData);
+        
+        // Update local state
+        setUsers(prev => prev.map(u => 
+          u.id === editingUser.id 
+            ? { ...updatedUser, isActive: u.isActive, postsCount: u.postsCount } 
+            : u
+        ));
+        
         toast.success('Korisnik je uspešno ažuriran');
       } else {
-        // Create user logic
-        const newUser: MockUser = {
-          id: Math.max(...users.map(u => u.id)) + 1,
+        // Create new user
+        const createData: CreateUserDto = {
           name: data.name,
           email: data.email,
-          role: data.role,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          password: data.password,
+          role: data.role
+        };
+        
+        const newUser = await usersApi.create(createData);
+        
+        // Add to local state
+        const extendedNewUser: ExtendedUser = {
+          ...newUser,
           isActive: true,
           postsCount: 0
         };
-        setUsers(prev => [...prev, newUser]);
+        
+        setUsers(prev => [...prev, extendedNewUser]);
         toast.success('Korisnik je uspešno kreiran');
       }
 
       handleCloseDialog();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving user:', error);
-      toast.error('Greška pri čuvanju korisnika');
+      
+      // Handle specific error messages from API
+      const errorMessage = error.response?.data?.message || 'Greška pri čuvanju korisnika';
+      toast.error(errorMessage);
     }
   };
 
-  const handleEditUser = (user: MockUser) => {
+  const handleEditUser = (user: ExtendedUser) => {
     setEditingUser(user);
     setValue('name', user.name);
     setValue('email', user.email);
@@ -199,18 +186,26 @@ export default function UsersPage() {
     if (!userToDelete) return;
 
     try {
+      await usersApi.delete(userToDelete.id.toString());
+      
+      // Remove from local state
       setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      
       toast.success('Korisnik je uspešno obrisan');
       setIsDeleteDialogOpen(false);
       setUserToDelete(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting user:', error);
-      toast.error('Greška pri brisanju korisnika');
+      
+      const errorMessage = error.response?.data?.message || 'Greška pri brisanju korisnika';
+      toast.error(errorMessage);
     }
   };
 
-  const toggleUserStatus = async (user: MockUser) => {
+  const toggleUserStatus = async (user: ExtendedUser) => {
     try {
+      // Since your API doesn't have user status toggle, we'll simulate it locally
+      // You might want to add this functionality to your backend
       const updatedUser = { ...user, isActive: !user.isActive };
       setUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u));
       toast.success(`Korisnik je ${updatedUser.isActive ? 'aktiviran' : 'deaktiviran'}`);
@@ -274,13 +269,13 @@ export default function UsersPage() {
     return matchesSearch && matchesRole;
   });
 
-  const canEditUser = (user: MockUser) => {
+  const canEditUser = (user: ExtendedUser) => {
     // Admin može da menja sve korisnike, osim sebe
     // Autor ne može da menja nikog
     return currentUser?.role === 'admin' && currentUser?.id !== user.id;
   };
 
-  const canDeleteUser = (user: MockUser) => {
+  const canDeleteUser = (user: ExtendedUser) => {
     // Admin može da briše sve korisnike osim sebe
     return currentUser?.role === 'admin' && currentUser?.id !== user.id;
   };
@@ -517,7 +512,7 @@ export default function UsersPage() {
                   <TableHead>Uloga</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Objave</TableHead>
-                  <TableHead>Poslednja prijava</TableHead>
+                  <TableHead>Kreiran</TableHead>
                   <TableHead className="text-right">Akcije</TableHead>
                 </TableRow>
               </TableHeader>
@@ -549,22 +544,16 @@ export default function UsersPage() {
                       {getRoleBadge(user.role)}
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(user.isActive)}
+                      {getStatusBadge(user.isActive ?? true)}
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{user.postsCount}</div>
+                      <div className="text-sm">{user.postsCount ?? 0}</div>
                     </TableCell>
                     <TableCell>
-                      {user.lastLogin ? (
-                        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          <span>{formatDate(user.lastLogin)}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground italic">
-                          Nikad se nije prijavio
-                        </span>
-                      )}
+                      <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>{formatDate(user.createdAt)}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end space-x-2">
@@ -698,7 +687,7 @@ export default function UsersPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {users.reduce((sum, user) => sum + user.postsCount, 0)}
+                {users.reduce((sum, user) => sum + (user.postsCount || 0), 0)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Kreirane od strane korisnika
@@ -715,7 +704,7 @@ export default function UsersPage() {
             <DialogTitle>Potvrdi brisanje</DialogTitle>
             <DialogDescription>
               Da li ste sigurni da želite da obrišete korisnika "{userToDelete?.name}"?
-              {userToDelete && userToDelete.postsCount > 0 && (
+              {userToDelete && (userToDelete.postsCount || 0) > 0 && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
                   <AlertCircle className="inline h-4 w-4 mr-1 text-yellow-600" />
                   <span className="text-sm text-yellow-800">
