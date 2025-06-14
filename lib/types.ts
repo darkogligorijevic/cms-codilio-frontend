@@ -23,6 +23,15 @@ export interface User {
   updatedAt: string;
 }
 
+export interface CreateUserDto {
+  email: string;
+  name: string;
+  password: string;
+  role?: UserRole
+}
+
+export interface UpdateUserDto extends CreateUserDto {}
+
 export interface Category {
   id: number;
   name: string;

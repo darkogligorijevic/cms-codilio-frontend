@@ -49,6 +49,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { User, UserRole } from '@/lib/types';
+import { usersApi } from '@/lib/api';
 import { toast } from 'sonner';
 
 interface UserFormData {
@@ -100,6 +101,11 @@ export default function UsersPage() {
     try {
       setIsLoading(true);
       // Mock data - u realnoj aplikaciji bi ovo došlo iz API-ja
+
+      // ovde sam ih pozvao i radi
+      const users = await usersApi.getAll();
+      console.log(users);
+
       const mockUsers: MockUser[] = [
         {
           id: 1,

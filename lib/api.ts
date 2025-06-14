@@ -32,7 +32,9 @@ import {
   SettingType,
   SiteSettings,
   UpdateMultipleSettingsDto,
-  UpdateSettingDto
+  UpdateSettingDto,
+  CreateUserDto,
+  UpdateUserDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -84,6 +86,34 @@ export const authApi = {
     }
   }
 };
+
+// Users API
+export const usersApi = {
+  create: async (data: CreateUserDto): Promise<User> => {
+    const response: AxiosResponse<User> = await api.post('/users', data);
+    return response.data;
+  },
+
+  getAll: async (): Promise<User[]> => {
+    const response: AxiosResponse<User[]> = await api.get('/users');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<User> => {
+    const response: AxiosResponse<User> = await api.get(`/users/${id}`);
+    return response.data;
+  },
+
+  update: async (id: string, data: UpdateUserDto): Promise<User> => {
+    const response: AxiosResponse<User> = await api.patch(`/users/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    return await api.delete(`/users/${id}`);
+  }
+
+}
 
 // Posts API
 export const postsApi = {
