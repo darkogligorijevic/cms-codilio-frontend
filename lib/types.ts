@@ -18,7 +18,7 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  role: UserRole;
+  role: UserRole; 
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +28,27 @@ export interface CreateUserDto {
   name?: string;
   password?: string;
   role?: UserRole
+}
+
+export interface UserWithStats extends User {
+  postsCount: number;
+  lastPostDate?: string;
+  recentPosts: Array<{
+    id: number;
+    title: string;
+    slug: string;
+    createdAt: string;
+    status: string;
+  }>;
+}
+
+export interface UsersStatistics {
+  totalUsers: number;
+  activeUsers: number;
+  admins: number;
+  authors: number;
+  totalPosts: number;
+  recentPosts: number;
 }
 
 export interface UpdateUserDto extends CreateUserDto {}

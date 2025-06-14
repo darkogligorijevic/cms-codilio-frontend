@@ -84,7 +84,6 @@ export default function PostsPage() {
       setIsLoading(true);
       const response = await postsApi.getAll(currentPage, postsPerPage);
       let filteredPosts = response.posts;
-      console.log(filteredPosts)
 
       // Apply filters
       if (statusFilter !== 'all') {

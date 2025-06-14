@@ -34,7 +34,9 @@ import {
   UpdateMultipleSettingsDto,
   UpdateSettingDto,
   CreateUserDto,
-  UpdateUserDto
+  UpdateUserDto,
+  UsersStatistics,
+  UserWithStats
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -94,13 +96,28 @@ export const usersApi = {
     return response.data;
   },
 
-  getAll: async (): Promise<User[]> => {
-    const response: AxiosResponse<User[]> = await api.get('/users');
+  getAll: async (withStats = false): Promise<User[] | UserWithStats[]> => {
+    const response = await api.get(`/users${withStats ? '?withStats=true' : ''}`);
     return response.data;
   },
 
-  getById: async (id: string): Promise<User> => {
-    const response: AxiosResponse<User> = await api.get(`/users/${id}`);
+  getAllWithStats: async (): Promise<UserWithStats[]> => {
+    const response: AxiosResponse<UserWithStats[]> = await api.get('/users?withStats=true');
+    return response.data;
+  },
+
+  getStatistics: async (): Promise<UsersStatistics> => {
+    const response: AxiosResponse<UsersStatistics> = await api.get('/users/statistics');
+    return response.data;
+  },
+
+  getById: async (id: string, withStats = false): Promise<User | UserWithStats> => {
+    const response = await api.get(`/users/${id}${withStats ? '?withStats=true' : ''}`);
+    return response.data;
+  },
+
+  getByIdWithStats: async (id: string): Promise<UserWithStats> => {
+    const response: AxiosResponse<UserWithStats> = await api.get(`/users/${id}?withStats=true`);
     return response.data;
   },
 
@@ -112,8 +129,7 @@ export const usersApi = {
   delete: async (id: string): Promise<void> => {
     return await api.delete(`/users/${id}`);
   }
-
-}
+};
 
 // Posts API
 export const postsApi = {
