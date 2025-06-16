@@ -36,7 +36,10 @@ import {
   CreateUserDto,
   UpdateUserDto,
   UsersStatistics,
-  UserWithStats
+  UserWithStats,
+  CompleteSetupDto,
+  CompleteSetupResponse,
+  SetupStatusResponse
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -70,10 +73,14 @@ api.interceptors.response.use(
         localStorage.removeItem('access_token');
         window.location.href = '/login';
       }
+    } else if (error.response?.status === 412 && error.response?.data?.setupRequired) {
+      // Handle setup required - this will be caught by the SetupGuard
+      console.log('Setup required, redirecting to setup wizard');
     }
     return Promise.reject(error);
   }
 );
+
 
 // Auth API
 export const authApi = {
@@ -506,4 +513,20 @@ export const settingsApi = {
     
     return structured as SiteSettings;
   }
+};
+export const setupApi = {
+  getStatus: async (): Promise<SetupStatusResponse> => {
+    const response: AxiosResponse<SetupStatusResponse> = await api.get('/setup/status');
+    return response.data;
+  },
+
+  completeSetup: async (data: CompleteSetupDto): Promise<CompleteSetupResponse> => {
+    const response: AxiosResponse<CompleteSetupResponse> = await api.post('/setup/complete', data);
+    return response.data;
+  },
+
+  checkAdminExists: async (): Promise<{ exists: boolean }> => {
+    const response: AxiosResponse<{ exists: boolean }> = await api.get('/setup/check-admin');
+    return response.data;
+  },
 };

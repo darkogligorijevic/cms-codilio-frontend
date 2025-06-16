@@ -455,3 +455,24 @@ export interface SiteSettings {
   allowComments?: boolean;
   allowRegistration?: boolean;
 }
+// Add these interfaces to lib/types.ts:
+export interface SetupStatusResponse {
+  isSetupCompleted: boolean;
+  hasAdminUser: boolean;
+}
+
+export interface CompleteSetupDto {
+  siteName: string;
+  siteTagline: string;
+  adminName: string;
+  adminEmail: string;
+  adminPassword: string;
+  contactEmail: string;
+}
+
+export interface CompleteSetupResponse {
+  success: boolean;
+  access_token: string;
+  user: User;
+  message: string;
+}
