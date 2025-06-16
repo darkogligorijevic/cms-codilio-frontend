@@ -71,11 +71,14 @@ api.interceptors.response.use(
       // Handle unauthorized - redirect to login
       if (typeof window !== 'undefined') {
         localStorage.removeItem('access_token');
-        window.location.href = '/login';
+        // Proverava da li nije setup stranica
+        if (!window.location.pathname.includes('/setup')) {
+          window.location.href = '/login';
+        }
       }
     } else if (error.response?.status === 412 && error.response?.data?.setupRequired) {
-      // Handle setup required - this will be caught by the SetupGuard
-      console.log('Setup required, redirecting to setup wizard');
+      // Handle setup required - samo loguj, SetupGuard će hendlovati
+      console.log('Setup required, будет обработано SetupGuard-ом');
     }
     return Promise.reject(error);
   }

@@ -48,6 +48,7 @@ import {
 } from 'lucide-react';
 import { CompleteSetupDto } from '@/lib/types';
 import { toast } from 'sonner';
+import { settingsApi, setupApi } from '@/lib/api';
 
 const STEPS = [
   {
@@ -169,6 +170,8 @@ export function SetupWizard() {
 
   // Mark step as completed when moving forward
   const nextStep = async () => {
+    console.log('🚀 nextStep called, currentStep:', currentStep);
+    
     let fieldsToValidate: (keyof EnhancedSetupFormData)[] = [];
     
     switch (currentStep) {
@@ -181,23 +184,55 @@ export function SetupWizard() {
       case 3: // Contact
         fieldsToValidate = ['contactEmail'];
         break;
+      case 4: // Appearance - optional
+      case 5: // Features - optional
+        console.log('📝 Optional step, no validation needed');
+        break;
     }
+
+    console.log('🔍 Fields to validate:', fieldsToValidate);
 
     if (fieldsToValidate.length > 0) {
       const isValid = await trigger(fieldsToValidate);
-      if (!isValid) return;
+      console.log('✅ Validation result:', isValid);
+      if (!isValid) {
+        console.log('❌ Validation failed, stopping');
+        return;
+      }
     }
 
     // Mark current step as completed
     if (!completedSteps.includes(currentStep)) {
+      console.log('✅ Marking step as completed:', currentStep);
       setCompletedSteps(prev => [...prev, currentStep]);
     }
 
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+    // KRITIČNA IZMENA: Eksplicitno zaustavi napredovanje na koraku 5
+    if (currentStep >= 5) {
+      console.log('🛑 Reached step 5 or higher, stopping auto-advance');
+      return;
+    }
+
+    // Samo za korake 0-4, dozvoli automatsko napredovanje
+    const nextStepIndex = currentStep + 1;
+    console.log('🎯 Next step would be:', nextStepIndex);
+
+    if (nextStepIndex <= 5) { // Maksimalno idi do koraka 5
+      console.log('➡️ Advancing to step:', nextStepIndex);
+      setCurrentStep(nextStepIndex);
+    } else {
+      console.log('🚫 Cannot advance further, at step:', currentStep);
     }
   };
 
+  // I dodaj ovu funkciju za lakše testiranje
+  const debugCurrentState = () => {
+    console.log('🐛 DEBUG STATE:');
+    console.log('Current step:', currentStep);
+    console.log('Completed steps:', completedSteps);
+    console.log('Total steps:', STEPS.length);
+    console.log('Current step data:', STEPS[currentStep]);
+  };
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -205,8 +240,28 @@ export function SetupWizard() {
   };
 
   const goToStep = (stepIndex: number) => {
-    if (stepIndex <= Math.max(...completedSteps) + 1) {
+    console.log(`🎯 goToStep called with stepIndex: ${stepIndex}`);
+    console.log(`📊 Current completed steps: [${completedSteps.join(', ')}]`);
+    
+    // Allow access to:
+    // 1. Completed steps
+    // 2. Next step after completed steps  
+    // 3. Always allow going back to previous steps
+    const maxCompletedStep = Math.max(...completedSteps, -1);
+    const maxAccessibleStep = maxCompletedStep + 1;
+    
+    console.log(`✅ Max completed step: ${maxCompletedStep}`);
+    console.log(`🚪 Max accessible step: ${maxAccessibleStep}`);
+    
+    const canAccess = stepIndex <= maxAccessibleStep || stepIndex <= currentStep;
+    
+    console.log(`🔒 Can access step ${stepIndex}: ${canAccess}`);
+    
+    if (canAccess) {
+      console.log(`➡️ Setting current step to: ${stepIndex}`);
       setCurrentStep(stepIndex);
+    } else {
+      console.log(`❌ Access denied to step ${stepIndex}`);
     }
   };
 
@@ -214,38 +269,126 @@ export function SetupWizard() {
     try {
       setIsSubmitting(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Pripremi osnovne setup podatke
+      const setupData: CompleteSetupDto = {
+        siteName: data.siteName,
+        siteTagline: data.siteTagline,
+        adminName: data.adminName,
+        adminEmail: data.adminEmail,
+        adminPassword: data.adminPassword,
+        contactEmail: data.contactEmail,
+      };
+      
+      // Pozovi setup API
+      const result = await setupApi.completeSetup(setupData);
+      
+      // Sačuvaj token
+      if (result.access_token) {
+        localStorage.setItem('access_token', result.access_token);
+      }
+      
+      // Ažuriraj dodatna podešavanja ako su potrebna
+      if (data.primaryColor || data.secondaryColor || data.fontFamily) {
+        const additionalSettings = [];
+        
+        if (data.primaryColor) {
+          additionalSettings.push({ key: 'theme_primary_color', value: data.primaryColor });
+        }
+        if (data.secondaryColor) {
+          additionalSettings.push({ key: 'theme_secondary_color', value: data.secondaryColor });
+        }
+        if (data.fontFamily) {
+          additionalSettings.push({ key: 'theme_font_family', value: data.fontFamily });
+        }
+        if (data.phone) {
+          additionalSettings.push({ key: 'contact_phone', value: data.phone });
+        }
+        if (data.address) {
+          additionalSettings.push({ key: 'contact_address', value: data.address });
+        }
+        if (data.workingHours) {
+          additionalSettings.push({ key: 'contact_working_hours', value: data.workingHours });
+        }
+        
+        // Dodaj email podešavanja ako su uneta
+        if (data.smtpHost) {
+          additionalSettings.push({ key: 'email_smtp_host', value: data.smtpHost });
+        }
+        if (data.smtpPort) {
+          additionalSettings.push({ key: 'email_smtp_port', value: data.smtpPort });
+        }
+        if (data.smtpUser) {
+          additionalSettings.push({ key: 'email_smtp_user', value: data.smtpUser });
+        }
+        
+        // Dodaj social media linkove
+        if (data.facebook) {
+          additionalSettings.push({ key: 'social_facebook', value: data.facebook });
+        }
+        if (data.twitter) {
+          additionalSettings.push({ key: 'social_twitter', value: data.twitter });
+        }
+        if (data.instagram) {
+          additionalSettings.push({ key: 'social_instagram', value: data.instagram });
+        }
+        
+        // Funkcionalnosti
+        additionalSettings.push({ key: 'allow_comments', value: data.enableComments.toString() });
+        additionalSettings.push({ key: 'theme_dark_mode', value: data.darkMode.toString() });
+        
+        // Pošalji dodatna podešavanja
+        if (additionalSettings.length > 0) {
+          try {
+            await settingsApi.updateMultiple({ settings: additionalSettings });
+          } catch (settingsError) {
+            console.warn('Failed to update additional settings:', settingsError);
+            // Ne prekidaj setup zbog toga
+          }
+        }
+      }
       
       setCompletedSteps(prev => [...prev, currentStep]);
-      setCurrentStep(6); // Go to completion step
+      setCurrentStep(6); // Idi na completion step
       toast.success('Setup je uspešno završen! Dobrodošli u CodilioCMS.');
-    } catch (error) {
+      
+      // Refresh setup status
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      
+    } catch (error: any) {
       console.error('Setup error:', error);
-      toast.error('Greška prilikom setup-a');
+      toast.error(error.response?.data?.message || 'Greška prilikom setup-a');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Zameni getStepIcon funkciju u setup-wizard.tsx
+
   const getStepIcon = (stepIndex: number) => {
     const StepIcon = STEPS[stepIndex].icon;
     const isCompleted = completedSteps.includes(stepIndex);
     const isCurrent = stepIndex === currentStep;
-    const isAccessible = stepIndex <= Math.max(...completedSteps) + 1;
+    const isAccessible = stepIndex <= Math.max(...completedSteps, 0) + 1;
+
+    console.log(`🎯 Step ${stepIndex}: completed=${isCompleted}, current=${isCurrent}, accessible=${isAccessible}`);
 
     return (
       <div
-        onClick={() => goToStep(stepIndex)}
+        onClick={() => {
+          console.log(`🖱️ Clicked step ${stepIndex}`);
+          goToStep(stepIndex);
+        }}
         className={`
-          relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer group
+          relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group
           ${isCompleted 
-            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg' 
+            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg cursor-pointer' 
             : isCurrent 
-              ? `bg-gradient-to-r ${STEPS[stepIndex].color} text-white shadow-lg scale-110` 
+              ? `bg-gradient-to-r ${STEPS[stepIndex].color} text-white shadow-lg scale-110 cursor-pointer` 
               : isAccessible
-                ? 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                : 'bg-gray-50 text-gray-300'
+                ? 'bg-gray-100 text-gray-400 hover:bg-gray-200 cursor-pointer'
+                : 'bg-gray-50 text-gray-300 cursor-not-allowed'
           }
         `}
       >
@@ -259,7 +402,7 @@ export function SetupWizard() {
         {stepIndex < STEPS.length - 1 && (
           <div className={`
             absolute top-1/2 left-full w-8 h-0.5 -translate-y-1/2
-            ${stepIndex < Math.max(...completedSteps) 
+            ${stepIndex < Math.max(...completedSteps, 0) 
               ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
               : 'bg-gray-200'
             }
@@ -1031,6 +1174,39 @@ export function SetupWizard() {
       </div>
 
       <div className="w-full max-w-6xl relative">
+        {process.env.NODE_ENV === 'development' && (
+  <div className="fixed top-4 right-4 z-50 bg-black text-white p-2 rounded text-xs">
+    <div>Step: {currentStep}/{STEPS.length - 1}</div>
+    <div>Completed: [{completedSteps.join(', ')}]</div>
+    <button 
+      onClick={() => {
+        console.log('🐛 DEBUG STATE:');
+        console.log('Current step:', currentStep);
+        console.log('Completed steps:', completedSteps);
+        console.log('Current step data:', STEPS[currentStep]);
+      }}
+      className="bg-red-500 px-2 py-1 mt-1 rounded text-xs"
+    >
+      Debug
+    </button>
+  </div>
+        )}{process.env.NODE_ENV === 'development' && (
+          <div className="fixed top-4 right-4 z-50 bg-black text-white p-2 rounded text-xs">
+            <div>Step: {currentStep}/{STEPS.length - 1}</div>
+            <div>Completed: [{completedSteps.join(', ')}]</div>
+            <button 
+              onClick={() => {
+                console.log('🐛 DEBUG STATE:');
+                console.log('Current step:', currentStep);
+                console.log('Completed steps:', completedSteps);
+                console.log('Current step data:', STEPS[currentStep]);
+              }}
+              className="bg-red-500 px-2 py-1 mt-1 rounded text-xs"
+            >
+              Debug
+            </button>
+          </div>
+        )}
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
@@ -1108,7 +1284,8 @@ export function SetupWizard() {
 
                   {currentStep === 5 ? (
                     <Button 
-                      type="submit" 
+                      type="button"  // KRITIČNO: Promenio sa "submit" na "button"
+                      onClick={handleSubmit(onSubmit)}  // KRITIČNO: Eksplicitno pozovi submit
                       disabled={isSubmitting}
                       className={`h-12 px-8 bg-gradient-to-r ${currentStepData.color} hover:opacity-90 transition-all`}
                     >
@@ -1127,7 +1304,11 @@ export function SetupWizard() {
                   ) : (
                     <Button 
                       type="button" 
-                      onClick={nextStep}
+                      onClick={(e) => {
+                        e.preventDefault(); // KRITIČNO: Zaustavi default form behavior
+                        console.log('🖱️ Dalje button clicked');
+                        nextStep();
+                      }}
                       className={`h-12 px-6 bg-gradient-to-r ${currentStepData.color} hover:opacity-90 transition-all`}
                     >
                       Dalje

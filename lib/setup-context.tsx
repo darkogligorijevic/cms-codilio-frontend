@@ -21,10 +21,15 @@ export function SetupProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       const status = await setupApi.getStatus();
       setIsSetupCompleted(status.isSetupCompleted);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking setup status:', error);
-      // If we can't check setup status, assume it's not completed
-      setIsSetupCompleted(false);
+      // Ako je greška 412 ili setup related greška, tretira kao nije setup završen
+      if (error.response?.status === 412 || error.response?.data?.setupRequired) {
+        setIsSetupCompleted(false);
+      } else {
+        // Za ostale greške, možda je network problem, ostavi kao nije završeno
+        setIsSetupCompleted(false);
+      }
     } finally {
       setIsLoading(false);
     }
