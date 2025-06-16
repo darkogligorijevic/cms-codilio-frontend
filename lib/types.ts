@@ -19,6 +19,7 @@ export interface User {
   email: string;
   name: string;
   role: UserRole; 
+  isActive?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,7 +28,8 @@ export interface CreateUserDto {
   email?: string;
   name?: string;
   password?: string;
-  role?: UserRole
+  role?: UserRole;
+  isActive?: boolean;
 }
 
 export interface UserWithStats extends User {
@@ -51,7 +53,9 @@ export interface UsersStatistics {
   recentPosts: number;
 }
 
-export interface UpdateUserDto extends CreateUserDto {}
+export interface UpdateUserDto extends CreateUserDto {
+  isActive?: boolean;
+}
 
 export interface Category {
   id: number;

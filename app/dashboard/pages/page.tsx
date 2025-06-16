@@ -53,6 +53,7 @@ import Link from 'next/link';
 import { pagesApi } from '@/lib/api';
 import type { Page, PageStatus } from '@/lib/types';
 import { toast } from 'sonner';
+import { transliterate } from '@/lib/transliterate';
 
 interface PageFormData {
   title: string;
@@ -109,7 +110,7 @@ export default function PagesPage() {
   // Auto-generate slug from title
   useEffect(() => {
     if (watchedTitle && !editingPage) {
-      const slug = watchedTitle
+      const slug = transliterate(watchedTitle)
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')

@@ -45,6 +45,7 @@ import Link from 'next/link';
 import { categoriesApi } from '@/lib/api';
 import type { Category, CreateCategoryDto, UpdateCategoryDto } from '@/lib/types';
 import { toast } from 'sonner';
+import { transliterate } from '@/lib/transliterate';
 
 interface CategoryFormData {
   name: string;
@@ -85,7 +86,7 @@ export default function CategoriesPage() {
   // Auto-generate slug from name
   useEffect(() => {
     if (watchedName && !editingCategory) {
-      const slug = watchedName
+      const slug = transliterate(watchedName)
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')

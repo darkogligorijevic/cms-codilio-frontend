@@ -120,6 +120,16 @@ export const usersApi = {
     const response: AxiosResponse<UserWithStats> = await api.get(`/users/${id}?withStats=true`);
     return response.data;
   },
+  
+  toggleStatus: async (id: string): Promise<User> => {
+    const response: AxiosResponse<User> = await api.patch(`/users/${id}/toggle-status`);
+    return response.data;
+  },
+
+  setStatus: async (id: string, isActive: boolean): Promise<User> => {
+    const response: AxiosResponse<User> = await api.patch(`/users/${id}/status`, { isActive });
+    return response.data;
+  },
 
   update: async (id: string, data: UpdateUserDto): Promise<User> => {
     const response: AxiosResponse<User> = await api.patch(`/users/${id}`, data);

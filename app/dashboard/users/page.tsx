@@ -1,4 +1,4 @@
-// app/dashboard/users/page.tsx - Ispravljena verzija sa tipovima
+// app/dashboard/users/page.tsx - Updated with real toggleUserStatus
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -62,10 +62,8 @@ interface UserFormData {
   role: UserRole;
 }
 
-// Koristi UserWithStats direktno umesto kreiranja novog interface-a
-type ExtendedUser = UserWithStats & {
-  isActive: boolean; // Dodano jer backend još uvek nema isActive logiku
-};
+// Since backend now has isActive, we can use UserWithStats directly
+type ExtendedUser = UserWithStats;
 
 interface UserStats {
   totalUsers: number;
@@ -122,21 +120,16 @@ export default function UsersPage() {
     try {
       setIsLoading(true);
       
-      // Koristi novo API da dohvatiš korisnike sa statistikama
+      // Fetch users with stats and statistics
       const [apiUsersWithStats, apiStats] = await Promise.all([
         usersApi.getAllWithStats(),
         usersApi.getStatistics()
       ]);
       
-      // Transformiši u ExtendedUser format
-      const extendedUsers: ExtendedUser[] = apiUsersWithStats.map(user => ({
-        ...user,
-        isActive: true, // Backend još uvek nema isActive logiku - dodaj na backend kasnije
-      }));
+      // Users now come with isActive from backend
+      setUsers(apiUsersWithStats);
       
-      setUsers(extendedUsers);
-      
-      // Koristi statistike sa backend-a
+      // Use statistics from backend
       const stats: UserStats = {
         totalUsers: apiStats.totalUsers,
         activeUsers: apiStats.activeUsers,
@@ -181,7 +174,6 @@ export default function UsersPage() {
           u.id === editingUser.id 
             ? { 
                 ...updatedUser, 
-                isActive: u.isActive, 
                 postsCount: u.postsCount,
                 recentPosts: u.recentPosts,
                 lastPostDate: u.lastPostDate
@@ -196,7 +188,8 @@ export default function UsersPage() {
           name: data.name,
           email: data.email,
           password: data.password,
-          role: data.role
+          role: data.role,
+          isActive: true  // New users are active by default
         };
         
         const newUser = await usersApi.create(createData);
@@ -204,7 +197,6 @@ export default function UsersPage() {
         // Add to local state
         const extendedNewUser: ExtendedUser = {
           ...newUser,
-          isActive: true,
           postsCount: 0,
           recentPosts: []
         };
@@ -269,12 +261,18 @@ export default function UsersPage() {
     }
   };
 
-  // Simulacija toggle statusa (backend još uvek nema ovu funkcionalnost)
+  // Updated toggle status function to use real API
   const toggleUserStatus = async (user: ExtendedUser) => {
     try {
-      // Za sada samo lokalno - možeš dodati backend endpoint kasnije
-      const updatedUser = { ...user, isActive: !user.isActive };
-      setUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u));
+      // Call the backend API to toggle status
+      const updatedUser = await usersApi.toggleStatus(user.id.toString());
+      
+      // Update local state with the response from backend
+      setUsers(prev => prev.map(u => 
+        u.id === user.id 
+          ? { ...u, isActive: updatedUser.isActive }
+          : u
+      ));
       
       // Update stats
       setUserStats(prev => ({
@@ -283,10 +281,11 @@ export default function UsersPage() {
       }));
       
       toast.success(`Korisnik je ${updatedUser.isActive ? 'aktiviran' : 'deaktiviran'}`);
-      toast.info('Napomena: Status je promenjen lokalno. Dodaj backend funkcionalnost za trajno čuvanje.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user status:', error);
-      toast.error('Greška pri ažuriranju statusa');
+      
+      const errorMessage = error.response?.data?.message || 'Greška pri ažuriranju statusa';
+      toast.error(errorMessage);
     }
   };
 
@@ -731,7 +730,7 @@ export default function UsersPage() {
                         {getRoleBadge(user.role)}
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(user.isActive)}
+                        {getStatusBadge(Boolean(user.isActive))}
                       </TableCell>
                       <TableCell>
                         <div className="text-sm font-medium">{user.postsCount}</div>
@@ -926,6 +925,10 @@ export default function UsersPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Uloga:</span>
                 {getRoleBadge(userToDelete.role)}
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Status:</span>
+                {getStatusBadge(Boolean(userToDelete.isActive))}
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Objave:</span>

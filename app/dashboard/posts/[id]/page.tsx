@@ -39,6 +39,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { postsApi, categoriesApi, mediaApi, pagesApi } from '@/lib/api';
 import type { Post, Category, Media, Page, CreatePostDto, UpdatePostDto, PostStatus } from '@/lib/types';
 import { toast } from 'sonner';
+import { transliterate } from '@/lib/transliterate';
 
 interface PostEditorProps {
   params: Promise<{
@@ -141,10 +142,11 @@ export default function PostEditor({ params }: PostEditorProps) {
     }
   }, [defaultPageId, isNewPost, formInitialized, watchedPageIds.length, setValue]);
 
-  // Auto-generate slug from title
+
   useEffect(() => {
     if (watchedTitle && isNewPost && formInitialized) {
-      const slug = watchedTitle
+      const latinTitle = transliterate(watchedTitle);
+      const slug = latinTitle
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
