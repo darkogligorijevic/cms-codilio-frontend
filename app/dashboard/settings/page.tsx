@@ -131,6 +131,8 @@ export default function SettingsPage() {
         
         formData[setting.key] = value;
       });
+
+      console.log(formData)
       
       reset(formData);
       
@@ -260,7 +262,8 @@ export default function SettingsPage() {
 
   const handleReset = async () => {
     try {
-      await resetSettings(activeTab);
+      await resetSettings();
+      window.location.href = "/";
       setIsResetDialogOpen(false);
     } catch (error) {
       console.error('Error resetting settings:', error);
