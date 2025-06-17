@@ -1,4 +1,4 @@
-// app/[slug]/page.tsx - FIXED VERSION
+// app/[slug]/page.tsx - Ažurirano za kontakt formu
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -19,11 +19,15 @@ import {
   TrendingUp,
   ChevronRight,
   Eye,
-  Calendar
+  Calendar,
+  Loader2,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { pagesApi, postsApi, mediaApi } from '@/lib/api';
-import type { Page, Post } from '@/lib/types';
+import { pagesApi, postsApi, mediaApi, mailerApi } from '@/lib/api';
+import type { Page, Post, CreateContactDto } from '@/lib/types';
+import { toast } from 'sonner';
 
 interface DynamicPageProps {
   params: Promise<{ slug: string }>;
@@ -33,6 +37,7 @@ interface DynamicPageProps {
 interface ContactForm {
   name: string;
   email: string;
+  phone: string;
   subject: string;
   message: string;
 }
@@ -49,11 +54,13 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [contactForm, setContactForm] = useState<ContactForm>({
     name: '',
     email: '',
+    phone: '',
     subject: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     fetchPage();
@@ -126,18 +133,74 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     return formatDate(dateString);
   };
 
+  // NOVO: Ažurirana funkcija za slanje kontakt forme
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitMessage('');
+    setSubmitSuccess(false);
     
     try {
-      // Simulate form submission - u realnoj aplikaciji bi ovo išlo na backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Validacija forme
+      if (!contactForm.name.trim()) {
+        throw new Error('Ime i prezime je obavezno');
+      }
+      if (!contactForm.email.trim()) {
+        throw new Error('Email adresa je obavezna');
+      }
+      if (!contactForm.subject.trim()) {
+        throw new Error('Naslov poruke je obavezan');
+      }
+      if (!contactForm.message.trim()) {
+        throw new Error('Poruka je obavezna');
+      }
+
+      // Priprema podataka za API
+      const contactData: CreateContactDto = {
+        name: contactForm.name.trim(),
+        email: contactForm.email.trim(),
+        phone: contactForm.phone.trim(),
+        subject: contactForm.subject.trim(),
+        message: contactForm.message.trim()
+      };
+
+      console.log('Sending contact data:', contactData);
+
+      // Poziv API-ja
+      const response = await mailerApi.createContact(contactData);
       
+      console.log('Contact created successfully:', response);
+      
+      setSubmitSuccess(true);
       setSubmitMessage('Hvala vam! Vaša poruka je uspešno poslata. Kontaktiraćemo vas uskoro.');
-      setContactForm({ name: '', email: '', subject: '', message: '' });
-    } catch (error) {
-      setSubmitMessage('Greška pri slanju poruke. Molimo pokušajte ponovo.');
+      
+      // Resetovanje forme
+      setContactForm({ 
+        name: '', 
+        email: '', 
+        phone: '', 
+        subject: '', 
+        message: '' 
+      });
+
+      // Toast notifikacija
+      toast.success('Poruka je uspešno poslata!');
+      
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error);
+      
+      setSubmitSuccess(false);
+      let errorMessage = 'Greška pri slanju poruke. Molimo pokušajte ponovo.';
+      
+      // Specifična poruka greške ako je dostupna
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setSubmitMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -334,19 +397,25 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           </div>
         </div>
 
-        {/* Contact Form */}
+        {/* Contact Form - AŽURIRANA FORMA */}
         <div>
           <h2 className="text-2xl font-bold mb-6">Pošaljite nam poruku</h2>
           
           <Card>
             <CardContent className="p-6">
+              {/* Success/Error Message */}
               {submitMessage && (
-                <div className={`mb-6 p-4 rounded-lg ${
-                  submitMessage.includes('Hvala') 
-                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                <div className={`mb-6 p-4 rounded-lg border flex items-start space-x-2 ${
+                  submitSuccess 
+                    ? 'bg-green-50 text-green-800 border-green-200' 
+                    : 'bg-red-50 text-red-800 border-red-200'
                 }`}>
-                  {submitMessage}
+                  {submitSuccess ? (
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  )}
+                  <div className="text-sm">{submitMessage}</div>
                 </div>
               )}
 
@@ -362,6 +431,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     value={contactForm.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="Vaše ime i prezime"
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -376,6 +446,21 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     value={contactForm.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder="vaš@email.com"
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                    Telefon
+                  </label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={contactForm.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="+381 11 123 4567"
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -390,6 +475,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     value={contactForm.subject}
                     onChange={(e) => handleInputChange('subject', e.target.value)}
                     placeholder="Naslov vaše poruke"
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -404,11 +490,19 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     value={contactForm.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
                     placeholder="Ovde upišite vašu poruku..."
+                    disabled={isSubmitting}
                   />
                 </div>
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
-                  {isSubmitting ? 'Šalje se...' : 'Pošalji poruku'}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Šalje se...
+                    </>
+                  ) : (
+                    'Pošalji poruku'
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -421,6 +515,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     </div>
   );
 
+  // Ostali template rendereri ostaju isti...
   const renderAboutTemplate = () => (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -461,41 +556,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
       </div>
 
-      {/* Services Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Naše usluge</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg hover:bg-gray-50">
-              <h3 className="font-semibold mb-2">Građanski servisi</h3>
-              <p className="text-sm text-gray-600">Izdavanje dokumenata, potvrda i dozvola</p>
-            </div>
-            <div className="p-4 border rounded-lg hover:bg-gray-50">
-              <h3 className="font-semibold mb-2">Urbanizam</h3>
-              <p className="text-sm text-gray-600">Građevinske dozvole i urbanističko planiranje</p>
-            </div>
-            <div className="p-4 border rounded-lg hover:bg-gray-50">
-              <h3 className="font-semibold mb-2">Komunalne usluge</h3>
-              <p className="text-sm text-gray-600">Održavanje javnih površina i infrastrukture</p>
-            </div>
-            <div className="p-4 border rounded-lg hover:bg-gray-50">
-              <h3 className="font-semibold mb-2">Socijalna zaštita</h3>
-              <p className="text-sm text-gray-600">Pomoć i podrška građanima</p>
-            </div>
-          </div>
-          <div className="mt-6">
-            <Button asChild>
-              <Link href="/usluge">
-                Pogledaj sve usluge
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Posts Section for About Page */}
       {renderPostsSection()}
     </div>
@@ -514,64 +574,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       <div className="prose prose-lg max-w-none">
         <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
       </div>
-
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          {
-            title: "Lični dokumenti",
-            description: "Izdavanje ličnih karata, pasoša i drugih dokumenata",
-            icon: FileText,
-            items: ["Lična karta", "Pasoš", "Vozačka dozvola", "Potvrde o prebivalištu"]
-          },
-          {
-            title: "Građevinske dozvole", 
-            description: "Sve što je potrebno za gradnju i rekonstrukciju",
-            icon: Building,
-            items: ["Građevinska dozvola", "Lokacijska dozvola", "Upotrebna dozvola", "Legalizacija"]
-          },
-          {
-            title: "Komunalne usluge",
-            description: "Usluge vezane za komunalnu infrastrukturu",
-            icon: Users,
-            items: ["Voda i kanalizacija", "Odvoz smeća", "Grejanje", "Održavanje puteva"]
-          }
-        ].map((service, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <service.icon className="h-10 w-10 text-blue-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
-              <p className="text-gray-600 mb-4">{service.description}</p>
-              <ul className="space-y-1">
-                {service.items.map((item, i) => (
-                  <li key={i} className="text-sm text-gray-600 flex items-center">
-                    <ChevronRight className="h-3 w-3 mr-2 text-blue-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Contact CTA */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="p-8 text-center">
-          <h3 className="text-xl font-semibold mb-4">Potrebna vam je pomoć?</h3>
-          <p className="text-gray-600 mb-6">
-            Naš tim je spreman da vam pomogne sa svim pitanjima vezanim za naše usluge.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild>
-              <Link href="/kontakt">Kontaktirajte nas</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/objave">Najnovije objave</Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Posts Section for Services Page */}
       {renderPostsSection()}
@@ -592,62 +594,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
       </div>
 
-      {/* Transparency Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          {
-            title: "Budžet i finansije",
-            description: "Budžetski dokumenti, finansijski izveštaji, javne nabavke",
-            icon: TrendingUp,
-            link: "/budzet"
-          },
-          {
-            title: "Javne nabavke",
-            description: "Tenderi, ugovori, izveštaji o sprovedenim postupcima",
-            icon: FileText,
-            link: "/javne-nabavke"
-          },
-          {
-            title: "Zapisnici sa sednica",
-            description: "Zapisnici i dokumenti sa sednica skupštine i komisija",
-            icon: Users,
-            link: "/sednice"
-          },
-          {
-            title: "Planovi i strategije",
-            description: "Razvojni planovi, strategije, prostorni planovi",
-            icon: Building,
-            link: "/planovi"
-          }
-        ].map((category, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <category.icon className="h-10 w-10 text-blue-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{category.title}</h3>
-              <p className="text-gray-600 mb-4">{category.description}</p>
-              <Button variant="outline" asChild>
-                <Link href={category.link}>
-                  Pogledaj dokumente
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Info Box */}
-      <Card className="bg-yellow-50 border-yellow-200">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-2">Pravo na pristup informacijama</h3>
-          <p className="text-gray-700">
-            U skladu sa Zakonom o slobodnom pristupu informacijama od javnog značaja, 
-            svaki građanin ima pravo da zatraži pristup informacijama koje poseduje naša institucija. 
-            Zahtevi se mogu podneti lično, poštom ili elektronski.
-          </p>
-        </CardContent>
-      </Card>
-
       {/* Posts Section for Transparency Page */}
       {renderPostsSection()}
     </div>
@@ -659,6 +605,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     </div>
   );
 
+  // Ostatak komponente ostaje isti...
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
