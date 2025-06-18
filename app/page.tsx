@@ -696,8 +696,9 @@ export default function HomePage() {
                 </div>
 
                 <Button 
-                  className="w-full mt-4 btn-primary-dynamic"
+                  variant="primary"
                   asChild
+                  className='w-full'
                 >
                   <Link href="/kontakt">Kontaktiraj nas</Link>
                 </Button>
@@ -862,7 +863,7 @@ export default function HomePage() {
                 className="text-sm text-gray-400 mt-4"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
-                © 2024 {institutionData.name}. Sva prava zadržana.
+                © 2025 {institutionData.name}. Sva prava zadržana.
               </p>
             </div>
 
@@ -903,7 +904,7 @@ export default function HomePage() {
 
             <div>
               <h4 
-                className="text-lg font-semibold mb-4 text-secondary-dynamic"
+                className="text-lg font-semibold mb-4 text-primary-dynamic"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
                 Kontakt
