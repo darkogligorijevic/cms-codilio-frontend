@@ -1,4 +1,4 @@
-// app/kategorije/page.tsx
+// app/kategorije/page.tsx - Kompletno ažurirano za dinamičke dugmiće
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -103,20 +103,20 @@ export default function CategoriesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-primary-dynamic" />
               <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
             </Link>
             <nav className="flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Početna
               </Link>
-              <Link href="/objave" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Objave
               </Link>
-              <Link href="/dokumenti" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Dokumenti
               </Link>
-              <Link href="/kontakt" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Kontakt
               </Link>
             </nav>
@@ -149,11 +149,11 @@ export default function CategoriesPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{categories.length}</div>
+                <div className="text-2xl font-bold text-primary-dynamic">{categories.length}</div>
                 <div className="text-sm text-gray-600">Aktivne kategorije</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{getTotalPublishedPosts()}</div>
+                <div className="text-2xl font-bold text-secondary-dynamic">{getTotalPublishedPosts()}</div>
                 <div className="text-sm text-gray-600">Objavljene objave</div>
               </div>
               <div className="text-center">
@@ -204,11 +204,11 @@ export default function CategoriesPage() {
                       {/* Category Header */}
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center space-x-3">
-                          <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                          <div className="bg-blue-100 p-2 rounded-lg text-primary-dynamic">
                             {getCategoryIcon(category.name)}
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600">
+                            <h3 className="text-lg font-semibold text-gray-900 hover:text-primary-dynamic">
                               <Link href={`/kategorije/${category.slug}`}>
                                 {category.name}
                               </Link>
@@ -246,7 +246,7 @@ export default function CategoriesPage() {
                               <Link
                                 key={post.id}
                                 href={`/objave/${post.slug}`}
-                                className="block text-sm text-gray-600 hover:text-blue-600 transition-colors line-clamp-1"
+                                className="block text-sm text-gray-600 hover:text-primary-dynamic transition-colors line-clamp-1"
                               >
                                 • {post.title}
                               </Link>
@@ -307,11 +307,20 @@ export default function CategoriesPage() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-full text-sm font-bold">
+                              <div 
+                                className="flex items-center justify-center w-8 h-8 text-white rounded-full text-sm font-bold"
+                                style={{
+                                  background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))`
+                                }}
+                              >
                                 {index + 1}
                               </div>
                               <div>
-                                <h3 className="font-medium text-gray-900">{category.name}</h3>
+                                <h3 className="font-medium text-gray-900 hover:text-primary-dynamic">
+                                  <Link href={`/kategorije/${category.slug}`}>
+                                    {category.name}
+                                  </Link>
+                                </h3>
                                 <p className="text-sm text-gray-500">
                                   {publishedPosts.length} objav • Kreirana {formatDate(category.createdAt)}
                                 </p>
@@ -319,7 +328,7 @@ export default function CategoriesPage() {
                             </div>
                             <Button variant="ghost" size="sm" asChild>
                               <Link href={`/kategorije/${category.slug}`}>
-                                <Eye className="h-4 w-4" />
+                                <Eye className="h-4 w-4 text-primary-dynamic" />
                               </Link>
                             </Button>
                           </div>
@@ -338,7 +347,7 @@ export default function CategoriesPage() {
             <p className="text-gray-600 mb-6">
               Trenutno nema kategorija sa objavljenim objavama.
             </p>
-            <Button asChild>
+            <Button variant="primary" asChild>
               <Link href="/objave">Pogledaj sve objave</Link>
             </Button>
           </div>
@@ -362,7 +371,7 @@ export default function CategoriesPage() {
                       <Badge
                         key={category.id}
                         variant="outline"
-                        className="hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-colors py-2 px-3"
+                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors py-2 px-3"
                         asChild
                       >
                         <Link href={`/kategorije/${category.slug}`}>
@@ -383,7 +392,7 @@ export default function CategoriesPage() {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2024 Opština Mladenovac. Sva prava zadržana.
+            © 2025 Opština Mladenovac. Sva prava zadržana.
           </p>
         </div>
       </footer>

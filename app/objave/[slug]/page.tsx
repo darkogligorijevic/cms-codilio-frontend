@@ -1,4 +1,4 @@
-// app/objave/[slug]/page.tsx
+// app/objave/[slug]/page.tsx - Ažurirano za dinamičke dugmiće
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -108,15 +108,9 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-dynamic" />
                 <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
               </Link>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Nazad na početnu
-                </Link>
-              </Button>
             </div>
           </div>
         </header>
@@ -145,7 +139,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-dynamic" />
                 <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
               </Link>
               <Button variant="outline" size="sm" asChild>
@@ -166,7 +160,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
             <p className="text-gray-600 mb-6">
               Objava koju tražite ne postoji ili je uklonjena.
             </p>
-            <Button asChild>
+            <Button variant="primary" asChild>
               <Link href="/objave">
                 Pogledaj sve objave
               </Link>
@@ -184,7 +178,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-primary-dynamic" />
               <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
             </Link>
             <div className="flex items-center space-x-4">
@@ -207,13 +201,13 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-blue-600">Početna</Link>
+            <Link href="/" className="hover:text-primary-dynamic">Početna</Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href="/objave" className="hover:text-blue-600">Objave</Link>
+            <Link href="/objave" className="hover:text-primary-dynamic">Objave</Link>
             <ChevronRight className="h-4 w-4" />
             {post.category && (
               <>
-                <Link href={`/kategorije/${post.category.slug}`} className="hover:text-blue-600">
+                <Link href={`/kategorije/${post.category.slug}`} className="hover:text-primary-dynamic">
                   {post.category.name}
                 </Link>
                 <ChevronRight className="h-4 w-4" />
@@ -285,7 +279,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           <div className="bg-gray-100 rounded-lg p-6 mb-8">
             <h3 className="text-lg font-semibold mb-4">Podelite ovu objavu</h3>
             <div className="flex items-center space-x-4">
-              <Button onClick={sharePost} size="sm">
+              <Button variant="primary" onClick={sharePost} size="sm">
                 <Share2 className="mr-2 h-4 w-4" />
                 Podeli
               </Button>
@@ -325,7 +319,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                       </Badge>
                     )}
 
-                    <h3 className="font-semibold text-gray-900 mb-2 hover:text-blue-600">
+                    <h3 className="font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${relatedPost.slug}`}>
                         {relatedPost.title}
                       </Link>
@@ -363,7 +357,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2024 Opština Mladenovac. Sva prava zadržana.
+            © 2025 Opština Mladenovac. Sva prava zadržana.
           </p>
         </div>
       </footer>

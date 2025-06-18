@@ -1,4 +1,4 @@
-// app/[slug]/page.tsx - Ažurirano za kontakt formu
+// app/[slug]/page.tsx - Ažurirano za dinamičke dugmiće
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -339,7 +339,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <MapPin className="h-6 w-6 text-blue-600 mt-1" />
+                  <MapPin className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Adresa</h3>
                     <p className="text-gray-600">Trg Oslobođenja 1, 11400 Mladenovac</p>
@@ -351,7 +351,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <Phone className="h-6 w-6 text-blue-600 mt-1" />
+                  <Phone className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Telefon</h3>
                     <p className="text-gray-600">+381 11 823 4567</p>
@@ -364,7 +364,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <Mail className="h-6 w-6 text-blue-600 mt-1" />
+                  <Mail className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
                     <p className="text-gray-600">info@mladenovac.rs</p>
@@ -377,7 +377,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
-                  <Clock className="h-6 w-6 text-blue-600 mt-1" />
+                  <Clock className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
                     <h3 className="font-semibold mb-1">Radno vreme</h3>
                     <p className="text-gray-600">Ponedeljak - Petak: 07:30 - 15:30</p>
@@ -494,7 +494,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                   />
                 </div>
 
-                <Button type="submit" disabled={isSubmitting} className="w-full">
+                <Button variant="primary" type="submit" disabled={isSubmitting} className="w-full">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -530,21 +530,21 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6 text-center">
-            <Users className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+            <Users className="h-8 w-8 text-primary-dynamic mx-auto mb-3" />
             <div className="text-2xl font-bold text-gray-900">53.096</div>
             <div className="text-sm text-gray-600">Građana</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6 text-center">
-            <MapPin className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+            <MapPin className="h-8 w-8 text-primary-dynamic mx-auto mb-3" />
             <div className="text-2xl font-bold text-gray-900">32</div>
             <div className="text-sm text-gray-600">Naselja</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6 text-center">
-            <TrendingUp className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+            <TrendingUp className="h-8 w-8 text-primary-dynamic mx-auto mb-3" />
             <div className="text-2xl font-bold text-gray-900">339 km²</div>
             <div className="text-sm text-gray-600">Površina</div>
           </CardContent>
@@ -613,7 +613,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-dynamic" />
                 <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
               </Link>
             </div>
@@ -639,7 +639,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-dynamic" />
                 <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
               </Link>
               <Button variant="outline" size="sm" asChild>
@@ -659,7 +659,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             <p className="text-gray-600 mb-6">
               Stranica koju tražite ne postoji ili je uklonjena.
             </p>
-            <Button asChild>
+            <Button variant="primary" asChild>
               <Link href="/">Nazad na početnu</Link>
             </Button>
           </div>
@@ -675,17 +675,17 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-primary-dynamic" />
               <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
             </Link>
             <nav className="flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Početna
               </Link>
-              <Link href="/objave" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Objave
               </Link>
-              <Link href="/dokumenti" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Dokumenti
               </Link>
             </nav>
@@ -717,7 +717,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2024 Opština Mladenovac. Sva prava zadržana.
+            © 2025 Opština Mladenovac. Sva prava zadržana.
           </p>
         </div>
       </footer>

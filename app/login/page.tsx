@@ -1,4 +1,4 @@
-// app/login/page.tsx
+// app/login/page.tsx - Koristi statične dugmiće
 'use client';
 
 import { useState } from 'react';
@@ -76,6 +76,7 @@ export default function LoginPage() {
             </div>
             
             <Button 
+              variant="default"
               type="submit" 
               className="w-full" 
               disabled={isSubmitting}

@@ -1,4 +1,4 @@
-// app/kategorije/[slug]/page.tsx
+// app/kategorije/[slug]/page.tsx - Ažurirano za dinamičke dugmiće
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -156,7 +156,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-dynamic" />
                 <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
               </Link>
             </div>
@@ -185,7 +185,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-dynamic" />
                 <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
               </Link>
               <Button variant="outline" size="sm" asChild>
@@ -206,7 +206,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
               Kategorija koju tražite ne postoji ili je uklonjena.
             </p>
             <div className="space-x-4">
-              <Button asChild>
+              <Button variant="primary" asChild>
                 <Link href="/kategorije">Sve kategorije</Link>
               </Button>
               <Button variant="outline" asChild>
@@ -226,20 +226,20 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-primary-dynamic" />
               <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
             </Link>
             <nav className="flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Početna
               </Link>
-              <Link href="/objave" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Objave
               </Link>
-              <Link href="/kategorije" className="text-blue-600 font-medium">
+              <Link href="/kategorije" className="text-primary-dynamic font-medium">
                 Kategorije
               </Link>
-              <Link href="/kontakt" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Kontakt
               </Link>
             </nav>
@@ -344,7 +344,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   
                   <CardContent className="p-6">
                     {/* Title */}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${post.slug}`}>
                         {post.title || 'Naslov objave'}
                       </Link>
@@ -408,7 +408,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                     return (
                       <Button
                         key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
+                        variant={currentPage === pageNum ? "primary" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
                         className="w-10"
@@ -446,7 +446,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
             </p>
             <div className="space-x-4">
               {searchTerm && (
-                <Button onClick={() => setSearchTerm('')}>
+                <Button variant="primary" onClick={() => setSearchTerm('')}>
                   Prikaži sve objave iz kategorije
                 </Button>
               )}
@@ -467,11 +467,11 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{posts?.length || 0}</div>
+                    <div className="text-2xl font-bold text-primary-dynamic">{posts?.length || 0}</div>
                     <div className="text-sm text-gray-600">Ukupno objava</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-secondary-dynamic">
                       {posts?.reduce((sum, post) => sum + (post?.viewCount || 0), 0).toLocaleString() || '0'}
                     </div>
                     <div className="text-sm text-gray-600">Ukupno pregleda</div>
@@ -533,7 +533,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2024 Opština Mladenovac. Sva prava zadržana.
+            © 2025 Opština Mladenovac. Sva prava zadržana.
           </p>
         </div>
       </footer>

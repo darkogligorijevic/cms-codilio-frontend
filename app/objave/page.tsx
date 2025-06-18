@@ -1,4 +1,4 @@
-// app/objave/page.tsx
+// app/objave/page.tsx - Ažurirano za dinamičke dugmiće
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
@@ -130,17 +130,17 @@ function PostsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-primary-dynamic" />
               <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
             </Link>
             <nav className="flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Početna
               </Link>
-              <Link href="/dokumenti" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Dokumenti
               </Link>
-              <Link href="/kontakt" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
                 Kontakt
               </Link>
             </nav>
@@ -275,7 +275,7 @@ function PostsContent() {
                     )}
 
                     {/* Title */}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${post.slug}`}>
                         {post.title}
                       </Link>
@@ -340,7 +340,7 @@ function PostsContent() {
                     return (
                       <Button
                         key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
+                        variant={currentPage === pageNum ? "primary" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNum)}
                         className="w-10"
@@ -377,7 +377,7 @@ function PostsContent() {
               }
             </p>
             {(searchTerm || selectedCategory !== 'all') && (
-              <Button onClick={clearFilters}>
+              <Button variant="primary" onClick={clearFilters}>
                 Prikaži sve objave
               </Button>
             )}
@@ -424,7 +424,7 @@ function PostsContent() {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2024 Opština Mladenovac. Sva prava zadržana.
+            © 2025 Opština Mladenovac. Sva prava zadržana.
           </p>
         </div>
       </footer>
@@ -440,7 +440,7 @@ function PostsLoading() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-blue-600" />
+              <Building className="h-8 w-8 text-primary-dynamic" />
               <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
             </div>
           </div>
