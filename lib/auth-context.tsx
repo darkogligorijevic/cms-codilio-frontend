@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is logged in on app start
     const token = localStorage.getItem('access_token');
     const userData = localStorage.getItem('user');
-    
+
     if (token && userData) {
       try {
         setUser(JSON.parse(userData));
@@ -35,17 +35,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('user');
       }
     }
-    
+
     setIsLoading(false);
   }, []);
+
+  
 
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authApi.login(credentials);
-      
+
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
+
       setUser(response.user);
     } catch (error) {
       console.error('Login error:', error);
@@ -57,6 +59,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authApi.logout();
     setUser(null);
     localStorage.removeItem('user');
+  };
+
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   return (

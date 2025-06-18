@@ -476,3 +476,52 @@ export interface CompleteSetupResponse {
   user: User;
   message: string;
 }
+
+export interface UserWithStats extends User {
+  postsCount: number;
+  lastPostDate?: string;
+  recentPosts: Array<{
+    id: number;
+    title: string;
+    slug: string;
+    createdAt: string;
+    status: string;
+  }>;
+}
+
+
+export interface UsersStatistics {
+  totalUsers: number;
+  activeUsers: number;
+  admins: number;
+  authors: number;
+  totalPosts: number;
+  recentPosts: number;
+}
+
+// Profile update DTO
+export interface UpdateProfileDto {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}
+
+// Security settings interface
+export interface SecuritySettings {
+  twoFactorEnabled: boolean;
+  activeSessions: SessionInfo[];
+  lastPasswordChange?: string;
+  loginAttempts?: number;
+}
+
+// Session information interface
+export interface SessionInfo {
+  id: string;
+  device: string;
+  browser: string;
+  ip: string;
+  location?: string;
+  lastActivity: string;
+  current: boolean;
+}

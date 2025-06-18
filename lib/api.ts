@@ -145,7 +145,15 @@ export const usersApi = {
     const response: AxiosResponse<User> = await api.patch(`/users/${id}`, data);
     return response.data;
   },
+  getCurrentUser: async (): Promise<UserWithStats> => {
+    const response: AxiosResponse<UserWithStats> = await api.get('/users/me?withStats=true');
+    return response.data;
+  },
 
+  updateProfile: async (data: UpdateUserDto): Promise<User> => {
+    const response: AxiosResponse<User> = await api.patch('/users/me', data);
+    return response.data;
+  },
   delete: async (id: string): Promise<void> => {
     return await api.delete(`/users/${id}`);
   }
