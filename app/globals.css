@@ -49,10 +49,24 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  
+  /* Default theme colors - will be overridden by settings */
+  --primary: 220 100% 50%; /* Default blue */
+  --primary-foreground: 0 0% 100%;
+  --primary-hex: #3B82F6;
+  --primary-hover: 220 100% 45%;
+  
+  --secondary: 160 84% 39%; /* Default green */
+  --secondary-foreground: 0 0% 100%;
+  --secondary-hex: #10B981;
+  
+  /* Font family - will be overridden by settings */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Site branding */
+  --site-name: "CodilioCMS";
+  
+  /* Other default colors */
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -83,8 +97,6 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -117,18 +129,191 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-family);
+    transition: font-family 0.3s ease-in-out;
   }
+  
   h1 {
-    @apply text-6xl
+    @apply text-6xl;
+    font-family: var(--font-family);
   }
 
   h2 {
-    @apply text-4xl
+    @apply text-4xl;
+    font-family: var(--font-family);
   }
 
   h3 {
-    @apply text-2xl
+    @apply text-2xl;
+    font-family: var(--font-family);
   }
+}
+
+/* ==========================================
+   DYNAMIC THEME UTILITIES
+   ========================================== */
+
+/* Primary color utilities that respect dynamic settings */
+.bg-primary-dynamic {
+  background-color: hsl(var(--primary));
+}
+
+.text-primary-dynamic {
+  color: hsl(var(--primary));
+}
+
+.border-primary-dynamic {
+  border-color: hsl(var(--primary));
+}
+
+.hover\:bg-primary-dynamic:hover {
+  background-color: hsl(var(--primary-hover));
+}
+
+/* Secondary color utilities */
+.bg-secondary-dynamic {
+  background-color: hsl(var(--secondary));
+}
+
+.text-secondary-dynamic {
+  color: hsl(var(--secondary));
+}
+
+.border-secondary-dynamic {
+  border-color: hsl(var(--secondary));
+}
+
+/* Custom button styles that use dynamic colors */
+.btn-primary-dynamic {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary));
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary-dynamic:hover {
+  background-color: hsl(var(--primary-hover));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+}
+
+.btn-secondary-dynamic {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border: 1px solid hsl(var(--secondary));
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-secondary-dynamic:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--secondary) / 0.3);
+}
+
+/* Gradient utilities using dynamic colors */
+.gradient-primary-dynamic {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+}
+
+.gradient-secondary-dynamic {
+  background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary) / 0.8));
+}
+
+.gradient-primary-secondary-dynamic {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+}
+
+/* Logo and branding utilities */
+.logo-container {
+  font-family: var(--font-family);
+}
+
+.site-name::before {
+  content: var(--site-name);
+}
+
+/* Theme transition effects */
+.theme-transition {
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+/* Custom link styles using dynamic colors */
+a.link-primary-dynamic {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+a.link-primary-dynamic:hover {
+  color: hsl(var(--primary-hover));
+  text-decoration: underline;
+}
+
+/* Custom card styles */
+.card-primary-dynamic {
+  border-left: 4px solid hsl(var(--primary));
+  background: linear-gradient(to right, hsl(var(--primary) / 0.05), transparent);
+}
+
+.card-secondary-dynamic {
+  border-left: 4px solid hsl(var(--secondary));
+  background: linear-gradient(to right, hsl(var(--secondary) / 0.05), transparent);
+}
+
+/* Hero section with dynamic gradient */
+.hero-gradient-dynamic {
+  background: linear-gradient(135deg, 
+    hsl(var(--primary)) 0%, 
+    hsl(var(--primary-hover)) 50%, 
+    hsl(var(--secondary)) 100%
+  );
+}
+
+/* Custom focus states */
+.focus-primary-dynamic:focus {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Dynamic color for icons */
+.icon-primary-dynamic {
+  color: hsl(var(--primary));
+}
+
+.icon-secondary-dynamic {
+  color: hsl(var(--secondary));
+}
+
+/* Badge styles with dynamic colors */
+.badge-primary-dynamic {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.2);
+}
+
+.badge-secondary-dynamic {
+  background-color: hsl(var(--secondary) / 0.1);
+  color: hsl(var(--secondary));
+  border: 1px solid hsl(var(--secondary) / 0.2);
+}
+
+/* Custom scrollbar that respects theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
 }
 
 /* ==========================================
@@ -140,7 +325,7 @@
   outline: none !important;
   min-height: 300px;
   padding: 1rem;
-  font-family: inherit;
+  font-family: var(--font-family);
   line-height: 1.6;
 }
 
@@ -159,6 +344,7 @@
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
   line-height: 1.2;
+  font-family: var(--font-family);
 }
 
 .ProseMirror h2 {
@@ -167,6 +353,7 @@
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
   line-height: 1.3;
+  font-family: var(--font-family);
 }
 
 .ProseMirror h3 {
@@ -175,6 +362,7 @@
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   line-height: 1.4;
+  font-family: var(--font-family);
 }
 
 .ProseMirror p {
@@ -200,7 +388,7 @@
 }
 
 .ProseMirror blockquote {
-  border-left: 4px solid #e2e8f0;
+  border-left: 4px solid hsl(var(--primary) / 0.3);
   padding-left: 1rem;
   margin: 1rem 0;
   font-style: italic;
@@ -231,13 +419,13 @@
 }
 
 .ProseMirror a {
-  color: #3b82f6;
+  color: hsl(var(--primary));
   text-decoration: underline;
   cursor: pointer;
 }
 
 .ProseMirror a:hover {
-  color: #1d4ed8;
+  color: hsl(var(--primary-hover));
 }
 
 .ProseMirror img {
@@ -272,7 +460,7 @@
 }
 
 .ProseMirror table .selectedCell:after {
-  background: rgba(59, 130, 246, 0.1);
+  background: hsl(var(--primary) / 0.1);
   content: "";
   left: 0;
   right: 0;
@@ -284,7 +472,7 @@
 }
 
 .ProseMirror .column-resize-handle {
-  background-color: #3b82f6;
+  background-color: hsl(var(--primary));
   bottom: -2px;
   position: absolute;
   right: -2px;
@@ -327,7 +515,7 @@
 
 /* Selection styles */
 .ProseMirror ::selection {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: hsl(var(--primary) / 0.2);
 }
 
 /* Drag and drop styles */
@@ -356,13 +544,13 @@
 }
 
 .drag-drop-zone:hover {
-  border-color: theme('colors.blue.400');
-  background-color: theme('colors.blue.50');
+  border-color: hsl(var(--primary) / 0.6);
+  background-color: hsl(var(--primary) / 0.05);
 }
 
 .drag-drop-zone.drag-over {
-  border-color: theme('colors.blue.500') !important;
-  background-color: theme('colors.blue.100') !important;
+  border-color: hsl(var(--primary)) !important;
+  background-color: hsl(var(--primary) / 0.1) !important;
   border-style: solid !important;
   transform: scale(1.02);
 }
@@ -371,7 +559,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(45deg, transparent 40%, theme('colors.blue.200') 50%, transparent 60%);
+  background: linear-gradient(45deg, transparent 40%, hsl(var(--primary) / 0.2) 50%, transparent 60%);
   animation: shimmer 2s infinite;
   pointer-events: none;
   z-index: 1;
@@ -389,9 +577,9 @@
 
 /* Rich Text Editor Drag Over Effect */
 .ProseMirror.drag-over {
-  background-color: theme('colors.blue.50');
-  border-color: theme('colors.blue.400');
-  box-shadow: 0 0 0 3px theme('colors.blue.200');
+  background-color: hsl(var(--primary) / 0.05);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
 }
 
 /* File Upload Progress Animations */
@@ -437,7 +625,7 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: linear-gradient(45deg, theme('colors.blue.400'), theme('colors.purple.400'));
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)));
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: -1;
@@ -478,7 +666,7 @@
 
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 20px theme('colors.green.300');
+    box-shadow: 0 0 20px hsl(var(--secondary) / 0.3);
   }
 
   100% {
@@ -520,26 +708,26 @@
 
 /* Accessibility Improvements */
 .drag-drop-zone:focus-within {
-  outline: 2px solid theme('colors.blue.500');
+  outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
 
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   .drag-drop-zone:hover {
-    border-color: theme('colors.blue.400');
-    background-color: theme('colors.blue.950');
+    border-color: hsl(var(--primary) / 0.4);
+    background-color: hsl(var(--primary) / 0.05);
   }
 
   .drag-drop-zone.drag-over {
-    border-color: theme('colors.blue.400') !important;
-    background-color: theme('colors.blue.900') !important;
+    border-color: hsl(var(--primary) / 0.4) !important;
+    background-color: hsl(var(--primary) / 0.1) !important;
   }
 
   .ProseMirror.drag-over {
-    background-color: theme('colors.blue.950');
-    border-color: theme('colors.blue.400');
-    box-shadow: 0 0 0 3px theme('colors.blue.800');
+    background-color: hsl(var(--primary) / 0.05);
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
   }
 }
 
@@ -616,6 +804,7 @@
   transition: width 0.3s ease;
   position: relative;
   overflow: hidden;
+  background-color: hsl(var(--primary));
 }
 
 .progress-bar-fill::after {
@@ -667,11 +856,11 @@
 }
 
 .media-grid-item:hover::after {
-  box-shadow: 0 0 0 2px theme('colors.blue.400');
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.4);
 }
 
 .media-grid-item.selected::after {
-  box-shadow: 0 0 0 3px theme('colors.blue.500');
+  box-shadow: 0 0 0 3px hsl(var(--primary));
 }
 
 /* Loading States */
@@ -703,7 +892,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: theme('colors.blue.500');
+  background: hsl(var(--primary));
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: -1;
@@ -718,24 +907,24 @@
 }
 
 .selectable-item.selected {
-  box-shadow: 0 0 0 2px theme('colors.blue.500');
+  box-shadow: 0 0 0 2px hsl(var(--primary));
 }
 
 /* File Type Specific Styling */
 .file-type-image {
-  border-left: 4px solid theme('colors.green.500');
+  border-left: 4px solid hsl(var(--secondary));
 }
 
 .file-type-pdf {
-  border-left: 4px solid theme('colors.red.500');
+  border-left: 4px solid #ef4444;
 }
 
 .file-type-document {
-  border-left: 4px solid theme('colors.blue.500');
+  border-left: 4px solid hsl(var(--primary));
 }
 
 .file-type-spreadsheet {
-  border-left: 4px solid theme('colors.green.600');
+  border-left: 4px solid #059669;
 }
 
 /* Responsive Grid Adjustments */
@@ -762,9 +951,9 @@
 
 /* Drag over state for the entire editor */
 .drag-drop-editor.drag-over {
-  background-color: theme('colors.blue.50');
-  border-color: theme('colors.blue.400');
-  box-shadow: 0 0 0 3px theme('colors.blue.200');
+  background-color: hsl(var(--primary) / 0.05);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
 }
 
 /* Placeholder styling when editor is empty */
@@ -779,8 +968,8 @@
 
 /* Drag and drop visual feedback */
 .ProseMirror[data-drag-over="true"] {
-  background-color: theme('colors.blue.50');
-  border: 2px dashed theme('colors.blue.400');
+  background-color: hsl(var(--primary) / 0.05);
+  border: 2px dashed hsl(var(--primary) / 0.4);
   border-radius: 0.5rem;
 }
 
@@ -788,8 +977,8 @@
 .editor-drag-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, theme('colors.blue.100') 0%, theme('colors.blue.50') 100%);
-  border: 2px dashed theme('colors.blue.400');
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%);
+  border: 2px dashed hsl(var(--primary) / 0.4);
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
@@ -836,8 +1025,8 @@
 }
 
 .upload-progress-item.success {
-  border-color: theme('colors.green.300');
-  background-color: theme('colors.green.50');
+  border-color: hsl(var(--secondary) / 0.3);
+  background-color: hsl(var(--secondary) / 0.05);
 }
 
 .upload-progress-item.error {
@@ -857,7 +1046,7 @@
 
 .upload-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, theme('colors.blue.500'), theme('colors.blue.600'));
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-hover)));
   border-radius: 3px;
   transition: width 0.3s ease;
   position: relative;
@@ -900,7 +1089,7 @@
 
 /* Selected image styling */
 .ProseMirror img.ProseMirror-selectednode {
-  outline: 3px solid theme('colors.blue.400');
+  outline: 3px solid hsl(var(--primary) / 0.4);
   outline-offset: 2px;
 }
 
@@ -917,7 +1106,7 @@
   content: '';
   position: absolute;
   inset: -4px;
-  border: 2px dashed theme('colors.blue.400');
+  border: 2px dashed hsl(var(--primary) / 0.4);
   border-radius: 0.5rem;
   pointer-events: none;
 }
@@ -963,7 +1152,7 @@
 }
 
 .color-picker-input:hover {
-  border-color: theme('colors.blue.400');
+  border-color: hsl(var(--primary) / 0.4);
   transform: scale(1.1);
 }
 
@@ -975,7 +1164,7 @@
 }
 
 .file-upload-button:hover {
-  background-color: theme('colors.blue.50');
+  background-color: hsl(var(--primary) / 0.05);
 }
 
 /* Empty state styling */
@@ -1002,7 +1191,7 @@
 }
 
 .upload-status-icon.success {
-  color: theme('colors.green.600');
+  color: hsl(var(--secondary));
 }
 
 .upload-status-icon.error {
@@ -1045,11 +1234,11 @@
 @media (prefers-contrast: high) {
   .editor-drag-overlay {
     border-width: 3px;
-    background: theme('colors.blue.100');
+    background: hsl(var(--primary) / 0.1);
   }
 
   .upload-progress-fill {
-    background: theme('colors.blue.700');
+    background: hsl(var(--primary));
   }
 
   .ProseMirror img {
@@ -1081,9 +1270,9 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .drag-drop-editor.drag-over {
-    background-color: theme('colors.blue.950');
-    border-color: theme('colors.blue.400');
-    box-shadow: 0 0 0 3px theme('colors.blue.800');
+    background-color: hsl(var(--primary) / 0.05);
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
   }
 
   .editor-toolbar {
@@ -1106,8 +1295,8 @@
   }
 
   .editor-drag-overlay {
-    background: linear-gradient(135deg, theme('colors.blue.900') 0%, theme('colors.blue.950') 100%);
-    border-color: theme('colors.blue.400');
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%);
+    border-color: hsl(var(--primary) / 0.4);
   }
 
   .ProseMirror p.is-editor-empty:first-child::before {
@@ -1121,16 +1310,16 @@
 
 /* Focus states for accessibility */
 .editor-toolbar button:focus-visible {
-  outline: 2px solid theme('colors.blue.500');
+  outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
 
 .color-picker-input:focus-visible {
-  outline: 2px solid theme('colors.blue.500');
+  outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
 
 .ProseMirror:focus-visible {
-  outline: 2px solid theme('colors.blue.500');
+  outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
