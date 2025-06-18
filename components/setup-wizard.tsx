@@ -354,7 +354,7 @@ export function SetupWizard() {
       // Refresh setup status
       setTimeout(() => {
         window.location.reload();
-      }, 2000);
+      }, 20000);
       
     } catch (error: any) {
       console.error('Setup error:', error);
