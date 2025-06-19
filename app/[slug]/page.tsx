@@ -1,7 +1,8 @@
-// app/[slug]/page.tsx - Ažurirano za dinamičke dugmiće
+// app/[slug]/page.tsx - Ažurirano za dinamičke dugmiće i API integraciju
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { useSettings } from '@/lib/settings-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,7 @@ interface ContactForm {
 
 export default function DynamicPage({ params }: DynamicPageProps) {
   const resolvedParams = use(params);
+  const { settings } = useSettings();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<Page | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +64,20 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [submitMessage, setSubmitMessage] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // Use settings for institution data with fallbacks
+  const institutionData = {
+    name: settings?.siteName || "Локална институција",
+    description: settings?.siteTagline || "Службени портал локалне самоуправе",
+    address: settings?.contactAddress || "Адреса институције",
+    phone: settings?.contactPhone || "+381 11 123 4567",
+    email: settings?.contactEmail || "info@institucija.rs",
+    workingHours: settings?.contactWorkingHours || "Понедељак - Петак: 07:30 - 15:30",
+    mapUrl: settings?.contactMapUrl,
+    citizens: "53.096",
+    villages: "32",
+    area: "339 km²"
+  };
+
   useEffect(() => {
     fetchPage();
   }, [resolvedParams.slug]);
@@ -75,7 +91,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       setPage(pageData);
     } catch (error) {
       console.error('Error fetching page:', error);
-      setError('Stranica nije pronađena');
+      setError('Страница није пронађена');
     } finally {
       setIsLoading(false);
     }
@@ -128,8 +144,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
       
-    if (diffInHours < 24) return `pre ${diffInHours} sati`;
-    if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
+    if (diffInHours < 24) return `пре ${diffInHours} сати`;
+    if (diffInHours < 168) return `пре ${Math.floor(diffInHours / 24)} дана`;
     return formatDate(dateString);
   };
 
@@ -143,16 +159,16 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     try {
       // Validacija forme
       if (!contactForm.name.trim()) {
-        throw new Error('Ime i prezime je obavezno');
+        throw new Error('Име и презиме је обавезно');
       }
       if (!contactForm.email.trim()) {
-        throw new Error('Email adresa je obavezna');
+        throw new Error('Емаил адреса је обавезна');
       }
       if (!contactForm.subject.trim()) {
-        throw new Error('Naslov poruke je obavezan');
+        throw new Error('Наслов поруке је обавезан');
       }
       if (!contactForm.message.trim()) {
-        throw new Error('Poruka je obavezna');
+        throw new Error('Порука је обавезна');
       }
 
       // Priprema podataka za API
@@ -172,7 +188,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       console.log('Contact created successfully:', response);
       
       setSubmitSuccess(true);
-      setSubmitMessage('Hvala vam! Vaša poruka je uspešno poslata. Kontaktiraćemo vas uskoro.');
+      setSubmitMessage('Хвала вам! Ваша порука је успешно послата. Контактираћемо вас ускоро.');
       
       // Resetovanje forme
       setContactForm({ 
@@ -184,13 +200,13 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       });
 
       // Toast notifikacija
-      toast.success('Poruka je uspešno poslata!');
+      toast.success('Порука је успешно послата!');
       
     } catch (error: any) {
       console.error('Error submitting contact form:', error);
       
       setSubmitSuccess(false);
-      let errorMessage = 'Greška pri slanju poruke. Molimo pokušajte ponovo.';
+      let errorMessage = 'Грешка при слању поруке. Молимо покушајте поново.';
       
       // Specifična poruka greške ako je dostupna
       if (error.response?.data?.message) {
@@ -206,37 +222,30 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   };
 
-  // Helper function to render posts section
-  const renderPostsSection = () => (
-    <div className="mt-12">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900">Objave za ovu stranicu</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            {posts.length > 0 ? `Prikazuje se ${posts.length} objava` : 'Nema objava za ovu stranicu'}
-          </p>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href="/objave">
-            Sve objave
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
+  // Helper function to render posts section - only if there are posts
+  const renderPostsSection = () => {
+    // Don't render section if no posts or still loading
+    if (isLoadingPosts || posts.length === 0) {
+      return null;
+    }
 
-      {isLoadingPosts ? (
-        <div className="space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-              </CardContent>
-            </Card>
-          ))}
+    return (
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900">Објаве за ову страницу</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Приказује се {posts.length} објав{posts.length === 1 ? 'а' : 'а'}
+            </p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link href="/objave">
+              Све објаве
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
-      ) : posts.length > 0 ? (
+
         <div className="space-y-6">
           {posts.map((post) => (
             <Card key={post.id} className="hover:shadow-md transition-shadow">
@@ -292,23 +301,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             </Card>
           ))}
         </div>
-      ) : (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Nema objava za ovu stranicu</h3>
-            <p className="text-gray-500 mb-4">
-              Trenutno nema objava dodeljenih ovoj stranici. 
-              Administrator može dodeliti objave ovoj stranici iz CMS-a.
-            </p>
-            <Button variant="outline" asChild>
-              <Link href="/objave">Pogledaj sve objave</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderPageContent = () => {
     if (!page) return null;
@@ -333,7 +328,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Contact Information */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">Kontakt informacije</h2>
+          <h2 className="text-2xl font-bold mb-6">Контакт информације</h2>
           
           <div className="space-y-6">
             <Card>
@@ -341,8 +336,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                 <div className="flex items-start space-x-4">
                   <MapPin className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
-                    <h3 className="font-semibold mb-1">Adresa</h3>
-                    <p className="text-gray-600">Trg Oslobođenja 1, 11400 Mladenovac</p>
+                    <h3 className="font-semibold mb-1">Адреса</h3>
+                    <p className="text-gray-600">{institutionData.address}</p>
                   </div>
                 </div>
               </CardContent>
@@ -353,9 +348,11 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                 <div className="flex items-start space-x-4">
                   <Phone className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
-                    <h3 className="font-semibold mb-1">Telefon</h3>
-                    <p className="text-gray-600">+381 11 823 4567</p>
-                    <p className="text-gray-600">+381 11 823 4568 (fax)</p>
+                    <h3 className="font-semibold mb-1">Телефон</h3>
+                    <p className="text-gray-600">{institutionData.phone}</p>
+                    {settings?.contactPhone && settings.contactPhone !== institutionData.phone && (
+                      <p className="text-gray-600">{settings.contactPhone} (факс)</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -366,9 +363,11 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                 <div className="flex items-start space-x-4">
                   <Mail className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
-                    <h3 className="font-semibold mb-1">Email</h3>
-                    <p className="text-gray-600">info@mladenovac.rs</p>
-                    <p className="text-gray-600">poverenik@mladenovac.rs</p>
+                    <h3 className="font-semibold mb-1">Емаил</h3>
+                    <p className="text-gray-600">{institutionData.email}</p>
+                    {settings?.contactEmail && settings.contactEmail !== institutionData.email && (
+                      <p className="text-gray-600">{settings.contactEmail}</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -379,9 +378,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                 <div className="flex items-start space-x-4">
                   <Clock className="h-6 w-6 text-primary-dynamic mt-1" />
                   <div>
-                    <h3 className="font-semibold mb-1">Radno vreme</h3>
-                    <p className="text-gray-600">Ponedeljak - Petak: 07:30 - 15:30</p>
-                    <p className="text-gray-600">Šalter za građane: 08:00 - 16:00</p>
+                    <h3 className="font-semibold mb-1">Радно време</h3>
+                    <p className="text-gray-600">{institutionData.workingHours}</p>
                   </div>
                 </div>
               </CardContent>
@@ -399,7 +397,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
         {/* Contact Form - AŽURIRANA FORMA */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">Pošaljite nam poruku</h2>
+          <h2 className="text-2xl font-bold mb-6">Пошаљите нам поруку</h2>
           
           <Card>
             <CardContent className="p-6">
@@ -422,7 +420,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
               <form onSubmit={handleContactSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    Ime i prezime *
+                    Име и презиме *
                   </label>
                   <Input
                     id="name"
@@ -430,14 +428,14 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     required
                     value={contactForm.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Vaše ime i prezime"
+                    placeholder="Ваше име и презиме"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    Email adresa *
+                    Емаил адреса *
                   </label>
                   <Input
                     id="email"
@@ -445,14 +443,14 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     required
                     value={contactForm.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="vaš@email.com"
+                    placeholder="ваш@email.com"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                    Telefon
+                    Телефон
                   </label>
                   <Input
                     id="phone"
@@ -466,7 +464,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                    Naslov poruke *
+                    Наслов поруке *
                   </label>
                   <Input
                     id="subject"
@@ -474,14 +472,14 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     required
                     value={contactForm.subject}
                     onChange={(e) => handleInputChange('subject', e.target.value)}
-                    placeholder="Naslov vaše poruke"
+                    placeholder="Наслов ваше поруке"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    Poruka *
+                    Порука *
                   </label>
                   <Textarea
                     id="message"
@@ -489,7 +487,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                     rows={6}
                     value={contactForm.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
-                    placeholder="Ovde upišite vašu poruku..."
+                    placeholder="Овде упишите вашу поруку..."
                     disabled={isSubmitting}
                   />
                 </div>
@@ -498,10 +496,10 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Šalje se...
+                      Шаље се...
                     </>
                   ) : (
-                    'Pošalji poruku'
+                    'Пошаљи поруку'
                   )}
                 </Button>
               </form>
@@ -510,7 +508,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         </div>
       </div>
 
-      {/* Posts Section for Contact Page */}
+      {/* Posts Section for Contact Page - conditionally rendered */}
       {renderPostsSection()}
     </div>
   );
@@ -520,9 +518,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-8">
-        <h2 className="text-3xl font-bold text-blue-900 mb-4">O našoj instituciji</h2>
+        <h2 className="text-3xl font-bold text-blue-900 mb-4">О нашој институцији</h2>
         <p className="text-lg text-blue-800">
-          Posvećeni transparentnosti, efikasnosti i služenju građanima
+          Посвећени транспарентности, ефикасности и служењу грађанима
         </p>
       </div>
 
@@ -531,22 +529,22 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <Card>
           <CardContent className="p-6 text-center">
             <Users className="h-8 w-8 text-primary-dynamic mx-auto mb-3" />
-            <div className="text-2xl font-bold text-gray-900">53.096</div>
-            <div className="text-sm text-gray-600">Građana</div>
+            <div className="text-2xl font-bold text-gray-900">{institutionData.citizens}</div>
+            <div className="text-sm text-gray-600">Грађана</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6 text-center">
             <MapPin className="h-8 w-8 text-primary-dynamic mx-auto mb-3" />
-            <div className="text-2xl font-bold text-gray-900">32</div>
-            <div className="text-sm text-gray-600">Naselja</div>
+            <div className="text-2xl font-bold text-gray-900">{institutionData.villages}</div>
+            <div className="text-sm text-gray-600">Насеља</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6 text-center">
             <TrendingUp className="h-8 w-8 text-primary-dynamic mx-auto mb-3" />
-            <div className="text-2xl font-bold text-gray-900">339 km²</div>
-            <div className="text-sm text-gray-600">Površina</div>
+            <div className="text-2xl font-bold text-gray-900">{institutionData.area}</div>
+            <div className="text-sm text-gray-600">Површина</div>
           </CardContent>
         </Card>
       </div>
@@ -556,7 +554,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
       </div>
 
-      {/* Posts Section for About Page */}
+      {/* Posts Section for About Page - conditionally rendered */}
       {renderPostsSection()}
     </div>
   );
@@ -564,9 +562,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const renderServicesTemplate = () => (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-4">Usluge za građane</h2>
+        <h2 className="text-3xl font-bold mb-4">Услуге за грађане</h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Pružamo širok spektar usluga za naše građane. Sve usluge možete obaviti lično ili online.
+          Пружамо широк спектар услуга за наше грађане. Све услуге можете обавити лично или онлајн.
         </p>
       </div>
 
@@ -575,7 +573,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
       </div>
 
-      {/* Posts Section for Services Page */}
+      {/* Posts Section for Services Page - conditionally rendered */}
       {renderPostsSection()}
     </div>
   );
@@ -583,9 +581,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const renderTransparencyTemplate = () => (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-4">Transparentnost</h2>
+        <h2 className="text-3xl font-bold mb-4">Транспарентност</h2>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Pristup informacijama od javnog značaja - naša obaveza prema građanima
+          Приступ информацијама од јавног значаја - наша обавеза према грађанима
         </p>
       </div>
 
@@ -594,14 +592,19 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
       </div>
 
-      {/* Posts Section for Transparency Page */}
+      {/* Posts Section for Transparency Page - conditionally rendered */}
       {renderPostsSection()}
     </div>
   );
 
   const renderDefaultTemplate = () => (
-    <div className="prose prose-lg max-w-none">
-      <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
+    <div className="space-y-8">
+      <div className="prose prose-lg max-w-none">
+        <div dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
+      </div>
+
+      {/* Posts Section for Default Page - conditionally rendered */}
+      {renderPostsSection()}
     </div>
   );
 
@@ -613,8 +616,16 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-primary-dynamic" />
-                <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
               </Link>
             </div>
           </div>
@@ -639,13 +650,21 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-primary-dynamic" />
-                <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
               </Link>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Nazad na početnu
+                  Назад на почетну
                 </Link>
               </Button>
             </div>
@@ -655,12 +674,12 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Stranica nije pronađena</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Страница није пронађена</h1>
             <p className="text-gray-600 mb-6">
-              Stranica koju tražite ne postoji ili je uklonjena.
+              Страница коју тражите не постоји или је уклоњена.
             </p>
             <Button variant="primary" asChild>
-              <Link href="/">Nazad na početnu</Link>
+              <Link href="/">Назад на почетну</Link>
             </Button>
           </div>
         </main>
@@ -675,18 +694,26 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-primary-dynamic" />
-              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
             </Link>
             <nav className="flex items-center space-x-6">
               <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Početna
+                Почетна
               </Link>
               <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Objave
+                Објаве
               </Link>
               <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Dokumenti
+                Документи
               </Link>
             </nav>
           </div>
@@ -701,7 +728,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             <Button variant="outline" asChild>
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Nazad na početnu
+                Назад на почетну
               </Link>
             </Button>
           </div>
@@ -717,7 +744,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 Opština Mladenovac. Sva prava zadržana.
+            © 2025 {institutionData.name}. Сва права задржана.
           </p>
         </div>
       </footer>

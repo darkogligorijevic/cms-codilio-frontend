@@ -1,5 +1,5 @@
 // lib/api.ts - Updated API functions
-import axios, { AxiosResponse } from 'axios';
+import axios, { Axios, AxiosResponse } from 'axios';
 import {
   type Post,
   type Page,
@@ -39,7 +39,8 @@ import {
   UserWithStats,
   CompleteSetupDto,
   CompleteSetupResponse,
-  SetupStatusResponse
+  SetupStatusResponse,
+  UpdateMediaDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -429,6 +430,11 @@ export const mediaApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+
+  updateAltCaption: async (id: number, data: UpdateMediaDto) : Promise<Media> => {
+    const response: AxiosResponse<Media> = await api.patch(`/media/${id}/alt-caption`, data);
     return response.data;
   },
   

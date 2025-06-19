@@ -1,8 +1,9 @@
-// app/objave/[slug]/page.tsx - Ažurirano za dinamičke dugmiće
+// app/objave/[slug]/page.tsx - Ažurirano za dinamičke dugmiće i ćirilicu
 'use client';
 
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSettings } from '@/lib/settings-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,15 +28,20 @@ interface SinglePostProps {
 export default function SinglePostPage({ params }: SinglePostProps) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const { settings } = useSettings();
   const [post, setPost] = useState<Post | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Use settings for institution data with fallbacks
+  const institutionData = {
+    name: settings?.siteName || "Локална институција",
+  };
+
   useEffect(() => {
     fetchPost();
   }, [resolvedParams.slug]);
-
 
   const fetchPost = async () => {
     try {
@@ -56,7 +62,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       }
     } catch (error) {
       console.error('Error fetching post:', error);
-      setError('Objava nije pronađena');
+      setError('Објава није пронађена');
     } finally {
       setIsLoading(false);
     }
@@ -82,17 +88,17 @@ export default function SinglePostPage({ params }: SinglePostProps) {
     } else {
       // Fallback to copying URL
       navigator.clipboard.writeText(window.location.href);
-      alert('Link je kopiran u clipboard');
+      alert('Линк је копиран у clipboard');
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const increaseView = async () => {
       if (post?.id) {
         try {
           await postsApi.incrementView(resolvedParams.slug); // PATCH poziv ka backendu
         } catch (e) {
-          console.error('Greška prilikom povećanja pregleda', e);
+          console.error('Грешка приликом повећања прегледа', e);
         }
       }
     };
@@ -108,8 +114,16 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-primary-dynamic" />
-                <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
               </Link>
             </div>
           </div>
@@ -139,13 +153,21 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-primary-dynamic" />
-                <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
               </Link>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Nazad na početnu
+                  Назад на почетну
                 </Link>
               </Button>
             </div>
@@ -156,13 +178,13 @@ export default function SinglePostPage({ params }: SinglePostProps) {
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Objava nije pronađena</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Објава није пронађена</h1>
             <p className="text-gray-600 mb-6">
-              Objava koju tražite ne postoji ili je uklonjena.
+              Објава коју тражите не постоји или је уклоњена.
             </p>
             <Button variant="primary" asChild>
               <Link href="/objave">
-                Pogledaj sve objave
+                Погледај све објаве
               </Link>
             </Button>
           </div>
@@ -178,18 +200,26 @@ export default function SinglePostPage({ params }: SinglePostProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-primary-dynamic" />
-              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Button variant="outline" size="sm" onClick={sharePost}>
                 <Share2 className="mr-2 h-4 w-4" />
-                Podeli
+                Подели
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Nazad na početnu
+                  Назад на почетну
                 </Link>
               </Button>
             </div>
@@ -201,9 +231,9 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-primary-dynamic">Početna</Link>
+            <Link href="/" className="hover:text-primary-dynamic">Почетна</Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href="/objave" className="hover:text-primary-dynamic">Objave</Link>
+            <Link href="/objave" className="hover:text-primary-dynamic">Објаве</Link>
             <ChevronRight className="h-4 w-4" />
             {post.category && (
               <>
@@ -264,7 +294,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
               <div className="flex items-center">
                 <Eye className="mr-2 h-4 w-4" />
                 {/* +1 kada se udje da ga odma racuna */}
-                <span>{post.viewCount + 1} pregleda</span> 
+                <span>{post.viewCount + 1} прегледа</span> 
               </div>
             </div>
           </header>
@@ -277,21 +307,21 @@ export default function SinglePostPage({ params }: SinglePostProps) {
 
           {/* Share Section */}
           <div className="bg-gray-100 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold mb-4">Podelite ovu objavu</h3>
+            <h3 className="text-lg font-semibold mb-4">Поделите ову објаву</h3>
             <div className="flex items-center space-x-4">
               <Button variant="primary" onClick={sharePost} size="sm">
                 <Share2 className="mr-2 h-4 w-4" />
-                Podeli
+                Подели
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
-                  alert('Link je kopiran u clipboard');
+                  alert('Линк је копиран у clipboard');
                 }}
               >
-                Kopiraj link
+                Копирај линк
               </Button>
             </div>
           </div>
@@ -300,7 +330,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Povezane objave</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Повезане објаве</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((relatedPost) => (
                 <Card key={relatedPost.id} className="hover:shadow-md transition-shadow">
@@ -347,7 +377,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           <Button variant="outline" asChild>
             <Link href="/objave">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Nazad na sve objave
+              Назад на све објаве
             </Link>
           </Button>
         </div>
@@ -357,7 +387,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 Opština Mladenovac. Sva prava zadržana.
+            © 2025 {institutionData.name}. Сва права задржана.
           </p>
         </div>
       </footer>

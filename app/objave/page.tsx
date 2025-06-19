@@ -1,8 +1,9 @@
-// app/objave/page.tsx - Ažurirano za dinamičke dugmiće
+// app/objave/page.tsx - Ažurirano za dinamičke dugmiće i ćirilicu
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useSettings } from '@/lib/settings-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ import type { Post, Category } from '@/lib/types';
 function PostsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
+  const { settings } = useSettings();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -38,6 +40,11 @@ function PostsContent() {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
 
   const postsPerPage = 12;
+
+  // Use settings for institution data with fallbacks
+  const institutionData = {
+    name: settings?.siteName || "Локална институција",
+  };
 
   useEffect(() => {
     fetchData();
@@ -115,8 +122,8 @@ function PostsContent() {
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 24) return `pre ${diffInHours} sati`;
-    if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
+    if (diffInHours < 24) return `пре ${diffInHours} сати`;
+    if (diffInHours < 168) return `пре ${Math.floor(diffInHours / 24)} дана`;
     return formatDate(dateString);
   };
 
@@ -130,18 +137,26 @@ function PostsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-primary-dynamic" />
-              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
             </Link>
             <nav className="flex items-center space-x-6">
               <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Početna
+                Почетна
               </Link>
               <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Dokumenti
+                Документи
               </Link>
               <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Kontakt
+                Контакт
               </Link>
             </nav>
           </div>
@@ -154,15 +169,15 @@ function PostsContent() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {selectedCategoryName ? `Objave iz kategorije: ${selectedCategoryName}` : 'Sve objave'}
+                {selectedCategoryName ? `Објаве из категорије: ${selectedCategoryName}` : 'Све објаве'}
               </h1>
               <p className="text-gray-600 mt-2">
-                {totalPosts > 0 ? `Ukupno ${totalPosts} objava` : 'Nema objava za prikaz'}
+                {totalPosts > 0 ? `Укупно ${totalPosts} објав${totalPosts === 1 ? 'а' : 'а'}` : 'Нема објава за приказ'}
               </p>
             </div>
             <Button variant="outline" asChild>
               <Link href="/">
-                Nazad na početnu
+                Назад на почетну
               </Link>
             </Button>
           </div>
@@ -178,7 +193,7 @@ function PostsContent() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Pretraži objave..."
+                  placeholder="Претражи објаве..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -193,7 +208,7 @@ function PostsContent() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="all">Sve kategorije</option>
+                <option value="all">Све категорије</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id.toString()}>
                     {category.name}
@@ -207,7 +222,7 @@ function PostsContent() {
               <div className="flex items-center">
                 <Button variant="outline" onClick={clearFilters} size="sm">
                   <Filter className="mr-2 h-4 w-4" />
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               </div>
             )}
@@ -218,16 +233,16 @@ function PostsContent() {
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
                 <Badge variant="secondary">
-                  Pretraga: "{searchTerm}"
+                  Претрага: "{searchTerm}"
                 </Badge>
               )}
               {selectedCategoryName && (
                 <Badge variant="secondary">
-                  Kategorija: {selectedCategoryName}
+                  Категорија: {selectedCategoryName}
                 </Badge>
               )}
               <span className="text-sm text-gray-500">
-                Pronađeno {displayPosts.length} rezultata
+                Пронађено {displayPosts.length} резултата
               </span>
             </div>
           )}
@@ -321,7 +336,7 @@ function PostsContent() {
                   className="flex items-center"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
-                  Prethodna
+                  Претходна
                 </Button>
 
                 <div className="flex items-center space-x-2">
@@ -357,7 +372,7 @@ function PostsContent() {
                   disabled={currentPage === totalPages}
                   className="flex items-center"
                 >
-                  Sledeća
+                  Следећа
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -368,17 +383,17 @@ function PostsContent() {
           <div className="text-center py-16">
             <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {searchTerm || selectedCategory !== 'all' ? 'Nema rezultata' : 'Nema objava'}
+              {searchTerm || selectedCategory !== 'all' ? 'Нема резултата' : 'Нема објава'}
             </h2>
             <p className="text-gray-600 mb-6">
               {searchTerm || selectedCategory !== 'all'
-                ? 'Pokušajte sa drugačijim kriterijumima pretrage.'
-                : 'Trenutno nema objavljenih objava.'
+                ? 'Покушајте са другачијим критеријумима претраге.'
+                : 'Тренутно нема објављених објава.'
               }
             </p>
             {(searchTerm || selectedCategory !== 'all') && (
               <Button variant="primary" onClick={clearFilters}>
-                Prikaži sve objave
+                Прикажи све објаве
               </Button>
             )}
           </div>
@@ -390,7 +405,7 @@ function PostsContent() {
         <aside className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Kategorije objava</CardTitle>
+              <CardTitle>Категорије објава</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
@@ -399,7 +414,7 @@ function PostsContent() {
                   className="cursor-pointer hover:bg-blue-50"
                   onClick={() => setSelectedCategory('all')}
                 >
-                  Sve ({totalPosts})
+                  Све ({totalPosts})
                 </Badge>
                 {categories.map((category) => (
                   <Badge
@@ -424,7 +439,7 @@ function PostsContent() {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 Opština Mladenovac. Sva prava zadržana.
+            © 2025 {institutionData.name}. Сва права задржана.
           </p>
         </div>
       </footer>
@@ -441,7 +456,7 @@ function PostsLoading() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Building className="h-8 w-8 text-primary-dynamic" />
-              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+              <span className="text-lg font-bold text-gray-900">Локална институција</span>
             </div>
           </div>
         </div>

@@ -127,10 +127,7 @@ export default function MediaPage() {
     if (!selectedMedia) return;
 
     try {
-      await mediaApi.update(selectedMedia.id, undefined, {
-        alt: data.alt || undefined,
-        caption: data.caption || undefined
-      });
+      await mediaApi.updateAltCaption(selectedMedia.id, data);
       
       toast.success('Medijski fajl je uspešno ažuriran');
       fetchMedia();
@@ -446,9 +443,9 @@ export default function MediaPage() {
                         
                         {/* Overlay actions - only show when NOT in selection mode */}
                         {!selectionMode && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                          <div className="absolute inset-0 backdrop-blur-xl bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
                             <Button
-                              variant="secondary"
+                              variant="secondaryDefault"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -459,7 +456,7 @@ export default function MediaPage() {
                               <ExternalLink className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant="secondaryDefault"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -470,7 +467,7 @@ export default function MediaPage() {
                               <Copy className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant="secondaryDefault"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -481,7 +478,7 @@ export default function MediaPage() {
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="secondary"
+                              variant="secondaryDefault"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -719,7 +716,10 @@ export default function MediaPage() {
               >
                 Otkaži
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? 'Čuva se...' : 'Sačuvaj izmene'}
               </Button>
             </DialogFooter>

@@ -1,7 +1,8 @@
-// app/kategorije/[slug]/page.tsx - Ažurirano za dinamičke dugmiće
+// app/kategorije/[slug]/page.tsx - Ažurirano za dinamičke dugmiće i ćirilicu
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { useSettings } from '@/lib/settings-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ interface CategoryArchiveProps {
 
 export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   const resolvedParams = use(params);
+  const { settings } = useSettings();
   const [category, setCategory] = useState<Category | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
@@ -38,6 +40,11 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
+
+  // Use settings for institution data with fallbacks
+  const institutionData = {
+    name: settings?.siteName || "Локална институција",
+  };
 
   useEffect(() => {
     fetchCategoryData();
@@ -72,7 +79,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
       const categoryData = await categoriesApi.getBySlug(resolvedParams.slug);
       
       if (!categoryData) {
-        setError('Kategorija nije pronađena');
+        setError('Категорија није пронађена');
         return;
       }
       
@@ -97,7 +104,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
       }
     } catch (error) {
       console.error('Error fetching category data:', error);
-      setError('Kategorija nije pronađena');
+      setError('Категорија није пронађена');
       setCategory(null);
       setPosts([]);
     } finally {
@@ -118,8 +125,8 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    if (diffInHours < 24) return `pre ${diffInHours} sati`;
-    if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
+    if (diffInHours < 24) return `пре ${diffInHours} сати`;
+    if (diffInHours < 168) return `пре ${Math.floor(diffInHours / 24)} дана`;
     return formatDate(dateString);
   };
 
@@ -137,13 +144,16 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
     if (!categoryName) return <Tag className="h-8 w-8" />;
     
     const name = categoryName.toLowerCase();
-    if (name.includes('obav') || name.includes('vest') || name.includes('inf')) {
+    if (name.includes('обав') || name.includes('вест') || name.includes('инф') || 
+        name.includes('obav') || name.includes('vest') || name.includes('inf')) {
       return <FileText className="h-8 w-8" />;
     }
-    if (name.includes('promet') || name.includes('saobraćaj') || name.includes('infrastruktur')) {
+    if (name.includes('промет') || name.includes('саобраћај') || name.includes('инфраструктур') ||
+        name.includes('promet') || name.includes('saobraćaj') || name.includes('infrastruktur')) {
       return <Building className="h-8 w-8" />;
     }
-    if (name.includes('sport') || name.includes('kultura') || name.includes('događaj')) {
+    if (name.includes('спорт') || name.includes('култура') || name.includes('догађај') ||
+        name.includes('sport') || name.includes('kultura') || name.includes('događaj')) {
       return <Calendar className="h-8 w-8" />;
     }
     return <Tag className="h-8 w-8" />;
@@ -156,8 +166,16 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-primary-dynamic" />
-                <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
               </Link>
             </div>
           </div>
@@ -185,13 +203,21 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center space-x-3">
-                <Building className="h-8 w-8 text-primary-dynamic" />
-                <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
               </Link>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/kategorije">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Nazad na kategorije
+                  Назад на категорије
                 </Link>
               </Button>
             </div>
@@ -201,16 +227,16 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <Tag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Kategorija nije pronađena</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Категорија није пронађена</h1>
             <p className="text-gray-600 mb-6">
-              Kategorija koju tražite ne postoji ili je uklonjena.
+              Категорија коју тражите не постоји или је уклоњена.
             </p>
             <div className="space-x-4">
               <Button variant="primary" asChild>
-                <Link href="/kategorije">Sve kategorije</Link>
+                <Link href="/kategorije">Све категорије</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/objave">Sve objave</Link>
+                <Link href="/objave">Све објаве</Link>
               </Button>
             </div>
           </div>
@@ -226,21 +252,29 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-primary-dynamic" />
-              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
             </Link>
             <nav className="flex items-center space-x-6">
               <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Početna
+                Почетна
               </Link>
               <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Objave
+                Објаве
               </Link>
               <Link href="/kategorije" className="text-primary-dynamic font-medium">
-                Kategorije
+                Категорије
               </Link>
               <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Kontakt
+                Контакт
               </Link>
             </nav>
           </div>
@@ -256,7 +290,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                 {getCategoryIcon(category?.name)}
               </div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold mb-2">{category?.name || 'Kategorija'}</h1>
+                <h1 className="text-3xl lg:text-4xl font-bold mb-2">{category?.name || 'Категорија'}</h1>
                 {category?.description && (
                   <p className="text-lg text-blue-100 mb-2">{category.description}</p>
                 )}
@@ -267,12 +301,12 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   </Badge>
                   <span className="flex items-center">
                     <FileText className="mr-2 h-4 w-4" />
-                    {filteredPosts?.length || 0} objav{(filteredPosts?.length || 0) === 1 ? 'a' : ((filteredPosts?.length || 0) % 10 >= 2 && (filteredPosts?.length || 0) % 10 <= 4 && ((filteredPosts?.length || 0) % 100 < 10 || (filteredPosts?.length || 0) % 100 >= 20) ? 'e' : 'a')}
+                    {filteredPosts?.length || 0} објав{(filteredPosts?.length || 0) === 1 ? 'а' : ((filteredPosts?.length || 0) % 10 >= 2 && (filteredPosts?.length || 0) % 10 <= 4 && ((filteredPosts?.length || 0) % 100 < 10 || (filteredPosts?.length || 0) % 100 >= 20) ? 'е' : 'а')}
                   </span>
                   {category?.createdAt && (
                     <span className="flex items-center">
                       <Calendar className="mr-2 h-4 w-4" />
-                      Kreirana {formatDate(category.createdAt)}
+                      Креирана {formatDate(category.createdAt)}
                     </span>
                   )}
                 </div>
@@ -281,7 +315,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
             <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20" asChild>
               <Link href="/kategorije">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Sve kategorije
+                Све категорије
               </Link>
             </Button>
           </div>
@@ -296,7 +330,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
               <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Pretraži objave u ovoj kategoriji..."
+                  placeholder="Претражи објаве у овој категорији..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9 w-80"
@@ -308,15 +342,15 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   size="sm"
                   onClick={() => setSearchTerm('')}
                 >
-                  Očisti pretragu
+                  Очисти претрагу
                 </Button>
               )}
             </div>
             <div className="text-sm text-gray-600">
               {searchTerm ? (
-                <>Pronađeno {paginatedPosts?.length || 0} rezultata za "{searchTerm}"</>
+                <>Пронађено {paginatedPosts?.length || 0} резултата за "{searchTerm}"</>
               ) : (
-                <>Prikazuje se {paginatedPosts?.length || 0} objav{(paginatedPosts?.length || 0) === 1 ? 'a' : 'a'}</>
+                <>Приказује се {paginatedPosts?.length || 0} објав{(paginatedPosts?.length || 0) === 1 ? 'а' : 'а'}</>
               )}
             </div>
           </div>
@@ -346,7 +380,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                     {/* Title */}
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${post.slug}`}>
-                        {post.title || 'Naslov objave'}
+                        {post.title || 'Наслов објаве'}
                       </Link>
                     </h3>
 
@@ -362,7 +396,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                       <div className="flex items-center space-x-3">
                         <span className="flex items-center">
                           <User className="mr-1 h-3 w-3" />
-                          {post.author?.name || 'Nepoznat autor'}
+                          {post.author?.name || 'Непознат аутор'}
                         </span>
                         <span className="flex items-center">
                           <Eye className="mr-1 h-3 w-3" />
@@ -371,7 +405,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                       </div>
                       <span className="flex items-center">
                         <Calendar className="mr-1 h-3 w-3" />
-                        {post.publishedAt || post.createdAt ? getTimeAgo(post.publishedAt || post.createdAt) : 'Nepoznat datum'}
+                        {post.publishedAt || post.createdAt ? getTimeAgo(post.publishedAt || post.createdAt) : 'Непознат датум'}
                       </span>
                     </div>
                   </CardContent>
@@ -389,7 +423,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   className="flex items-center"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
-                  Prethodna
+                  Претходна
                 </Button>
 
                 <div className="flex items-center space-x-2">
@@ -425,7 +459,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   disabled={currentPage === totalPages}
                   className="flex items-center"
                 >
-                  Sledeća
+                  Следећа
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -436,22 +470,22 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="text-center py-16">
             <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {searchTerm ? 'Nema rezultata' : 'Nema objava u ovoj kategoriji'}
+              {searchTerm ? 'Нема резултата' : 'Нема објава у овој категорији'}
             </h2>
             <p className="text-gray-600 mb-6">
               {searchTerm 
-                ? `Nema objava koje odgovaraju pretrazi "${searchTerm}" u kategoriji "${category?.name || 'ova kategorija'}".`
-                : `U kategoriji "${category?.name || 'ova kategorija'}" trenutno nema objavljenih objava.`
+                ? `Нема објава које одговарају претрази "${searchTerm}" у категорији "${category?.name || 'ова категорија'}".`
+                : `У категорији "${category?.name || 'ова категорија'}" тренутно нема објављених објава.`
               }
             </p>
             <div className="space-x-4">
               {searchTerm && (
                 <Button variant="primary" onClick={() => setSearchTerm('')}>
-                  Prikaži sve objave iz kategorije
+                  Прикажи све објаве из категорије
                 </Button>
               )}
               <Button variant="outline" asChild>
-                <Link href="/objave">Sve objave</Link>
+                <Link href="/objave">Све објаве</Link>
               </Button>
             </div>
           </div>
@@ -462,25 +496,25 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="mt-16">
             <Card>
               <CardHeader>
-                <CardTitle>Statistike kategorije</CardTitle>
+                <CardTitle>Статистике категорије</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-dynamic">{posts?.length || 0}</div>
-                    <div className="text-sm text-gray-600">Ukupno objava</div>
+                    <div className="text-sm text-gray-600">Укупно објава</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-secondary-dynamic">
                       {posts?.reduce((sum, post) => sum + (post?.viewCount || 0), 0).toLocaleString() || '0'}
                     </div>
-                    <div className="text-sm text-gray-600">Ukupno pregleda</div>
+                    <div className="text-sm text-gray-600">Укупно прегледа</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600">
                       {posts && posts.length > 0 ? Math.round(posts.reduce((sum, post) => sum + (post?.viewCount || 0), 0) / posts.length) : 0}
                     </div>
-                    <div className="text-sm text-gray-600">Prosek pregleda</div>
+                    <div className="text-sm text-gray-600">Просек прегледа</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
@@ -489,7 +523,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                         new Date(a?.publishedAt || a?.createdAt || 0).getTime()
                       )[0]?.publishedAt || posts[0]?.createdAt || '') : 'N/A'}
                     </div>
-                    <div className="text-sm text-gray-600">Poslednja objava</div>
+                    <div className="text-sm text-gray-600">Последња објава</div>
                   </div>
                 </div>
               </CardContent>
@@ -501,26 +535,26 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
         <div className="mt-16">
           <Card>
             <CardHeader>
-              <CardTitle>Možda vas zanima</CardTitle>
+              <CardTitle>Можда вас занима</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" asChild>
                   <Link href="/kategorije">
                     <Tag className="mr-2 h-4 w-4" />
-                    Sve kategorije
+                    Све категорије
                   </Link>
                 </Button>
                 <Button variant="outline" asChild>
                   <Link href="/objave">
                     <FileText className="mr-2 h-4 w-4" />
-                    Sve objave
+                    Све објаве
                   </Link>
                 </Button>
                 <Button variant="outline" asChild>
                   <Link href="/">
                     <TrendingUp className="mr-2 h-4 w-4" />
-                    Najnovije objave
+                    Најновије објаве
                   </Link>
                 </Button>
               </div>
@@ -533,7 +567,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 Opština Mladenovac. Sva prava zadržana.
+            © 2025 {institutionData.name}. Сва права задржана.
           </p>
         </div>
       </footer>

@@ -281,6 +281,8 @@ export interface CreateMediaDto {
   caption?: string;
 }
 
+export interface UpdateMediaDto extends CreateMediaDto {}
+
 // Page selection interface for dropdown
 export interface PageSelectionOption {
   id: number;

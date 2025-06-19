@@ -1,7 +1,8 @@
-// app/kategorije/page.tsx - Kompletno ažurirano za dinamičke dugmiće
+// app/kategorije/page.tsx - Kompletno ažurirano za dinamičke dugmiće i ćirilicu
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSettings } from '@/lib/settings-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,12 +17,18 @@ import {
   Eye
 } from 'lucide-react';
 import Link from 'next/link';
-import { categoriesApi } from '@/lib/api';
+import { categoriesApi, mediaApi } from '@/lib/api';
 import type { Category } from '@/lib/types';
 
 export default function CategoriesPage() {
+  const { settings } = useSettings();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Use settings for institution data with fallbacks
+  const institutionData = {
+    name: settings?.siteName || "Локална институција",
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -84,13 +91,16 @@ export default function CategoriesPage() {
     if (!categoryName) return <Tag className="h-6 w-6" />;
     
     const name = categoryName.toLowerCase();
-    if (name.includes('obav') || name.includes('vest') || name.includes('inf')) {
+    if (name.includes('обав') || name.includes('вест') || name.includes('инф') || 
+        name.includes('obav') || name.includes('vest') || name.includes('inf')) {
       return <FileText className="h-6 w-6" />;
     }
-    if (name.includes('promet') || name.includes('saobraćaj') || name.includes('infrastruktur')) {
+    if (name.includes('промет') || name.includes('саобраћај') || name.includes('инфраструктур') ||
+        name.includes('promet') || name.includes('saobraćaj') || name.includes('infrastruktur')) {
       return <Building className="h-6 w-6" />;
     }
-    if (name.includes('sport') || name.includes('kultura') || name.includes('događaj')) {
+    if (name.includes('спорт') || name.includes('култура') || name.includes('догађај') ||
+        name.includes('sport') || name.includes('kultura') || name.includes('događaj')) {
       return <Calendar className="h-6 w-6" />;
     }
     return <Tag className="h-6 w-6" />;
@@ -103,21 +113,29 @@ export default function CategoriesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-3">
-              <Building className="h-8 w-8 text-primary-dynamic" />
-              <span className="text-lg font-bold text-gray-900">Opština Mladenovac</span>
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
             </Link>
             <nav className="flex items-center space-x-6">
               <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Početna
+                Почетна
               </Link>
               <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Objave
+                Објаве
               </Link>
               <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Dokumenti
+                Документи
               </Link>
               <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Kontakt
+                Контакт
               </Link>
             </nav>
           </div>
@@ -129,14 +147,14 @@ export default function CategoriesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Kategorije objava</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Категорије објава</h1>
               <p className="text-gray-600 mt-2">
-                Organizovano po temama za lakše pronalaženje sadržaja
+                Организовано по темама за лакше проналажење садржаја
               </p>
             </div>
             <Button variant="outline" asChild>
               <Link href="/">
-                Nazad na početnu
+                Назад на почетну
               </Link>
             </Button>
           </div>
@@ -150,23 +168,23 @@ export default function CategoriesPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary-dynamic">{categories.length}</div>
-                <div className="text-sm text-gray-600">Aktivne kategorije</div>
+                <div className="text-sm text-gray-600">Активне категорије</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-secondary-dynamic">{getTotalPublishedPosts()}</div>
-                <div className="text-sm text-gray-600">Objavljene objave</div>
+                <div className="text-sm text-gray-600">Објављене објаве</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
                   {categories.length > 0 ? Math.round(getTotalPublishedPosts() / categories.length) : 0}
                 </div>
-                <div className="text-sm text-gray-600">Prosek po kategoriji</div>
+                <div className="text-sm text-gray-600">Просек по категорији</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-orange-600">
                   {getMostActiveCategory()?.posts?.filter(post => post.status === "published")?.length || 0}
                 </div>
-                <div className="text-sm text-gray-600">Najaktivnija kategorija</div>
+                <div className="text-sm text-gray-600">Најактивнија категорија</div>
               </div>
             </div>
           </div>
@@ -222,7 +240,7 @@ export default function CategoriesPage() {
                           </div>
                         </div>
                         <Badge variant="secondary" className="text-sm">
-                          {publishedPosts.length} objava
+                          {publishedPosts.length} објав{publishedPosts.length === 1 ? 'а' : 'а'}
                         </Badge>
                       </div>
 
@@ -233,14 +251,14 @@ export default function CategoriesPage() {
                         </p>
                       ) : (
                         <p className="text-gray-400 text-sm mb-4 italic">
-                          Nema opisa kategorije
+                          Нема описа категорије
                         </p>
                       )}
 
                       {/* Recent Posts Preview */}
                       {publishedPosts.length > 0 && (
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Poslednje objave:</h4>
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Последње објаве:</h4>
                           <div className="space-y-1">
                             {publishedPosts.slice(0, 3).map((post) => (
                               <Link
@@ -253,7 +271,7 @@ export default function CategoriesPage() {
                             ))}
                             {publishedPosts.length > 3 && (
                               <p className="text-xs text-gray-500">
-                                i još {publishedPosts.length - 3} objava...
+                                и још {publishedPosts.length - 3} објав{publishedPosts.length - 3 === 1 ? 'а' : 'а'}...
                               </p>
                             )}
                           </div>
@@ -264,11 +282,11 @@ export default function CategoriesPage() {
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                         <span className="flex items-center">
                           <Calendar className="mr-1 h-3 w-3" />
-                          Kreirana {formatDate(category.createdAt)}
+                          Креирана {formatDate(category.createdAt)}
                         </span>
                         <span className="flex items-center">
                           <TrendingUp className="mr-1 h-3 w-3" />
-                          Aktivna
+                          Активна
                         </span>
                       </div>
 
@@ -279,7 +297,7 @@ export default function CategoriesPage() {
                         asChild
                       >
                         <Link href={`/kategorije/${category.slug}`}>
-                          Pogledaj objave
+                          Погледај објаве
                           <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                       </Button>
@@ -291,7 +309,7 @@ export default function CategoriesPage() {
 
             {/* Popular Categories Section */}
             <div className="mt-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Najpopularnije kategorije</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Најпопуларније категорије</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 {categories
                   .sort((a, b) => {
@@ -322,7 +340,7 @@ export default function CategoriesPage() {
                                   </Link>
                                 </h3>
                                 <p className="text-sm text-gray-500">
-                                  {publishedPosts.length} objav • Kreirana {formatDate(category.createdAt)}
+                                  {publishedPosts.length} објав{publishedPosts.length === 1 ? 'а' : 'а'} • Креирана {formatDate(category.createdAt)}
                                 </p>
                               </div>
                             </div>
@@ -343,12 +361,12 @@ export default function CategoriesPage() {
           /* No Categories */
           <div className="text-center py-16">
             <Tag className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Nema aktivnih kategorija</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Нема активних категорија</h2>
             <p className="text-gray-600 mb-6">
-              Trenutno nema kategorija sa objavljenim objavama.
+              Тренутно нема категорија са објављеним објавама.
             </p>
             <Button variant="primary" asChild>
-              <Link href="/objave">Pogledaj sve objave</Link>
+              <Link href="/objave">Погледај све објаве</Link>
             </Button>
           </div>
         )}
@@ -358,9 +376,9 @@ export default function CategoriesPage() {
           <div className="mt-12">
             <Card>
               <CardHeader>
-                <CardTitle>Brza navigacija</CardTitle>
+                <CardTitle>Брза навигација</CardTitle>
                 <CardDescription>
-                  Kliknite na kategoriju da vidite sve objave iz te oblasti
+                  Кликните на категорију да видите све објаве из те области
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -392,7 +410,7 @@ export default function CategoriesPage() {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 Opština Mladenovac. Sva prava zadržana.
+            © 2025 {institutionData.name}. Сва права задржана.
           </p>
         </div>
       </footer>

@@ -1,4 +1,4 @@
-// app/page.tsx - Fixed version without inline :hover styles
+// app/page.tsx - Fixed version without inline :hover styles and translated to Cyrillic
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -53,12 +53,12 @@ export default function HomePage() {
 
   // Use settings for institution data
   const institutionData = {
-    name: settings?.siteName || "Lokalna institucija",
-    description: settings?.siteTagline || "Službeni portal lokalne samouprave",
-    address: settings?.contactAddress || "Adresa institucije",
+    name: settings?.siteName || "Локална институција",
+    description: settings?.siteTagline || "Службени портал локалне самоуправе",
+    address: settings?.contactAddress || "Адреса институције",
     phone: settings?.contactPhone || "+381 11 123 4567",
     email: settings?.contactEmail || "info@institucija.rs",
-    workingHours: settings?.contactWorkingHours || "Ponedeljak - Petak: 07:30 - 15:30",
+    workingHours: settings?.contactWorkingHours || "Понедељак - Петак: 07:30 - 15:30",
     mapUrl: settings?.contactMapUrl,
     citizens: "53.096",
     villages: "32",
@@ -192,8 +192,8 @@ export default function HomePage() {
     const date = new Date(dateString);
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 24) return `pre ${diffInHours} sati`;
-    if (diffInHours < 168) return `pre ${Math.floor(diffInHours / 24)} dana`;
+    if (diffInHours < 24) return `пре ${diffInHours} сати`;
+    if (diffInHours < 168) return `пре ${Math.floor(diffInHours / 24)} дана`;
     return formatDate(dateString);
   };
 
@@ -216,7 +216,7 @@ export default function HomePage() {
               {settings?.siteLogo ? (
                 <img 
                   src={mediaApi.getFileUrl(settings.siteLogo)} 
-                  alt={settings.siteName || 'Logo'} 
+                  alt={settings.siteName || 'Лого'} 
                   className="h-8 object-contain"
                 />
               ) : (
@@ -275,10 +275,10 @@ export default function HomePage() {
             <div className="md:hidden py-4 border-t">
               <div className="space-y-2">
                 <Link href="/objave" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">
-                  Objave
+                  Објаве
                 </Link>
                 <Link href="/dokumenti" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">
-                  Dokumenti
+                  Документи
                 </Link>
                 {pages.slice(0, 3).map((page) => (
                   <Link
@@ -290,7 +290,7 @@ export default function HomePage() {
                   </Link>
                 ))}
                 <Link href="/login" className="block px-3 py-2 text-primary-dynamic hover:bg-blue-50 rounded-md">
-                  CMS Login
+                  CMS пријава
                 </Link>
               </div>
             </div>
@@ -309,26 +309,26 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold mb-4" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
-                Dobrodošli u {institutionData.name}
+                Добродошли у {institutionData.name}
               </h2>
               <p className="text-lg lg:text-xl text-blue-100 mb-6" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
-                Transparentnost, dostupnost i efikasnost u službi građana.
-                Ovde možete pronaći sve važne informacije o radu naše institucije.
+                Транспарентност, доступност и ефикасност у служби грађана.
+                Овде можете пронаћи све важне информације о раду наше институције.
               </p>
 
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4 mt-8">
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold">{institutionData.citizens}</div>
-                  <div className="text-sm text-blue-200">Građana</div>
+                  <div className="text-sm text-blue-200">Грађана</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold">{institutionData.villages}</div>
-                  <div className="text-sm text-blue-200">Naselja</div>
+                  <div className="text-sm text-blue-200">Насеља</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold">{institutionData.area}</div>
-                  <div className="text-sm text-blue-200">Površina</div>
+                  <div className="text-sm text-blue-200">Површина</div>
                 </div>
               </div>
             </div>
@@ -337,9 +337,9 @@ export default function HomePage() {
               {/* Search Card */}
               <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardHeader>
-                  <CardTitle className="text-white">Pretraži sadržaj</CardTitle>
+                  <CardTitle className="text-white">Претражи садржај</CardTitle>
                   <CardDescription className="text-blue-100">
-                    Pronađite objave, dokumente i informacije
+                    Пронађите објаве, документе и информације
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -348,7 +348,7 @@ export default function HomePage() {
                       <div className="relative">
                         <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
-                          placeholder="Unesite ključne reči..."
+                          placeholder="Унесите кључне речи..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="pl-9 bg-white/90 focus-primary-dynamic"
@@ -372,7 +372,7 @@ export default function HomePage() {
                               <div className="p-3">
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                   <FileText className="mr-2 h-4 w-4 text-primary-dynamic" />
-                                  Objave ({searchResults.posts.length})
+                                  Објаве ({searchResults.posts.length})
                                 </h4>
                                 <div className="space-y-2">
                                   {searchResults.posts.map((post) => (
@@ -422,7 +422,7 @@ export default function HomePage() {
                               <div className="p-3 border-t">
                                 <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                   <Building className="mr-2 h-4 w-4 text-secondary-dynamic" />
-                                  Stranice ({searchResults.pages.length})
+                                  Странице ({searchResults.pages.length})
                                 </h4>
                                 <div className="space-y-2">
                                   {searchResults.pages.map((page) => (
@@ -451,9 +451,9 @@ export default function HomePage() {
                             {searchResults.posts.length === 0 && searchResults.pages.length === 0 && !isSearching && (
                               <div className="p-4 text-center text-gray-500">
                                 <Search className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-                                <p className="text-sm">Nema rezultata za "{searchTerm}"</p>
+                                <p className="text-sm">Нема резултата за "{searchTerm}"</p>
                                 <p className="text-xs text-gray-400 mt-1">
-                                  Pokušajte sa drugim ključnim rečima
+                                  Покушајте са другим кључним речима
                                 </p>
                               </div>
                             )}
@@ -465,7 +465,7 @@ export default function HomePage() {
                                   className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto"
                                   style={{ borderColor: themeColors.primary }}
                                 ></div>
-                                <p className="text-sm text-gray-500 mt-2">Pretraživanje...</p>
+                                <p className="text-sm text-gray-500 mt-2">Претражује се...</p>
                               </div>
                             )}
 
@@ -477,7 +477,7 @@ export default function HomePage() {
                                   onClick={clearSearch}
                                   className="text-sm font-medium flex items-center justify-center text-primary-dynamic hover:text-primary-dynamic/80 transition-colors"
                                 >
-                                  Prikaži sve rezultate
+                                  Прикажи све резултате
                                   <ChevronRight className="ml-1 h-4 w-4" />
                                 </Link>
                               </div>
@@ -490,7 +490,7 @@ export default function HomePage() {
                         className="w-full bg-white hover:bg-blue-50 text-primary-dynamic"
                       >
                         <Search className="mr-2 h-4 w-4" />
-                        Pretraži
+                        Претражи
                       </Button>
                     </form>
                   </div>
@@ -510,15 +510,15 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
-                  Najnovije objave
+                  Најновије објаве
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  {posts.length > 0 ? `Prikazuje se ${posts.length} najnovijih objava` : 'Nema objava za prikazivanje'}
+                  {posts.length > 0 ? `Приказује се ${posts.length} најновијих објава` : 'Нема објава за приказивање'}
                 </p>
               </div>
               <Button variant="outline" asChild>
                 <Link href="/objave">
-                  Sve objave
+                  Све објаве
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -556,7 +556,7 @@ export default function HomePage() {
                               <div className="flex items-center space-x-1">
                                 <span className="text-xs text-gray-400">•</span>
                                 <span className="text-xs text-gray-500">
-                                  Prikazuje se na: {post.pages.map(p => p.title).join(', ')}
+                                  Приказује се на: {post.pages.map(p => p.title).join(', ')}
                                 </span>
                               </div>
                             )}
@@ -605,13 +605,13 @@ export default function HomePage() {
               <Card>
                 <CardContent className="p-12 text-center">
                   <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nema objava na početnoj strani</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Нема објава на почетној страни</h3>
                   <p className="text-gray-500 mb-4">
-                    Trenutno nema objava dodeljenih početnoj strani.
-                    Administrator može dodeliti objave ovoj stranici iz CMS-a.
+                    Тренутно нема објава додељених почетној страни.
+                    Администратор може доделити објаве овој страни из CMS-а.
                   </p>
                   <Button variant="outline" asChild>
-                    <Link href="/objave">Pogledaj sve objave</Link>
+                    <Link href="/objave">Погледај све објаве</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -624,9 +624,9 @@ export default function HomePage() {
             {pages.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Brzi linkovi</CardTitle>
+                  <CardTitle>Брзи линкови</CardTitle>
                   <CardDescription>
-                    Najčešće tražene informacije
+                    Најчешће тражене информације
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -648,7 +648,7 @@ export default function HomePage() {
                     >
                       <span className="text-sm font-medium flex items-center text-primary-dynamic">
                         <Download className="mr-2 h-4 w-4" />
-                        Svi dokumenti
+                        Сви документи
                       </span>
                       <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform text-primary-dynamic" />
                     </Link>
@@ -660,13 +660,13 @@ export default function HomePage() {
             {/* Contact Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Kontakt informacije</CardTitle>
+                <CardTitle>Контакт информације</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-4 w-4 text-primary-dynamic mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Adresa</div>
+                    <div className="font-medium text-gray-900">Адреса</div>
                     <div className="text-gray-600">{institutionData.address}</div>
                   </div>
                 </div>
@@ -674,7 +674,7 @@ export default function HomePage() {
                 <div className="flex items-start space-x-3">
                   <Phone className="h-4 w-4 text-primary-dynamic mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Telefon</div>
+                    <div className="font-medium text-gray-900">Телефон</div>
                     <div className="text-gray-600">{institutionData.phone}</div>
                   </div>
                 </div>
@@ -682,7 +682,7 @@ export default function HomePage() {
                 <div className="flex items-start space-x-3">
                   <Mail className="h-4 w-4 text-primary-dynamic mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Email</div>
+                    <div className="font-medium text-gray-900">Емаил</div>
                     <div className="text-gray-600">{institutionData.email}</div>
                   </div>
                 </div>
@@ -690,7 +690,7 @@ export default function HomePage() {
                 <div className="flex items-start space-x-3">
                   <Clock className="h-4 w-4 text-primary-dynamic mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-medium text-gray-900">Radno vreme</div>
+                    <div className="font-medium text-gray-900">Радно време</div>
                     <div className="text-gray-600">{institutionData.workingHours}</div>
                   </div>
                 </div>
@@ -700,7 +700,7 @@ export default function HomePage() {
                   asChild
                   className='w-full'
                 >
-                  <Link href="/kontakt">Kontaktiraj nas</Link>
+                  <Link href="/kontakt">Контактирај нас</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -709,7 +709,7 @@ export default function HomePage() {
             {categories.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Kategorije objava</CardTitle>
+                  <CardTitle>Категорије објава</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -738,9 +738,9 @@ export default function HomePage() {
             {/* Transparency */}
             <Card className="card-primary-dynamic">
               <CardHeader>
-                <CardTitle className="text-primary-dynamic">Transparentnost</CardTitle>
+                <CardTitle className="text-primary-dynamic">Транспарентност</CardTitle>
                 <CardDescription className="text-primary-dynamic opacity-80">
-                  Pristup informacijama od javnog značaja
+                  Приступ информацијама од јавног значаја
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -748,19 +748,19 @@ export default function HomePage() {
                   <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/budzet">
                       <TrendingUp className="mr-2 h-4 w-4" />
-                      Budžet i finansije
+                      Буџет и финансије
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/javne-nabavke">
                       <FileText className="mr-2 h-4 w-4" />
-                      Javne nabavke
+                      Јавне набавке
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/sednice">
                       <Users className="mr-2 h-4 w-4" />
-                      Zapisnici sa sednica
+                      Записници са седница
                     </Link>
                   </Button>
                 </div>
@@ -779,7 +779,7 @@ export default function HomePage() {
                 {settings?.siteLogo ? (
                   <img 
                     src={mediaApi.getFileUrl(settings.siteLogo)} 
-                    alt={settings.siteName || 'Logo'} 
+                    alt={settings.siteName || 'Лого'} 
                     className="h-6 object-contain brightness-0 invert"
                   />
                 ) : (
@@ -796,8 +796,8 @@ export default function HomePage() {
                 className="text-gray-300 mb-4 text-sm"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
-                Službeni portal lokalne samouprave posvećen transparentnosti
-                i dostupnosti informacija građanima.
+                Службени портал локалне самоуправе посвећен транспарентности
+                и доступности информација грађанима.
               </p>
               
               {/* Social Media Links */}
@@ -863,7 +863,7 @@ export default function HomePage() {
                 className="text-sm text-gray-400 mt-4"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
-                © 2025 {institutionData.name}. Sva prava zadržana.
+                © 2025 {institutionData.name}. Сва права задржана.
               </p>
             </div>
 
@@ -872,7 +872,7 @@ export default function HomePage() {
                 className="text-lg font-semibold mb-4 text-primary-dynamic"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
-                Korisni linkovi
+                Корисни линкови
               </h4>
               <div className="space-y-2">
                 {pages.map((page) => (
@@ -890,14 +890,14 @@ export default function HomePage() {
                   className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                   style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
                 >
-                  Dokumenti
+                  Документи
                 </Link>
                 <Link 
                   href="/sitemap" 
                   className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                   style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
                 >
-                  Mapa sajta
+                  Мапа сајта
                 </Link>
               </div>
             </div>
@@ -907,7 +907,7 @@ export default function HomePage() {
                 className="text-lg font-semibold mb-4 text-primary-dynamic"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
-                Kontakt
+                Контакт
               </h4>
               <div 
                 className="space-y-2 text-gray-300 text-sm"
@@ -931,7 +931,7 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                   >
                     <MapPin className="mr-2 h-4 w-4" />
-                    Prikaži na mapi
+                    Прикажи на мапи
                   </a>
                 </Button>
               )}
