@@ -640,7 +640,7 @@ export default function CategoriesPage() {
                         {category.posts?.length || 0} objava
                       </Badge>
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/categories/${category.slug}`} target="_blank">
+                        <Link href={`/kategorije/${category.slug}`} target="_blank">
                           <ExternalLink className="h-4 w-4" />
                         </Link>
                       </Button>

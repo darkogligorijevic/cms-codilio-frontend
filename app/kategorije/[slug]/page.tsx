@@ -24,12 +24,14 @@ import {
 import Link from 'next/link';
 import { categoriesApi, postsApi, mediaApi } from '@/lib/api';
 import type { Category, Post } from '@/lib/types';
+import { useThemeColors } from '@/lib/theme-hooks';
 
 interface CategoryArchiveProps {
   params: Promise<{ slug: string }>;
 }
 
 export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
+  const themeColors = useThemeColors();
   const resolvedParams = use(params);
   const { settings } = useSettings();
   const [category, setCategory] = useState<Category | null>(null);
@@ -282,7 +284,10 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
       </header>
 
       {/* Category Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
+      <div className="text-white py-12"         
+           style={{
+            background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.secondary} 100%)`
+           }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
