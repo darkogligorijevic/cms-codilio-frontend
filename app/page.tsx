@@ -1,4 +1,4 @@
-// app/(frontend)/page.tsx - FINALNA VERZIJA SA SVETLOM TEMOM
+// app/page.tsx - Fixed version without inline :hover styles and translated to Cyrillic
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -14,12 +14,22 @@ import {
   Search,
   FileText,
   Download,
-  ChevronRight,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
   TrendingUp,
   Users,
   Building,
+  ChevronRight,
+  ExternalLink,
+  Menu,
   X,
-  User
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube
 } from 'lucide-react';
 import Link from 'next/link';
 import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
@@ -35,6 +45,7 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<{ posts: Post[], pages: Page[] }>({ posts: [], pages: [] });
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -44,6 +55,11 @@ export default function HomePage() {
   const institutionData = {
     name: settings?.siteName || "Локална институција",
     description: settings?.siteTagline || "Службени портал локалне самоуправе",
+    address: settings?.contactAddress || "Адреса институције",
+    phone: settings?.contactPhone || "+381 11 123 4567",
+    email: settings?.contactEmail || "info@institucija.rs",
+    workingHours: settings?.contactWorkingHours || "Понедељак - Петак: 07:30 - 15:30",
+    mapUrl: settings?.contactMapUrl,
     citizens: "53.096",
     villages: "32",
     area: "339 km²"
@@ -183,14 +199,105 @@ export default function HomePage() {
 
   if (settingsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{ borderColor: themeColors.primary }}></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-3">
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <div>
+                <h1 className="text-lg font-bold text-gray-900" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
+                  {institutionData.name}
+                </h1>
+                <p className="text-xs text-gray-500 hidden sm:block" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
+                  {institutionData.description}
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Објаве
+              </Link>
+              <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Документи
+              </Link>
+              {pages.slice(0, 3).map((page) => (
+                <Link
+                  key={page.id}
+                  href={`/${page.slug}`}
+                  className="text-gray-700 hover:text-primary-dynamic transition-colors"
+                >
+                  {page.title}
+                </Link>
+              ))}
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  CMS
+                </Link>
+              </Button>
+            </nav>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden py-4 border-t">
+              <div className="space-y-2">
+                <Link href="/objave" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">
+                  Објаве
+                </Link>
+                <Link href="/dokumenti" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">
+                  Документи
+                </Link>
+                {pages.slice(0, 3).map((page) => (
+                  <Link
+                    key={page.id}
+                    href={`/${page.slug}`}
+                    className="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                  >
+                    {page.title}
+                  </Link>
+                ))}
+                <Link href="/login" className="block px-3 py-2 text-primary-dynamic hover:bg-blue-50 rounded-md">
+                  CMS пријава
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+
       {/* Hero Section with Dynamic Colors */}
       <section 
         className="text-white py-12 lg:py-16"
@@ -394,8 +501,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Main Content - SVETLA POZADINA */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 bg-white">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Latest News */}
@@ -420,7 +527,7 @@ export default function HomePage() {
             {isLoading ? (
               <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse bg-white border border-gray-200">
+                  <Card key={i} className="animate-pulse">
                     <CardContent className="p-6">
                       <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
                       <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
@@ -432,7 +539,7 @@ export default function HomePage() {
             ) : posts.length > 0 ? (
               <div className="space-y-6">
                 {posts.map((post) => (
-                  <Card key={post.id} className="hover:shadow-md transition-shadow bg-white border border-gray-200">
+                  <Card key={post.id} className="hover:shadow-md transition-shadow theme-transition">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -470,10 +577,6 @@ export default function HomePage() {
 
                           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center">
-                              <User className="mr-1 h-3 w-3" />
-                              {post.author.name}
-                            </span>
-                            <span className="flex items-center">
                               <Eye className="mr-1 h-3 w-3" />
                               {post.viewCount}
                             </span>
@@ -499,7 +602,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200">
+              <Card>
                 <CardContent className="p-12 text-center">
                   <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Нема објава на почетној страни</h3>
@@ -519,10 +622,10 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Quick Links */}
             {pages.length > 0 && (
-              <Card className="bg-white border border-gray-200">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Брзи линкови</CardTitle>
-                  <CardDescription className="text-gray-600">
+                  <CardTitle>Брзи линкови</CardTitle>
+                  <CardDescription>
                     Најчешће тражене информације
                   </CardDescription>
                 </CardHeader>
@@ -531,14 +634,14 @@ export default function HomePage() {
                     <Link
                       key={page.id}
                       href={`/${page.slug}`}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group theme-transition"
                     >
-                      <span className="text-sm font-medium text-gray-700">{page.title}</span>
+                      <span className="text-sm font-medium">{page.title}</span>
                       <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-primary-dynamic transition-colors" />
                     </Link>
                   ))}
 
-                  <div className="pt-2 border-t border-gray-100">
+                  <div className="pt-2 border-t">
                     <Link
                       href="/dokumenti"
                       className="flex items-center justify-between p-3 rounded-lg transition-colors group hover:bg-primary-dynamic/5"
@@ -554,11 +657,59 @@ export default function HomePage() {
               </Card>
             )}
 
+            {/* Contact Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Контакт информације</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">Адреса</div>
+                    <div className="text-gray-600">{institutionData.address}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Phone className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">Телефон</div>
+                    <div className="text-gray-600">{institutionData.phone}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Mail className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">Емаил</div>
+                    <div className="text-gray-600">{institutionData.email}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Clock className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">Радно време</div>
+                    <div className="text-gray-600">{institutionData.workingHours}</div>
+                  </div>
+                </div>
+
+                <Button 
+                  variant="primary"
+                  asChild
+                  className='w-full'
+                >
+                  <Link href="/kontakt">Контактирај нас</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Categories */}
             {categories.length > 0 && (
-              <Card className="bg-white border border-gray-200">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Категорије објава</CardTitle>
+                  <CardTitle>Категорије објава</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -566,7 +717,7 @@ export default function HomePage() {
                       <Badge
                         key={category.id}
                         variant="outline"
-                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors badge-primary-dynamic border-gray-300 text-gray-700 hover:text-primary-dynamic"
+                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors badge-primary-dynamic"
                         asChild
                       >
                         <Link href={`/kategorije/${category.slug}`}>
@@ -585,7 +736,7 @@ export default function HomePage() {
             )}
 
             {/* Transparency */}
-            <Card className="bg-white border border-gray-200 card-primary-dynamic">
+            <Card className="card-primary-dynamic">
               <CardHeader>
                 <CardTitle className="text-primary-dynamic">Транспарентност</CardTitle>
                 <CardDescription className="text-primary-dynamic opacity-80">
@@ -594,19 +745,19 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 text-gray-700 hover:text-primary-dynamic" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/budzet">
                       <TrendingUp className="mr-2 h-4 w-4" />
                       Буџет и финансије
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 text-gray-700 hover:text-primary-dynamic" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/javne-nabavke">
                       <FileText className="mr-2 h-4 w-4" />
                       Јавне набавке
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 text-gray-700 hover:text-primary-dynamic" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/sednice">
                       <Users className="mr-2 h-4 w-4" />
                       Записници са седница
@@ -618,6 +769,176 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-6 object-contain brightness-0 invert"
+                  />
+                ) : (
+                  <Building className="h-6 w-6" />
+                )}
+                <span 
+                  className="text-lg font-bold"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  {institutionData.name}
+                </span>
+              </div>
+              <p 
+                className="text-gray-300 mb-4 text-sm"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                Службени портал локалне самоуправе посвећен транспарентности
+                и доступности информација грађанима.
+              </p>
+              
+              {/* Social Media Links */}
+              <div className="flex items-center space-x-4">
+                {settings?.socialFacebook && (
+                  <a 
+                    href={settings.socialFacebook} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors hover:text-primary-dynamic"
+                    title="Facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialTwitter && (
+                  <a 
+                    href={settings.socialTwitter} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors hover:text-primary-dynamic"
+                    title="Twitter"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialInstagram && (
+                  <a 
+                    href={settings.socialInstagram} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors hover:text-primary-dynamic"
+                    title="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialLinkedin && (
+                  <a 
+                    href={settings.socialLinkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors hover:text-primary-dynamic"
+                    title="LinkedIn"
+                  >
+                    <Linkedin className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialYoutube && (
+                  <a 
+                    href={settings.socialYoutube} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-400 hover:text-white transition-colors hover:text-primary-dynamic"
+                    title="YouTube"
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+              
+              <p 
+                className="text-sm text-gray-400 mt-4"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                © 2025 {institutionData.name}. Сва права задржана.
+              </p>
+            </div>
+
+            <div>
+              <h4 
+                className="text-lg font-semibold mb-4 text-primary-dynamic"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                Корисни линкови
+              </h4>
+              <div className="space-y-2">
+                {pages.map((page) => (
+                  <Link
+                    key={page.id}
+                    href={`/${page.slug}`}
+                    className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
+                    style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                  >
+                    {page.title}
+                  </Link>
+                ))}
+                <Link 
+                  href="/dokumenti" 
+                  className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  Документи
+                </Link>
+                <Link 
+                  href="/sitemap" 
+                  className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  Мапа сајта
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <h4 
+                className="text-lg font-semibold mb-4 text-primary-dynamic"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                Контакт
+              </h4>
+              <div 
+                className="space-y-2 text-gray-300 text-sm"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                <p>{institutionData.address}</p>
+                <p>{institutionData.phone}</p>
+                <p>{institutionData.email}</p>
+                <p>{institutionData.workingHours}</p>
+              </div>
+              {institutionData.mapUrl && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4 border-primary-dynamic text-primary-dynamic hover:bg-primary-dynamic hover:text-white"
+                  asChild
+                >
+                  <a 
+                    href={institutionData.mapUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Прикажи на мапи
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

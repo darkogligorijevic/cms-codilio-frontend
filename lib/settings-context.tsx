@@ -1,4 +1,4 @@
-// lib/settings-context.tsx - DEBUG VERSION
+// lib/settings-context.tsx - FIXED VERSION
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
@@ -23,8 +23,8 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 // Utility function to convert hex color to HSL
 function hexToHsl(hex: string) {
+  // Dodaj validaciju za hex string
   if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || hex.length !== 7) {
-    console.warn('🎨 Invalid hex color:', hex);
     return '220 100% 50%'; // default blue
   }
 
@@ -38,7 +38,7 @@ function hexToHsl(hex: string) {
     let h, s, l = (max + min) / 2;
 
     if (max === min) {
-      h = s = 0;
+      h = s = 0; // achromatic
     } else {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -55,69 +55,68 @@ function hexToHsl(hex: string) {
     s = Math.round(s * 100);
     l = Math.round(l * 100);
 
-    const result = `${h} ${s}% ${l}%`;
-    console.log('🎨 Converted', hex, 'to HSL:', result);
-    return result;
+    return `${h} ${s}% ${l}%`;
   } catch (error) {
-    console.warn('🎨 Error converting hex to HSL:', hex, error);
-    return '220 100% 50%';
+    console.warn('Error converting hex to HSL:', hex, error);
+    return '220 100% 50%'; // default blue
   }
 }
 
-// DEBUG: Function to apply theme to CSS variables
+// Function to apply theme to CSS variables
 function applyThemeToDocument(settings: SiteSettings) {
   if (typeof document === 'undefined') return;
 
-  console.log('🎨 =================================');
-  console.log('🎨 APPLYING THEME TO DOCUMENT');
-  console.log('🎨 Settings:', settings);
-  console.log('🎨 =================================');
-
   const root = document.documentElement;
-
-  // DEBUG: Log current state
-  console.log('🐛 BEFORE - HTML classes:', root.className);
-  console.log('🐛 BEFORE - Background var:', getComputedStyle(root).getPropertyValue('--background'));
 
   // Apply colors if they exist
   if (settings.themePrimaryColor) {
     const primaryHsl = hexToHsl(settings.themePrimaryColor);
-    root.style.setProperty('--primary-dynamic', primaryHsl);
+    root.style.setProperty('--primary', primaryHsl);
     root.style.setProperty('--primary-hex', settings.themePrimaryColor);
-    console.log('✅ Applied primary color:', settings.themePrimaryColor, '→', primaryHsl);
+    
+    // Create variations for hover states
+    const [h, s, l] = primaryHsl.split(' ');
+    const hNum = parseInt(h) || 220;
+    const sNum = parseInt(s.replace('%', '')) || 100;
+    const lNum = parseInt(l.replace('%', '')) || 50;
+    
+    // Primary foreground (contrasting color)
+    const primaryForeground = lNum > 50 ? '0 0% 0%' : '0 0% 100%';
+    root.style.setProperty('--primary-foreground', primaryForeground);
+    
+    // Hover state (slightly darker/lighter)
+    const hoverL = lNum > 50 ? Math.max(lNum - 10, 0) : Math.min(lNum + 10, 100);
+    root.style.setProperty('--primary-hover', `${hNum} ${sNum}% ${hoverL}%`);
   }
 
   if (settings.themeSecondaryColor) {
     const secondaryHsl = hexToHsl(settings.themeSecondaryColor);
-    root.style.setProperty('--secondary-dynamic', secondaryHsl);
+    root.style.setProperty('--secondary', secondaryHsl);
     root.style.setProperty('--secondary-hex', settings.themeSecondaryColor);
-    console.log('✅ Applied secondary color:', settings.themeSecondaryColor, '→', secondaryHsl);
+    
+    const [h, s, l] = secondaryHsl.split(' ');
+    const lNum = parseInt(l.replace('%', '')) || 50;
+    const secondaryForeground = lNum > 50 ? '0 0% 0%' : '0 0% 100%';
+    root.style.setProperty('--secondary-foreground', secondaryForeground);
   }
 
   // Apply font family
   if (settings.themeFontFamily) {
     root.style.setProperty('--font-family', settings.themeFontFamily);
-    console.log('✅ Applied font family:', settings.themeFontFamily);
+    document.body.style.fontFamily = settings.themeFontFamily;
   }
 
-  // CRITICAL: Dark mode logic
-  console.log('🌙 Theme dark mode setting:', settings.themeDarkMode);
-  
+  // Apply dark mode class if enabled
   if (settings.themeDarkMode) {
     root.classList.add('dark-mode-available');
-    console.log('✅ Dark mode is AVAILABLE (but not forced)');
   } else {
     root.classList.remove('dark-mode-available');
-    root.classList.remove('dark'); // FORCE REMOVE dark class
-    console.log('❌ Dark mode DISABLED - forcing light mode');
-    console.log('🔥 REMOVED dark class from HTML');
   }
 
-  // DEBUG: Log final state
-  console.log('🐛 AFTER - HTML classes:', root.className);
-  console.log('🐛 AFTER - Background var:', getComputedStyle(root).getPropertyValue('--background'));
-  console.log('🐛 AFTER - Body computed background:', getComputedStyle(document.body).backgroundColor);
-  console.log('🎨 =================================');
+  // Custom properties for site branding
+  if (settings.siteName) {
+    root.style.setProperty('--site-name', `"${settings.siteName}"`);
+  }
 }
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -125,42 +124,43 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [rawSettings, setRawSettings] = useState<Setting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Ref to track if initial fetch is done
   const hasInitiallyFetched = useRef(false);
   
+  // Memoized fetch function to prevent recreation on every render
   const fetchSettings = useCallback(async (showToastOnError = false) => {
+    // Prevent multiple simultaneous fetches
     if (isLoading && hasInitiallyFetched.current) {
       return;
     }
     
     try {
       setIsLoading(true);
-      console.log('🔄 Fetching settings...');
       
       const [structured, raw] = await Promise.all([
         settingsApi.getStructured(),
         settingsApi.getAll()
       ]);
       
-      console.log('📦 Fetched settings:', structured);
-      
       setSettings(structured);
       setRawSettings(raw);
       
-      // Apply theme immediately after fetching
+      // Apply theme only if values actually changed
       if (structured) {
-        console.log('🎨 About to apply theme...');
         applyThemeToDocument(structured);
       }
       
       hasInitiallyFetched.current = true;
       
     } catch (error) {
-      console.error('❌ Error fetching settings:', error);
+      console.error('Error fetching settings:', error);
       
+      // Only show toast error if explicitly requested (not during initial load)
       if (showToastOnError) {
         toast.error('Greška pri učitavanju podešavanja');
       }
       
+      // Set empty defaults to prevent infinite retries
       if (!hasInitiallyFetched.current) {
         setSettings({} as SiteSettings);
         setRawSettings([]);
@@ -169,25 +169,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, []); // Empty dependency array - function is stable
 
-  // Initial fetch
+  // Initial fetch - only runs once
   useEffect(() => {
     if (!hasInitiallyFetched.current) {
-      console.log('🚀 Initial settings fetch...');
       fetchSettings(false);
     }
-  }, []);
+  }, []); // Empty dependency array - only run once on mount
 
-  // Apply theme when settings change
+  // Separate effect for applying theme when settings change
   useEffect(() => {
     if (settings && hasInitiallyFetched.current) {
-      console.log('🔄 Settings changed, reapplying theme...');
+      // Use requestAnimationFrame to avoid blocking rendering
       requestAnimationFrame(() => {
         applyThemeToDocument(settings);
       });
     }
-  }, [settings]);
+  }, [settings]); // Only depend on settings
 
   const refreshSettings = useCallback(async () => {
     await fetchSettings(true);
@@ -197,6 +196,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       await settingsApi.update(key, { value });
       await refreshSettings();
+      // Ne prikazuj toast ovde jer će se pozvati iz komponente
     } catch (error) {
       console.error('Error updating setting:', error);
       throw error;
@@ -207,6 +207,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       const updatedSettings = await settingsApi.updateMultiple(updates);
       
+      // Immediately update local state with new values
       setRawSettings(prevSettings => {
         const newSettings = [...prevSettings];
         updates.settings.forEach(update => {
@@ -218,13 +219,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return newSettings;
       });
 
+      // Update structured settings
       const newStructured = await settingsApi.getStructured();
       setSettings(newStructured);
       
+      // Apply theme immediately
       if (newStructured) {
         applyThemeToDocument(newStructured);
       }
       
+      // Don't show toast here, let component handle it
     } catch (error) {
       console.error('Error updating settings:', error);
       throw error;
@@ -235,6 +239,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       const uploadedSetting = await settingsApi.uploadFile(key, file);
       
+      // Immediately update local state with new value
       setRawSettings(prevSettings => {
         const newSettings = [...prevSettings];
         const index = newSettings.findIndex(s => s.key === key);
@@ -244,13 +249,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return newSettings;
       });
       
+      // Update structured settings
       const newStructured = await settingsApi.getStructured();
       setSettings(newStructured);
       
+      // Apply theme if needed
       if (newStructured) {
         applyThemeToDocument(newStructured);
       }
       
+      // Return the uploaded setting for use in component
       return uploadedSetting;
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -262,6 +270,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       await settingsApi.reset(category);
       await refreshSettings();
+      // Ne prikazuj toast ovde jer će se pozvati iz komponente
     } catch (error) {
       console.error('Error resetting settings:', error);
       throw error;
@@ -282,12 +291,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       await settingsApi.import({ settings: data });
       await refreshSettings();
+      // Ne prikazuj toast ovde jer će se pozvati iz komponente
     } catch (error) {
       console.error('Error importing settings:', error);
       throw error;
     }
   }, [refreshSettings]);
 
+  // Memoize context value to prevent unnecessary re-renders
   const contextValue = React.useMemo(() => ({
     settings,
     rawSettings,
@@ -327,4 +338,5 @@ export function useSettings() {
   return context;
 }
 
+// Export the theme application function for manual use if needed
 export { applyThemeToDocument };
