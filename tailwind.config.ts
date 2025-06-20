@@ -1,4 +1,4 @@
-// tailwind.config.ts - Updated for Tailwind CSS 4 + Next.js 15
+// tailwind.config.ts - Kompletan fajl za Tailwind CSS 4 + Next.js 15
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -328,7 +328,9 @@ const config: Config = {
     },
   },
   plugins: [
-    require('@tailwindcss/typography')
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/aspect-ratio'),
   ],
 };
 

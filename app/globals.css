@@ -1,4 +1,4 @@
-/* app/globals.css - Tailwind CSS 4 + Next.js 15 compatible */
+/* app/globals.css - Kompletan fajl za Tailwind CSS 4 + Next.js 15 */
 @import "tailwindcss";
 
 /* CSS Variables for theme colors */
@@ -37,7 +37,7 @@
   --font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Dark mode colors */
+/* Dark mode colors - Ovo će se koristiti kada se omogući dark mode */
 .dark {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
@@ -73,20 +73,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-@layer base {
-  h1 {
-    @apply text-6xl
-  }
-  
-  h2 {
-    @apply text-4xl
-  }
-
-  h3 {
-    @apply text-2xl
-  }
-}
-
 /* Theme transition class */
 .theme-transition {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
@@ -96,40 +82,6 @@ body {
 .dark {
   color-scheme: dark;
 }
-
-
-.bg-primary-static {
-  background-color: #000000;
-}
-
-.text-primary-static {
-  color: #000000;
-}
-
-.border-primary-static {
-  border-color: #000000;
-}
-
-.hover\:bg-primary-static\/90:hover {
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.bg-secondary-static {
-  background-color: #ffffff;
-}
-
-.text-secondary-static {
-  color: #ffffff;
-}
-
-.border-secondary-static {
-  border-color: #ffffff;
-}
-
-.hover\:bg-secondary-static\/90:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
 
 /* Dynamic color utilities */
 .text-primary-dynamic {
@@ -270,14 +222,6 @@ body {
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--muted-foreground));
   border-radius: 4px;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground));
 }
 
 /* Selection colors */

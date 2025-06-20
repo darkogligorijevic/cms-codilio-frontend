@@ -1,9 +1,8 @@
-// app/(frontend)/layout.tsx
+// app/(frontend)/layout.tsx - Kompletan fajl
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Roboto } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from '@/components/frontend/header';
 import { Footer } from '@/components/frontend/footer';
 import { pagesApi } from '@/lib/api';
@@ -34,14 +33,12 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   }, []);
 
   return (
-    <ThemeProvider>
-      <div className={`${roboto.className} min-h-screen flex flex-col bg-gray-50`}>
-        <Header pages={pages} />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer pages={pages} />
-      </div>
-    </ThemeProvider>
+    <div className={`${roboto.className} min-h-screen flex flex-col bg-white theme-transition`}>
+      <Header pages={pages} />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer pages={pages} />
+    </div>
   );
 }
