@@ -34,6 +34,7 @@ import {
 import Link from 'next/link';
 import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Page, Category } from '@/lib/types';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export default function HomePage() {
   const { settings, isLoading: settingsLoading } = useSettings();
@@ -208,7 +209,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50 dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -249,6 +250,11 @@ export default function HomePage() {
                   {page.title}
                 </Link>
               ))}
+              {settings?.themeDarkMode ? (
+                <ModeToggle />
+              ) : (
+                <span hidden/>
+              )}
               <Button variant="outline" size="sm" asChild>
                 <Link href="/dashboard">
                   <ExternalLink className="mr-2 h-4 w-4" />
@@ -257,17 +263,24 @@ export default function HomePage() {
               </Button>
             </nav>
 
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
+            <div className='justify-end gap-2 items-center md:hidden flex'>
+              {settings?.themeDarkMode ? (
+                  <ModeToggle />
+                ) : (
+                  <span hidden/>
               )}
-            </button>
+              {/* Mobile menu button */}
+              <button
+                className="md:hidden p-2"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
