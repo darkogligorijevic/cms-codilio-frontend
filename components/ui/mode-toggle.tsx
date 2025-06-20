@@ -36,7 +36,7 @@ export function ModeToggle() {
         <Button 
           variant="outline" 
           size="icon" 
-          className="relative h-9 w-9 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
+          className="relative h-9 w-9 bg-white border-gray-200 hover:bg-gray-50 transition-all duration-200"
         >
           {/* Sun icon for light mode */}
           <Sun
@@ -59,14 +59,14 @@ export function ModeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="min-w-[140px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600"
+        className="min-w-[140px] bg-white border-gray-200 :border-gray-600"
       >
         <DropdownMenuItem 
           onClick={() => setTheme("light")}
           className={`cursor-pointer ${
             theme === "light" 
-              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic" 
-              : "hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-gray-100 text-primary-dynamic" 
+              : "hover:bg-gray-50"
           }`}
         >
           <Sun className="mr-2 h-4 w-4" />
@@ -79,8 +79,8 @@ export function ModeToggle() {
           onClick={() => setTheme("dark")}
           className={`cursor-pointer ${
             theme === "dark" 
-              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic" 
-              : "hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-gray-100 text-primary-dynamic" 
+              : "hover:bg-gray-50"
           }`}
         >
           <Moon className="mr-2 h-4 w-4" />
@@ -93,8 +93,8 @@ export function ModeToggle() {
           onClick={() => setTheme("system")}
           className={`cursor-pointer ${
             theme === "system" 
-              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic" 
-              : "hover:bg-gray-50 dark:hover:bg-gray-700"
+              ? "bg-gray-100 text-primary-dynamic" 
+              : "hover:bg-gray-50"
           }`}
         >
           <Monitor className="mr-2 h-4 w-4" />

@@ -1,52 +1,10 @@
-// HITNA ISPRAVKA - Dodaj ovo na vrh settings-context.tsx
-
-// lib/settings-context.tsx - HITNA ISPRAVKA
+// lib/settings-context.tsx - DEBUG VERSION
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { SiteSettings, Setting, SettingCategory, UpdateMultipleSettingsDto } from './types';
 import { settingsApi } from './api';
 import { toast } from 'sonner';
-
-// DODAJ OVO NA POČETAK FAJLA:
-if (typeof window !== 'undefined') {
-  // FORCE LIGHT THEME ON LOAD
-  const forceLight = () => {
-    document.documentElement.classList.remove('dark');
-    document.documentElement.style.setProperty('--background', '0 0% 100%');
-    document.documentElement.style.setProperty('--foreground', '222.2 84% 4.9%');
-    document.documentElement.style.setProperty('--card', '0 0% 100%');
-    document.documentElement.style.setProperty('--card-foreground', '222.2 84% 4.9%');
-    console.log('🔥 FORCED LIGHT THEME');
-  };
-  
-  // Run immediately
-  forceLight();
-  
-  // Run when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', forceLight);
-  }
-  
-  // Watch for any changes to dark class
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        const target = mutation.target as HTMLElement;
-        if (target.classList.contains('dark')) {
-          console.log('🚨 DETECTED DARK CLASS - REMOVING');
-          target.classList.remove('dark');
-          forceLight();
-        }
-      }
-    });
-  });
-  
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  });
-}
 
 interface SettingsContextType {
   settings: SiteSettings | null;
@@ -66,6 +24,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 // Utility function to convert hex color to HSL
 function hexToHsl(hex: string) {
   if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || hex.length !== 7) {
+    console.warn('🎨 Invalid hex color:', hex);
     return '220 100% 50%'; // default blue
   }
 
@@ -79,7 +38,7 @@ function hexToHsl(hex: string) {
     let h, s, l = (max + min) / 2;
 
     if (max === min) {
-      h = s = 0; // achromatic
+      h = s = 0;
     } else {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -96,48 +55,69 @@ function hexToHsl(hex: string) {
     s = Math.round(s * 100);
     l = Math.round(l * 100);
 
-    return `${h} ${s}% ${l}%`;
+    const result = `${h} ${s}% ${l}%`;
+    console.log('🎨 Converted', hex, 'to HSL:', result);
+    return result;
   } catch (error) {
-    console.warn('Error converting hex to HSL:', hex, error);
-    return '220 100% 50%'; // default blue
+    console.warn('🎨 Error converting hex to HSL:', hex, error);
+    return '220 100% 50%';
   }
 }
 
-// Function to apply theme to CSS variables
+// DEBUG: Function to apply theme to CSS variables
 function applyThemeToDocument(settings: SiteSettings) {
   if (typeof document === 'undefined') return;
 
+  console.log('🎨 =================================');
+  console.log('🎨 APPLYING THEME TO DOCUMENT');
+  console.log('🎨 Settings:', settings);
+  console.log('🎨 =================================');
+
   const root = document.documentElement;
 
-  // FORCE LIGHT THEME ALWAYS
-  root.classList.remove('dark');
-  root.style.setProperty('--background', '0 0% 100%');
-  root.style.setProperty('--foreground', '222.2 84% 4.9%');
-  root.style.setProperty('--card', '0 0% 100%');
-  root.style.setProperty('--card-foreground', '222.2 84% 4.9%');
-  root.style.setProperty('--border', '214.3 31.8% 91.4%');
-  root.style.setProperty('--muted', '210 40% 96%');
-  root.style.setProperty('--muted-foreground', '215.4 16.3% 46.9%');
+  // DEBUG: Log current state
+  console.log('🐛 BEFORE - HTML classes:', root.className);
+  console.log('🐛 BEFORE - Background var:', getComputedStyle(root).getPropertyValue('--background'));
 
-  // Apply theme colors if they exist
+  // Apply colors if they exist
   if (settings.themePrimaryColor) {
     const primaryHsl = hexToHsl(settings.themePrimaryColor);
     root.style.setProperty('--primary-dynamic', primaryHsl);
     root.style.setProperty('--primary-hex', settings.themePrimaryColor);
+    console.log('✅ Applied primary color:', settings.themePrimaryColor, '→', primaryHsl);
   }
 
   if (settings.themeSecondaryColor) {
     const secondaryHsl = hexToHsl(settings.themeSecondaryColor);
     root.style.setProperty('--secondary-dynamic', secondaryHsl);
     root.style.setProperty('--secondary-hex', settings.themeSecondaryColor);
+    console.log('✅ Applied secondary color:', settings.themeSecondaryColor, '→', secondaryHsl);
   }
 
   // Apply font family
   if (settings.themeFontFamily) {
     root.style.setProperty('--font-family', settings.themeFontFamily);
+    console.log('✅ Applied font family:', settings.themeFontFamily);
   }
 
-  console.log('✅ APPLIED LIGHT THEME WITH CUSTOM COLORS');
+  // CRITICAL: Dark mode logic
+  console.log('🌙 Theme dark mode setting:', settings.themeDarkMode);
+  
+  if (settings.themeDarkMode) {
+    root.classList.add('dark-mode-available');
+    console.log('✅ Dark mode is AVAILABLE (but not forced)');
+  } else {
+    root.classList.remove('dark-mode-available');
+    root.classList.remove('dark'); // FORCE REMOVE dark class
+    console.log('❌ Dark mode DISABLED - forcing light mode');
+    console.log('🔥 REMOVED dark class from HTML');
+  }
+
+  // DEBUG: Log final state
+  console.log('🐛 AFTER - HTML classes:', root.className);
+  console.log('🐛 AFTER - Background var:', getComputedStyle(root).getPropertyValue('--background'));
+  console.log('🐛 AFTER - Body computed background:', getComputedStyle(document.body).backgroundColor);
+  console.log('🎨 =================================');
 }
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -154,23 +134,28 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     
     try {
       setIsLoading(true);
+      console.log('🔄 Fetching settings...');
       
       const [structured, raw] = await Promise.all([
         settingsApi.getStructured(),
         settingsApi.getAll()
       ]);
       
+      console.log('📦 Fetched settings:', structured);
+      
       setSettings(structured);
       setRawSettings(raw);
       
+      // Apply theme immediately after fetching
       if (structured) {
+        console.log('🎨 About to apply theme...');
         applyThemeToDocument(structured);
       }
       
       hasInitiallyFetched.current = true;
       
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('❌ Error fetching settings:', error);
       
       if (showToastOnError) {
         toast.error('Greška pri učitavanju podešavanja');
@@ -186,14 +171,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Initial fetch
   useEffect(() => {
     if (!hasInitiallyFetched.current) {
+      console.log('🚀 Initial settings fetch...');
       fetchSettings(false);
     }
   }, []);
 
+  // Apply theme when settings change
   useEffect(() => {
     if (settings && hasInitiallyFetched.current) {
+      console.log('🔄 Settings changed, reapplying theme...');
       requestAnimationFrame(() => {
         applyThemeToDocument(settings);
       });

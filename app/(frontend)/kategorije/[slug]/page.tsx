@@ -164,24 +164,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex items-center space-x-3">
-                {settings?.siteLogo ? (
-                  <img 
-                    src={mediaApi.getFileUrl(settings.siteLogo)} 
-                    alt={settings.siteName || 'Лого'} 
-                    className="h-8 object-contain"
-                  />
-                ) : (
-                  <Building className="h-8 w-8 text-primary-dynamic" />
-                )}
-                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
-              </Link>
-            </div>
-          </div>
-        </header>
+        
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse space-y-6">
@@ -201,30 +184,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   if (error || !category) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex items-center space-x-3">
-                {settings?.siteLogo ? (
-                  <img 
-                    src={mediaApi.getFileUrl(settings.siteLogo)} 
-                    alt={settings.siteName || 'Лого'} 
-                    className="h-8 object-contain"
-                  />
-                ) : (
-                  <Building className="h-8 w-8 text-primary-dynamic" />
-                )}
-                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
-              </Link>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/kategorije">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Назад на категорије
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </header>
+        
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
@@ -249,40 +209,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-3">
-              {settings?.siteLogo ? (
-                <img 
-                  src={mediaApi.getFileUrl(settings.siteLogo)} 
-                  alt={settings.siteName || 'Лого'} 
-                  className="h-8 object-contain"
-                />
-              ) : (
-                <Building className="h-8 w-8 text-primary-dynamic" />
-              )}
-              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
-            </Link>
-            <nav className="flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Почетна
-              </Link>
-              <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Објаве
-              </Link>
-              <Link href="/kategorije" className="text-primary-dynamic font-medium">
-                Категорије
-              </Link>
-              <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
-                Контакт
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
+    
       {/* Category Header */}
       <div className="text-white py-12"         
            style={{
@@ -568,14 +495,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm text-gray-400">
-            © 2025 {institutionData.name}. Сва права задржана.
-          </p>
-        </div>
-      </footer>
+
     </div>
   );
 }

@@ -34,11 +34,6 @@ export default function SinglePostPage({ params }: SinglePostProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Use settings for institution data with fallbacks
-  const institutionData = {
-    name: settings?.siteName || "Локална институција",
-  };
-
   useEffect(() => {
     fetchPost();
   }, [resolvedParams.slug]);
@@ -110,24 +105,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex items-center space-x-3">
-                {settings?.siteLogo ? (
-                  <img 
-                    src={mediaApi.getFileUrl(settings.siteLogo)} 
-                    alt={settings.siteName || 'Лого'} 
-                    className="h-8 object-contain"
-                  />
-                ) : (
-                  <Building className="h-8 w-8 text-primary-dynamic" />
-                )}
-                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
-              </Link>
-            </div>
-          </div>
-        </header>
+
 
         {/* Loading Content */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -148,31 +126,6 @@ export default function SinglePostPage({ params }: SinglePostProps) {
   if (error || !post) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex items-center space-x-3">
-                {settings?.siteLogo ? (
-                  <img 
-                    src={mediaApi.getFileUrl(settings.siteLogo)} 
-                    alt={settings.siteName || 'Лого'} 
-                    className="h-8 object-contain"
-                  />
-                ) : (
-                  <Building className="h-8 w-8 text-primary-dynamic" />
-                )}
-                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
-              </Link>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Назад на почетну
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </header>
 
         {/* Error Content */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -195,38 +148,6 @@ export default function SinglePostPage({ params }: SinglePostProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-3">
-              {settings?.siteLogo ? (
-                <img 
-                  src={mediaApi.getFileUrl(settings.siteLogo)} 
-                  alt={settings.siteName || 'Лого'} 
-                  className="h-8 object-contain"
-                />
-              ) : (
-                <Building className="h-8 w-8 text-primary-dynamic" />
-              )}
-              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm" onClick={sharePost}>
-                <Share2 className="mr-2 h-4 w-4" />
-                Подели
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Назад на почетну
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -252,7 +173,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <article>
           {/* Post Header */}
-          <header className="mb-8">
+          <div className="mb-8">
             {post.category && (
               <Badge variant="secondary" className="mb-4">
                 {post.category.name}
@@ -297,7 +218,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                 <span>{post.viewCount + 1} прегледа</span> 
               </div>
             </div>
-          </header>
+          </div>
 
           {/* Post Content */}
           <div
@@ -383,14 +304,6 @@ export default function SinglePostPage({ params }: SinglePostProps) {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm text-gray-400">
-            © 2025 {institutionData.name}. Сва права задржана.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

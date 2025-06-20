@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="sr" className="theme-transition">
+    <html lang="sr">
       <head>
         {/* Preload default font */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

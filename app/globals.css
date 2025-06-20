@@ -73,6 +73,20 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+@layer base {
+  h1 {
+    @apply text-6xl
+  }
+  
+  h2 {
+    @apply text-4xl
+  }
+
+  h3 {
+    @apply text-2xl
+  }
+}
+
 /* Theme transition class */
 .theme-transition {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
@@ -82,6 +96,40 @@ body {
 .dark {
   color-scheme: dark;
 }
+
+
+.bg-primary-static {
+  background-color: #000000;
+}
+
+.text-primary-static {
+  color: #000000;
+}
+
+.border-primary-static {
+  border-color: #000000;
+}
+
+.hover\:bg-primary-static\/90:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.bg-secondary-static {
+  background-color: #ffffff;
+}
+
+.text-secondary-static {
+  color: #ffffff;
+}
+
+.border-secondary-static {
+  border-color: #ffffff;
+}
+
+.hover\:bg-secondary-static\/90:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
 
 /* Dynamic color utilities */
 .text-primary-dynamic {

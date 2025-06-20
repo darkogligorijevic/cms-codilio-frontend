@@ -1,9 +1,9 @@
-// app/(frontend)/layout.tsx - PRIVREMENA VERZIJA BEZ ThemeProvider
+// app/(frontend)/layout.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Roboto } from "next/font/google";
-// import { ThemeProvider } from "@/components/theme-provider"; // PRIVREMENO ISKLJUČENO
+import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from '@/components/frontend/header';
 import { Footer } from '@/components/frontend/footer';
 import { pagesApi } from '@/lib/api';
@@ -34,13 +34,14 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   }, []);
 
   return (
-    // PRIVREMENO BEZ ThemeProvider
-    <div className={`${roboto.className} min-h-screen flex flex-col bg-white`}>
-      <Header pages={pages} />
-      <main className="flex-1">
-        {children}
-      </main>
-      <Footer pages={pages} />
-    </div>
+    <ThemeProvider>
+      <div className={`${roboto.className} min-h-screen flex flex-col bg-gray-50`}>
+        <Header pages={pages} />
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer pages={pages} />
+      </div>
+    </ThemeProvider>
   );
 }
