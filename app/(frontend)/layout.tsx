@@ -1,4 +1,4 @@
-// app/(frontend)/layout.tsx
+// app/(frontend)/layout.tsx - Complete with Dark Mode
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -35,7 +35,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
 
   return (
     <ThemeProvider>
-      <div className={`${roboto.className} min-h-screen flex flex-col bg-gray-50`}>
+      <div className={`${roboto.className} min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900`}>
         <Header pages={pages} />
         <main className="flex-1">
           {children}

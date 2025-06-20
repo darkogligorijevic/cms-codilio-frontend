@@ -1,4 +1,4 @@
-// Templates/Common/PostsSection.tsx
+// components/frontend/posts-section.tsx - Complete with Dark Mode
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,11 +44,11 @@ export function PostsSection({ posts, title = "Објаве за ову стра
   };
 
   return (
-    <div className="mt-12 dark:text-white">
+    <div className="mt-12 text-gray-900 dark:text-white">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Приказује се {posts.length} објав{posts.length === 1 ? 'а' : 'а'}
           </p>
         </div>
@@ -60,24 +60,24 @@ export function PostsSection({ posts, title = "Објаве за ову стра
         </Button>
       </div>
 
-      <div className="space-y-6 dark:text-white">
+      <div className="space-y-6">
         {posts.map((post) => (
-          <Card key={post.id} className="hover:shadow-md transition-shadow">
+          <Card key={post.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     {post.category && (
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="badge-primary-dynamic">
                         {post.category.name}
                       </Badge>
                     )}
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
                       {getTimeAgo(post.publishedAt || post.createdAt)}
                     </span>
                   </div>
                   
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-primary-dynamic">
                     <Link href={`/objave/${post.slug}`}>
                       {post.title}
                     </Link>
@@ -85,12 +85,12 @@ export function PostsSection({ posts, title = "Објаве за ову стра
                   
                   {post.excerpt && (
                     <div
-                      className="text-gray-600 mb-3 text-sm lg:text-base prose prose-sm max-w-none"
+                      className="text-gray-600 dark:text-gray-300 mb-3 text-sm lg:text-base prose prose-sm max-w-none dark:prose-invert"
                       dangerouslySetInnerHTML={{ __html: post.excerpt }}
                     />
                   )}
                   
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <span className="flex items-center">
                       <User className="mr-1 h-3 w-3" />
                       {post.author.name}

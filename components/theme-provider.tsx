@@ -1,4 +1,4 @@
-// components/theme-provider.tsx - Enhanced with better dark mode support and debugging
+// components/theme-provider.tsx - Complete Dark Mode Implementation
 "use client"
 
 import * as React from "react"
@@ -40,48 +40,6 @@ export function ThemeProvider({
       attribute="class"
       themes={settings?.themeDarkMode ? ['light', 'dark', 'system'] : ['light']}
       storageKey="codilio-theme"
-    >
-      {children}
-    </NextThemesProvider>
+      >{children}</NextThemesProvider>
   )
-}
-
-// Utility function to convert hex color to HSL
-function hexToHsl(hex: string): string {
-  if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || hex.length !== 7) {
-    return '220 100% 50%'; // default blue
-  }
-
-  try {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-      h = s = 0; // achromatic
-    } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-        default: h = 0;
-      }
-      h /= 6;
-    }
-
-    h = Math.round(h * 360);
-    s = Math.round(s * 100);
-    l = Math.round(l * 100);
-
-    return `${h} ${s}% ${l}%`;
-  } catch (error) {
-    console.warn('Error converting hex to HSL:', hex, error);
-    return '220 100% 50%'; // default blue
-  }
 }

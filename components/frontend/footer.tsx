@@ -1,4 +1,4 @@
-// components/frontend/footer.tsx
+// components/frontend/footer.tsx - Complete with Dark Mode
 'use client';
 
 import { useSettings } from '@/lib/settings-context';
@@ -38,7 +38,7 @@ export function Footer({ pages }: FooterProps) {
   };
 
   return (
-    <footer className="bg-gray-900 text-white py-12 mt-16">
+    <footer className="bg-gray-900 dark:bg-black text-white py-12 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
@@ -61,7 +61,7 @@ export function Footer({ pages }: FooterProps) {
               </span>
             </div>
             <p 
-              className="text-gray-300 mb-4 text-sm"
+              className="text-gray-300 dark:text-gray-400 mb-4 text-sm"
               style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
             >
               Службени портал локалне самоуправе посвећен транспарентности
@@ -128,7 +128,7 @@ export function Footer({ pages }: FooterProps) {
             </div>
             
             <p 
-              className="text-sm text-gray-400 mt-4"
+              className="text-sm text-gray-400 dark:text-gray-500 mt-4"
               style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
             >
               © 2025 {institutionData.name}. Сва права задржана.
@@ -148,7 +148,7 @@ export function Footer({ pages }: FooterProps) {
                 <Link
                   key={page.id}
                   href={`/${page.slug}`}
-                  className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
+                  className="block text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                   style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
                 >
                   {page.title}
@@ -156,14 +156,14 @@ export function Footer({ pages }: FooterProps) {
               ))}
               <Link 
                 href="/dokumenti" 
-                className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
+                className="block text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
                 Документи
               </Link>
               <Link 
                 href="/sitemap" 
-                className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
+                className="block text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
                 Мапа сајта
@@ -180,7 +180,7 @@ export function Footer({ pages }: FooterProps) {
               Контакт
             </h4>
             <div 
-              className="space-y-2 text-gray-300 text-sm"
+              className="space-y-2 text-gray-300 dark:text-gray-400 text-sm"
               style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
             >
               <p>{institutionData.address}</p>

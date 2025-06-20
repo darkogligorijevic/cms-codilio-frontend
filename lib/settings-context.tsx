@@ -1,4 +1,4 @@
-// lib/settings-context.tsx - DEBUG VERSION
+// lib/settings-context.tsx - Complete with Dark Mode Fix
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
@@ -64,7 +64,7 @@ function hexToHsl(hex: string) {
   }
 }
 
-// DEBUG: Function to apply theme to CSS variables
+// FIXED: Function to apply theme to CSS variables without interfering with next-themes
 function applyThemeToDocument(settings: SiteSettings) {
   if (typeof document === 'undefined') return;
 
@@ -74,10 +74,6 @@ function applyThemeToDocument(settings: SiteSettings) {
   console.log('🎨 =================================');
 
   const root = document.documentElement;
-
-  // DEBUG: Log current state
-  console.log('🐛 BEFORE - HTML classes:', root.className);
-  console.log('🐛 BEFORE - Background var:', getComputedStyle(root).getPropertyValue('--background'));
 
   // Apply colors if they exist
   if (settings.themePrimaryColor) {
@@ -100,23 +96,22 @@ function applyThemeToDocument(settings: SiteSettings) {
     console.log('✅ Applied font family:', settings.themeFontFamily);
   }
 
-  // CRITICAL: Dark mode logic
+  // CRITICAL FIX: Don't force light mode, let next-themes handle it
   console.log('🌙 Theme dark mode setting:', settings.themeDarkMode);
   
   if (settings.themeDarkMode) {
-    root.classList.add('dark-mode-available');
-    console.log('✅ Dark mode is AVAILABLE (but not forced)');
+    root.setAttribute('data-dark-mode-enabled', 'true');
+    console.log('✅ Dark mode is AVAILABLE');
   } else {
-    root.classList.remove('dark-mode-available');
-    root.classList.remove('dark'); // FORCE REMOVE dark class
-    console.log('❌ Dark mode DISABLED - forcing light mode');
-    console.log('🔥 REMOVED dark class from HTML');
+    root.setAttribute('data-dark-mode-enabled', 'false');
+    // Only remove dark class if dark mode is disabled in settings
+    const currentTheme = localStorage.getItem('codilio-theme');
+    if (!currentTheme || currentTheme === 'dark') {
+      root.classList.remove('dark');
+      console.log('❌ Dark mode DISABLED - forcing light mode');
+    }
   }
 
-  // DEBUG: Log final state
-  console.log('🐛 AFTER - HTML classes:', root.className);
-  console.log('🐛 AFTER - Background var:', getComputedStyle(root).getPropertyValue('--background'));
-  console.log('🐛 AFTER - Body computed background:', getComputedStyle(document.body).backgroundColor);
   console.log('🎨 =================================');
 }
 

@@ -1,9 +1,9 @@
-/* app/globals.css - Tailwind CSS 4 + Next.js 15 compatible */
+/* app/globals.css - Complete Dark Mode Implementation */
 @import "tailwindcss";
 
 /* CSS Variables for theme colors */
 :root {
-  /* Light mode colors - using HSL values for Tailwind v4 */
+  /* Light mode colors */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
@@ -25,7 +25,7 @@
   --ring: 222.2 47.4% 11.2%;
   --radius: 0.5rem;
 
-  /* Default theme colors (will be overridden by settings) */
+  /* Default theme colors */
   --primary-static: 220 100% 50%;
   --secondary-static: 160 84% 39%;
   --primary-dynamic: var(--primary-static);
@@ -33,7 +33,7 @@
   --primary-hex: #3B82F6;
   --secondary-hex: #10B981;
   
-  /* Font family (will be overridden by settings) */
+  /* Font family */
   --font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -97,7 +97,7 @@ body {
   color-scheme: dark;
 }
 
-
+/* Static color utilities */
 .bg-primary-static {
   background-color: #000000;
 }
@@ -129,7 +129,6 @@ body {
 .hover\:bg-secondary-static\/90:hover {
   background-color: rgba(255, 255, 255, 0.9);
 }
-
 
 /* Dynamic color utilities */
 .text-primary-dynamic {
@@ -258,6 +257,115 @@ body {
   text-decoration: underline;
 }
 
+/* Dark mode specific fixes */
+.dark .bg-white {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark .text-gray-900 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .text-gray-800 {
+  color: rgb(229 231 235) !important; /* gray-200 */
+}
+
+.dark .text-gray-700 {
+  color: rgb(209 213 219) !important; /* gray-300 */
+}
+
+.dark .text-gray-600 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .text-gray-500 {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+.dark .border-gray-200 {
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: rgb(17 24 39) !important; /* gray-900 */
+}
+
+.dark .bg-gray-100 {
+  background-color: rgb(31 41 55) !important; /* gray-800 */
+}
+
+/* Dark mode for prose content */
+.dark .prose {
+  color: rgb(229 231 235);
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: rgb(255 255 255);
+}
+
+.dark .prose strong {
+  color: rgb(255 255 255);
+}
+
+.dark .prose a {
+  color: hsl(var(--primary-dynamic));
+}
+
+.dark .prose blockquote {
+  border-left-color: hsl(var(--border));
+  color: rgb(156 163 175);
+}
+
+.dark .prose code {
+  background-color: rgb(31 41 55);
+  color: rgb(229 231 235);
+}
+
+.dark .prose pre {
+  background-color: rgb(17 24 39);
+  color: rgb(229 231 235);
+}
+
+.dark .prose table {
+  border-color: hsl(var(--border));
+}
+
+.dark .prose th,
+.dark .prose td {
+  border-color: hsl(var(--border));
+}
+
+.dark .prose th {
+  background-color: rgb(31 41 55);
+  color: rgb(255 255 255);
+}
+
+/* Fix input and form elements in dark mode */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: rgb(31 41 55);
+  border-color: rgb(75 85 99);
+  color: rgb(255 255 255);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: hsl(var(--primary-dynamic));
+  box-shadow: 0 0 0 3px hsl(var(--primary-dynamic) / 0.1);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgb(156 163 175);
+}
+
 /* Improved scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -330,49 +438,14 @@ body {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Prose improvements for dark mode */
-.prose-dynamic {
-  color: hsl(var(--foreground));
+/* Dark mode image adjustments */
+.dark img {
+  filter: brightness(0.9);
+  transition: filter 0.2s ease-in-out;
 }
 
-.prose-dynamic h1,
-.prose-dynamic h2,
-.prose-dynamic h3,
-.prose-dynamic h4,
-.prose-dynamic h5,
-.prose-dynamic h6 {
-  color: hsl(var(--foreground));
-}
-
-.prose-dynamic a {
-  color: hsl(var(--primary-dynamic));
-}
-
-.prose-dynamic a:hover {
-  color: hsl(var(--primary-dynamic) / 0.8);
-}
-
-.dark .prose-dynamic {
-  color: hsl(var(--foreground));
-}
-
-.dark .prose-dynamic h1,
-.dark .prose-dynamic h2,
-.dark .prose-dynamic h3,
-.dark .prose-dynamic h4,
-.dark .prose-dynamic h5,
-.dark .prose-dynamic h6 {
-  color: hsl(var(--foreground));
-}
-
-.dark .prose-dynamic code {
-  background-color: hsl(var(--muted));
-  color: hsl(var(--foreground));
-}
-
-.dark .prose-dynamic blockquote {
-  background-color: hsl(var(--muted));
-  border-left-color: hsl(var(--border));
+.dark img:hover {
+  filter: brightness(1);
 }
 
 /* Form improvements */
@@ -401,16 +474,6 @@ body {
 
 .card-enhanced:hover {
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-/* Dark mode image adjustments */
-.dark img {
-  filter: brightness(0.9);
-  transition: filter 0.2s ease-in-out;
-}
-
-.dark img:hover {
-  filter: brightness(1);
 }
 
 /* Print styles */
