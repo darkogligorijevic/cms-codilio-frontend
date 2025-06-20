@@ -1,4 +1,4 @@
-// app/dashboard/settings/page.tsx
+// app/dashboard/settings/page.tsx - COMPLETE FIXED VERSION
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -80,7 +80,8 @@ export default function SettingsPage() {
     uploadFile,
     resetSettings,
     exportSettings,
-    importSettings
+    importSettings,
+    refreshSettings
   } = useSettings();
 
   const [activeTab, setActiveTab] = useState<SettingCategory>(SettingCategory.GENERAL);
@@ -93,6 +94,18 @@ export default function SettingsPage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const [isDraggingFavicon, setIsDraggingFavicon] = useState(false);
+  
+  // Track file uploads separately from form state
+  const [pendingFileUploads, setPendingFileUploads] = useState<{
+    [SETTING_KEYS.SITE_LOGO]?: File | null; // null means remove file
+    [SETTING_KEYS.SITE_FAVICON]?: File | null; // null means remove file
+  }>({});
+
+  // Track original file values to enable proper reset
+  const [originalFileValues, setOriginalFileValues] = useState<{
+    [SETTING_KEYS.SITE_LOGO]?: string;
+    [SETTING_KEYS.SITE_FAVICON]?: string;
+  }>({});
 
   const {
     register,
@@ -116,9 +129,11 @@ export default function SettingsPage() {
     { value: SettingCategory.ADVANCED, label: 'Napredno', icon: Shield },
   ];
 
+  // Initialize form data when settings change
   useEffect(() => {
     if (rawSettings.length > 0) {
       const formData: SettingFormData = {};
+      const fileValues: typeof originalFileValues = {};
       
       rawSettings.forEach(setting => {
         let value: any = setting.value;
@@ -130,42 +145,127 @@ export default function SettingsPage() {
         }
         
         formData[setting.key] = value;
+        
+        // Store original file values
+        if (setting.key === SETTING_KEYS.SITE_LOGO || setting.key === SETTING_KEYS.SITE_FAVICON) {
+          fileValues[setting.key as keyof typeof fileValues] = setting.value;
+        }
       });
 
-      console.log(formData)
-      
+      // Reset form with current values - this will reset isDirty to false
       reset(formData);
+      setOriginalFileValues(fileValues);
       
-      // Set logo and favicon previews
+      // Set logo and favicon previews from actual database values
       const logoSetting = rawSettings.find(s => s.key === SETTING_KEYS.SITE_LOGO);
       if (logoSetting?.value) {
         setLogoPreview(mediaApi.getFileUrl(logoSetting.value));
+      } else {
+        setLogoPreview(null);
       }
       
       const faviconSetting = rawSettings.find(s => s.key === SETTING_KEYS.SITE_FAVICON);
       if (faviconSetting?.value) {
         setFaviconPreview(mediaApi.getFileUrl(faviconSetting.value));
+      } else {
+        setFaviconPreview(null);
       }
+
+      // Clear pending uploads when settings refresh
+      setPendingFileUploads({});
+      setHasChanges(false);
     }
   }, [rawSettings, reset]);
 
+  // Track changes including file uploads
   useEffect(() => {
-    setHasChanges(isDirty);
-  }, [isDirty]);
+    const hasFormChanges = isDirty;
+    const hasFileChanges = Object.keys(pendingFileUploads).length > 0;
+    setHasChanges(hasFormChanges || hasFileChanges);
+  }, [isDirty, pendingFileUploads]);
 
   const onSubmit = async (data: SettingFormData) => {
     try {
       setIsSaving(true);
       
-      const updates: UpdateMultipleSettingsDto = {
-        settings: Object.entries(data).map(([key, value]) => ({
-          key,
-          value: String(value)
-        }))
+      // Handle file uploads/removals first
+      const fileUpdates: Array<{ key: string; value: string }> = [];
+      
+      for (const [key, fileAction] of Object.entries(pendingFileUploads)) {
+        if (fileAction === null) {
+          // Remove file
+          fileUpdates.push({ key, value: '' });
+        } else if (fileAction instanceof File) {
+          // Upload new file
+          try {
+            const uploadedSetting = await uploadFile(key, fileAction);
+            fileUpdates.push({ key, value: uploadedSetting.value });
+          } catch (error) {
+            console.error(`Error uploading ${key}:`, error);
+            toast.error(`Greška pri upload-u ${key === SETTING_KEYS.SITE_LOGO ? 'loga' : 'favicona'}`);
+            return;
+          }
+        }
+      }
+      
+      // Prepare text updates - exclude file fields as they are handled above
+      const textUpdates: UpdateMultipleSettingsDto = {
+        settings: [
+          ...Object.entries(data)
+            .filter(([key]) => key !== SETTING_KEYS.SITE_LOGO && key !== SETTING_KEYS.SITE_FAVICON)
+            .map(([key, value]) => ({
+              key,
+              value: String(value)
+            })),
+          ...fileUpdates
+        ]
       };
       
-      await updateMultipleSettings(updates);
+      // Update all settings
+      if (textUpdates.settings.length > 0) {
+        await updateMultipleSettings(textUpdates);
+        
+        // Reset form with the new values immediately
+        const newFormData: SettingFormData = {};
+        rawSettings.forEach(setting => {
+          // Check if this setting was updated
+          const updatedSetting = textUpdates.settings.find(u => u.key === setting.key);
+          let value: any = updatedSetting ? updatedSetting.value : setting.value;
+          
+          if (setting.type === SettingType.NUMBER) {
+            value = parseInt(value, 10) || 0;
+          } else if (setting.type === SettingType.BOOLEAN) {
+            value = value === 'true' || value === true;
+          }
+          
+          newFormData[setting.key] = value;
+        });
+        
+        // Apply the updates to the form data
+        textUpdates.settings.forEach(update => {
+          let value: any = update.value;
+          const setting = rawSettings.find(s => s.key === update.key);
+          
+          if (setting?.type === SettingType.NUMBER) {
+            value = parseInt(value, 10) || 0;
+          } else if (setting?.type === SettingType.BOOLEAN) {
+            value = value === 'true' || value === true;
+          }
+          
+          newFormData[update.key] = value;
+        });
+        
+        // Reset form with updated values - this will make isDirty = false
+        reset(newFormData);
+      }
+      
+      // Clear all change tracking
+      setPendingFileUploads({});
       setHasChanges(false);
+      
+      // Refresh settings to get the latest file URLs
+      await refreshSettings();
+      
       toast.success('Podešavanja su uspešno sačuvana');
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -187,13 +287,20 @@ export default function SettingsPage() {
         return;
       }
 
-      await uploadFile(SETTING_KEYS.SITE_LOGO, file);
+      // Store file as pending upload (don't upload immediately)
+      setPendingFileUploads(prev => ({
+        ...prev,
+        [SETTING_KEYS.SITE_LOGO]: file
+      }));
+      
+      // Set preview
       const preview = URL.createObjectURL(file);
       setLogoPreview(preview);
-      setHasChanges(true);
+      
+      toast.success('Logo je spreman za čuvanje');
     } catch (error) {
-      console.error('Error uploading logo:', error);
-      throw error;
+      console.error('Error preparing logo:', error);
+      toast.error('Greška pri pripremi loga');
     }
   };
 
@@ -209,14 +316,47 @@ export default function SettingsPage() {
         return;
       }
 
-      await uploadFile(SETTING_KEYS.SITE_FAVICON, file);
+      // Store file as pending upload (don't upload immediately)
+      setPendingFileUploads(prev => ({
+        ...prev,
+        [SETTING_KEYS.SITE_FAVICON]: file
+      }));
+      
+      // Set preview
       const preview = URL.createObjectURL(file);
       setFaviconPreview(preview);
-      setHasChanges(true);
+      
+      toast.success('Favicon je spreman za čuvanje');
     } catch (error) {
-      console.error('Error uploading favicon:', error);
-      throw error;
+      console.error('Error preparing favicon:', error);
+      toast.error('Greška pri pripremi favicona');
     }
+  };
+
+  const handleRemoveLogo = () => {
+    // Mark for removal (don't remove immediately from database)
+    setPendingFileUploads(prev => ({
+      ...prev,
+      [SETTING_KEYS.SITE_LOGO]: null
+    }));
+    
+    // Clear preview
+    setLogoPreview(null);
+    
+    toast.success('Logo je označen za uklanjanje');
+  };
+
+  const handleRemoveFavicon = () => {
+    // Mark for removal (don't remove immediately from database)
+    setPendingFileUploads(prev => ({
+      ...prev,
+      [SETTING_KEYS.SITE_FAVICON]: null
+    }));
+    
+    // Clear preview
+    setFaviconPreview(null);
+    
+    toast.success('Favicon je označen za uklanjanje');
   };
 
   const handleDragOver = (e: React.DragEvent, type: 'logo' | 'favicon') => {
@@ -262,12 +402,43 @@ export default function SettingsPage() {
 
   const handleReset = async () => {
     try {
+      // Reset all settings
       await resetSettings();
-      window.location.href = "/";
+      
+      // Clear local state
+      setPendingFileUploads({});
+      setLogoPreview(null);
+      setFaviconPreview(null);
+      setHasChanges(false);
+      
+      // Refresh settings to get the reset values
+      await refreshSettings();
+      
       setIsResetDialogOpen(false);
+      toast.success('Podešavanja su resetovana');
     } catch (error) {
       console.error('Error resetting settings:', error);
+      toast.error('Greška pri resetovanju podešavanja');
     }
+  };
+
+  const handleFormReset = () => {
+    // Reset form to original values
+    reset();
+    
+    // Reset file previews to original values
+    setLogoPreview(originalFileValues[SETTING_KEYS.SITE_LOGO] 
+      ? mediaApi.getFileUrl(originalFileValues[SETTING_KEYS.SITE_LOGO] as string) 
+      : null);
+    setFaviconPreview(originalFileValues[SETTING_KEYS.SITE_FAVICON] 
+      ? mediaApi.getFileUrl(originalFileValues[SETTING_KEYS.SITE_FAVICON] as string) 
+      : null);
+    
+    // Clear pending uploads and file actions
+    setPendingFileUploads({});
+    setHasChanges(false);
+    
+    toast.success('Izmene su poništene');
   };
 
   const handleExport = async () => {
@@ -295,164 +466,6 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Error importing settings:', error);
       toast.error('Neispravni format podataka');
-    }
-  };
-
-  const getCategorySettings = (category: SettingCategory) => {
-    return rawSettings.filter(setting => setting.category === category);
-  };
-
-  const renderSettingField = (setting: any) => {
-    const value = formValues[setting.key] || '';
-
-    switch (setting.type) {
-      case SettingType.BOOLEAN:
-        return (
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id={setting.key}
-              {...register(setting.key)}
-              className="rounded"
-            />
-            <Label htmlFor={setting.key}>{setting.label}</Label>
-          </div>
-        );
-
-      case SettingType.NUMBER:
-        return (
-          <div className="space-y-2">
-            <Label htmlFor={setting.key}>{setting.label}</Label>
-            <Input
-              id={setting.key}
-              type="number"
-              {...register(setting.key, { 
-                valueAsNumber: true,
-                min: setting.validation?.min,
-                max: setting.validation?.max
-              })}
-              placeholder={setting.description}
-            />
-          </div>
-        );
-
-      case SettingType.COLOR:
-        return (
-          <div className="space-y-2">
-            <Label htmlFor={setting.key}>{setting.label}</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                id={setting.key}
-                type="color"
-                {...register(setting.key)}
-                className="w-20 h-10"
-              />
-              <Input
-                type="text"
-                value={value as any}
-                onChange={(e) => setValue(setting.key, e.target.value)}
-                placeholder="#000000"
-                className="flex-1"
-              />
-            </div>
-          </div>
-        );
-
-      case SettingType.SELECT:
-        return (
-          <div className="space-y-2">
-            <Label>{setting.label}</Label>
-            <Select
-              value={value as any}
-              onValueChange={(val) => setValue(setting.key, val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={setting.description} />
-              </SelectTrigger>
-              <SelectContent>
-                {setting.options?.map((option: string) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-
-      case SettingType.FILE:
-        // Special handling for logo and favicon
-        if (setting.key === SETTING_KEYS.SITE_LOGO) {
-          return (
-            <div className="space-y-2">
-              <Label>{setting.label}</Label>
-              {logoPreview && (
-                <div className="mb-4">
-                  <img 
-                    src={logoPreview} 
-                    alt="Logo preview" 
-                    className="h-20 object-contain"
-                  />
-                </div>
-              )}
-              <DragDropUpload
-                onFileUpload={handleLogoUpload}
-                accept="image/*"
-                maxSize={5}
-                multiple={false}
-                className="h-32"
-              />
-            </div>
-          );
-        } else if (setting.key === SETTING_KEYS.SITE_FAVICON) {
-          return (
-            <div className="space-y-2">
-              <Label>{setting.label}</Label>
-              {faviconPreview && (
-                <div className="mb-4">
-                  <img 
-                    src={faviconPreview} 
-                    alt="Favicon preview" 
-                    className="h-8 w-8"
-                  />
-                </div>
-              )}
-              <DragDropUpload
-                onFileUpload={handleFaviconUpload}
-                accept="image/x-icon,image/png"
-                maxSize={1}
-                multiple={false}
-                className="h-32"
-              />
-            </div>
-          );
-        }
-        return null;
-
-      default:
-        return (
-          <div className="space-y-2">
-            <Label htmlFor={setting.key}>{setting.label}</Label>
-            {setting.key.includes('message') || setting.key.includes('description') ? (
-              <Textarea
-                id={setting.key}
-                {...register(setting.key)}
-                placeholder={setting.description}
-                rows={3}
-              />
-            ) : (
-              <Input
-                id={setting.key}
-                type="text"
-                {...register(setting.key)}
-                placeholder={setting.description}
-              />
-            )}
-            {setting.description && (
-              <p className="text-xs text-muted-foreground">{setting.description}</p>
-            )}
-          </div>
-        );
     }
   };
 
@@ -531,7 +544,7 @@ export default function SettingsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => reset()}
+                onClick={handleFormReset}
               >
                 Poništi
               </Button>
@@ -615,11 +628,7 @@ export default function SettingsPage() {
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                setLogoPreview(null);
-                                setValue(SETTING_KEYS.SITE_LOGO, '');
-                                setHasChanges(true);
-                              }}
+                              onClick={handleRemoveLogo}
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -685,11 +694,7 @@ export default function SettingsPage() {
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                setFaviconPreview(null);
-                                setValue(SETTING_KEYS.SITE_FAVICON, '');
-                                setHasChanges(true);
-                              }}
+                              onClick={handleRemoveFavicon}
                             >
                               <X className="h-4 w-4" />
                             </Button>

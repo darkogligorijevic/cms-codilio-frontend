@@ -1,4 +1,4 @@
-// lib/settings-context.tsx - Fixed infinite loop issues
+// lib/settings-context.tsx - FIXED VERSION
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
@@ -13,7 +13,7 @@ interface SettingsContextType {
   refreshSettings: () => Promise<void>;
   updateSetting: (key: string, value: string) => Promise<void>;
   updateMultipleSettings: (updates: UpdateMultipleSettingsDto) => Promise<void>;
-  uploadFile: (key: string, file: File) => Promise<void>;
+  uploadFile: (key: string, file: File) => Promise<Setting>;
   resetSettings: (category?: SettingCategory) => Promise<void>;
   exportSettings: () => Promise<Record<string, string>>;
   importSettings: (data: Record<string, string>) => Promise<void>;
@@ -196,49 +196,83 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       await settingsApi.update(key, { value });
       await refreshSettings();
-      toast.success('Podešavanje je uspešno ažurirano');
+      // Ne prikazuj toast ovde jer će se pozvati iz komponente
     } catch (error) {
       console.error('Error updating setting:', error);
-      toast.error('Greška pri ažuriranju podešavanja');
       throw error;
     }
   }, [refreshSettings]);
 
   const updateMultipleSettings = useCallback(async (updates: UpdateMultipleSettingsDto) => {
     try {
-      await settingsApi.updateMultiple(updates);
-      await refreshSettings();
-      toast.success('Podešavanja su uspešno ažurirana');
+      const updatedSettings = await settingsApi.updateMultiple(updates);
+      
+      // Immediately update local state with new values
+      setRawSettings(prevSettings => {
+        const newSettings = [...prevSettings];
+        updates.settings.forEach(update => {
+          const index = newSettings.findIndex(s => s.key === update.key);
+          if (index !== -1) {
+            newSettings[index] = { ...newSettings[index], value: update.value };
+          }
+        });
+        return newSettings;
+      });
+
+      // Update structured settings
+      const newStructured = await settingsApi.getStructured();
+      setSettings(newStructured);
+      
+      // Apply theme immediately
+      if (newStructured) {
+        applyThemeToDocument(newStructured);
+      }
+      
+      // Don't show toast here, let component handle it
     } catch (error) {
       console.error('Error updating settings:', error);
-      toast.error('Greška pri ažuriranju podešavanja');
       throw error;
     }
-  }, [refreshSettings]);
+  }, []);
 
   const uploadFile = useCallback(async (key: string, file: File) => {
     try {
-      await settingsApi.uploadFile(key, file);
-      await refreshSettings();
-      toast.success('Fajl je uspešno učitan');
+      const uploadedSetting = await settingsApi.uploadFile(key, file);
+      
+      // Immediately update local state with new value
+      setRawSettings(prevSettings => {
+        const newSettings = [...prevSettings];
+        const index = newSettings.findIndex(s => s.key === key);
+        if (index !== -1) {
+          newSettings[index] = { ...newSettings[index], value: uploadedSetting.value };
+        }
+        return newSettings;
+      });
+      
+      // Update structured settings
+      const newStructured = await settingsApi.getStructured();
+      setSettings(newStructured);
+      
+      // Apply theme if needed
+      if (newStructured) {
+        applyThemeToDocument(newStructured);
+      }
+      
+      // Return the uploaded setting for use in component
+      return uploadedSetting;
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('Greška pri učitavanju fajla');
       throw error;
     }
-  }, [refreshSettings]);
+  }, []);
 
   const resetSettings = useCallback(async (category?: SettingCategory) => {
     try {
       await settingsApi.reset(category);
       await refreshSettings();
-      toast.success(category 
-        ? `Podešavanja kategorije su resetovana na podrazumevane vrednosti`
-        : 'Sva podešavanja su resetovana na podrazumevane vrednosti'
-      );
+      // Ne prikazuj toast ovde jer će se pozvati iz komponente
     } catch (error) {
       console.error('Error resetting settings:', error);
-      toast.error('Greška pri resetovanju podešavanja');
       throw error;
     }
   }, [refreshSettings]);
@@ -249,7 +283,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       return data;
     } catch (error) {
       console.error('Error exporting settings:', error);
-      toast.error('Greška pri eksportovanju podešavanja');
       throw error;
     }
   }, []);
@@ -258,10 +291,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       await settingsApi.import({ settings: data });
       await refreshSettings();
-      toast.success('Podešavanja su uspešno importovana');
+      // Ne prikazuj toast ovde jer će se pozvati iz komponente
     } catch (error) {
       console.error('Error importing settings:', error);
-      toast.error('Greška pri importovanju podešavanja');
       throw error;
     }
   }, [refreshSettings]);

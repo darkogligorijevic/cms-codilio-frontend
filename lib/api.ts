@@ -478,7 +478,6 @@ export const settingsApi = {
   uploadFile: async (key: string, file: File): Promise<Setting> => {
     const formData = new FormData();
     formData.append('file', file);
-    
     const response: AxiosResponse<Setting> = await api.post(`/settings/${key}/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
