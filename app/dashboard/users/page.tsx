@@ -898,18 +898,18 @@ export default function UsersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Potvrdi brisanje</DialogTitle>
-            <DialogDescription>
-              Da li ste sigurni da želite da obrišete korisnika "{userToDelete?.name}"?
+              <DialogDescription>
+                Da li si siguran da želiš da obrišeš korisnika {userToDelete?.name}?
+              </DialogDescription>
+
               {userToDelete && userToDelete.postsCount > 0 && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
                   <AlertCircle className="inline h-4 w-4 mr-1 text-yellow-600" />
                   <span className="text-sm text-yellow-800">
-                    Ovaj korisnik je kreirao {userToDelete.postsCount} objav(a). 
-                    One će ostati na sistemu, ali bez vlasnika.
+                    Ovaj korisnik je kreirao {userToDelete.postsCount} objav(a). One će ostati na sistemu, ali bez vlasnika.
                   </span>
                 </div>
               )}
-            </DialogDescription>
           </DialogHeader>
           
           {userToDelete && (
