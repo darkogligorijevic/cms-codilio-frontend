@@ -495,3 +495,417 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+/* Dodaj ovo na kraju app/globals.css fajla */
+
+/* Icon Spinning animacije za theme toggle - kraće animacije, jedan krug */
+@layer utilities {
+  .animate-icon-spin {
+    animation: icon-spin-centered 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .animate-sun-rotate {
+    animation: sun-rotate-centered 2s ease-in-out infinite;
+  }
+  
+  .animate-moon-rotate {
+    animation: moon-rotate-centered 3s ease-in-out infinite;
+  }
+  
+  .animate-sun-spin-dramatic {
+    animation: sun-spin-single-centered 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .animate-moon-spin-dramatic {
+    animation: moon-spin-single-centered 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .animate-sun-wobble {
+    animation: sun-wobble-centered 1s ease-in-out;
+  }
+  
+  .animate-moon-wobble {
+    animation: moon-wobble-centered 1s ease-in-out;
+  }
+  
+  .animate-orbit {
+    animation: orbit 400ms linear;
+  }
+  
+  .animate-twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+  }
+}
+
+/* Keyframe animacije za icon spinning - kraće, jedan krug */
+@keyframes icon-spin-centered {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
+  }
+}
+
+/* Sun specific animations sa jednim krugom */
+@keyframes sun-spin-single-centered {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  }
+}
+
+/* Moon specific animations sa jednim krugom */
+@keyframes moon-spin-single-centered {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6));
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(-180deg) scale(1.2);
+    filter: drop-shadow(0 0 15px rgba(147, 197, 253, 0.8));
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-360deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6));
+  }
+}
+
+/* Sun specific animations sa centriranim pozicioniranjem */
+@keyframes sun-rotate-centered {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  }
+  25% {
+    transform: translate(-50%, -50%) rotate(5deg);
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.7));
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.9));
+  }
+  75% {
+    transform: translate(-50%, -50%) rotate(-5deg);
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.7));
+  }
+}
+
+@keyframes sun-spin-dramatic-centered {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  }
+  25% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1.1);
+    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 1));
+  }
+  75% {
+    transform: translate(-50%, -50%) rotate(540deg) scale(1.2);
+    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(720deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  }
+}
+
+@keyframes sun-wobble-centered {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  15% {
+    transform: translate(-50%, -50%) rotate(5deg);
+  }
+  30% {
+    transform: translate(-50%, -50%) rotate(-5deg);
+  }
+  45% {
+    transform: translate(-50%, -50%) rotate(3deg);
+  }
+  60% {
+    transform: translate(-50%, -50%) rotate(-3deg);
+  }
+  75% {
+    transform: translate(-50%, -50%) rotate(2deg);
+  }
+  90% {
+    transform: translate(-50%, -50%) rotate(-1deg);
+  }
+}
+
+/* Moon specific animations sa centriranim pozicioniranjem */
+@keyframes moon-rotate-centered {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6));
+  }
+  33% {
+    transform: translate(-50%, -50%) rotate(-3deg);
+    filter: drop-shadow(0 0 12px rgba(147, 197, 253, 0.8));
+  }
+  66% {
+    transform: translate(-50%, -50%) rotate(3deg);
+    filter: drop-shadow(0 0 6px rgba(147, 197, 253, 0.4));
+  }
+}
+
+@keyframes moon-spin-dramatic-centered {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6));
+  }
+  25% {
+    transform: translate(-50%, -50%) rotate(-180deg) scale(1.2);
+    filter: drop-shadow(0 0 15px rgba(147, 197, 253, 0.8));
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(-360deg) scale(1.1);
+    filter: drop-shadow(0 0 20px rgba(147, 197, 253, 1));
+  }
+  75% {
+    transform: translate(-50%, -50%) rotate(-540deg) scale(1.2);
+    filter: drop-shadow(0 0 15px rgba(147, 197, 253, 0.8));
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-720deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6));
+  }
+}
+
+@keyframes moon-wobble-centered {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  20% {
+    transform: translate(-50%, -50%) rotate(-4deg);
+  }
+  40% {
+    transform: translate(-50%, -50%) rotate(4deg);
+  }
+  60% {
+    transform: translate(-50%, -50%) rotate(-2deg);
+  }
+  80% {
+    transform: translate(-50%, -50%) rotate(2deg);
+  }
+}
+
+/* Particle animations - kraće */
+@keyframes orbit {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) translateY(-14px) scale(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(180deg) translateY(-14px) scale(1);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) translateY(-14px) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Trail effects za dramatic spinning */
+@keyframes trail-0 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(180deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(360deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-1 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(225deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(405deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-2 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(270deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(450deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-3 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(135deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(315deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(495deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-4 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(180deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(360deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(540deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-5 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(225deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(405deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(585deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-6 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(270deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(450deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(630deg) translateY(-18px) scale(0); }
+}
+
+@keyframes trail-7 {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(315deg) translateY(-18px) scale(0); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(495deg) translateY(-18px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(675deg) translateY(-18px) scale(0); }
+}
+
+/* Smooth transitions za sve elemente */
+.theme-transition {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Optimized animations for performance */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Button interaction states */
+.theme-toggle-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.theme-toggle-button:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+.theme-toggle-button:active {
+  transform: scale(0.95);
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Icon-specific glow effects */
+.sun-glow {
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  transition: filter 0.3s ease-in-out;
+}
+
+.sun-glow:hover {
+  filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+}
+
+.moon-glow {
+  filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.6));
+  transition: filter 0.3s ease-in-out;
+}
+
+.moon-glow:hover {
+  filter: drop-shadow(0 0 15px rgba(147, 197, 253, 0.9));
+}
+
+/* Spinning states */
+.spinning-sun {
+  animation: sun-spin-dramatic 1000ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spinning-moon {
+  animation: moon-spin-dramatic 1000ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .animate-icon-spin,
+  .animate-sun-spin-dramatic,
+  .animate-moon-spin-dramatic {
+    animation-duration: 500ms;
+  }
+  
+  .animate-sun-rotate,
+  .animate-moon-rotate {
+    animation-duration: 1.5s;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-icon-spin,
+  .animate-sun-rotate,
+  .animate-moon-rotate,
+  .animate-sun-spin-dramatic,
+  .animate-moon-spin-dramatic,
+  .animate-sun-wobble,
+  .animate-moon-wobble,
+  .animate-orbit,
+  .animate-twinkle,
+  .spinning-sun,
+  .spinning-moon {
+    animation: none !important;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* High performance mode for older devices */
+@media (max-width: 480px) {
+  .animate-sun-spin-dramatic,
+  .animate-moon-spin-dramatic {
+    animation: simple-icon-spin 400ms ease-in-out;
+  }
+}
+
+@keyframes simple-icon-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
