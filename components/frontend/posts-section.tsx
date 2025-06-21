@@ -1,4 +1,4 @@
-// components/frontend/posts-section.tsx - Complete with Dark Mode
+// components/frontend/posts-section.tsx - COMPLETELY FIXED VERSION
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,7 +52,7 @@ export function PostsSection({ posts, title = "Објаве за ову стра
             Приказује се {posts.length} објав{posts.length === 1 ? 'а' : 'а'}
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
           <Link href="/objave">
             Све објаве
             <ChevronRight className="ml-2 h-4 w-4" />
@@ -77,7 +77,7 @@ export function PostsSection({ posts, title = "Објаве за ову стра
                     </span>
                   </div>
                   
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-primary-dynamic">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-primary-dynamic transition-colors">
                     <Link href={`/objave/${post.slug}`}>
                       {post.title}
                     </Link>

@@ -1,4 +1,4 @@
-// lib/settings-context.tsx - Complete with Dark Mode Fix
+// lib/settings-context.tsx - CRITICAL FIXES FOR DARK MODE
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
@@ -64,7 +64,7 @@ function hexToHsl(hex: string) {
   }
 }
 
-// FIXED: Function to apply theme to CSS variables without interfering with next-themes
+// FIXED: Function to apply theme to CSS variables
 function applyThemeToDocument(settings: SiteSettings) {
   if (typeof document === 'undefined') return;
 
@@ -96,7 +96,7 @@ function applyThemeToDocument(settings: SiteSettings) {
     console.log('✅ Applied font family:', settings.themeFontFamily);
   }
 
-  // CRITICAL FIX: Don't force light mode, let next-themes handle it
+  // CRITICAL FIX: Handle dark mode properly
   console.log('🌙 Theme dark mode setting:', settings.themeDarkMode);
   
   if (settings.themeDarkMode) {
@@ -104,12 +104,14 @@ function applyThemeToDocument(settings: SiteSettings) {
     console.log('✅ Dark mode is AVAILABLE');
   } else {
     root.setAttribute('data-dark-mode-enabled', 'false');
-    // Only remove dark class if dark mode is disabled in settings
-    const currentTheme = localStorage.getItem('codilio-theme');
-    if (!currentTheme || currentTheme === 'dark') {
-      root.classList.remove('dark');
-      console.log('❌ Dark mode DISABLED - forcing light mode');
+    // CRITICAL: Remove dark class if dark mode is disabled in settings
+    // This prevents broken dark mode when setting is disabled
+    root.classList.remove('dark');
+    // Also clear the theme from localStorage to force light mode
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('codilio-theme', 'light');
     }
+    console.log('❌ Dark mode DISABLED - forcing light mode');
   }
 
   console.log('🎨 =================================');
@@ -144,7 +146,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       // Apply theme immediately after fetching
       if (structured) {
         console.log('🎨 About to apply theme...');
-        applyThemeToDocument(structured);
+        // Use setTimeout to ensure DOM is ready
+        setTimeout(() => {
+          applyThemeToDocument(structured);
+        }, 100);
       }
       
       hasInitiallyFetched.current = true;
@@ -172,12 +177,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       console.log('🚀 Initial settings fetch...');
       fetchSettings(false);
     }
-  }, []);
+  }, [fetchSettings]);
 
   // Apply theme when settings change
   useEffect(() => {
     if (settings && hasInitiallyFetched.current) {
       console.log('🔄 Settings changed, reapplying theme...');
+      // Use requestAnimationFrame for better performance
       requestAnimationFrame(() => {
         applyThemeToDocument(settings);
       });
@@ -217,7 +223,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSettings(newStructured);
       
       if (newStructured) {
-        applyThemeToDocument(newStructured);
+        // Apply theme changes immediately
+        setTimeout(() => {
+          applyThemeToDocument(newStructured);
+        }, 50);
       }
       
     } catch (error) {
@@ -243,7 +252,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSettings(newStructured);
       
       if (newStructured) {
-        applyThemeToDocument(newStructured);
+        setTimeout(() => {
+          applyThemeToDocument(newStructured);
+        }, 50);
       }
       
       return uploadedSetting;

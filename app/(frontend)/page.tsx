@@ -1,4 +1,3 @@
-// app/(frontend)/page.tsx - FINALNA VERZIJA SA SVETLOM TEMOM
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -156,7 +155,7 @@ export default function HomePage() {
     const parts = text.split(regex);
     return parts.map((part, index) =>
       regex.test(part) ? (
-        <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
+        <span key={index} className="bg-yellow-200 dark:bg-yellow-600 px-1 rounded font-semibold">
           {part}
         </span>
       ) : part
@@ -183,14 +182,14 @@ export default function HomePage() {
 
   if (settingsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{ borderColor: themeColors.primary }}></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
       {/* Hero Section with Dynamic Colors */}
       <section 
         className="text-white py-12 lg:py-16"
@@ -244,7 +243,7 @@ export default function HomePage() {
                           placeholder="Унесите кључне речи..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-9 bg-white/90 focus-primary-dynamic"
+                          className="pl-9 bg-white/90 dark:bg-white/95 focus-primary-dynamic text-gray-900"
                           autoComplete="off"
                         />
                         {searchTerm && (
@@ -259,11 +258,11 @@ export default function HomePage() {
 
                         {/* Search Results Dropdown */}
                         {showSearchResults && (searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border z-50 max-h-96 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
                             {/* Posts Results */}
                             {searchResults.posts.length > 0 && (
                               <div className="p-3">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                                   <FileText className="mr-2 h-4 w-4 text-primary-dynamic" />
                                   Објаве ({searchResults.posts.length})
                                 </h4>
@@ -273,7 +272,7 @@ export default function HomePage() {
                                       key={post.id}
                                       href={`/objave/${post.slug}`}
                                       onClick={clearSearch}
-                                      className="block p-2 hover:bg-gray-50 rounded-md transition-colors"
+                                      className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
                                     >
                                       <div className="flex items-start space-x-3">
                                         {post.featuredImage && (
@@ -284,11 +283,11 @@ export default function HomePage() {
                                           />
                                         )}
                                         <div className="flex-1 min-w-0">
-                                          <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
                                             {highlightText(post.title, searchTerm)}
                                           </div>
                                           {post.excerpt && (
-                                            <div className="text-xs text-gray-600 line-clamp-2 mt-1">
+                                            <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                                               {highlightText(post.excerpt.substring(0, 100), searchTerm)}
                                             </div>
                                           )}
@@ -298,7 +297,7 @@ export default function HomePage() {
                                                 {post.category.name}
                                               </Badge>
                                             )}
-                                            <span className="text-xs text-gray-500">
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">
                                               {getTimeAgo(post.publishedAt || post.createdAt)}
                                             </span>
                                           </div>
@@ -312,8 +311,8 @@ export default function HomePage() {
 
                             {/* Pages Results */}
                             {searchResults.pages.length > 0 && (
-                              <div className="p-3 border-t">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                              <div className="p-3 border-t dark:border-gray-700">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                                   <Building className="mr-2 h-4 w-4 text-secondary-dynamic" />
                                   Странице ({searchResults.pages.length})
                                 </h4>
@@ -323,12 +322,12 @@ export default function HomePage() {
                                       key={page.id}
                                       href={`/${page.slug}`}
                                       onClick={clearSearch}
-                                      className="block p-2 hover:bg-gray-50 rounded-md transition-colors"
+                                      className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
                                     >
-                                      <div className="text-sm font-medium text-gray-900">
+                                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {highlightText(page.title, searchTerm)}
                                       </div>
-                                      <div className="text-xs text-gray-600 line-clamp-2 mt-1">
+                                      <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                                         {highlightText(
                                           page.content.replace(/<[^>]*>/g, '').substring(0, 100),
                                           searchTerm
@@ -342,10 +341,10 @@ export default function HomePage() {
 
                             {/* No Results */}
                             {searchResults.posts.length === 0 && searchResults.pages.length === 0 && !isSearching && (
-                              <div className="p-4 text-center text-gray-500">
-                                <Search className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                <Search className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-600 mb-2" />
                                 <p className="text-sm">Нема резултата за "{searchTerm}"</p>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                                   Покушајте са другим кључним речима
                                 </p>
                               </div>
@@ -358,13 +357,13 @@ export default function HomePage() {
                                   className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto"
                                   style={{ borderColor: themeColors.primary }}
                                 ></div>
-                                <p className="text-sm text-gray-500 mt-2">Претражује се...</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Претражује се...</p>
                               </div>
                             )}
 
                             {/* Show more results link */}
                             {(searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                              <div className="p-3 border-t bg-gray-50">
+                              <div className="p-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                                 <Link
                                   href={`/pretraga?q=${encodeURIComponent(searchTerm)}`}
                                   onClick={clearSearch}
@@ -380,7 +379,7 @@ export default function HomePage() {
                       </div>
                       <Button
                         type="submit"
-                        className="w-full bg-white hover:bg-blue-50 text-primary-dynamic"
+                        className="w-full bg-white hover:bg-blue-50 text-primary-dynamic border border-primary-dynamic hover:border-primary-dynamic"
                       >
                         <Search className="mr-2 h-4 w-4" />
                         Претражи
@@ -394,22 +393,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Main Content - SVETLA POZADINA */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 bg-white">
+      {/* Main Content - PROPER DARK MODE */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 bg-white dark:bg-gray-900 transition-colors">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Latest News */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
                   Најновије објаве
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {posts.length > 0 ? `Приказује се ${posts.length} најновијих објава` : 'Нема објава за приказивање'}
                 </p>
               </div>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                 <Link href="/objave">
                   Све објаве
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -420,11 +419,11 @@ export default function HomePage() {
             {isLoading ? (
               <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse bg-white border border-gray-200">
+                  <Card key={i} className="animate-pulse bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <CardContent className="p-6">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                      <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
                     </CardContent>
                   </Card>
                 ))}
@@ -432,7 +431,7 @@ export default function HomePage() {
             ) : posts.length > 0 ? (
               <div className="space-y-6">
                 {posts.map((post) => (
-                  <Card key={post.id} className="hover:shadow-md transition-shadow bg-white border border-gray-200">
+                  <Card key={post.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -442,20 +441,20 @@ export default function HomePage() {
                                 {post.category.name}
                               </Badge>
                             )}
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
                               {getTimeAgo(post.publishedAt || post.createdAt)}
                             </span>
                             {post.pages && post.pages.length > 0 && (
                               <div className="flex items-center space-x-1">
-                                <span className="text-xs text-gray-400">•</span>
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
                                   Приказује се на: {post.pages.map(p => p.title).join(', ')}
                                 </span>
                               </div>
                             )}
                           </div>
 
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic transition-colors">
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-primary-dynamic transition-colors">
                             <Link href={`/objave/${post.slug}`}>
                               {post.title}
                             </Link>
@@ -463,12 +462,12 @@ export default function HomePage() {
 
                           {post.excerpt && (
                             <div
-                              className="text-gray-600 mb-3 text-sm lg:text-base prose prose-sm max-w-none"
+                              className="text-gray-600 dark:text-gray-300 mb-3 text-sm lg:text-base prose prose-sm dark:prose-invert max-w-none"
                               dangerouslySetInnerHTML={{ __html: post.excerpt }}
                             />
                           )}
 
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                             <span className="flex items-center">
                               <User className="mr-1 h-3 w-3" />
                               {post.author.name}
@@ -499,15 +498,15 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardContent className="p-12 text-center">
-                  <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Нема објава на почетној страни</h3>
-                  <p className="text-gray-500 mb-4">
+                  <FileText className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Нема објава на почетној страни</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
                     Тренутно нема објава додељених почетној страни.
                     Администратор може доделити објаве овој страни из CMS-а.
                   </p>
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <Link href="/objave">Погледај све објаве</Link>
                   </Button>
                 </CardContent>
@@ -519,10 +518,10 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Quick Links */}
             {pages.length > 0 && (
-              <Card className="bg-white border border-gray-200">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Брзи линкови</CardTitle>
-                  <CardDescription className="text-gray-600">
+                  <CardTitle className="text-gray-900 dark:text-white">Брзи линкови</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">
                     Најчешће тражене информације
                   </CardDescription>
                 </CardHeader>
@@ -531,17 +530,17 @@ export default function HomePage() {
                     <Link
                       key={page.id}
                       href={`/${page.slug}`}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
                     >
-                      <span className="text-sm font-medium text-gray-700">{page.title}</span>
-                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-primary-dynamic transition-colors" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{page.title}</span>
+                      <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-primary-dynamic transition-colors" />
                     </Link>
                   ))}
 
-                  <div className="pt-2 border-t border-gray-100">
+                  <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
                     <Link
                       href="/dokumenti"
-                      className="flex items-center justify-between p-3 rounded-lg transition-colors group hover:bg-primary-dynamic/5"
+                      className="flex items-center justify-between p-3 rounded-lg transition-colors group hover:bg-primary-dynamic/5 dark:hover:bg-primary-dynamic/10"
                     >
                       <span className="text-sm font-medium flex items-center text-primary-dynamic">
                         <Download className="mr-2 h-4 w-4" />
@@ -556,9 +555,9 @@ export default function HomePage() {
 
             {/* Categories */}
             {categories.length > 0 && (
-              <Card className="bg-white border border-gray-200">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Категорије објава</CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-white">Категорије објава</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -566,7 +565,7 @@ export default function HomePage() {
                       <Badge
                         key={category.id}
                         variant="outline"
-                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors badge-primary-dynamic border-gray-300 text-gray-700 hover:text-primary-dynamic"
+                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors badge-primary-dynamic border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic"
                         asChild
                       >
                         <Link href={`/kategorije/${category.slug}`}>
@@ -585,7 +584,7 @@ export default function HomePage() {
             )}
 
             {/* Transparency */}
-            <Card className="bg-white border border-gray-200 card-primary-dynamic">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 card-primary-dynamic">
               <CardHeader>
                 <CardTitle className="text-primary-dynamic">Транспарентност</CardTitle>
                 <CardDescription className="text-primary-dynamic opacity-80">
@@ -594,19 +593,19 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 text-gray-700 hover:text-primary-dynamic" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic" asChild>
                     <Link href="/budzet">
                       <TrendingUp className="mr-2 h-4 w-4" />
                       Буџет и финансије
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 text-gray-700 hover:text-primary-dynamic" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic" asChild>
                     <Link href="/javne-nabavke">
                       <FileText className="mr-2 h-4 w-4" />
                       Јавне набавке
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 text-gray-700 hover:text-primary-dynamic" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic" asChild>
                     <Link href="/sednice">
                       <Users className="mr-2 h-4 w-4" />
                       Записници са седница

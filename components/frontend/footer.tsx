@@ -1,4 +1,3 @@
-// components/frontend/footer.tsx - Complete with Dark Mode
 'use client';
 
 import { useSettings } from '@/lib/settings-context';
@@ -38,7 +37,7 @@ export function Footer({ pages }: FooterProps) {
   };
 
   return (
-    <footer className="bg-gray-900 dark:bg-black text-white py-12 mt-16">
+    <footer className="bg-gray-900 dark:bg-black text-white py-12 mt-16 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}

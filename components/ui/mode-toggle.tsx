@@ -1,4 +1,4 @@
-// components/ui/mode-toggle.tsx - Complete Dark Mode Toggle
+// components/ui/mode-toggle.tsx - COMPLETELY FIXED VERSION
 "use client";
 
 import * as React from "react";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ModeToggle() {
-  const { theme, setTheme, systemTheme } = useTheme();
+  const { theme, setTheme, systemTheme, resolvedTheme } = useTheme();
   const { settings } = useSettings();
   const [mounted, setMounted] = React.useState(false);
 
@@ -41,17 +41,17 @@ export function ModeToggle() {
           {/* Sun icon for light mode */}
           <Sun
             className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
-              currentTheme === "dark" 
-                ? "scale-0 rotate-90 opacity-0" 
+              resolvedTheme === "dark" 
+                ? "scale-0 rotate-90 opacity-0 absolute" 
                 : "scale-100 rotate-0 opacity-100"
             }`}
           />
           {/* Moon icon for dark mode */}
           <Moon
-            className={`absolute h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
-              currentTheme === "dark" 
+            className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+              resolvedTheme === "dark" 
                 ? "scale-100 rotate-0 opacity-100" 
-                : "scale-0 rotate-90 opacity-0"
+                : "scale-0 rotate-90 opacity-0 absolute"
             }`}
           />
           <span className="sr-only">Промени тему</span>
@@ -65,7 +65,7 @@ export function ModeToggle() {
           onClick={() => setTheme("light")}
           className={`cursor-pointer ${
             theme === "light" 
-              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic" 
+              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic font-semibold" 
               : "hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
@@ -79,7 +79,7 @@ export function ModeToggle() {
           onClick={() => setTheme("dark")}
           className={`cursor-pointer ${
             theme === "dark" 
-              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic" 
+              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic font-semibold" 
               : "hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
@@ -93,7 +93,7 @@ export function ModeToggle() {
           onClick={() => setTheme("system")}
           className={`cursor-pointer ${
             theme === "system" 
-              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic" 
+              ? "bg-gray-100 dark:bg-gray-700 text-primary-dynamic font-semibold" 
               : "hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
@@ -110,7 +110,7 @@ export function ModeToggle() {
 
 // Simple toggle version (alternative)
 export function SimpleToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { settings } = useSettings();
   const [mounted, setMounted] = React.useState(false);
 
@@ -123,7 +123,7 @@ export function SimpleToggle() {
   }
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -135,45 +135,19 @@ export function SimpleToggle() {
     >
       <Sun
         className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
-          theme === "dark" 
-            ? "scale-0 rotate-90 opacity-0" 
+          resolvedTheme === "dark" 
+            ? "scale-0 rotate-90 opacity-0 absolute" 
             : "scale-100 rotate-0 opacity-100"
         }`}
       />
       <Moon
-        className={`absolute h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
-          theme === "dark" 
+        className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+          resolvedTheme === "dark" 
             ? "scale-100 rotate-0 opacity-100" 
-            : "scale-0 rotate-90 opacity-0"
+            : "scale-0 rotate-90 opacity-0 absolute"
         }`}
       />
       <span className="sr-only">Промени тему</span>
     </Button>
-  );
-}
-
-// Theme status indicator (for debugging)
-export function ThemeStatus() {
-  const { theme, systemTheme } = useTheme();
-  const { settings } = useSettings();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || process.env.NODE_ENV !== 'development') {
-    return null;
-  }
-
-  const currentTheme = theme === "system" ? systemTheme : theme;
-
-  return (
-    <div className="fixed bottom-4 right-4 bg-black/80 text-white text-xs p-2 rounded z-50 font-mono">
-      <div>Theme: {theme}</div>
-      <div>System: {systemTheme}</div>
-      <div>Current: {currentTheme}</div>
-      <div>Dark Mode Enabled: {settings?.themeDarkMode ? "Yes" : "No"}</div>
-    </div>
   );
 }

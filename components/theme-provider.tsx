@@ -1,4 +1,4 @@
-// components/theme-provider.tsx - Complete Dark Mode Implementation
+// components/theme-provider.tsx - COMPLETELY FIXED VERSION
 "use client"
 
 import * as React from "react"
@@ -20,7 +20,7 @@ export function ThemeProvider({
     });
   }, [settings]);
 
-  // Only enable system theme detection if dark mode is enabled in settings
+  // Only enable dark mode if it's enabled in settings
   const enableSystem = settings?.themeDarkMode ?? false;
   const defaultTheme = "light"; // Always start with light theme
   
@@ -40,6 +40,8 @@ export function ThemeProvider({
       attribute="class"
       themes={settings?.themeDarkMode ? ['light', 'dark', 'system'] : ['light']}
       storageKey="codilio-theme"
-      >{children}</NextThemesProvider>
+    >
+      {children}
+    </NextThemesProvider>
   )
 }

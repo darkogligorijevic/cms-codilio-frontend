@@ -12,11 +12,32 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
+          "--normal-bg": "white",
+          "--normal-text": "rgb(17 24 39)",
+          "--normal-border": "rgb(229 231 235)",
+          "--success-bg": "rgb(34 197 94)",
+          "--success-text": "white",
+          "--error-bg": "rgb(239 68 68)",
+          "--error-text": "white",
+          "--warning-bg": "rgb(245 158 11)",
+          "--warning-text": "white",
+          "--info-bg": "rgb(59 130 246)",
+          "--info-text": "white",
         } as React.CSSProperties
       }
+      toastOptions={{
+        style: {
+          background: "white",
+          border: "1px solid rgb(229 231 235)",
+          color: "rgb(17 24 39)",
+          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          borderRadius: "8px",
+          padding: "16px",
+          fontSize: "14px",
+          fontWeight: "500",
+        },
+        className: "toast-override",
+      }}
       {...props}
     />
   )
