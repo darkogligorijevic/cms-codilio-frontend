@@ -14,6 +14,16 @@ export enum UserRole {
   AUTHOR = 'author'
 }
 
+export enum MediaCategory {
+  PROCUREMENT = 'procurement', // Javne Nabavke
+  FINANCIAL = 'financial',     // Finansijski izveštaji
+  DECISIONS = 'decisions',     // Odluke sa sastanaka
+  PLANS = 'plans',             // Godišnji planovi
+  REPORTS = 'reports',         // Izveštaji o radu
+  OTHER = 'other'              // Ostalo
+}
+
+
 export interface User {
   id: number;
   email: string;
@@ -110,6 +120,9 @@ export interface Media {
   path: string;
   alt?: string;
   caption?: string;
+  category: MediaCategory;
+  description?: string;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -279,11 +292,36 @@ export interface UpdateCategoryDto extends Partial<CreateCategoryDto> {}
 export interface CreateMediaDto {
   alt?: string;
   caption?: string;
+  category?: MediaCategory;
+  description?: string;
+  isPublic?: boolean;
 }
+
 
 export interface UpdateMediaDto extends CreateMediaDto {}
 
-// Page selection interface for dropdown
+
+export interface MediaCategoryInfo {
+  value: MediaCategory;
+  label: string;
+  description: string;
+}
+
+
+export interface FindMediaOptions {
+  category?: MediaCategory;
+  isPublic?: boolean;
+  search?: string;
+}
+
+
+export interface MediaCategoryStats {
+  category: MediaCategory;
+  count: number;
+  totalSize: number;
+}
+
+
 export interface PageSelectionOption {
   id: number;
   title: string;
