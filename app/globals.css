@@ -26,6 +26,7 @@
   --input: 214.3 31.8% 91.4%;
   --ring: 222.2 47.4% 11.2%;
   --radius: 0.5rem;
+  --footer: 222.2 84% 4.9%;
 
   /* VAŠE CUSTOM DYNAMIC COLORS - u HSL formatu */
   --primary-static: 240 10% 4%;
@@ -60,6 +61,7 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 94.1%;
+  --footer: 222.2 84% 4.9%;
 }
 
 /* KLJUČNO: @theme inline direktiva za Tailwind v4 + shadcn/ui */
@@ -84,6 +86,7 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  --color-footer: hsl(var(--footer))
   
   /* VAŠE CUSTOM DYNAMIC COLORS */
   --color-primary-dynamic: hsl(var(--primary-dynamic));
@@ -264,6 +267,10 @@ body {
   color: white;
   border-color: hsl(var(--primary-dynamic));
   transition: all 0.2s ease-in-out;
+}
+
+.bg-footer {
+  background-color: hsl(var(--footer));
 }
 
 .btn-primary-dynamic:hover {
