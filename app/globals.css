@@ -5,7 +5,7 @@
 
 /* CSS Variables for theme colors */
 :root {
-  /* Light mode colors - using HSL values for Tailwind v4 */
+  /* Light mode colors - shadcn/ui format */
   --background: 0 0% 100%; /* bela */
   --foreground: 240 10% 4%;
   --card: 0 0% 100%;
@@ -27,15 +27,15 @@
   --ring: 222.2 47.4% 11.2%;
   --radius: 0.5rem;
 
-  /* Default theme colors (will be overridden by settings) */
-  --primary-static: 220 100% 50%;
-  --secondary-static: 160 84% 39%;
+  /* VAŠE CUSTOM DYNAMIC COLORS - u HSL formatu */
+  --primary-static: 240 10% 4%;
+  --secondary-static: 0 0% 100%;
   --primary-dynamic: var(--primary-static);
   --secondary-dynamic: var(--secondary-static);
   --primary-hex: #3B82F6;
   --secondary-hex: #10B981;
   
-  /* Font family (will be overridden by settings) */
+  /* Font family */
   --font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -62,20 +62,57 @@
   --ring: 224.3 76.3% 94.1%;
 }
 
-/* Base styles */
+/* KLJUČNO: @theme inline direktiva za Tailwind v4 + shadcn/ui */
+@theme inline {
+  /* Mapiranje shadcn/ui varijabli na Tailwind v4 theme sistem */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  /* VAŠE CUSTOM DYNAMIC COLORS */
+  --color-primary-dynamic: hsl(var(--primary-dynamic));
+  --color-secondary-dynamic: hsl(var(--secondary-dynamic));
+  --color-primary-static: hsl(var(--primary-static));
+  --color-secondary-static: hsl(var(--secondary-static));
+  
+  /* Font system */
+  --font-sans: var(--font-family);
+  --font-dynamic: var(--font-family);
+  
+  /* Border radius */
+  --radius: var(--radius);
+}
+
+/* Base styles - ZADRŽAVAM VAŠE */
 * {
   border-color: hsl(var(--border));
 }
 
 body {
   color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
   font-family: var(--font-family);
   font-feature-settings: "rlig" 1, "calt" 1;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer base {
-  
   h1 {
     @apply text-6xl
   }
@@ -99,40 +136,40 @@ body {
   color-scheme: dark;
 }
 
+/* ZADRŽAVAM SVE VAŠE POSTOJEĆE STATIC UTILITIES */
 .bg-primary-static {
-  background-color: #000000;
+  background-color: hsl(var(--primary-static));
 }
 
 .text-primary-static {
-  color: #000000;
+  color: hsl(var(--primary-static));
 }
 
 .border-primary-static {
-  border-color: #000000;
+  border-color: hsl(var(--primary-static));
 }
 
 .hover\:bg-primary-static\/90:hover {
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: hsl(var(--primary-static) / 0.9);
 }
 
 .bg-secondary-static {
-  background-color: #ffffff;
+  background-color: hsl(var(--secondary-static));
 }
 
 .text-secondary-static {
-  color: #ffffff;
+  color: hsl(var(--secondary-static));
 }
 
 .border-secondary-static {
-  border-color: #ffffff;
+  border-color: hsl(var(--secondary-static));
 }
 
 .hover\:bg-secondary-static\/90:hover {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: hsl(var(--secondary-static) / 0.9);
 }
 
-
-/* Dynamic color utilities */
+/* ZADRŽAVAM SVE VAŠE DYNAMIC COLOR UTILITIES */
 .text-primary-dynamic {
   color: hsl(var(--primary-dynamic));
 }
@@ -258,6 +295,8 @@ body {
   color: hsl(var(--primary-dynamic) / 0.8);
   text-decoration: underline;
 }
+
+/* ZADRŽAVAM SVE VAŠE POSTOJEĆE SCROLL, SELECTION I OSTALE UTILITY KLASE */
 
 /* Improved scrollbar */
 ::-webkit-scrollbar {
