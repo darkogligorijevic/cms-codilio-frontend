@@ -15,7 +15,7 @@ const config: Config = {
         foreground: "hsl(var(--foreground))",
         primary: "hsl(var(--primary))",
         secondary: "hsl(var(--secondary))",
-        
+          
         // Dark mode specific colors
         card: {
           DEFAULT: "hsl(var(--card))",

@@ -50,6 +50,7 @@ import Link from 'next/link';
 import { postsApi, categoriesApi } from '@/lib/api';
 import type { Post, Category, PostStatus } from '@/lib/types';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -63,6 +64,7 @@ export default function PostsPage() {
   const [totalPosts, setTotalPosts] = useState(0);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const {theme} = useTheme();
   const postsPerPage = 10;
 
   useEffect(() => {
@@ -206,7 +208,7 @@ export default function PostsPage() {
             Upravljajte objavama na portalu institucije
           </p>
         </div>
-        <Button asChild>
+        <Button asChild variant={theme === "light" ? "default" : "secondaryDefault"}>
           <Link href="/dashboard/posts/new">
             <Plus className="mr-2 h-4 w-4" />
             Nova objava

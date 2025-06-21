@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SetupGuard } from "@/components/setup-guard";
 import { MaintenanceModeWrapper } from "@/components/maintenance-mode";
 import { MetaTags, DynamicFontLoader } from "@/components/meta-tags";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="sr">
+    <html lang="sr" suppressHydrationWarning>
       <head>
         {/* Preload default font */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,30 +36,29 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} theme-transition`}>
-        <AuthProvider>
-          <SetupProvider>
-            <SetupGuard>
-              <SettingsProvider>
-                <MaintenanceModeWrapper>
-                  {/* Meta tags component that reads from settings */}
-                  <MetaTags />
-                  
-                  {/* Dynamic font loader */}
-                  <DynamicFontLoader />
-                  
-                  {/* Main app content */}
-                  <div className="min-h-screen">
-                    {children}
-                  </div>
-                  
-                  {/* Toast notifications */}
-                  <Toaster richColors position="top-center"/>
-                </MaintenanceModeWrapper>
-              </SettingsProvider>
-            </SetupGuard>
-          </SetupProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <SetupProvider>
+              <SetupGuard>
+                <SettingsProvider>
+                  <MaintenanceModeWrapper>
+                    <MetaTags />
+                    <DynamicFontLoader />
+                      <div className="min-h-screen">{children}</div>
+                    <Toaster richColors position="top-center" />
+                  </MaintenanceModeWrapper>
+                </SettingsProvider>
+              </SetupGuard>
+            </SetupProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
+
     </html>
   );
 }

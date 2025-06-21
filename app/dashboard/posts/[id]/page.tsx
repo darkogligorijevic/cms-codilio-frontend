@@ -40,6 +40,7 @@ import { postsApi, categoriesApi, mediaApi, pagesApi } from '@/lib/api';
 import type { Post, Category, Media, Page, CreatePostDto, UpdatePostDto, PostStatus } from '@/lib/types';
 import { toast } from 'sonner';
 import { transliterate } from '@/lib/transliterate';
+import { useTheme } from 'next-themes';
 
 interface PostEditorProps {
   params: Promise<{
@@ -83,6 +84,7 @@ export default function PostEditor({ params }: PostEditorProps) {
   const [isSaving, setSaving] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);
   const [defaultPageId, setDefaultPageId] = useState<number | null>(null); // ADDED: Dynamic default page
+  const {theme} = useTheme();
 
   // FIXED: Dynamic default values based on available pages
   const defaultFormValues = useMemo(() => ({
@@ -570,6 +572,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                     type="submit"
                     className="w-full"
                     disabled={isSaving || !isDirty || !formInitialized}
+                    variant={theme === "light" ? "default" : "secondaryDefault"}
                   >
                     <Save className="mr-2 h-4 w-4" />
                     {isSaving ? 'Čuva se...' : (isNewPost ? 'Kreiraj objavu' : 'Sačuvaj izmene')}
@@ -588,10 +591,10 @@ export default function PostEditor({ params }: PostEditorProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Current selection summary */}
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="p-3 bg-blue-50 border dark:bg-transparent border-blue-200 rounded-lg">
                   <div className="flex items-center space-x-2 text-sm">
-                    <Globe className="h-4 w-4 text-blue-600" />
-                    <span className="text-blue-800">{getSelectedPagesText()}</span>
+                    <Globe className="h-4 w-4 text-primary-dynamic" />
+                    <span className="text-primary-dynamic">{getSelectedPagesText()}</span>
                   </div>
                 </div>
 
@@ -613,7 +616,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                       >
                         {/* ADDED: Show home icon for homepage */}
                         {isHomepage(page) ? (
-                          <Home className="h-4 w-4 text-blue-600" />
+                          <Home className="h-4 w-4 text-primary-dynamic" />
                         ) : (
                           <Layout className="h-4 w-4 text-muted-foreground" />
                         )}
@@ -637,7 +640,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                   ))}
                 </div>
 
-                <div className="text-xs text-muted-foreground p-3 bg-gray-50 rounded">
+                <div className="text-xs text-muted-foreground p-3 bg-gray-50 dark:bg-gray-800 rounded">
                   <strong>Napomena:</strong> Objava mora biti dodeljena barem jednoj stranici. 
                   Ako nije izabrana nijedna stranica, biće automatski dodeljena početnoj strani.
                 </div>

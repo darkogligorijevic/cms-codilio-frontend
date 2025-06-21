@@ -54,6 +54,7 @@ import { pagesApi } from '@/lib/api';
 import type { Page, PageStatus } from '@/lib/types';
 import { toast } from 'sonner';
 import { transliterate } from '@/lib/transliterate';
+import { useTheme } from 'next-themes';
 
 interface PageFormData {
   title: string;
@@ -82,6 +83,7 @@ export default function PagesPage() {
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<Page | null>(null);
+  const {theme} = useTheme();
 
   const {
     register,
@@ -281,7 +283,7 @@ export default function PagesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
               <Plus className="mr-2 h-4 w-4" />
               Nova stranica
             </Button>
@@ -404,7 +406,7 @@ export default function PagesPage() {
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
                   Otkaži
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
                   {isSubmitting ? 'Čuva se...' : (editingPage ? 'Sačuvaj izmene' : 'Kreiraj stranicu')}
                 </Button>
               </DialogFooter>

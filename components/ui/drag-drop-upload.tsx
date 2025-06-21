@@ -235,7 +235,7 @@ export function DragDropUpload({
             ? "border-gray-200 bg-gray-50 cursor-not-allowed" 
             : isDragOver 
               ? "border-blue-500 bg-blue-50 border-solid" 
-              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 cursor-pointer"
+              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-transparent cursor-pointer"
         )}
         onClick={() => !disabled && fileInputRef.current?.click()}
       >
@@ -264,7 +264,7 @@ export function DragDropUpload({
           </div>
 
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
+            <h3 className="text-lg font-medium text-gray-900 mb-1 dark:text-white">
               {isDragOver ? 'Otpustite fajlove ovde' : 'Prevucite fajlove ovde'}
             </h3>
             <p className="text-sm text-gray-500 mb-2">

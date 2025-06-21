@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User, Eye, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { mediaApi } from '@/lib/api';
+import { ModeToggle } from '../ui/mode-toggle';
 
 export function DashboardHeader() {
   const { user, logout } = useAuth();
@@ -27,7 +28,7 @@ export function DashboardHeader() {
   };
 
   return (
-    <header className="h-16 bg-white border-b flex items-center justify-between px-6">
+    <header className="h-16 bg-white dark:bg-gray-900 border-b flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
         {settings?.siteLogo && (
           <img 
@@ -37,7 +38,7 @@ export function DashboardHeader() {
           />
         )}
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">
+          <h1 className="text-lg font-semibold dark:text-white text-gray-900">
             {settings?.siteName || 'Administracioni panel'}
           </h1>
           {settings?.siteTagline && (
@@ -46,7 +47,9 @@ export function DashboardHeader() {
         </div>
       </div>
 
+
       <div className="flex items-center space-x-4">
+        <ModeToggle />
         <Button variant="outline" asChild>
           <Link href="/" target="_blank" className="flex items-center space-x-2">
             <Eye className="h-4 w-4" />

@@ -38,7 +38,7 @@ export function Footer({ pages }: FooterProps) {
   };
 
   return (
-    <footer className="bg-gray-900 text-white py-12 mt-16">
+    <footer className="bg-gray-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
@@ -48,7 +48,7 @@ export function Footer({ pages }: FooterProps) {
                 <img 
                   src={mediaApi.getFileUrl(settings.siteLogo)} 
                   alt={settings.siteName || 'Лого'} 
-                  className="h-6 object-contain brightness-0 invert"
+                  className="h-6 object-cover filter dark:brightness-0 dark:invert"
                 />
               ) : (
                 <Building className="h-6 w-6" />

@@ -496,7 +496,7 @@ export default function MediaPage() {
                         {/* File type badge */}
                         <Badge
                           variant="secondary"
-                          className="absolute top-2 left-2 text-xs"
+                          className="absolute top-2 left-2 text-xs border-none font-bold text-gray-900 px-2 py-1 bg-primary-dynamic"
                         >
                           {getFileTypeLabel(item.mimeType)}
                         </Badge>

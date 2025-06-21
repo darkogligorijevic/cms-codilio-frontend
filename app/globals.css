@@ -1,11 +1,13 @@
 /* app/globals.css - Tailwind CSS 4 + Next.js 15 compatible */
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* CSS Variables for theme colors */
 :root {
   /* Light mode colors - using HSL values for Tailwind v4 */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  --background: 0 0% 100%; /* bela */
+  --foreground: 240 10% 4%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
@@ -39,8 +41,8 @@
 
 /* Dark mode colors */
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  --background: 240 10% 4%; /* tamna */
+  --foreground: 0 0% 100%;
   --card: 222.2 84% 4.9%;
   --card-foreground: 210 40% 98%;
   --popover: 222.2 84% 4.9%;
@@ -67,13 +69,13 @@
 
 body {
   color: hsl(var(--foreground));
-  background: hsl(var(--background));
   font-family: var(--font-family);
   font-feature-settings: "rlig" 1, "calt" 1;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer base {
+  
   h1 {
     @apply text-6xl
   }
@@ -96,7 +98,6 @@ body {
 .dark {
   color-scheme: dark;
 }
-
 
 .bg-primary-static {
   background-color: #000000;

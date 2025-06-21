@@ -54,6 +54,7 @@ import { useAuth } from '@/lib/auth-context';
 import type { User, UserRole, CreateUserDto, UpdateUserDto, UserWithStats, UsersStatistics } from '@/lib/types';
 import { usersApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 interface UserFormData {
   name: string;
@@ -87,6 +88,7 @@ export default function UsersPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<ExtendedUser | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const {theme} = useTheme();
   const [userStats, setUserStats] = useState<UserStats>({
     totalUsers: 0,
     activeUsers: 0,
@@ -390,7 +392,7 @@ export default function UsersPage() {
           {currentUser?.role === 'admin' && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
                   <Plus className="mr-2 h-4 w-4" />
                   Novi korisnik
                 </Button>
@@ -517,7 +519,7 @@ export default function UsersPage() {
                     <Button type="button" variant="outline" onClick={handleCloseDialog}>
                       Otkaži
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
                       {isSubmitting ? 'Čuva se...' : (editingUser ? 'Sačuvaj izmene' : 'Kreiraj korisnika')}
                     </Button>
                   </DialogFooter>

@@ -62,9 +62,9 @@ export function DashboardSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 dark:border-r shadow-lg">
       <div className="flex h-16 items-center px-6 border-b">
-        <Link href="/dashboard" className="text-xl font-bold text-gray-900">
+        <Link href="/dashboard" className="text-xl font-bold text-gray-900 dark:text-white">
           CMS Codilio
         </Link>
       </div>
@@ -82,8 +82,8 @@ export function DashboardSidebar() {
                 className={cn(
                   'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                   isActive
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-blue-50 text-primary-dynamic border-r-2 border-primary-dynamic'
+                    : 'text-gray-600 dark:text-gray-200 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
                 <item.icon className="mr-3 h-5 w-5" />

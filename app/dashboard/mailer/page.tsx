@@ -77,6 +77,7 @@ import type {
   ReplyToContactDto
 } from '@/lib/types';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 // Add TemplateVariableHelper component inline
 const TemplateVariableHelper = ({ context = 'both' }: { context?: 'newsletter' | 'contact' | 'both' }) => {
@@ -124,7 +125,7 @@ const TemplateVariableHelper = ({ context = 'both' }: { context?: 'newsletter' |
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div className="space-y-4 dark:text-gray-900">
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
             <p><strong>Kako koristiti:</strong> Ukucajte varijablu u template (npr. <code>{'{{firstName}}'}</code>) i biće zamenjena pravom vrednošću.</p>
           </div>
@@ -200,6 +201,7 @@ export default function MailerPage() {
   const [replyingToContact, setReplyingToContact] = useState<Contact | null>(null); // New: Contact being replied to
   const [isSendingNewsletter, setIsSendingNewsletter] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false); // New: Reply sending state
+  const {theme} = useTheme();
 
   // Forms
   const contactForm = useForm<ContactFormData>();
@@ -559,7 +561,7 @@ export default function MailerPage() {
         <div className="flex items-center space-x-2">
           <Dialog open={isNewsletterDialogOpen} onOpenChange={setIsNewsletterDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
                 <Send className="mr-2 h-4 w-4" />
                 Pošalji Newsletter
               </Button>
@@ -1173,8 +1175,8 @@ export default function MailerPage() {
                 {watchedTemplateId && watchedTemplateId !== '' && (
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center space-x-2 text-sm">
-                      <FileText className="h-4 w-4 text-blue-600" />
-                      <span className="text-blue-800">
+                      <FileText className="h-4 w-4 text-primary-dynamic" />
+                      <span className="text-primary-dynamic">
                         Template "{templates.find(t => t.id.toString() === watchedTemplateId)?.name}" je učitan. 
                         Možete urediti sadržaj pre slanja.
                       </span>
@@ -1229,8 +1231,8 @@ export default function MailerPage() {
 
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">
+                  <Mail className="h-4 w-4 text-primary-dynamic" />
+                  <span className="text-sm font-medium text-primary-dynamic">
                     Biće poslato na {subscriberStats.active} aktivnih pretplatnika
                   </span>
                 </div>
@@ -1248,7 +1250,7 @@ export default function MailerPage() {
               >
                 Otkaži
               </Button>
-              <Button type="submit" disabled={isSendingNewsletter}>
+              <Button type="submit" disabled={isSendingNewsletter} variant={theme === "light" ? "default" : "secondaryDefault"}>
                 {isSendingNewsletter ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

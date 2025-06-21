@@ -66,6 +66,7 @@ import {
 import { mediaApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 interface SettingFormData {
   [key: string]: string | number | boolean;
@@ -94,6 +95,7 @@ export default function SettingsPage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const [isDraggingFavicon, setIsDraggingFavicon] = useState(false);
+  const {theme} = useTheme();
   
   // Track file uploads separately from form state
   const [pendingFileUploads, setPendingFileUploads] = useState<{
@@ -545,6 +547,7 @@ export default function SettingsPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleFormReset}
+                className='dark:text-gray-900 dark:hover:bg-white dark:hover:text-gray-900'
               >
                 Poništi
               </Button>
@@ -621,7 +624,7 @@ export default function SettingsPage() {
                     <Label>Logo sajta</Label>
                     <div className="space-y-3">
                       {logoPreview && (
-                        <div className="p-4 bg-gray-50 rounded-lg border">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium">Trenutni logo:</span>
                             <Button
@@ -656,7 +659,7 @@ export default function SettingsPage() {
                         <label
                           htmlFor="logo-upload"
                           className={cn(
-                            "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all",
+                            "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all dark:bg-gray-900",
                             isDraggingLogo 
                               ? "border-blue-500 bg-blue-50 scale-105" 
                               : "border-gray-300 bg-gray-50 hover:bg-gray-100"
@@ -687,7 +690,7 @@ export default function SettingsPage() {
                     <Label>Favicon</Label>
                     <div className="space-y-3">
                       {faviconPreview && (
-                        <div className="p-4 bg-gray-50 rounded-lg border">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium">Trenutni favicon:</span>
                             <Button
@@ -722,7 +725,7 @@ export default function SettingsPage() {
                         <label
                           htmlFor="favicon-upload"
                           className={cn(
-                            "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all",
+                            "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all dark:bg-gray-900",
                             isDraggingFavicon 
                               ? "border-blue-500 bg-blue-50 scale-105" 
                               : "border-gray-300 bg-gray-50 hover:bg-gray-100"
@@ -1191,7 +1194,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Preview */}
-                <div className="border rounded-lg p-6 bg-gray-50">
+                <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
                   <h4 className="text-sm font-medium mb-4">Pregled boja</h4>
                   <div className="space-y-3">
                     <div className="flex items-center space-x-4">
@@ -1359,6 +1362,7 @@ export default function SettingsPage() {
             type="submit"
             size="lg"
             disabled={isSaving || !hasChanges}
+            variant={theme === "light" ? "default" : "secondaryDefault"}
           >
             {isSaving ? (
               <>
