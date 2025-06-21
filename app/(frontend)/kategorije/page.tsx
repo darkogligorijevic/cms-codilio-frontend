@@ -107,15 +107,15 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
  
       {/* Page Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Категорије објава</h1>
-              <p className="text-gray-600 mt-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Категорије објава</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Организовано по темама за лакше проналажење садржаја
               </p>
             </div>
@@ -130,28 +130,28 @@ export default function CategoriesPage() {
 
       {/* Statistics */}
       {!isLoading && categories.length > 0 && (
-        <div className="bg-white border-b">
+        <div className="bg-white border-b dark:bg-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary-dynamic">{categories.length}</div>
-                <div className="text-sm text-gray-600">Активне категорије</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Активне категорије</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-secondary-dynamic">{getTotalPublishedPosts()}</div>
-                <div className="text-sm text-gray-600">Објављене објаве</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Објављене објаве</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
                   {categories.length > 0 ? Math.round(getTotalPublishedPosts() / categories.length) : 0}
                 </div>
-                <div className="text-sm text-gray-600">Просек по категорији</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Просек по категорији</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-orange-600">
                   {getMostActiveCategory()?.posts?.filter(post => post.status === "published")?.length || 0}
                 </div>
-                <div className="text-sm text-gray-600">Најактивнија категорија</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Најактивнија категорија</div>
               </div>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function CategoriesPage() {
                             {getCategoryIcon(category.name)}
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900 hover:text-primary-dynamic">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 hover:text-primary-dynamic ">
                               <Link href={`/kategorije/${category.slug}`}>
                                 {category.name}
                               </Link>
@@ -206,7 +206,7 @@ export default function CategoriesPage() {
                             </div>
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-sm">
+                        <Badge variant="secondary" className="text-sm badge-primary-dynamic">
                           {publishedPosts.length} објав{publishedPosts.length === 1 ? 'а' : 'а'}
                         </Badge>
                       </div>
@@ -225,7 +225,7 @@ export default function CategoriesPage() {
                       {/* Recent Posts Preview */}
                       {publishedPosts.length > 0 && (
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Последње објаве:</h4>
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-200 mb-2">Последње објаве:</h4>
                           <div className="space-y-1">
                             {publishedPosts.slice(0, 3).map((post) => (
                               <Link
@@ -276,7 +276,7 @@ export default function CategoriesPage() {
 
             {/* Popular Categories Section */}
             <div className="mt-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Најпопуларније категорије</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200 mb-6">Најпопуларније категорије</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 {categories
                   .sort((a, b) => {
@@ -301,7 +301,7 @@ export default function CategoriesPage() {
                                 {index + 1}
                               </div>
                               <div>
-                                <h3 className="font-medium text-gray-900 hover:text-primary-dynamic">
+                                <h3 className="font-medium text-gray-900 dark:text-gray-200 hover:text-primary-dynamic">
                                   <Link href={`/kategorije/${category.slug}`}>
                                     {category.name}
                                   </Link>

@@ -20,6 +20,7 @@ import {
 import Link from 'next/link';
 import { postsApi, mediaApi } from '@/lib/api';
 import type { Post } from '@/lib/types';
+import { useTheme } from 'next-themes';
 
 interface SinglePostProps {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
   const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {theme} = useTheme();
 
   useEffect(() => {
     fetchPost();
@@ -103,19 +105,17 @@ export default function SinglePostPage({ params }: SinglePostProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-
-
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        
         {/* Loading Content */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-8"></div>
             <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-5/6"></div>
             </div>
           </div>
         </main>
@@ -125,7 +125,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
         {/* Error Content */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -147,11 +147,11 @@ export default function SinglePostPage({ params }: SinglePostProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Breadcrumb */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b dark:bg-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
             <Link href="/" className="hover:text-primary-dynamic">Почетна</Link>
             <ChevronRight className="h-4 w-4" />
             <Link href="/objave" className="hover:text-primary-dynamic">Објаве</Link>
@@ -164,7 +164,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                 <ChevronRight className="h-4 w-4" />
               </>
             )}
-            <span className="text-gray-900">{post.title}</span>
+            <span className="text-gray-900 dark:text-white">{post.title}</span>
           </nav>
         </div>
       </div>
@@ -175,18 +175,18 @@ export default function SinglePostPage({ params }: SinglePostProps) {
           {/* Post Header */}
           <div className="mb-8">
             {post.category && (
-              <Badge variant="secondary" className="mb-4">
+              <Badge variant="secondary" className="mb-4 badge-primary-dynamic">
                 {post.category.name}
               </Badge>
             )}
 
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               {post.title}
             </h1>
 
             {post.excerpt && (
               <div
-                className="text-gray-600 text-sm mb-4 line-clamp-3 prose prose-sm max-w-none"
+                className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3 prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.excerpt }}
               />
             )}
@@ -222,12 +222,12 @@ export default function SinglePostPage({ params }: SinglePostProps) {
 
           {/* Post Content */}
           <div
-            className="prose prose-lg prose-gray max-w-none mb-12"
+            className="prose prose-lg prose-gray max-w-none mb-12 dark:text-black"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
           {/* Share Section */}
-          <div className="bg-gray-100 rounded-lg p-6 mb-8">
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 mb-8">
             <h3 className="text-lg font-semibold mb-4">Поделите ову објаву</h3>
             <div className="flex items-center space-x-4">
               <Button variant="primary" onClick={sharePost} size="sm">
@@ -235,7 +235,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                 Подели
               </Button>
               <Button
-                variant="outline"
+                variant={theme === "light" ? "outline" : "default"}
                 size="sm"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
@@ -251,7 +251,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Повезане објаве</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Повезане објаве</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {relatedPosts.map((relatedPost) => (
                 <Card key={relatedPost.id} className="hover:shadow-md transition-shadow">
@@ -265,19 +265,19 @@ export default function SinglePostPage({ params }: SinglePostProps) {
                     )}
 
                     {relatedPost.category && (
-                      <Badge variant="secondary" className="mb-2">
+                      <Badge variant="secondary" className="mb-2 badge-primary-dynamic">
                         {relatedPost.category.name}
                       </Badge>
                     )}
 
-                    <h3 className="font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-200 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${relatedPost.slug}`}>
                         {relatedPost.title}
                       </Link>
                     </h3>
 
                     {relatedPost.excerpt && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                         {relatedPost.excerpt}
                       </p>
                     )}

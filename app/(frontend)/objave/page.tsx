@@ -131,17 +131,17 @@ function PostsContent() {
   const displayPosts = searchTerm || selectedCategory !== 'all' ? filteredPosts : posts;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       {/* Page Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {selectedCategoryName ? `Објаве из категорије: ${selectedCategoryName}` : 'Све објаве'}
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
                 {totalPosts > 0 ? `Укупно ${totalPosts} објав${totalPosts === 1 ? 'а' : 'а'}` : 'Нема објава за приказ'}
               </p>
             </div>
@@ -155,7 +155,7 @@ function PostsContent() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
             {/* Search */}
@@ -176,7 +176,7 @@ function PostsContent() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="all">Све категорије</option>
                 {categories.map((category) => (
@@ -254,13 +254,13 @@ function PostsContent() {
                   <CardContent className="p-6">
                     {/* Category Badge */}
                     {post.category && (
-                      <Badge variant="secondary" className="mb-3">
+                      <Badge variant="secondary" className="mb-3 badge-primary-dynamic">
                         {post.category.name}
                       </Badge>
                     )}
 
                     {/* Title */}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${post.slug}`}>
                         {post.title}
                       </Link>
@@ -381,7 +381,7 @@ function PostsContent() {
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-blue-50"
+                  className="cursor-pointer hover:bg-blue-50 badge-primary-dynamic"
                   onClick={() => setSelectedCategory('all')}
                 >
                   Све ({totalPosts})
@@ -390,7 +390,7 @@ function PostsContent() {
                   <Badge
                     key={category.id}
                     variant={selectedCategory === category.id.toString() ? 'default' : 'outline'}
-                    className="cursor-pointer hover:bg-blue-50"
+                    className="cursor-pointer hover:bg-blue-50 badge-primary-dynamic"
                     onClick={() => setSelectedCategory(category.id.toString())}
                   >
                     {category.name}
@@ -412,14 +412,14 @@ function PostsContent() {
 // Loading komponenta
 function PostsLoading() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-8 bg-gray-200 dark:bg-gray-600 rounded w-1/3"></div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+              <div key={i} className="h-64 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
             ))}
           </div>
         </div>
