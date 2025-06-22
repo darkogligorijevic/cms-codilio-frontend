@@ -482,7 +482,11 @@ export default function OrganizationalStructurePage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(statistics.totalEmployees / statistics.totalUnits)}
+                {
+                  statistics.totalEmployees && statistics.totalUnits
+                    ? Math.round(statistics.totalEmployees / statistics.totalUnits)
+                    : "N/A"
+                }
               </div>
               <p className="text-xs text-muted-foreground">
                 Po jedinici
