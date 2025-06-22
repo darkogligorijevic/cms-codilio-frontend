@@ -377,8 +377,8 @@ export function DragDropUpload({
           disabled 
             ? "border-gray-200 bg-gray-50 cursor-not-allowed" 
             : isDragOver 
-              ? "border-blue-500 bg-blue-50 border-solid" 
-              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-transparent cursor-pointer"
+              ? "border-gray-600 bg-gray-100 dark:bg-card border-solid" 
+              : "border-gray-300 hover:border-gray-200 hover:bg-gray-50 dark:hover:bg-transparent cursor-pointer"
         )}
         onClick={() => !disabled && fileInputRef.current?.click()}
       >
@@ -398,11 +398,11 @@ export function DragDropUpload({
         )}>
           <div className={cn(
             "mx-auto rounded-full p-4",
-            isDragOver ? "bg-blue-100" : "bg-gray-100"
+            isDragOver ? "bg-white dark:bg-gray-600" : "bg-gray-100 dark:bg-gray-600"
           )}>
             <Upload className={cn(
               "h-8 w-8",
-              isDragOver ? "text-blue-600" : "text-gray-400"
+              isDragOver ? "text-gray-600 dark:text-gray-200" : "text-gray-400"
             )} />
           </div>
 

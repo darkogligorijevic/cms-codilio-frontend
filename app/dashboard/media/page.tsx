@@ -269,11 +269,11 @@ export default function MediaPage() {
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType?.startsWith('image/')) {
-      return <ImageIcon className="h-4 w-4" />;
+      return <ImageIcon className="h-6 w-6" />;
     } else if (mimeType?.includes('pdf')) {
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-6 w-6 dark:invert-100" />;
     } else {
-      return <File className="h-4 w-4" />;
+      return <File className="h-6 w-6" />;
     }
   };
 
@@ -527,7 +527,7 @@ export default function MediaPage() {
                         }
                       }}
                     >
-                      <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">
+                      <div className="aspect-square bg-gray-50 dark:bg-gray-900 flex items-center justify-center relative group">
                         {item.mimeType?.startsWith('image/') ? (
                           <img
                             crossOrigin="anonymous"
