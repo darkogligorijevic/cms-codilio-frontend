@@ -44,7 +44,11 @@ import {
   FindMediaOptions,
   MediaCategory,
   MediaCategoryInfo,
-  MediaCategoryStats
+  MediaCategoryStats,
+  CreateOrganizationalUnitDto,
+  OrganizationalStatistics,
+  OrganizationalUnit,
+  UpdateOrganizationalUnitDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -594,4 +598,85 @@ export const setupApi = {
     const response: AxiosResponse<{ exists: boolean }> = await api.get('/setup/check-admin');
     return response.data;
   },
+};
+
+export const organizationalApi = {
+  // Get all units
+  getAll: async (): Promise<OrganizationalUnit[]> => {
+    const response: AxiosResponse<OrganizationalUnit[]> = await api.get('/organizational-structure');
+    return response.data;
+  },
+
+  // Get units as tree structure
+  getTree: async (): Promise<OrganizationalUnit[]> => {
+    const response: AxiosResponse<OrganizationalUnit[]> = await api.get('/organizational-structure?tree=true');
+    return response.data;
+  },
+
+  // Get root units (top level)
+  getRoots: async (): Promise<OrganizationalUnit[]> => {
+    const response: AxiosResponse<OrganizationalUnit[]> = await api.get('/organizational-structure/roots');
+    return response.data;
+  },
+
+  // Get unit by ID
+  getById: async (id: number): Promise<OrganizationalUnit> => {
+    const response: AxiosResponse<OrganizationalUnit> = await api.get(`/organizational-structure/${id}`);
+    return response.data;
+  },
+
+  // Get unit by code
+  getByCode: async (code: string): Promise<OrganizationalUnit> => {
+    const response: AxiosResponse<OrganizationalUnit> = await api.get(`/organizational-structure/code/${code}`);
+    return response.data;
+  },
+
+  // Get descendants (sub-units)
+  getDescendants: async (id: number): Promise<OrganizationalUnit[]> => {
+    const response: AxiosResponse<OrganizationalUnit[]> = await api.get(`/organizational-structure/${id}/descendants`);
+    return response.data;
+  },
+
+  // Get ancestors (parent units)
+  getAncestors: async (id: number): Promise<OrganizationalUnit[]> => {
+    const response: AxiosResponse<OrganizationalUnit[]> = await api.get(`/organizational-structure/${id}/ancestors`);
+    return response.data;
+  },
+
+  // Create new unit
+  create: async (data: CreateOrganizationalUnitDto): Promise<OrganizationalUnit> => {
+    const response: AxiosResponse<OrganizationalUnit> = await api.post('/organizational-structure', data);
+    return response.data;
+  },
+
+  // Update unit
+  update: async (id: number, data: UpdateOrganizationalUnitDto): Promise<OrganizationalUnit> => {
+    const response: AxiosResponse<OrganizationalUnit> = await api.patch(`/organizational-structure/${id}`, data);
+    return response.data;
+  },
+
+  // Move unit to new parent
+  moveUnit: async (id: number, newParentId: number | null): Promise<OrganizationalUnit> => {
+    const response: AxiosResponse<OrganizationalUnit> = await api.patch(`/organizational-structure/${id}/move`, {
+      newParentId
+    });
+    return response.data;
+  },
+
+  // Delete unit
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/organizational-structure/${id}`);
+  },
+
+  // Get statistics
+  getStatistics: async (): Promise<OrganizationalStatistics> => {
+    const response: AxiosResponse<OrganizationalStatistics> = await api.get('/organizational-structure/statistics');
+    return response.data;
+  },
+
+  // Export structure
+  exportStructure: async (): Promise<any> => {
+    const response = await api.get('/organizational-structure/export');
+    return response.data;
+  }
 };

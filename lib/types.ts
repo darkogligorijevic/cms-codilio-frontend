@@ -254,10 +254,12 @@ export interface SubscribeToNewsletterDto {
 
 export interface CreateContactDto {
   name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
+  title: string;
+  type: ContactType;
+  phone?: string;
+  email?: string;
+  office?: string;
+  order?: number;
 }
 
 export interface UpdateEmailTemplateDto extends CreateEmailTemplateDto {}
@@ -565,3 +567,91 @@ export interface SessionInfo {
   lastActivity: string;
   current: boolean;
 }
+
+export enum UnitType {
+  DEPARTMENT = 'department',
+  DIVISION = 'division',
+  SECTOR = 'sector',
+  SERVICE = 'service',
+  OFFICE = 'office',
+  COMMITTEE = 'committee',
+  OTHER = 'other'
+}
+
+export enum ContactType {
+  MANAGER = 'manager',
+  DEPUTY = 'deputy',
+  SECRETARY = 'secretary',
+  COORDINATOR = 'coordinator',
+  SPECIALIST = 'specialist',
+  OTHER = 'other'
+}
+
+export interface ContactInfo {
+  id: number;
+  name: string;
+  title: string;
+  type: ContactType;
+  phone?: string;
+  email?: string;
+  office?: string;
+  order: number;
+  unitId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrganizationalUnit {
+  id: number;
+  name: string;
+  code: string;
+  type: UnitType;
+  description?: string;
+  managerName?: string;
+  managerTitle?: string;
+  phone?: string;
+  email?: string;
+  location?: string;
+  employeeCount: number;
+  isActive: boolean;
+  parentId?: number;
+  parent?: OrganizationalUnit;
+  children?: OrganizationalUnit[];
+  contacts?: ContactInfo[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOrganizationalUnitDto {
+  name: string;
+  code: string;
+  type: UnitType;
+  description?: string;
+  managerName?: string;
+  managerTitle?: string;
+  phone?: string;
+  email?: string;
+  location?: string;
+  employeeCount?: number;
+  parentId?: number;
+  contacts?: CreateContactDto[];
+}
+
+export interface UpdateOrganizationalUnitDto extends Partial<CreateOrganizationalUnitDto> {}
+
+export interface MoveUnitDto {
+  newParentId: number | null;
+}
+
+export interface OrganizationalStatistics {
+  totalUnits: number;
+  activeUnits: number;
+  unitsByType: Array<{
+    type: UnitType;
+    count: number;
+  }>;
+  totalEmployees: number;
+}
+
+
+

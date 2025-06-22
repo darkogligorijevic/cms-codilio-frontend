@@ -1,4 +1,4 @@
-// components/dashboard/sidebar.tsx - Updated with Mailer
+// components/dashboard/sidebar.tsx - Updated with Organizational Structure
 'use client';
 
 import Link from 'next/link';
@@ -12,7 +12,8 @@ import {
   Image, 
   Settings,
   PenTool,
-  Mail
+  Mail,
+  Building2
 } from 'lucide-react';
 
 const menuItems = [
@@ -45,6 +46,11 @@ const menuItems = [
     title: 'Mailer',
     href: '/dashboard/mailer',
     icon: Mail,
+  },
+  {
+    title: 'Org. struktura',
+    href: '/dashboard/organizational-structure',
+    icon: Building2,
   },
   {
     title: 'Korisnici',
