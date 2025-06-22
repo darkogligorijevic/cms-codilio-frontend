@@ -14,7 +14,8 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-  RotateCcw
+  RotateCcw,
+  Move
 } from 'lucide-react';
 import { OrganizationalUnit, UnitType } from '@/lib/types';
 import { useTheme } from 'next-themes';
@@ -32,6 +33,7 @@ interface ChartNode {
   height: number;
   level: number;
   children: ChartNode[];
+  isDragging?: boolean;
 }
 
 const UNIT_WIDTH = 280;
@@ -45,6 +47,11 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [selectedUnit, setSelectedUnit] = useState<OrganizationalUnit | null>(null);
+  const [nodes, setNodes] = useState<ChartNode[]>([]);
+  const [draggedNode, setDraggedNode] = useState<ChartNode | null>(null);
+  const [draggedNodeOffset, setDraggedNodeOffset] = useState({ x: 0, y: 0 });
+  const [isOverChart, setIsOverChart] = useState(false);
+  
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const {theme} = useTheme();
@@ -88,14 +95,14 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
     return labels[type] || type;
   };
 
-  // Calculate layout positions for nodes
-  const calculateLayout = (units: OrganizationalUnit[], level = 0): ChartNode[] => {
-    const nodes: ChartNode[] = [];
+  // Calculate initial layout positions for nodes
+  const calculateInitialLayout = (units: OrganizationalUnit[], level = 0): ChartNode[] => {
+    const initialNodes: ChartNode[] = [];
     let currentX = 0;
 
     units.forEach((unit, index) => {
       const children = unit.children && unit.children.length > 0 
-        ? calculateLayout(unit.children, level + 1) 
+        ? calculateInitialLayout(unit.children, level + 1) 
         : [];
       
       let nodeWidth = UNIT_WIDTH;
@@ -124,66 +131,136 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
         });
       }
 
-      nodes.push(node);
+      initialNodes.push(node);
       currentX += nodeWidth + HORIZONTAL_SPACING;
     });
 
-    return nodes;
+    return initialNodes;
   };
 
-  const allNodes = calculateLayout(data);
+  // Initialize nodes when data changes
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const initialNodes = calculateInitialLayout(data);
+      setNodes(initialNodes);
+    }
+  }, [data]);
 
   // Calculate total dimensions
-  const getTotalDimensions = (nodes: ChartNode[]): { width: number; height: number } => {
+  const getTotalDimensions = (nodeList: ChartNode[]): { width: number; height: number } => {
     let maxX = 0;
     let maxY = 0;
 
-    const traverse = (nodeList: ChartNode[]) => {
-      nodeList.forEach(node => {
+    const traverse = (currentNodes: ChartNode[]) => {
+      currentNodes.forEach(node => {
         maxX = Math.max(maxX, node.x + UNIT_WIDTH);
         maxY = Math.max(maxY, node.y + UNIT_HEIGHT);
         traverse(node.children);
       });
     };
 
-    traverse(nodes);
+    traverse(nodeList);
     return { width: maxX + 40, height: maxY + 40 };
   };
 
-  const totalDimensions = getTotalDimensions(allNodes);
+  const totalDimensions = getTotalDimensions(nodes);
 
-  // Pan and zoom handlers
+  // Enhanced mouse handlers with chart isolation
+  const handleMouseEnter = () => {
+    setIsOverChart(true);
+    // Prevent page scrolling when over chart
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleMouseLeave = () => {
+    setIsOverChart(false);
+    // Restore page scrolling
+    document.body.style.overflow = 'auto';
+    setIsDragging(false);
+    setDraggedNode(null);
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target === svgRef.current) {
+    e.preventDefault();
+    if (e.target === svgRef.current || (e.target as Element).closest('.chart-background')) {
       setIsDragging(true);
       setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
+    if (isDragging && !draggedNode) {
       setPosition({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y
       });
+    } else if (draggedNode) {
+      // Update dragged node position
+      const rect = svgRef.current?.getBoundingClientRect();
+      if (rect) {
+        const svgX = (e.clientX - rect.left - position.x) / scale - draggedNodeOffset.x;
+        const svgY = (e.clientY - rect.top - position.y) / scale - draggedNodeOffset.y;
+        
+        setNodes(prevNodes => updateNodePosition(prevNodes, draggedNode.unit.id, svgX, svgY));
+      }
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setDraggedNode(null);
   };
 
+  // Isolated wheel handler - only triggers when mouse is over chart
   const handleWheel = (e: React.WheelEvent) => {
+    // Always prevent default and stop propagation when over chart
     e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isOverChart) return;
+    
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     setScale(prev => Math.max(0.2, Math.min(2, prev * delta)));
   };
 
+  // Node dragging handlers
+  const handleNodeMouseDown = (e: React.MouseEvent, node: ChartNode) => {
+    e.stopPropagation();
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (rect) {
+      const svgX = (e.clientX - rect.left - position.x) / scale;
+      const svgY = (e.clientY - rect.top - position.y) / scale;
+      
+      setDraggedNode(node);
+      setDraggedNodeOffset({
+        x: svgX - node.x,
+        y: svgY - node.y
+      });
+    }
+  };
+
+  // Helper function to update node position in the tree
+  const updateNodePosition = (nodeList: ChartNode[], unitId: number, newX: number, newY: number): ChartNode[] => {
+    return nodeList.map(node => {
+      if (node.unit.id === unitId) {
+        return { ...node, x: newX, y: newY };
+      }
+      if (node.children.length > 0) {
+        return { ...node, children: updateNodePosition(node.children, unitId, newX, newY) };
+      }
+      return node;
+    });
+  };
+
   const zoomIn = () => setScale(prev => Math.min(2, prev * 1.2));
   const zoomOut = () => setScale(prev => Math.max(0.2, prev / 1.2));
+  
   const resetView = () => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
+    // Reset to initial layout
+    const initialNodes = calculateInitialLayout(data);
+    setNodes(initialNodes);
   };
 
   const fitToScreen = () => {
@@ -204,16 +281,26 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
     });
   };
 
+  // Cleanup effect
   useEffect(() => {
-    fitToScreen();
-  }, [data]);
+    return () => {
+      // Restore page scrolling on component unmount
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  useEffect(() => {
+    if (nodes.length > 0) {
+      fitToScreen();
+    }
+  }, [nodes.length]);
 
   // Render connection lines
-  const renderConnections = (nodes: ChartNode[]): JSX.Element[] => {
+  const renderConnections = (nodeList: ChartNode[]): JSX.Element[] => {
     const lines: JSX.Element[] = [];
 
-    const traverse = (nodeList: ChartNode[]) => {
-      nodeList.forEach(node => {
+    const traverse = (currentNodes: ChartNode[]) => {
+      currentNodes.forEach(node => {
         node.children.forEach(child => {
           const parentCenterX = node.x + UNIT_WIDTH / 2;
           const parentBottom = node.y + UNIT_HEIGHT;
@@ -259,21 +346,22 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
       });
     };
 
-    traverse(nodes);
+    traverse(nodeList);
     return lines;
   };
 
-  // Render unit nodes
-  const renderUnits = (nodes: ChartNode[]): JSX.Element[] => {
+  // Render unit nodes with drag capability
+  const renderUnits = (nodeList: ChartNode[]): JSX.Element[] => {
     const units: JSX.Element[] = [];
 
-    const traverse = (nodeList: ChartNode[]) => {
-      nodeList.forEach(node => {
+    const traverse = (currentNodes: ChartNode[]) => {
+      currentNodes.forEach(node => {
         const isSelected = selectedUnit?.id === node.unit.id;
+        const isDraggedNode = draggedNode?.unit.id === node.unit.id;
         const unitColor = getUnitTypeColor(node.unit.type);
 
         units.push(
-          <g key={`unit-${node.unit.id}`}>
+          <g key={`unit-${node.unit.id}`} className="cursor-move">
             {/* Unit card */}
             <rect
               x={node.x}
@@ -284,12 +372,46 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
               fill="white"
               stroke={isSelected ? unitColor : "#E2E8F0"}
               strokeWidth={isSelected ? "3" : "1"}
-              className="cursor-pointer hover:stroke-gray-400 transition-colors"
+              className={`transition-all ${isDraggedNode ? 'opacity-80 drop-shadow-lg' : 'hover:stroke-gray-400'}`}
+              style={{ cursor: 'move' }}
+              onMouseDown={(e) => handleNodeMouseDown(e, node)}
               onClick={() => {
                 setSelectedUnit(node.unit);
                 onUnitClick?.(node.unit);
               }}
             />
+            
+            {/* Drag indicator */}
+            {isDraggedNode && (
+              <g>
+                <rect
+                  x={node.x + 4}
+                  y={node.y + 4}
+                  width={UNIT_WIDTH - 8}
+                  height={UNIT_HEIGHT - 8}
+                  rx="6"
+                  fill="none"
+                  stroke={unitColor}
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                  opacity="0.6"
+                />
+                <circle
+                  cx={node.x + UNIT_WIDTH - 16}
+                  cy={node.y + 16}
+                  r="8"
+                  fill={unitColor}
+                  opacity="0.8"
+                />
+                <Move 
+                  x={node.x + UNIT_WIDTH - 20} 
+                  y={node.y + 12} 
+                  width="8" 
+                  height="8" 
+                  fill="white"
+                />
+              </g>
+            )}
             
             {/* Unit header */}
             <rect
@@ -299,11 +421,8 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
               height="32"
               rx="8"
               fill={unitColor}
-              className="cursor-pointer"
-              onClick={() => {
-                setSelectedUnit(node.unit);
-                onUnitClick?.(node.unit);
-              }}
+              style={{ cursor: 'move' }}
+              onMouseDown={(e) => handleNodeMouseDown(e, node)}
             />
 
             {/* Unit icon */}
@@ -411,7 +530,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
       });
     };
 
-    traverse(nodes);
+    traverse(nodeList);
     return units;
   };
 
@@ -465,11 +584,17 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
       <div
         ref={containerRef}
         className="w-full h-full overflow-hidden cursor-move"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        style={{ 
+          // Ensure this div captures all wheel events
+          touchAction: 'none',
+          userSelect: 'none'
+        }}
       >
         <svg
           ref={svgRef}
@@ -479,7 +604,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
             transformOrigin: '0 0',
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+            transition: (isDragging || draggedNode) ? 'none' : 'transform 0.1s ease-out'
           }}
         >
           {/* Grid pattern */}
@@ -499,16 +624,17 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
             </pattern>
           </defs>
           <rect
+            className="chart-background"
             width="100%"
             height="100%"
             fill="url(#grid)"
           />
 
           {/* Connection lines */}
-          {renderConnections(allNodes)}
+          {renderConnections(nodes)}
 
           {/* Unit nodes */}
-          {renderUnits(allNodes)}
+          {renderUnits(nodes)}
         </svg>
       </div>
 
@@ -613,8 +739,9 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
           <CardContent className="p-3">
             <div className="text-xs text-gray-600 dark:text-gray-200 space-y-1">
               <p>• Kliknite na jedinicu za detalje</p>
-              <p>• Skrolujte za zoom</p>
-              <p>• Prevlačite za pomeranje</p>
+              <p>• Prevucite jedinice za reorganizaciju</p>
+              <p>• Skrolujte za zoom (samo nad grafikonom)</p>
+              <p>• Prevlačite pozadinu za pomeranje</p>
             </div>
           </CardContent>
         </Card>
