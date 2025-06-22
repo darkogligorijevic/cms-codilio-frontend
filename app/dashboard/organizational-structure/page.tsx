@@ -636,7 +636,7 @@ export default function OrganizationalStructurePage() {
           />
           
           {/* Modal Content */}
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
+          <div className="relative bg-card rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b">
               <div>

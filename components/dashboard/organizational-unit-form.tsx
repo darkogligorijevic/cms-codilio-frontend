@@ -29,6 +29,7 @@ import {
   CreateContactDto 
 } from '@/lib/types';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 interface OrganizationalUnitFormProps {
   unit?: OrganizationalUnit | null;
@@ -68,6 +69,7 @@ export function OrganizationalUnitForm({
 }: OrganizationalUnitFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const {theme} = useTheme();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -140,14 +142,14 @@ export function OrganizationalUnitForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Custom Tab Navigation */}
         <div className="w-full">
-          <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
+          <div className="flex space-x-1 rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
             <button
               type="button"
               onClick={() => setActiveTab('basic')}
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                 activeTab === 'basic'
                   ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
               Osnovni podaci
@@ -158,7 +160,7 @@ export function OrganizationalUnitForm({
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                 activeTab === 'details'
                   ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
               Detalji
@@ -169,7 +171,7 @@ export function OrganizationalUnitForm({
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                 activeTab === 'contacts'
                   ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
               Kontakti
@@ -237,7 +239,7 @@ export function OrganizationalUnitForm({
                       <select
                         id="type"
                         {...form.register('type')}
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-gray-900 px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {unitTypeOptions.map(option => (
                           <option key={option.value} value={option.value}>
@@ -254,7 +256,7 @@ export function OrganizationalUnitForm({
                         {...form.register('parentId', {
                           setValueAs: (value) => value === '' ? undefined : parseInt(value)
                         })}
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-gray-900 px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="">Nema nadređene (koren)</option>
                         {parentOptions.map(parent => (
@@ -381,7 +383,7 @@ export function OrganizationalUnitForm({
                         Dodajte kontakt osobe za ovu organizacionu jedinicu
                       </CardDescription>
                     </div>
-                    <Button type="button" onClick={addContact} size="sm">
+                    <Button type="button" variant={theme === "light" ? "default" : "secondaryDefault"} onClick={addContact} size="sm">
                       <Plus className="mr-2 h-4 w-4" />
                       Dodaj kontakt
                     </Button>
@@ -448,7 +450,7 @@ export function OrganizationalUnitForm({
                                 <Label>Tip kontakta</Label>
                                 <select
                                   {...form.register(`contacts.${index}.type`)}
-                                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-gray-900 px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {contactTypeOptions.map(option => (
                                     <option key={option.value} value={option.value}>
@@ -507,6 +509,7 @@ export function OrganizationalUnitForm({
           <Button 
             type="submit" 
             disabled={isSubmitting}
+            variant={theme === "light" ? "default" : "secondaryDefault"}
             className="min-w-[100px]"
           >
             {isSubmitting ? 'Čuva se...' : unit ? 'Ažuriraj' : 'Kreiraj'}
