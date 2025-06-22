@@ -57,6 +57,7 @@ import { DragDropUpload } from '@/components/ui/drag-drop-upload';
 import { mediaApi } from '@/lib/api';
 import { MediaCategory, type Media, type CreateMediaDto, type FindMediaOptions, type MediaCategoryInfo } from '@/lib/types';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 interface MediaFormData {
   alt: string;
@@ -81,6 +82,8 @@ export default function MediaPage() {
   // Selection mode states
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  const {theme} = useTheme();
 
   const {
     register,
@@ -866,6 +869,7 @@ export default function MediaPage() {
               </Button>
               <Button 
                 type="submit" 
+                variant={theme === "light" ? "default" : "secondaryDefault"}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Čuva se...' : 'Sačuvaj izmene'}
