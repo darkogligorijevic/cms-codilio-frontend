@@ -7,30 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
 import { 
   Plus,
   Trash2,
@@ -160,6 +138,7 @@ export function OrganizationalUnitForm({
   return (
     <div className="w-full p-6">
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* Custom Tab Navigation */}
         <div className="w-full">
           <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
             <button
@@ -197,438 +176,343 @@ export function OrganizationalUnitForm({
             </button>
           </div>
         </div>
-        <Tabs>
-          <TabsContent value="basic" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Building className="h-5 w-5" />
-                  <span>Osnovne informacije</span>
-                </CardTitle>
-                <CardDescription>
-                  Unesite osnovne podatke o organizacionoj jedinici
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    rules={{
-                      required: 'Naziv je obavezan',
-                      minLength: { value: 2, message: 'Naziv mora imati najmanje 2 karaktera' }
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Naziv jedinice *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="npr. Odsek za javne nabavke" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="code"
-                    rules={{
-                      required: 'Kod je obavezan',
-                      pattern: {
-                        value: /^[A-Za-z0-9-_]+$/,
-                        message: 'Kod može sadržati samo slova, brojeve, crtice i podvlake'
-                      }
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Kod jedinice *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="npr. OJN-001" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Jedinstveni kod za identifikaciju (samo slova, brojevi i crtice)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tip jedinice</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Izaberite tip" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {unitTypeOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="parentId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nadređena jedinica</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
-                          defaultValue={field.value?.toString()}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Nema nadređene (koren)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="">Nema nadređene (koren)</SelectItem>
-                            {parentOptions.map(parent => (
-                              <SelectItem key={parent.id} value={parent.id.toString()}>
-                                {parent.name} ({parent.code})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Opis</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Kratki opis nadležnosti i aktivnosti..."
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-            
-          <TabsContent value="details" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+        {/* Tab Content */}
+        <div className="mt-6">
+          {/* Basic Tab */}
+          {activeTab === 'basic' && (
+            <div className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5" />
-                    <span>Rukovodstvo</span>
+                    <Building className="h-5 w-5" />
+                    <span>Osnovne informacije</span>
                   </CardTitle>
+                  <CardDescription>
+                    Unesite osnovne podatke o organizacionoj jedinici
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="managerName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ime rukovodioca</FormLabel>
-                        <FormControl>
-                          <Input placeholder="npr. Marko Petrović" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Naziv jedinice *</Label>
+                      <Input
+                        id="name"
+                        placeholder="npr. Odsek za javne nabavke"
+                        {...form.register('name', { 
+                          required: 'Naziv je obavezan',
+                          minLength: { value: 2, message: 'Naziv mora imati najmanje 2 karaktera' }
+                        })}
+                      />
+                      {form.formState.errors.name && (
+                        <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
+                      )}
+                    </div>
 
-                  <FormField
-                    control={form.control}
-                    name="managerTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Funkcija rukovodioca</FormLabel>
-                        <FormControl>
-                          <Input placeholder="npr. Načelnik odseka" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <div className="space-y-2">
+                      <Label htmlFor="code">Kod jedinice *</Label>
+                      <Input
+                        id="code"
+                        placeholder="npr. OJN-001"
+                        {...form.register('code', {
+                          required: 'Kod je obavezan',
+                          pattern: {
+                            value: /^[A-Za-z0-9-_]+$/,
+                            message: 'Kod može sadržati samo slova, brojeve, crtice i podvlake'
+                          }
+                        })}
+                      />
+                      <p className="text-xs text-gray-500">
+                        Jedinstveni kod za identifikaciju (samo slova, brojevi i crtice)
+                      </p>
+                      {form.formState.errors.code && (
+                        <p className="text-sm text-red-600">{form.formState.errors.code.message}</p>
+                      )}
+                    </div>
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="employeeCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Broj zaposlenih</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="0"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="type">Tip jedinice</Label>
+                      <select
+                        id="type"
+                        {...form.register('type')}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {unitTypeOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Phone className="h-5 w-5" />
-                    <span>Kontakt informacije</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefon</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+381 11 123 4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <div className="space-y-2">
+                      <Label htmlFor="parentId">Nadređena jedinica</Label>
+                      <select
+                        id="parentId"
+                        {...form.register('parentId', {
+                          setValueAs: (value) => value === '' ? undefined : parseInt(value)
+                        })}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Nema nadređene (koren)</option>
+                        {parentOptions.map(parent => (
+                          <option key={parent.id} value={parent.id.toString()}>
+                            {parent.name} ({parent.code})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email adresa</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="odsek@institucija.rs" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Lokacija</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Zgrada A, I sprat, kancelarija 101" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Opis</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Kratki opis nadležnosti i aktivnosti..."
+                      rows={3}
+                      {...form.register('description')}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="contacts" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
+          {/* Details Tab */}
+          {activeTab === 'details' && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
-                      <Users className="h-5 w-5" />
-                      <span>Lista kontakata</span>
+                      <User className="h-5 w-5" />
+                      <span>Rukovodstvo</span>
                     </CardTitle>
-                    <CardDescription>
-                      Dodajte kontakt osobe za ovu organizacionu jedinicu
-                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="managerName">Ime rukovodioca</Label>
+                      <Input
+                        id="managerName"
+                        placeholder="npr. Marko Petrović"
+                        {...form.register('managerName')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="managerTitle">Funkcija rukovodioca</Label>
+                      <Input
+                        id="managerTitle"
+                        placeholder="npr. Načelnik odseka"
+                        {...form.register('managerTitle')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="employeeCount">Broj zaposlenih</Label>
+                      <Input
+                        id="employeeCount"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        {...form.register('employeeCount', {
+                          setValueAs: (value) => parseInt(value) || 0
+                        })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Phone className="h-5 w-5" />
+                      <span>Kontakt informacije</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefon</Label>
+                      <Input
+                        id="phone"
+                        placeholder="+381 11 123 4567"
+                        {...form.register('phone')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email adresa</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="odsek@institucija.rs"
+                        {...form.register('email')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Lokacija</Label>
+                      <Input
+                        id="location"
+                        placeholder="Zgrada A, I sprat, kancelarija 101"
+                        {...form.register('location')}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Contacts Tab */}
+          {activeTab === 'contacts' && (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Users className="h-5 w-5" />
+                        <span>Lista kontakata</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Dodajte kontakt osobe za ovu organizacionu jedinicu
+                      </CardDescription>
+                    </div>
+                    <Button type="button" onClick={addContact} size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Dodaj kontakt
+                    </Button>
                   </div>
-                  <Button type="button" onClick={addContact} size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj kontakt
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {fields.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Users className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                    <p>Nema dodanih kontakata</p>
-                    <p className="text-sm">Kliknite "Dodaj kontakt" da dodate prvi kontakt</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {fields.map((field, index) => (
-                      <Card key={field.id} className="relative">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline">
-                              Kontakt {index + 1}
-                            </Badge>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => remove(index)}
-                              className="h-8 w-8 p-0 text-red-600"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name={`contacts.${index}.name`}
-                              rules={{ required: 'Ime je obavezno' }}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Ime i prezime *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Ana Marić" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                </CardHeader>
+                <CardContent>
+                  {fields.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                      <p>Nema dodanih kontakata</p>
+                      <p className="text-sm">Kliknite "Dodaj kontakt" da dodate prvi kontakt</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {fields.map((field, index) => (
+                        <Card key={field.id} className="relative">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline">
+                                Kontakt {index + 1}
+                              </Badge>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => remove(index)}
+                                className="h-8 w-8 p-0 text-red-600"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Ime i prezime *</Label>
+                                <Input
+                                  placeholder="Ana Marić"
+                                  {...form.register(`contacts.${index}.name`, { required: 'Ime je obavezno' })}
+                                />
+                                {form.formState.errors.contacts?.[index]?.name && (
+                                  <p className="text-sm text-red-600">
+                                    {form.formState.errors.contacts[index]?.name?.message}
+                                  </p>
+                                )}
+                              </div>
 
-                            <FormField
-                              control={form.control}
-                              name={`contacts.${index}.title`}
-                              rules={{ required: 'Funkcija je obavezna' }}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Funkcija *</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Referent za..." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                              <div className="space-y-2">
+                                <Label>Funkcija *</Label>
+                                <Input
+                                  placeholder="Referent za..."
+                                  {...form.register(`contacts.${index}.title`, { required: 'Funkcija je obavezna' })}
+                                />
+                                {form.formState.errors.contacts?.[index]?.title && (
+                                  <p className="text-sm text-red-600">
+                                    {form.formState.errors.contacts[index]?.title?.message}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
 
-                          <div className="grid grid-cols-3 gap-4">
-                            <FormField
-                              control={form.control}
-                              name={`contacts.${index}.type`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Tip kontakta</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {contactTypeOptions.map(option => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                          {option.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="space-y-2">
+                                <Label>Tip kontakta</Label>
+                                <select
+                                  {...form.register(`contacts.${index}.type`)}
+                                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {contactTypeOptions.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
 
-                            <FormField
-                              control={form.control}
-                              name={`contacts.${index}.phone`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Telefon</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="+381 11..." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                              <div className="space-y-2">
+                                <Label>Telefon</Label>
+                                <Input
+                                  placeholder="+381 11..."
+                                  {...form.register(`contacts.${index}.phone`)}
+                                />
+                              </div>
 
-                            <FormField
-                              control={form.control}
-                              name={`contacts.${index}.office`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Kancelarija</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="101" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                              <div className="space-y-2">
+                                <Label>Kancelarija</Label>
+                                <Input
+                                  placeholder="101"
+                                  {...form.register(`contacts.${index}.office`)}
+                                />
+                              </div>
+                            </div>
 
-                          <FormField
-                            control={form.control}
-                            name={`contacts.${index}.email`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Email adresa</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="email" 
-                                    placeholder="ana.maric@institucija.rs" 
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                            <div className="space-y-2">
+                              <Label>Email adresa</Label>
+                              <Input
+                                type="email"
+                                placeholder="ana.maric@institucija.rs"
+                                {...form.register(`contacts.${index}.email`)}
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
 
-          <div className="flex items-center justify-end space-x-2 pt-6 mt-6 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Otkaži
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="min-w-[100px]"
-            >
-              {isSubmitting ? 'Čuva se...' : unit ? 'Ažuriraj' : 'Kreiraj'}
-            </Button>
-          </div>
-        </form>
-      
+        {/* Form Actions */}
+        <div className="flex items-center justify-end space-x-2 pt-6 mt-6 border-t">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            Otkaži
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="min-w-[100px]"
+          >
+            {isSubmitting ? 'Čuva se...' : unit ? 'Ažuriraj' : 'Kreiraj'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
