@@ -28,6 +28,7 @@ import { Page, Post, OrganizationalUnit, UnitType } from '@/lib/types';
 import { PostsSection } from '@/components/frontend/posts-section';
 import { organizationalApi } from '@/lib/api';
 import { OrganizationalChart } from '@/components/dashboard/organizational-chart';
+import { useTheme } from 'next-themes';
 
 interface OrganizationalStructureTemplateProps {
   page: Page;
@@ -50,6 +51,7 @@ export function OrganizationalStructureTemplate({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<UnitType | 'all'>('all');
   const [selectedUnit, setSelectedUnit] = useState<OrganizationalUnit | null>(null);
+  const {theme} = useTheme();
 
   useEffect(() => {
     fetchUnits();
@@ -204,7 +206,7 @@ export function OrganizationalStructureTemplate({
               {/* Unit Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2 mb-1">
-                  <h3 className="font-semibold text-gray-900 truncate">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-200 truncate">
                     {unit.name}
                   </h3>
                   <Badge className={`text-xs ${getUnitTypeColor(unit.type)}`}>
@@ -341,7 +343,7 @@ export function OrganizationalStructureTemplate({
         <div className="space-y-3">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <h3 className="font-semibold text-gray-900">{unit.name}</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-200">{unit.name}</h3>
               <div className="flex items-center space-x-2">
                 <Badge className={`text-xs ${getUnitTypeColor(unit.type)}`}>
                   {getUnitTypeLabel(unit.type)}
@@ -361,9 +363,9 @@ export function OrganizationalStructureTemplate({
             {unit.managerName && (
               <div className="flex items-center space-x-2">
                 <User className="h-4 w-4 text-gray-400" />
-                <span className="font-medium">{unit.managerName}</span>
+                <span className="font-medium dark:text-gray-200">{unit.managerName}</span>
                 {unit.managerTitle && (
-                  <span className="text-gray-500">- {unit.managerTitle}</span>
+                  <span className="text-gray-400">- {unit.managerTitle}</span>
                 )}
               </div>
             )}
@@ -423,7 +425,7 @@ export function OrganizationalStructureTemplate({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-4">Организациона структура</h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Преглед организационе структуре наше институције, организационих јединица и контакт информација
         </p>
       </div>
@@ -451,7 +453,7 @@ export function OrganizationalStructureTemplate({
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value as UnitType | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-gray-900"
           >
             <option value="all">Сви типови</option>
             <option value={UnitType.DEPARTMENT}>Одсек</option>
@@ -491,7 +493,13 @@ export function OrganizationalStructureTemplate({
           )}
           
           <Button
-            variant={viewMode === 'tree' ? 'default' : 'outline'}
+            variant={
+              viewMode === 'tree' ? 
+                (theme === "light" ? 
+                  "default" : "secondaryDefault"
+                ) 
+                : "outline"
+              }
             size="sm"
             onClick={() => setViewMode('tree')}
           >
@@ -499,7 +507,13 @@ export function OrganizationalStructureTemplate({
             Стабло
           </Button>
           <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            variant={
+              viewMode === 'grid' ? 
+                (theme === "light" ? 
+                  "default" : "secondaryDefault"
+                ) 
+                : "outline"
+              }
             size="sm"
             onClick={() => setViewMode('grid')}
           >
@@ -507,7 +521,13 @@ export function OrganizationalStructureTemplate({
             Картице
           </Button>
           <Button
-            variant={viewMode === 'chart' ? 'default' : 'outline'}
+            variant={
+              viewMode === 'chart' ? 
+                (theme === "light" ? 
+                  "default" : "secondaryDefault"
+                ) 
+                : "outline"
+              }
             size="sm"
             onClick={() => setViewMode('chart')}
           >
@@ -522,7 +542,7 @@ export function OrganizationalStructureTemplate({
         <Card>
           <CardContent className="p-12 text-center">
             <Building className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-2">
               Нема организационих јединица
             </h3>
             <p className="text-gray-500">
@@ -547,7 +567,7 @@ export function OrganizationalStructureTemplate({
           <CardContent className="p-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-2">Интерактивни графикон</h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Кликните на јединицу за детаље • Превлачите за пребацивање • Скролујте за зум
               </p>
             </div>
@@ -569,7 +589,7 @@ export function OrganizationalStructureTemplate({
         <Card>
           <CardContent className="p-8 text-center">
             <Search className="mx-auto h-8 w-8 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-2">
               Нема резултата
             </h3>
             <p className="text-gray-500">

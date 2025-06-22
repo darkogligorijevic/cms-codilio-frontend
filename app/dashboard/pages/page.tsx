@@ -392,7 +392,7 @@ export default function PagesPage() {
                     id="content"
                     placeholder="Napišite sadržaj stranice..."
                     rows={8}
-                    {...register('content', { required: 'Sadržaj je obavezan' })}
+                    {...register('content')}
                   />
                   {errors.content && (
                     <p className="text-sm text-red-600 flex items-center">
