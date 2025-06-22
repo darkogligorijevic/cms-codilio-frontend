@@ -17,6 +17,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { OrganizationalUnit, UnitType } from '@/lib/types';
+import { useTheme } from 'next-themes';
 
 interface OrganizationalChartProps {
   data: OrganizationalUnit[];
@@ -46,6 +47,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
   const [selectedUnit, setSelectedUnit] = useState<OrganizationalUnit | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const {theme} = useTheme();
 
   // Early return if no data
   if (!data || data.length === 0) {
@@ -414,10 +416,10 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
   };
 
   return (
-    <div className="relative w-full h-[600px] bg-gray-50 rounded-lg overflow-hidden">
+    <div className="relative w-full h-[600px] bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
       {/* Controls */}
       <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
-        <div className="bg-white rounded-lg shadow-md p-1 flex items-center space-x-1">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-1 flex items-center space-x-1">
           <Button
             size="sm"
             variant="ghost"
@@ -491,7 +493,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
               <path
                 d="M 20 0 L 0 0 0 20"
                 fill="none"
-                stroke="#F1F5F9"
+                stroke={theme === "light" ? "#F1F5F9" : "#222"}
                 strokeWidth="1"
               />
             </pattern>
@@ -607,9 +609,9 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
 
       {/* Instructions */}
       <div className="absolute top-4 left-4 z-10">
-        <Card className="bg-white/90 backdrop-blur-sm">
+        <Card className="bg-white/90 dark:bg-card backdrop-blur-sm">
           <CardContent className="p-3">
-            <div className="text-xs text-gray-600 space-y-1">
+            <div className="text-xs text-gray-600 dark:text-gray-200 space-y-1">
               <p>• Kliknite na jedinicu za detalje</p>
               <p>• Skrolujte za zoom</p>
               <p>• Prevlačite za pomeranje</p>

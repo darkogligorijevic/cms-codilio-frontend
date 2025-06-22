@@ -49,6 +49,7 @@ import { OrganizationalUnit, UnitType, ContactType, OrganizationalStatistics } f
 import { toast } from 'sonner';
 import { OrganizationalUnitForm } from '@/components/dashboard/organizational-unit-form';
 import { OrganizationalChart } from '@/components/dashboard/organizational-chart';
+import { useTheme } from 'next-themes';
 
 type ViewMode = 'tree' | 'grid' | 'chart';
 
@@ -64,6 +65,8 @@ export default function OrganizationalStructurePage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [unitToDelete, setUnitToDelete] = useState<OrganizationalUnit | null>(null);
   const [expandedUnits, setExpandedUnits] = useState<Set<number>>(new Set());
+  const [hideSearch, setHideSearch] = useState(true);
+  const {theme} = useTheme()
 
   useEffect(() => {
     fetchData();
@@ -190,7 +193,7 @@ export default function OrganizationalStructurePage() {
     return (
       <div key={unit.id} className="space-y-1">
         <div
-          className={`flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 border ${
+          className={`flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 border ${
             level === 0 ? 'border-gray-200' : 'border-transparent'
           }`}
           style={{ marginLeft: `${level * 20}px` }}
@@ -216,7 +219,7 @@ export default function OrganizationalStructurePage() {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2">
-              <h3 className="font-medium text-gray-900 truncate">{unit.name}</h3>
+              <h3 className="font-medium text-gray-900 dark:text-gray-200 truncate">{unit.name}</h3>
               <Badge className={`text-xs ${getUnitTypeColor(unit.type)}`}>
                 {getUnitTypeLabel(unit.type)}
               </Badge>
@@ -351,7 +354,7 @@ export default function OrganizationalStructurePage() {
 
         {unit.contacts && unit.contacts.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-900">Kontakti:</h4>
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-400">Kontakti:</h4>
             <div className="space-y-1">
               {unit.contacts.slice(0, 2).map(contact => (
                 <div key={contact.id} className="text-sm text-gray-600">
@@ -415,7 +418,7 @@ export default function OrganizationalStructurePage() {
             <Download className="mr-2 h-4 w-4" />
             Eksport
           </Button>
-          <Button onClick={handleCreateUnit}>
+          <Button onClick={handleCreateUnit} variant={theme === "light" ? "default" : "secondaryDefault"}>
             <Plus className="mr-2 h-4 w-4" />
             Nova jedinica
           </Button>
@@ -491,7 +494,8 @@ export default function OrganizationalStructurePage() {
 
       {/* Controls */}
       <div className="flex items-center justify-between">
-        <div className="relative max-w-sm">
+       
+        <div className={`relative max-w-sm ${hideSearch ? "invisible" : ""}`}>
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Pretraži jedinice..."
@@ -500,28 +504,54 @@ export default function OrganizationalStructurePage() {
             className="pl-9"
           />
         </div>
+        
 
         <div className="flex items-center space-x-2">
           <Button
-            variant={viewMode === 'tree' ? 'default' : 'outline'}
+            variant={
+              viewMode === 'tree'
+                ? (theme === 'light' ? 'default' : 'secondaryDefault')
+                : 'outline'
+            }
             size="sm"
-            onClick={() => setViewMode('tree')}
+            onClick={() => 
+              {
+                setViewMode('tree')
+                setHideSearch(true)
+              }
+            }
           >
             <TreePine className="mr-2 h-4 w-4" />
             Hijerarhija
           </Button>
           <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            variant={
+              viewMode === 'grid'
+                ? (theme === 'light' ? 'default' : 'secondaryDefault')
+                : 'outline'
+            }
             size="sm"
-            onClick={() => setViewMode('grid')}
+            onClick={() => {
+                setViewMode('grid') 
+                setHideSearch(false)
+              } 
+            }
           >
             <Grid3X3 className="mr-2 h-4 w-4" />
             Kartice
           </Button>
           <Button
-            variant={viewMode === 'chart' ? 'default' : 'outline'}
+            variant={
+              viewMode === 'chart'
+                ? (theme === 'light' ? 'default' : 'secondaryDefault')
+                : 'outline'
+            }
             size="sm"
-            onClick={() => setViewMode('chart')}
+            onClick={() => {
+                setViewMode('chart') 
+                setHideSearch(true)
+              }
+            }
           >
             <BarChart3 className="mr-2 h-4 w-4" />
             Grafikon
@@ -539,7 +569,7 @@ export default function OrganizationalStructurePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-2 ">
               {treeUnits && treeUnits.length > 0 ? (
                 treeUnits.map(unit => renderTreeUnit(unit))
               ) : (
