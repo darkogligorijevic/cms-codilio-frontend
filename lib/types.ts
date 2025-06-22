@@ -253,13 +253,15 @@ export interface SubscribeToNewsletterDto {
 }
 
 export interface CreateContactDto {
-  name: string;
-  title: string;
-  type: ContactType;
+  name?: string;
+  title?: string;
+  type?: ContactType;
   phone?: string;
   email?: string;
   office?: string;
   order?: number;
+  subject?: string;
+  message?: string;
 }
 
 export interface UpdateEmailTemplateDto extends CreateEmailTemplateDto {}

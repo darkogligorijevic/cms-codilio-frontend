@@ -6,6 +6,7 @@ import { AboutTemplate } from './about/about-template';
 import { ContactTemplate } from './contact/contact-template';
 import { ServicesTemplate } from './services/services-template';
 import { TransparencyTemplate } from './transparency/transparency-template';
+import { OrganizationalStructureTemplate } from './organizational-structure/organizationa-structure-template';
 import { DefaultTemplate } from './default/default-template';
 
 // Template registry interface
@@ -25,6 +26,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateComponent> = {
   contact: ContactTemplate,
   services: ServicesTemplate,
   transparency: TransparencyTemplate,
+  organizationalStructure: OrganizationalStructureTemplate,
   default: DefaultTemplate,
 } as const;
 
@@ -70,6 +72,13 @@ export const TEMPLATE_METADATA: Record<TemplateKey, TemplateMetadata> = {
     description: 'Страница за приступ информацијама од јавног значаја',
     category: 'information',
     features: ['Документи', 'Објаве', 'Јавне набавке', 'Буџет'],
+  },
+  organizationalStructure: {
+    key: 'organizationalStructure',
+    name: 'Организациона структура',
+    description: 'Интерактивни приказ организационе структуре у облику стабла са детаљним информацијама',
+    category: 'institutional',
+    features: ['Стабло јединица', 'Интерактивни приказ', 'Претрага и филтери', 'Детаљне информације', 'Статистике'],
   },
   default: {
     key: 'default',

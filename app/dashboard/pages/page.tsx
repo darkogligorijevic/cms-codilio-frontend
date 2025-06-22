@@ -70,6 +70,7 @@ const PAGE_TEMPLATES = [
   { value: 'contact', label: 'Kontakt stranica', description: 'Stranica sa kontakt informacijama' },
   { value: 'about', label: 'O nama', description: 'Stranica o instituciji' },
   { value: 'services', label: 'Usluge', description: 'Lista usluga institucije' },
+  { value: 'organizationalStructure', label: 'Organizaciona struktura', description: "Stablo organizacione strukture"},
   { value: 'transparency', label: 'Transparentnost', description: 'Dokumenti i transparentnost' }
 ];
 
