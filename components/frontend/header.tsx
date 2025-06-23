@@ -55,12 +55,12 @@ export function Header({ pages }: HeaderProps) {
               >
                 {institutionData.name}
               </h1>
-              <p 
+              {/* <p 
                 className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block" 
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
                 {institutionData.description}
-              </p>
+              </p> */}
             </div>
           </Link>
 

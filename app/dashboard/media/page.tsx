@@ -272,11 +272,11 @@ export default function MediaPage() {
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType?.startsWith('image/')) {
-      return <ImageIcon className="h-6 w-6" />;
+      return <ImageIcon className="h-6 w-6 dark:invert-100" />;
     } else if (mimeType?.includes('pdf')) {
       return <FileText className="h-6 w-6 dark:invert-100" />;
     } else {
-      return <File className="h-6 w-6" />;
+      return <File className="h-6 w-6 dark:invert-100" />;
     }
   };
 
@@ -296,17 +296,17 @@ export default function MediaPage() {
   const getCategoryIcon = (category: MediaCategory) => {
     switch (category) {
       case MediaCategory.PROCUREMENT:
-        return <Building className="h-4 w-4" />;
+        return <Building className="h-6 w-6" />;
       case MediaCategory.FINANCIAL:
-        return <DollarSign className="h-4 w-4" />;
+        return <DollarSign className="h-6 w-6" />;
       case MediaCategory.DECISIONS:
-        return <FileCheck className="h-4 w-4" />;
+        return <FileCheck className="h-6 w-6" />;
       case MediaCategory.PLANS:
-        return <Clipboard className="h-4 w-4" />;
+        return <Clipboard className="h-6 w-6" />;
       case MediaCategory.REPORTS:
-        return <BarChart3 className="h-4 w-4" />;
+        return <BarChart3 className="h-6 w-6" />;
       default:
-        return <Folder className="h-4 w-4" />;
+        return <Folder className="h-6 w-6" />;
     }
   };
 
