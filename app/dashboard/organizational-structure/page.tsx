@@ -1,4 +1,4 @@
-// app/dashboard/organizational-structure/page.tsx
+// app/dashboard/organizational-structure/page.tsx - Updated with navigation
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -49,6 +49,7 @@ import { OrganizationalUnit, UnitType, ContactType, OrganizationalStatistics } f
 import { toast } from 'sonner';
 import { OrganizationalUnitForm } from '@/components/dashboard/organizational-unit-form';
 import { OrganizationalChart } from '@/components/dashboard/organizational-chart';
+import { OrgStructureNav } from '@/components/dashboard/org-structure-nav';
 import { useTheme } from 'next-themes';
 
 type ViewMode = 'tree' | 'grid' | 'chart';
@@ -142,7 +143,7 @@ export default function OrganizationalStructurePage() {
       const data = await organizationalApi.exportStructure();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = window.document.createElement('a');
       a.href = url;
       a.download = 'organizaciona-struktura.json';
       a.click();
@@ -377,6 +378,9 @@ export default function OrganizationalStructurePage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
+        {/* Navigation */}
+        <OrgStructureNav />
+        
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Organizaciona struktura</h1>
@@ -405,6 +409,9 @@ export default function OrganizationalStructurePage() {
 
   return (
     <div className="space-y-6">
+      {/* Navigation */}
+      <OrgStructureNav />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -1,4 +1,4 @@
-// components/dashboard/director-documents.tsx
+// components/dashboard/director-documents.tsx - Fixed version
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -218,9 +218,10 @@ export function DirectorDocuments({ director, onDocumentsUpdate }: DirectorDocum
     }
   };
 
+  // Fixed download function - use DOM API directly instead of document property
   const handleDownload = (document: DirectorDocument) => {
     const url = directorsApi.getFileUrl(document.filename);
-    const link = document.createElement('a');
+    const link = window.document.createElement('a'); // Use window.document explicitly
     link.href = url;
     link.download = document.originalName;
     link.click();
@@ -295,7 +296,7 @@ export function DirectorDocuments({ director, onDocumentsUpdate }: DirectorDocum
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-2">
-                        <h4 className="font-medium text-gray-900 truncate">
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
                           {document.title}
                         </h4>
                         <Badge variant={document.isPublic ? "default" : "secondary"} className="text-xs">
@@ -316,7 +317,7 @@ export function DirectorDocuments({ director, onDocumentsUpdate }: DirectorDocum
                         </Badge>
                       </div>
                       
-                      <div className="space-y-1 text-sm text-gray-600">
+                      <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
                         <p>Оригинални назив: {document.originalName}</p>
                         {document.description && (
                           <p>Опис: {document.description}</p>
@@ -365,7 +366,7 @@ export function DirectorDocuments({ director, onDocumentsUpdate }: DirectorDocum
           <Card>
             <CardContent className="p-8 text-center">
               <FileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Нема докумената</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Нема докумената</h3>
               <p className="text-gray-500 mb-4">
                 Додајте први документ за овог директора
               </p>
