@@ -1,4 +1,4 @@
-// Templates/TemplateRegistry.tsx
+// Templates/TemplateRegistry.tsx - Updated with Directors Template
 import { Page, Post } from '@/lib/types';
 
 // Import all templates
@@ -7,6 +7,7 @@ import { ContactTemplate } from './contact/contact-template';
 import { ServicesTemplate } from './services/services-template';
 import { TransparencyTemplate } from './transparency/transparency-template';
 import { OrganizationalStructureTemplate } from './organizational-structure/organizationa-structure-template';
+import { DirectorsTemplate } from './directors/directors-template';
 import { DefaultTemplate } from './default/default-template';
 
 // Template registry interface
@@ -27,6 +28,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateComponent> = {
   services: ServicesTemplate,
   transparency: TransparencyTemplate,
   organizationalStructure: OrganizationalStructureTemplate,
+  directors: DirectorsTemplate,
   default: DefaultTemplate,
 } as const;
 
@@ -79,6 +81,13 @@ export const TEMPLATE_METADATA: Record<TemplateKey, TemplateMetadata> = {
     description: 'Интерактивни приказ организационе структуре у облику стабла са детаљним информацијама',
     category: 'institutional',
     features: ['Стабло јединица', 'Интерактивни приказ', 'Претрага и филтери', 'Детаљне информације', 'Статистике'],
+  },
+  directors: {
+    key: 'directors',
+    name: 'Директори',
+    description: 'Модеран приказ тренутног и бивших директора са документима и детаљним информацијама',
+    category: 'institutional',
+    features: ['Тренутни директор', 'Историја директора', 'Јавни документи', 'Биографије', 'Контакт информације', 'Статистике'],
   },
   default: {
     key: 'default',

@@ -71,7 +71,8 @@ const PAGE_TEMPLATES = [
   { value: 'about', label: 'O nama', description: 'Stranica o instituciji' },
   { value: 'services', label: 'Usluge', description: 'Lista usluga institucije' },
   { value: 'organizationalStructure', label: 'Organizaciona struktura', description: "Stablo organizacione strukture"},
-  { value: 'transparency', label: 'Transparentnost', description: 'Dokumenti i transparentnost' }
+  { value: 'transparency', label: 'Transparentnost', description: 'Dokumenti i transparentnost' },
+  { value: 'directors', label: 'Direktori', description: 'Cela dokumentacija i biografija direktora'},
 ];
 
 export default function PagesPage() {
