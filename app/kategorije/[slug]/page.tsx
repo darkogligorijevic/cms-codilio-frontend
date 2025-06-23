@@ -164,7 +164,24 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <Link href="/" className="flex items-center space-x-3">
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
+              </Link>
+            </div>
+          </div>
+        </header>
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse space-y-6">
@@ -184,7 +201,30 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   if (error || !category) {
     return (
       <div className="min-h-screen bg-gray-50">
-        
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <Link href="/" className="flex items-center space-x-3">
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-8 object-contain"
+                  />
+                ) : (
+                  <Building className="h-8 w-8 text-primary-dynamic" />
+                )}
+                <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
+              </Link>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/kategorije">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Назад на категорије
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </header>
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
@@ -208,8 +248,41 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-    
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="flex items-center space-x-3">
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
+            </Link>
+            <nav className="flex items-center space-x-6">
+              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Почетна
+              </Link>
+              <Link href="/objave" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Објаве
+              </Link>
+              <Link href="/kategorije" className="text-primary-dynamic font-medium">
+                Категорије
+              </Link>
+              <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Контакт
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
+
       {/* Category Header */}
       <div className="text-white py-12"         
            style={{
@@ -227,7 +300,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   <p className="text-lg text-blue-100 mb-2">{category.description}</p>
                 )}
                 <div className="flex items-center space-x-4 text-blue-200">
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30 dark:border-none">
+                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                     <Hash className="mr-1 h-3 w-3" />
                     {category?.slug || ''}
                   </Badge>
@@ -244,7 +317,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                 </div>
               </div>
             </div>
-            <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 dark:border-none" asChild>
+            <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20" asChild>
               <Link href="/kategorije">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Све категорије
@@ -255,12 +328,12 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white border-b dark:bg-gray-900">
+      <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 dark:text-gray-200" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Претражи објаве у овој категорији..."
                   value={searchTerm}
@@ -278,7 +351,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                 </Button>
               )}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm text-gray-600">
               {searchTerm ? (
                 <>Пронађено {paginatedPosts?.length || 0} резултата за "{searchTerm}"</>
               ) : (
@@ -310,7 +383,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                   
                   <CardContent className="p-6">
                     {/* Title */}
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-2 hover:text-primary-dynamic">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${post.slug}`}>
                         {post.title || 'Наслов објаве'}
                       </Link>
@@ -434,19 +507,19 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-dynamic">{posts?.length || 0}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Укупно објава</div>
+                    <div className="text-sm text-gray-600">Укупно објава</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-secondary-dynamic">
                       {posts?.reduce((sum, post) => sum + (post?.viewCount || 0), 0).toLocaleString() || '0'}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Укупно прегледа</div>
+                    <div className="text-sm text-gray-600">Укупно прегледа</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600">
                       {posts && posts.length > 0 ? Math.round(posts.reduce((sum, post) => sum + (post?.viewCount || 0), 0) / posts.length) : 0}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Просек прегледа</div>
+                    <div className="text-sm text-gray-600">Просек прегледа</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
@@ -455,7 +528,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
                         new Date(a?.publishedAt || a?.createdAt || 0).getTime()
                       )[0]?.publishedAt || posts[0]?.createdAt || '') : 'N/A'}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Последња објава</div>
+                    <div className="text-sm text-gray-600">Последња објава</div>
                   </div>
                 </div>
               </CardContent>
@@ -471,19 +544,19 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" asChild className='hover:bg-primary-dynamic duration-100 ease-in-out'>
+                <Button variant="outline" asChild>
                   <Link href="/kategorije">
                     <Tag className="mr-2 h-4 w-4" />
                     Све категорије
                   </Link>
                 </Button>
-                <Button variant="outline" asChild className='hover:bg-primary-dynamic duration-100 ease-in-out'>
+                <Button variant="outline" asChild>
                   <Link href="/objave">
                     <FileText className="mr-2 h-4 w-4" />
                     Све објаве
                   </Link>
                 </Button>
-                <Button variant="outline" asChild className='hover:bg-primary-dynamic duration-100 ease-in-out'>
+                <Button variant="outline" asChild>
                   <Link href="/">
                     <TrendingUp className="mr-2 h-4 w-4" />
                     Најновије објаве
@@ -495,7 +568,14 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
         </div>
       </main>
 
-
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm text-gray-400">
+            © 2025 {institutionData.name}. Сва права задржана.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -20,7 +20,6 @@ import {
 import Link from 'next/link';
 import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Page } from '@/lib/types';
-import { useTheme } from 'next-themes';
 
 interface DashboardStats {
   totalPosts: number;
@@ -58,7 +57,6 @@ export default function DashboardPage() {
   const [recentPages, setRecentPages] = useState<Page[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { theme } = useTheme()
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -195,12 +193,12 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-            <Button asChild variant={theme === "light" ? "default" : "secondaryDefault"}>
-              <Link href="/dashboard/posts">
-                <FileText className="mr-2 h-4 w-4" />
-                Nova objava
-              </Link>
-            </Button>
+          <Button asChild variant="default">
+            <Link href="/dashboard/posts">
+              <FileText className="mr-2 h-4 w-4" />
+              Nova objava
+            </Link>
+          </Button>
         </div>
       </div>
 

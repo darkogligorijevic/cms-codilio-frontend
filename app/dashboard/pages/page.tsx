@@ -54,7 +54,6 @@ import { pagesApi } from '@/lib/api';
 import type { Page, PageStatus } from '@/lib/types';
 import { toast } from 'sonner';
 import { transliterate } from '@/lib/transliterate';
-import { useTheme } from 'next-themes';
 
 interface PageFormData {
   title: string;
@@ -70,7 +69,6 @@ const PAGE_TEMPLATES = [
   { value: 'contact', label: 'Kontakt stranica', description: 'Stranica sa kontakt informacijama' },
   { value: 'about', label: 'O nama', description: 'Stranica o instituciji' },
   { value: 'services', label: 'Usluge', description: 'Lista usluga institucije' },
-  { value: 'organizationalStructure', label: 'Organizaciona struktura', description: "Stablo organizacione strukture"},
   { value: 'transparency', label: 'Transparentnost', description: 'Dokumenti i transparentnost' }
 ];
 
@@ -84,7 +82,6 @@ export default function PagesPage() {
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<Page | null>(null);
-  const {theme} = useTheme();
 
   const {
     register,
@@ -284,7 +281,7 @@ export default function PagesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
+            <Button>
               <Plus className="mr-2 h-4 w-4" />
               Nova stranica
             </Button>
@@ -392,7 +389,7 @@ export default function PagesPage() {
                     id="content"
                     placeholder="Napišite sadržaj stranice..."
                     rows={8}
-                    {...register('content')}
+                    {...register('content', { required: 'Sadržaj je obavezan' })}
                   />
                   {errors.content && (
                     <p className="text-sm text-red-600 flex items-center">
@@ -407,7 +404,7 @@ export default function PagesPage() {
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
                   Otkaži
                 </Button>
-                <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'Čuva se...' : (editingPage ? 'Sačuvaj izmene' : 'Kreiraj stranicu')}
                 </Button>
               </DialogFooter>

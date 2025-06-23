@@ -44,7 +44,7 @@ export function PostsSection({ posts, title = "Објаве за ову стра
   };
 
   return (
-    <div className="mt-12 dark:text-white">
+    <div className="mt-12">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
@@ -60,7 +60,7 @@ export function PostsSection({ posts, title = "Објаве за ову стра
         </Button>
       </div>
 
-      <div className="space-y-6 dark:text-white">
+      <div className="space-y-6">
         {posts.map((post) => (
           <Card key={post.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">

@@ -1,4 +1,4 @@
-// lib/settings-context.tsx - OČIŠĆENA verzija bez force light theme
+// lib/settings-context.tsx - Enhanced with Dark Mode Support
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
@@ -10,6 +10,8 @@ interface SettingsContextType {
   settings: SiteSettings | null;
   rawSettings: Setting[];
   isLoading: boolean;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
   refreshSettings: () => Promise<void>;
   updateSetting: (key: string, value: string) => Promise<void>;
   updateMultipleSettings: (updates: UpdateMultipleSettingsDto) => Promise<void>;
@@ -21,80 +23,128 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-// Utility function to convert hex color to HSL
-function hexToHsl(hex: string) {
+// Utility function to convert hex color to RGB values
+function hexToRgb(hex: string) {
   if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || hex.length !== 7) {
-    return '220 100% 50%'; // default blue
+    return '59 130 246'; // default blue
   }
 
   try {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-      h = s = 0; // achromatic
-    } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-        default: h = 0;
-      }
-      h /= 6;
-    }
-
-    h = Math.round(h * 360);
-    s = Math.round(s * 100);
-    l = Math.round(l * 100);
-
-    return `${h} ${s}% ${l}%`;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `${r} ${g} ${b}`;
   } catch (error) {
-    console.warn('Error converting hex to HSL:', hex, error);
-    return '220 100% 50%'; // default blue
+    console.warn('Error converting hex to RGB:', hex, error);
+    return '59 130 246'; // default blue
   }
 }
 
-// Function to apply theme to CSS variables (simplified - no more force light)
-function applyThemeToDocument(settings: SiteSettings) {
+// Function to calculate a darker/lighter variant of a color
+function createColorVariant(rgb: string, adjustment: number = -10) {
+  try {
+    const [r, g, b] = rgb.split(' ').map(Number);
+    const newR = Math.max(0, Math.min(255, r + adjustment));
+    const newG = Math.max(0, Math.min(255, g + adjustment));
+    const newB = Math.max(0, Math.min(255, b + adjustment));
+    return `${newR} ${newG} ${newB}`;
+  } catch (error) {
+    return rgb;
+  }
+}
+
+// Function to determine if a color is light or dark
+function isLightColor(rgb: string): boolean {
+  try {
+    const [r, g, b] = rgb.split(' ').map(Number);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+  } catch (error) {
+    return true;
+  }
+}
+
+// Function to apply theme to CSS variables and dark mode
+function applyThemeToDocument(settings: SiteSettings, isDarkMode: boolean) {
   if (typeof document === 'undefined') return;
 
   const root = document.documentElement;
+  const body = document.body;
 
-  // Apply theme colors if they exist
+  // Apply or remove dark mode class
+  if (isDarkMode && settings.themeDarkMode) {
+    body.classList.add('dark', 'dark-mode');
+    root.classList.add('dark');
+  } else {
+    body.classList.remove('dark', 'dark-mode');
+    root.classList.remove('dark');
+  }
+
+  // Apply colors if they exist
   if (settings.themePrimaryColor) {
-    const primaryHsl = hexToHsl(settings.themePrimaryColor);
-    root.style.setProperty('--primary-dynamic', primaryHsl);
+    const primaryRgb = hexToRgb(settings.themePrimaryColor);
+    root.style.setProperty('--primary', primaryRgb);
     root.style.setProperty('--primary-hex', settings.themePrimaryColor);
+    
+    // Create hover variant
+    const primaryHover = createColorVariant(primaryRgb, -15);
+    root.style.setProperty('--primary-hover', primaryHover);
+    
+    // Primary foreground (contrasting color)
+    const primaryForeground = isLightColor(primaryRgb) ? '15 23 42' : '248 250 252';
+    root.style.setProperty('--primary-foreground', primaryForeground);
   }
 
   if (settings.themeSecondaryColor) {
-    const secondaryHsl = hexToHsl(settings.themeSecondaryColor);
-    root.style.setProperty('--secondary-dynamic', secondaryHsl);
+    const secondaryRgb = hexToRgb(settings.themeSecondaryColor);
+    root.style.setProperty('--secondary', secondaryRgb);
     root.style.setProperty('--secondary-hex', settings.themeSecondaryColor);
+    
+    // Secondary foreground (contrasting color)
+    const secondaryForeground = isLightColor(secondaryRgb) ? '15 23 42' : '248 250 252';
+    root.style.setProperty('--secondary-foreground', secondaryForeground);
   }
 
   // Apply font family
   if (settings.themeFontFamily) {
     root.style.setProperty('--font-family', settings.themeFontFamily);
+    document.body.style.fontFamily = settings.themeFontFamily;
   }
 
-  console.log('✅ Applied theme colors and fonts');
+  // Custom properties for site branding
+  if (settings.siteName) {
+    root.style.setProperty('--site-name', `"${settings.siteName}"`);
+  }
+
+  // Add smooth transition class for theme switching
+  body.classList.add('theme-switching');
+  setTimeout(() => {
+    body.classList.remove('theme-switching');
+  }, 300);
 }
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [rawSettings, setRawSettings] = useState<Setting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
+  // Ref to track if initial fetch is done
   const hasInitiallyFetched = useRef(false);
   
+  // Initialize dark mode from localStorage or system preference
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        setIsDarkMode(true);
+      }
+    }
+  }, []);
+
+  // Memoized fetch function to prevent recreation on every render
   const fetchSettings = useCallback(async (showToastOnError = false) => {
     if (isLoading && hasInitiallyFetched.current) {
       return;
@@ -111,9 +161,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSettings(structured);
       setRawSettings(raw);
       
-      // Apply theme only colors and fonts (not dark/light mode)
+      // Apply theme only if values actually changed
       if (structured) {
-        applyThemeToDocument(structured);
+        applyThemeToDocument(structured, isDarkMode);
       }
       
       hasInitiallyFetched.current = true;
@@ -133,23 +183,41 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isDarkMode]);
 
-  // Initial fetch
+  // Initial fetch - only runs once
   useEffect(() => {
     if (!hasInitiallyFetched.current) {
       fetchSettings(false);
     }
-  }, []);
+  }, [fetchSettings]);
 
-  // Apply theme when settings change
+  // Apply theme when settings or dark mode changes
   useEffect(() => {
     if (settings && hasInitiallyFetched.current) {
       requestAnimationFrame(() => {
-        applyThemeToDocument(settings);
+        applyThemeToDocument(settings, isDarkMode);
       });
     }
-  }, [settings]);
+  }, [settings, isDarkMode]);
+
+  // Toggle dark mode function
+  const toggleDarkMode = useCallback(() => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newDarkMode ? 'dark' : 'light');
+    }
+    
+    // Apply immediately if settings are loaded
+    if (settings) {
+      applyThemeToDocument(settings, newDarkMode);
+    }
+    
+    toast.success(newDarkMode ? 'Uključen tamni režim' : 'Uključen svetli režim');
+  }, [isDarkMode, settings]);
 
   const refreshSettings = useCallback(async () => {
     await fetchSettings(true);
@@ -169,6 +237,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       const updatedSettings = await settingsApi.updateMultiple(updates);
       
+      // Immediately update local state with new values
       setRawSettings(prevSettings => {
         const newSettings = [...prevSettings];
         updates.settings.forEach(update => {
@@ -180,23 +249,26 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return newSettings;
       });
 
+      // Update structured settings
       const newStructured = await settingsApi.getStructured();
       setSettings(newStructured);
       
+      // Apply theme immediately
       if (newStructured) {
-        applyThemeToDocument(newStructured);
+        applyThemeToDocument(newStructured, isDarkMode);
       }
       
     } catch (error) {
       console.error('Error updating settings:', error);
       throw error;
     }
-  }, []);
+  }, [isDarkMode]);
 
   const uploadFile = useCallback(async (key: string, file: File) => {
     try {
       const uploadedSetting = await settingsApi.uploadFile(key, file);
       
+      // Immediately update local state with new value
       setRawSettings(prevSettings => {
         const newSettings = [...prevSettings];
         const index = newSettings.findIndex(s => s.key === key);
@@ -206,11 +278,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return newSettings;
       });
       
+      // Update structured settings
       const newStructured = await settingsApi.getStructured();
       setSettings(newStructured);
       
+      // Apply theme if needed
       if (newStructured) {
-        applyThemeToDocument(newStructured);
+        applyThemeToDocument(newStructured, isDarkMode);
       }
       
       return uploadedSetting;
@@ -218,7 +292,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       console.error('Error uploading file:', error);
       throw error;
     }
-  }, []);
+  }, [isDarkMode]);
 
   const resetSettings = useCallback(async (category?: SettingCategory) => {
     try {
@@ -250,10 +324,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refreshSettings]);
 
+  // Memoize context value to prevent unnecessary re-renders
   const contextValue = React.useMemo(() => ({
     settings,
     rawSettings,
     isLoading,
+    isDarkMode,
+    toggleDarkMode,
     refreshSettings,
     updateSetting,
     updateMultipleSettings,
@@ -265,6 +342,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     settings,
     rawSettings,
     isLoading,
+    isDarkMode,
+    toggleDarkMode,
     refreshSettings,
     updateSetting,
     updateMultipleSettings,
@@ -289,4 +368,5 @@ export function useSettings() {
   return context;
 }
 
+// Export the theme application function for manual use if needed
 export { applyThemeToDocument };

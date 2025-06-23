@@ -1,4 +1,4 @@
-// components/ui/media-picker.tsx - Ažurirana verzija sa kategorijama
+// components/ui/media-picker.tsx - Updated with Drag & Drop
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,13 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -29,20 +22,11 @@ import {
   FileText, 
   File,
   CheckCircle,
-  X,
-  Eye,
-  EyeOff,
-  Building,
-  DollarSign,
-  FileCheck,
-  Clipboard,
-  BarChart3,
-  Folder,
-  Filter
+  X
 } from 'lucide-react';
 import { DragDropUpload } from '@/components/ui/drag-drop-upload';
 import { mediaApi } from '@/lib/api';
-import { MediaCategory, type Media, type FindMediaOptions } from '@/lib/types';
+import type { Media } from '@/lib/types';
 import { toast } from 'sonner';
 
 interface MediaPickerProps {
@@ -52,18 +36,7 @@ interface MediaPickerProps {
   title?: string;
   description?: string;
   allowedTypes?: string[];
-  allowedCategories?: MediaCategory[];
-  showPublicOnly?: boolean;
 }
-
-const categories = [
-  { value: MediaCategory.PROCUREMENT, label: 'Javne nabavke', icon: Building },
-  { value: MediaCategory.FINANCIAL, label: 'Finansijski izvještaji', icon: DollarSign },
-  { value: MediaCategory.DECISIONS, label: 'Odluke', icon: FileCheck },
-  { value: MediaCategory.PLANS, label: 'Planovi', icon: Clipboard },
-  { value: MediaCategory.REPORTS, label: 'Izvještaji', icon: BarChart3 },
-  { value: MediaCategory.OTHER, label: 'Ostalo', icon: Folder }
-];
 
 export function MediaPicker({
   isOpen,
@@ -71,13 +44,10 @@ export function MediaPicker({
   onSelect,
   title = "Izaberite medijski fajl",
   description = "Izaberite postojeći fajl ili učitajte novi",
-  allowedTypes = ['image/*'],
-  allowedCategories,
-  showPublicOnly = false
+  allowedTypes = ['image/*']
 }: MediaPickerProps) {
   const [media, setMedia] = useState<Media[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<MediaCategory | 'all'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<Media | null>(null);
@@ -86,45 +56,22 @@ export function MediaPicker({
     if (isOpen) {
       fetchMedia();
     }
-  }, [isOpen, searchTerm, categoryFilter]);
+  }, [isOpen]);
 
   const fetchMedia = async () => {
     try {
       setIsLoading(true);
-      
-      const options: FindMediaOptions = {};
-      
-      if (categoryFilter !== 'all') {
-        options.category = categoryFilter as MediaCategory;
-      }
-      
-      if (showPublicOnly) {
-        options.isPublic = true;
-      }
-      
-      if (searchTerm) {
-        options.search = searchTerm;
-      }
-      
-      const response = await mediaApi.getAll(options);
+      const response = await mediaApi.getAll();
       
       // Filter by allowed types
-      let filteredMedia = response.filter(item => 
+      const filteredMedia = response.filter(item => 
         allowedTypes.some(type => {
           if (type === 'image/*') return item.mimeType.startsWith('image/');
           if (type === 'video/*') return item.mimeType.startsWith('video/');
           if (type === 'audio/*') return item.mimeType.startsWith('audio/');
-          if (type.startsWith('.')) return item.originalName.toLowerCase().endsWith(type.toLowerCase());
           return item.mimeType === type;
         })
       );
-
-      // Filter by allowed categories if specified
-      if (allowedCategories && allowedCategories.length > 0) {
-        filteredMedia = filteredMedia.filter(item => 
-          allowedCategories.includes(item.category)
-        );
-      }
       
       setMedia(filteredMedia);
     } catch (error) {
@@ -135,32 +82,16 @@ export function MediaPicker({
     }
   };
 
-  const handleFileUpload = async (file: File, metadata?: any) => {
+  const handleFileUpload = async (file: File) => {
     try {
       setIsUploading(true);
-      const newMedia = await mediaApi.upload(file, metadata);
-      
-      // Check if uploaded file matches our filters
-      const matchesType = allowedTypes.some(type => {
-        if (type === 'image/*') return newMedia.mimeType.startsWith('image/');
-        if (type === 'video/*') return newMedia.mimeType.startsWith('video/');
-        if (type === 'audio/*') return newMedia.mimeType.startsWith('audio/');
-        if (type.startsWith('.')) return newMedia.originalName.toLowerCase().endsWith(type.toLowerCase());
-        return newMedia.mimeType === type;
-      });
-
-      const matchesCategory = !allowedCategories || allowedCategories.includes(newMedia.category);
-      const matchesPublic = !showPublicOnly || newMedia.isPublic;
-
-      if (matchesType && matchesCategory && matchesPublic) {
-        setMedia(prev => [newMedia, ...prev]);
-      }
-      
+      const newMedia = await mediaApi.upload(file);
+      setMedia(prev => [newMedia, ...prev]);
       toast.success('Fajl je uspešno učitan');
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error('Greška pri učitavanju fajla');
-      throw error;
+      throw error; // Re-throw to handle in DragDropUpload component
     } finally {
       setIsUploading(false);
     }
@@ -187,17 +118,6 @@ export function MediaPicker({
     return 'Fajl';
   };
 
-  const getCategoryIcon = (category: MediaCategory) => {
-    const categoryInfo = categories.find(cat => cat.value === category);
-    const IconComponent = categoryInfo?.icon || Folder;
-    return <IconComponent className="h-4 w-4" />;
-  };
-
-  const getCategoryLabel = (category: MediaCategory) => {
-    const categoryInfo = categories.find(cat => cat.value === category);
-    return categoryInfo?.label || 'Ostalo';
-  };
-
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -206,7 +126,10 @@ export function MediaPicker({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const availableCategories = allowedCategories || categories.map(cat => cat.value);
+  const filteredMedia = media.filter(item =>
+    item.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.alt?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -217,7 +140,7 @@ export function MediaPicker({
         </DialogHeader>
 
         <div className="flex-1 flex flex-col space-y-4 overflow-hidden">
-          {/* Upload Section */}
+          {/* Drag & Drop Upload Section */}
           <DragDropUpload
             onFileUpload={handleFileUpload}
             accept={allowedTypes.join(',')}
@@ -225,13 +148,10 @@ export function MediaPicker({
             multiple={false}
             disabled={isUploading}
             className="border-dashed border-2 border-gray-300 rounded-lg p-4"
-            showMetadataForm={true}
-            defaultCategory={allowedCategories?.[0] || MediaCategory.OTHER}
-            defaultIsPublic={showPublicOnly}
           />
 
-          {/* Filters */}
-          <div className="flex items-center space-x-4">
+          {/* Search */}
+          <div className="flex items-center space-x-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -241,36 +161,11 @@ export function MediaPicker({
                 className="pl-9"
               />
             </div>
-            
-            {availableCategories.length > 1 && (
-              <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as MediaCategory | 'all')}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sve kategorije" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Sve kategorije</SelectItem>
-                  {categories
-                    .filter(cat => availableCategories.includes(cat.value))
-                    .map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        <div className="flex items-center space-x-2">
-                          <category.icon className="h-4 w-4" />
-                          <span>{category.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            {(searchTerm || categoryFilter !== 'all') && (
+            {searchTerm && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setSearchTerm('');
-                  setCategoryFilter('all');
-                }}
+                onClick={() => setSearchTerm('')}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -289,9 +184,9 @@ export function MediaPicker({
                   </div>
                 ))}
               </div>
-            ) : media.length > 0 ? (
+            ) : filteredMedia.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-                {media.map((item) => (
+                {filteredMedia.map((item) => (
                   <Card 
                     key={item.id} 
                     className={`cursor-pointer transition-all hover:shadow-md ${
@@ -323,27 +218,12 @@ export function MediaPicker({
                         </div>
                       )}
 
-                      {/* Category badge */}
                       <Badge
                         variant="secondary"
-                        className="absolute top-2 left-2 text-xs flex items-center space-x-1"
+                        className="absolute top-2 left-2 text-xs"
                       >
-                        {getCategoryIcon(item.category)}
-                        <span>{getCategoryLabel(item.category)}</span>
+                        {getFileTypeLabel(item.mimeType)}
                       </Badge>
-
-                      {/* Public/Private indicator */}
-                      <div className="absolute top-2 right-2">
-                        {item.isPublic ? (
-                          <Badge variant="default" className="text-xs bg-green-600">
-                            <Eye className="h-3 w-3" />
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            <EyeOff className="h-3 w-3" />
-                          </Badge>
-                        )}
-                      </div>
                     </div>
 
                     <CardContent className="p-3">
@@ -352,9 +232,9 @@ export function MediaPicker({
                           {item.originalName}
                         </h4>
                         
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground truncate" title={item.description}>
-                            {item.description}
+                        {item.alt && (
+                          <p className="text-xs text-muted-foreground truncate" title={item.alt}>
+                            {item.alt}
                           </p>
                         )}
 
@@ -371,24 +251,20 @@ export function MediaPicker({
               <div className="text-center py-12">
                 <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {searchTerm || categoryFilter !== 'all' ? 'Nema rezultata' : 'Nema fajlova'}
+                  {searchTerm ? 'Nema rezultata' : 'Nema fajlova'}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  {searchTerm || categoryFilter !== 'all'
-                    ? `Nema fajlova koji odgovaraju filterima`
+                  {searchTerm 
+                    ? `Nema fajlova koji odgovaraju pretrazi "${searchTerm}"`
                     : 'Učitajte prvi fajl koristeći drag & drop ili dugme za učitavanje'
                   }
                 </p>
-                {(searchTerm || categoryFilter !== 'all') && (
+                {searchTerm && (
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      setSearchTerm('');
-                      setCategoryFilter('all');
-                    }}
+                    onClick={() => setSearchTerm('')}
                   >
-                    <Filter className="mr-2 h-4 w-4" />
-                    Očisti filtere
+                    Očisti pretragu
                   </Button>
                 )}
               </div>

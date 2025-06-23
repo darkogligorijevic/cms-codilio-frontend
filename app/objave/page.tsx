@@ -131,17 +131,47 @@ function PostsContent() {
   const displayPosts = searchTerm || selectedCategory !== 'all' ? filteredPosts : posts;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="flex items-center space-x-3">
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <span className="text-lg font-bold text-gray-900">{institutionData.name}</span>
+            </Link>
+            <nav className="flex items-center space-x-6">
+              <Link href="/" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Почетна
+              </Link>
+              <Link href="/dokumenti" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Документи
+              </Link>
+              <Link href="/kontakt" className="text-gray-700 hover:text-primary-dynamic transition-colors">
+                Контакт
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
 
       {/* Page Header */}
-      <div className="bg-white border-b dark:bg-gray-900">
+      <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900">
                 {selectedCategoryName ? `Објаве из категорије: ${selectedCategoryName}` : 'Све објаве'}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-gray-600 mt-2">
                 {totalPosts > 0 ? `Укупно ${totalPosts} објав${totalPosts === 1 ? 'а' : 'а'}` : 'Нема објава за приказ'}
               </p>
             </div>
@@ -155,7 +185,7 @@ function PostsContent() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white border-b dark:bg-gray-900">
+      <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
             {/* Search */}
@@ -176,7 +206,7 @@ function PostsContent() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="all">Све категорије</option>
                 {categories.map((category) => (
@@ -254,13 +284,13 @@ function PostsContent() {
                   <CardContent className="p-6">
                     {/* Category Badge */}
                     {post.category && (
-                      <Badge variant="secondary" className="mb-3 badge-primary-dynamic">
+                      <Badge variant="secondary" className="mb-3">
                         {post.category.name}
                       </Badge>
                     )}
 
                     {/* Title */}
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-2 hover:text-primary-dynamic">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-primary-dynamic">
                       <Link href={`/objave/${post.slug}`}>
                         {post.title}
                       </Link>
@@ -381,7 +411,7 @@ function PostsContent() {
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-blue-50 badge-primary-dynamic"
+                  className="cursor-pointer hover:bg-blue-50"
                   onClick={() => setSelectedCategory('all')}
                 >
                   Све ({totalPosts})
@@ -390,7 +420,7 @@ function PostsContent() {
                   <Badge
                     key={category.id}
                     variant={selectedCategory === category.id.toString() ? 'default' : 'outline'}
-                    className="cursor-pointer hover:bg-blue-50 badge-primary-dynamic"
+                    className="cursor-pointer hover:bg-blue-50"
                     onClick={() => setSelectedCategory(category.id.toString())}
                   >
                     {category.name}
@@ -405,6 +435,14 @@ function PostsContent() {
         </aside>
       )}
 
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm text-gray-400">
+            © 2025 {institutionData.name}. Сва права задржана.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -412,14 +450,24 @@ function PostsContent() {
 // Loading komponenta
 function PostsLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <Building className="h-8 w-8 text-primary-dynamic" />
+              <span className="text-lg font-bold text-gray-900">Локална институција</span>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 dark:bg-gray-600 rounded w-1/3"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
+              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
             ))}
           </div>
         </div>

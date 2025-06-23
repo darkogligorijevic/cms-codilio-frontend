@@ -1,250 +1,242 @@
-// components/meta-tags.tsx - Optimized version
+// components/meta-tags.tsx - Enhanced with Dark Mode Support
 'use client';
 
+import { useEffect } from 'react';
 import { useSettings } from '@/lib/settings-context';
-import { mediaApi } from '@/lib/api';
-import { useEffect, useRef } from 'react';
+import Head from 'next/head';
 
-interface MetaTagsProps {
-  title?: string;
-  description?: string;
-  keywords?: string;
-  image?: string;
-}
-
-export function MetaTags({ title, description, keywords, image }: MetaTagsProps) {
+export function MetaTags() {
   const { settings } = useSettings();
-  const lastAppliedSettings = useRef<string>('');
 
   useEffect(() => {
-    if (typeof document === 'undefined' || !settings) return;
+    // Update meta theme-color based on current theme
+    const updateThemeColor = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      const themeColorLight = settings?.themePrimaryColor || '#ffffff';
+      const themeColorDark = '#020617'; // slate-950
+      
+      // Update existing theme-color meta tags
+      const lightMetaTag = document.querySelector('meta[media="(prefers-color-scheme: light)"]');
+      const darkMetaTag = document.querySelector('meta[media="(prefers-color-scheme: dark)"]');
+      
+      if (lightMetaTag) {
+        lightMetaTag.setAttribute('content', themeColorLight);
+      }
+      if (darkMetaTag) {
+        darkMetaTag.setAttribute('content', themeColorDark);
+      }
 
-    // Create a hash of settings to avoid unnecessary DOM manipulations
-    const settingsHash = JSON.stringify({
-      siteName: settings.siteName,
-      seoTitle: settings.seoTitle,
-      seoDescription: settings.seoDescription,
-      seoKeywords: settings.seoKeywords,
-      siteLogo: settings.siteLogo,
-      siteFavicon: settings.siteFavicon,
-      themePrimaryColor: settings.themePrimaryColor,
-      seoGoogleAnalytics: settings.seoGoogleAnalytics,
-      seoGoogleTagManager: settings.seoGoogleTagManager,
-      title,
-      description,
-      keywords,
-      image
+      // Update the current theme-color meta tag
+      let currentThemeTag = document.querySelector('meta[name="theme-color"]:not([media])');
+      if (!currentThemeTag) {
+        currentThemeTag = document.createElement('meta');
+        currentThemeTag.setAttribute('name', 'theme-color');
+        document.head.appendChild(currentThemeTag);
+      }
+      currentThemeTag.setAttribute('content', isDark ? themeColorDark : themeColorLight);
+    };
+
+    // Initial update
+    updateThemeColor();
+
+    // Listen for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          updateThemeColor();
+        }
+      });
     });
 
-    // Skip if nothing changed
-    if (lastAppliedSettings.current === settingsHash) {
-      return;
-    }
-
-    lastAppliedSettings.current = settingsHash;
-
-    const siteTitle = title 
-      ? `${title} | ${settings?.siteName || 'CMS Codilio'}`
-      : settings?.seoTitle || settings?.siteName || 'CMS Codilio';
-
-    const siteDescription = description || settings?.seoDescription || settings?.siteTagline || '';
-    const siteKeywords = keywords || settings?.seoKeywords || '';
-
-    // Batch DOM updates
-    requestAnimationFrame(() => {
-      // Update document title
-      document.title = siteTitle;
-
-      // Update or create meta tags
-      const updateMetaTag = (name: string, content: string) => {
-        if (!content) return;
-        
-        let metaTag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
-        if (!metaTag) {
-          metaTag = document.createElement('meta');
-          metaTag.name = name;
-          document.head.appendChild(metaTag);
-        }
-        metaTag.content = content;
-      };
-
-      const updateMetaProperty = (property: string, content: string) => {
-        if (!content) return;
-        
-        let metaTag = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
-        if (!metaTag) {
-          metaTag = document.createElement('meta');
-          metaTag.setAttribute('property', property);
-          document.head.appendChild(metaTag);
-        }
-        metaTag.content = content;
-      };
-
-      // Basic meta tags
-      updateMetaTag('description', siteDescription);
-      if (siteKeywords) updateMetaTag('keywords', siteKeywords);
-
-      // Open Graph tags
-      updateMetaProperty('og:title', siteTitle);
-      updateMetaProperty('og:description', siteDescription);
-      updateMetaProperty('og:site_name', settings?.siteName || 'CMS Codilio');
-      updateMetaProperty('og:type', 'website');
-
-      // Image for social sharing
-      const socialImage = image || (settings?.siteLogo ? mediaApi.getFileUrl(settings.siteLogo) : '');
-      if (socialImage) {
-        updateMetaProperty('og:image', socialImage);
-        updateMetaTag('twitter:image', socialImage);
-      }
-
-      // Twitter Card tags
-      updateMetaTag('twitter:card', 'summary_large_image');
-      updateMetaTag('twitter:title', siteTitle);
-      updateMetaTag('twitter:description', siteDescription);
-
-      // Favicon
-      if (settings?.siteFavicon) {
-        let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
-        if (!favicon) {
-          favicon = document.createElement('link');
-          favicon.rel = 'icon';
-          document.head.appendChild(favicon);
-        }
-        favicon.href = mediaApi.getFileUrl(settings.siteFavicon);
-      }
-
-      // Theme color for mobile browsers
-      if (settings?.themePrimaryColor) {
-        let themeColor = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
-        if (!themeColor) {
-          themeColor = document.createElement('meta');
-          themeColor.name = 'theme-color';
-          document.head.appendChild(themeColor);
-        }
-        themeColor.content = settings.themePrimaryColor;
-      }
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
     });
 
-    // Google Analytics - only add if not already present
-    if (settings?.seoGoogleAnalytics) {
-      const existingGA = document.querySelector(`script[src*="${settings.seoGoogleAnalytics}"]`);
-      if (!existingGA) {
-        // Remove old GA scripts
-        const oldGA = document.querySelectorAll('script[src*="googletagmanager.com/gtag"]');
-        oldGA.forEach(script => script.remove());
+    return () => observer.disconnect();
+  }, [settings?.themePrimaryColor]);
 
-        // Add new GA script
-        const gaScript = document.createElement('script');
-        gaScript.async = true;
-        gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${settings.seoGoogleAnalytics}`;
-        document.head.appendChild(gaScript);
+  if (!settings) return null;
 
-        // Add GA config script
-        const gaConfig = document.createElement('script');
-        gaConfig.innerHTML = `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${settings.seoGoogleAnalytics}');
-        `;
-        document.head.appendChild(gaConfig);
-      }
-    }
+  return (
+    <Head>
+      {/* Basic Meta Tags */}
+      {settings.siteName && (
+        <title>{settings.siteName}</title>
+      )}
+      
+      {settings.siteTagline && (
+        <meta name="description" content={settings.siteTagline} />
+      )}
 
-    // Google Tag Manager - only add if not already present
-    if (settings?.seoGoogleTagManager) {
-      const existingGTM = document.querySelector(`script[src*="${settings.seoGoogleTagManager}"]`);
-      if (!existingGTM) {
-        // Remove old GTM scripts
-        const oldGTM = document.querySelectorAll('script[src*="googletagmanager.com/gtm"]');
-        oldGTM.forEach(script => script.remove());
+      {/* SEO Meta Tags */}
+      {settings.seoTitle && (
+        <meta property="og:title" content={settings.seoTitle} />
+      )}
+      
+      {settings.seoDescription && (
+        <>
+          <meta name="description" content={settings.seoDescription} />
+          <meta property="og:description" content={settings.seoDescription} />
+          <meta name="twitter:description" content={settings.seoDescription} />
+        </>
+      )}
 
-        // Add new GTM script
-        const gtmScript = document.createElement('script');
-        gtmScript.innerHTML = `
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','${settings.seoGoogleTagManager}');
-        `;
-        document.head.appendChild(gtmScript);
+      {settings.seoKeywords && (
+        <meta name="keywords" content={settings.seoKeywords} />
+      )}
 
-        // Add GTM noscript fallback to body
-        const gtmNoscript = document.createElement('noscript');
-        gtmNoscript.innerHTML = `
-          <iframe src="https://www.googletagmanager.com/ns.html?id=${settings.seoGoogleTagManager}"
-          height="0" width="0" style="display:none;visibility:hidden"></iframe>
-        `;
-        if (document.body && !document.querySelector('noscript[src*="googletagmanager"]')) {
-          document.body.prepend(gtmNoscript);
-        }
-      }
-    }
+      {/* Open Graph Meta Tags */}
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content={settings.siteName || 'CodilioCMS'} />
+      
+      {/* Twitter Card Meta Tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      {settings.siteName && (
+        <meta name="twitter:title" content={settings.siteName} />
+      )}
 
-  }, [settings, title, description, keywords, image]);
+      {/* Favicon */}
+      {settings.siteFavicon && (
+        <>
+          <link rel="icon" href={`/api/media/file/${settings.siteFavicon}`} />
+          <link rel="apple-touch-icon" href={`/api/media/file/${settings.siteFavicon}`} />
+        </>
+      )}
 
-  return null; // This component doesn't render anything visible
+      {/* Language and locale */}
+      <meta httpEquiv="content-language" content={settings.siteLanguage || 'sr'} />
+      <meta property="og:locale" content={settings.siteLanguage === 'en' ? 'en_US' : 'sr_RS'} />
+
+      {/* Viewport for responsive design */}
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+      {/* Color scheme and theme support */}
+      <meta name="color-scheme" content="light dark" />
+      <meta name="supported-color-schemes" content="light dark" />
+
+      {/* PWA Meta Tags */}
+      <meta name="application-name" content={settings.siteName || 'CodilioCMS'} />
+      <meta name="apple-mobile-web-app-title" content={settings.siteName || 'CodilioCMS'} />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+      {/* Additional SEO */}
+      <meta name="robots" content="index, follow" />
+      <meta name="googlebot" content="index, follow" />
+      
+      {/* Contact Information */}
+      {settings.contactEmail && (
+        <meta name="contact" content={settings.contactEmail} />
+      )}
+
+      {/* Analytics */}
+      {settings.seoGoogleAnalytics && (
+        <>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${settings.seoGoogleAnalytics}`}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${settings.seoGoogleAnalytics}');
+              `,
+            }}
+          />
+        </>
+      )}
+
+      {/* Google Tag Manager */}
+      {settings.seoGoogleTagManager && (
+        <>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${settings.seoGoogleTagManager}');
+              `,
+            }}
+          />
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${settings.seoGoogleTagManager}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        </>
+      )}
+    </Head>
+  );
 }
 
-// Hook for dynamic font loading - optimized
-export function useDynamicFonts() {
+export function DynamicFontLoader() {
   const { settings } = useSettings();
-  const lastLoadedFont = useRef<string>('');
 
   useEffect(() => {
-    if (!settings?.themeFontFamily || typeof document === 'undefined') return;
+    if (!settings?.themeFontFamily || typeof window === 'undefined') return;
 
     const fontFamily = settings.themeFontFamily;
 
-    // Skip if same font is already loaded
-    if (lastLoadedFont.current === fontFamily) return;
+    // Skip if font is already loaded or is a system font
+    if (fontFamily === 'Inter' || fontFamily.includes('system-ui')) return;
 
-    // Font loading map
-    const fontMap: Record<string, string> = {
-      'Inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap',
-      'Roboto': 'https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap',
-      'Open Sans': 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap',
-      'Lato': 'https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap',
-      'Poppins': 'https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap'
+    // Create font link element
+    const linkElement = document.createElement('link');
+    linkElement.rel = 'preload';
+    linkElement.as = 'style';
+    linkElement.onload = function() {
+      // @ts-ignore
+      this.onload = null;
+      // @ts-ignore
+      this.rel = 'stylesheet';
     };
 
-    const fontUrl = fontMap[fontFamily];
-    if (!fontUrl) return;
-
-    // Check if font is already loaded
-    const existingLink = document.querySelector(`link[href="${fontUrl}"]`);
-    if (existingLink) {
-      lastLoadedFont.current = fontFamily;
-      return;
+    // Generate Google Fonts URL based on font family
+    let fontUrl = '';
+    switch (fontFamily) {
+      case 'Roboto':
+        fontUrl = 'https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap';
+        break;
+      case 'Open Sans':
+        fontUrl = 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap';
+        break;
+      case 'Lato':
+        fontUrl = 'https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap';
+        break;
+      case 'Poppins':
+        fontUrl = 'https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap';
+        break;
+      default:
+        // For custom fonts, try to construct a Google Fonts URL
+        const fontName = fontFamily.replace(/\s+/g, '+');
+        fontUrl = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
     }
 
-    // Remove old font links (except the current one)
-    const oldFontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
-    oldFontLinks.forEach(link => {
-      if (link.getAttribute('href') !== fontUrl) {
-        link.remove();
-      }
-    });
+    linkElement.href = fontUrl;
 
-    // Add new font link
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = fontUrl;
-    link.crossOrigin = 'anonymous';
-    
-    // Add load event listener to track when font is loaded
-    link.onload = () => {
-      lastLoadedFont.current = fontFamily;
+    // Check if font link already exists
+    const existingLink = document.querySelector(`link[href="${fontUrl}"]`);
+    if (!existingLink) {
+      document.head.appendChild(linkElement);
+    }
+
+    // Apply font to body immediately
+    document.body.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+
+    // Cleanup function
+    return () => {
+      // Don't remove the link on unmount as it might be used by other components
     };
-    
-    document.head.appendChild(link);
-
   }, [settings?.themeFontFamily]);
-}
 
-// Component that applies fonts to body
-export function DynamicFontLoader() {
-  useDynamicFonts();
   return null;
 }

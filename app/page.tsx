@@ -1,4 +1,4 @@
-// app/(frontend)/page.tsx - FINALNA VERZIJA SA SVETLOM TEMOM
+// app/page.tsx - Updated with Dark Mode Support
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -8,25 +8,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DarkModeToggle } from '@/components/ui/dark-mode-toggle';
 import {
   Calendar,
   Eye,
   Search,
   FileText,
   Download,
-  ChevronRight,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
   TrendingUp,
   Users,
   Building,
+  ChevronRight,
+  ExternalLink,
+  Menu,
   X,
-  User
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube
 } from 'lucide-react';
 import Link from 'next/link';
 import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Page, Category } from '@/lib/types';
 
 export default function HomePage() {
-  const { settings, isLoading: settingsLoading } = useSettings();
+  const { settings, isLoading: settingsLoading, isDarkMode } = useSettings();
   const { getButtonStyles, getTextStyles, getGradientStyles } = useDynamicStyles();
   const themeColors = useThemeColors();
   
@@ -35,6 +46,7 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<{ posts: Post[], pages: Page[] }>({ posts: [], pages: [] });
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -44,6 +56,11 @@ export default function HomePage() {
   const institutionData = {
     name: settings?.siteName || "Локална институција",
     description: settings?.siteTagline || "Службени портал локалне самоуправе",
+    address: settings?.contactAddress || "Адреса институције",
+    phone: settings?.contactPhone || "+381 11 123 4567",
+    email: settings?.contactEmail || "info@institucija.rs",
+    workingHours: settings?.contactWorkingHours || "Понедељак - Петак: 07:30 - 15:30",
+    mapUrl: settings?.contactMapUrl,
     citizens: "53.096",
     villages: "32",
     area: "339 km²"
@@ -156,7 +173,7 @@ export default function HomePage() {
     const parts = text.split(regex);
     return parts.map((part, index) =>
       regex.test(part) ? (
-        <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
+        <span key={index} className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded font-semibold">
           {part}
         </span>
       ) : part
@@ -183,17 +200,115 @@ export default function HomePage() {
 
   if (settingsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{ borderColor: themeColors.primary }}></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      {/* Header */}
+      <header className="bg-card shadow-sm border-b border-border z-50 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-3">
+              {settings?.siteLogo ? (
+                <img 
+                  src={mediaApi.getFileUrl(settings.siteLogo)} 
+                  alt={settings.siteName || 'Лого'} 
+                  className="h-8 object-contain"
+                />
+              ) : (
+                <Building className="h-8 w-8 text-primary-dynamic" />
+              )}
+              <div>
+                <h1 className="text-lg font-bold text-foreground" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
+                  {institutionData.name}
+                </h1>
+                <p className="text-xs text-muted-foreground hidden sm:block" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
+                  {institutionData.description}
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/objave" className="text-muted-foreground hover:text-foreground transition-colors">
+                Објаве
+              </Link>
+              <Link href="/dokumenti" className="text-muted-foreground hover:text-foreground transition-colors">
+                Документи
+              </Link>
+              {pages.slice(0, 3).map((page) => (
+                <Link
+                  key={page.id}
+                  href={`/${page.slug}`}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {page.title}
+                </Link>
+              ))}
+              
+              {/* Dark Mode Toggle */}
+              <DarkModeToggle />
+              
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  CMS
+                </Link>
+              </Button>
+            </nav>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center space-x-2">
+              <DarkModeToggle />
+              <button
+                className="p-2"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-border">
+              <div className="space-y-2">
+                <Link href="/objave" className="block px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-md transition-colors">
+                  Објаве
+                </Link>
+                <Link href="/dokumenti" className="block px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-md transition-colors">
+                  Документи
+                </Link>
+                {pages.slice(0, 3).map((page) => (
+                  <Link
+                    key={page.id}
+                    href={`/${page.slug}`}
+                    className="block px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-md transition-colors"
+                  >
+                    {page.title}
+                  </Link>
+                ))}
+                <Link href="/dashboard" className="block px-3 py-2 text-primary-dynamic hover:bg-primary-dynamic/10 rounded-md transition-colors">
+                  CMS пријава
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+
       {/* Hero Section with Dynamic Colors */}
       <section 
-        className="text-white py-12 lg:py-16"
+        className="text-white py-12 lg:py-16 transition-all duration-300"
         style={{
           background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.secondary} 100%)`
         }}
@@ -228,7 +343,7 @@ export default function HomePage() {
 
             <div>
               {/* Search Card */}
-              <Card className="bg-white/10 backdrop-blur-sm border-none">
+              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardHeader>
                   <CardTitle className="text-white">Претражи садржај</CardTitle>
                   <CardDescription className="text-blue-100">
@@ -244,7 +359,7 @@ export default function HomePage() {
                           placeholder="Унесите кључне речи..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-9 bg-white/90 text-gray-500 dark:bg-gray-800/90 focus-primary-dynamic"
+                          className="pl-9 bg-white/90 focus-primary-dynamic text-gray-900"
                           autoComplete="off"
                         />
                         {searchTerm && (
@@ -259,11 +374,11 @@ export default function HomePage() {
 
                         {/* Search Results Dropdown */}
                         {showSearchResults && (searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-600 z-50 max-h-96 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-lg shadow-lg border border-border z-50 max-h-96 overflow-y-auto">
                             {/* Posts Results */}
                             {searchResults.posts.length > 0 && (
                               <div className="p-3">
-                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center">
                                   <FileText className="mr-2 h-4 w-4 text-primary-dynamic" />
                                   Објаве ({searchResults.posts.length})
                                 </h4>
@@ -273,7 +388,7 @@ export default function HomePage() {
                                       key={post.id}
                                       href={`/objave/${post.slug}`}
                                       onClick={clearSearch}
-                                      className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+                                      className="block p-2 hover:bg-muted rounded-md transition-colors"
                                     >
                                       <div className="flex items-start space-x-3">
                                         {post.featuredImage && (
@@ -284,11 +399,11 @@ export default function HomePage() {
                                           />
                                         )}
                                         <div className="flex-1 min-w-0">
-                                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
+                                          <div className="text-sm font-medium text-foreground line-clamp-1">
                                             {highlightText(post.title, searchTerm)}
                                           </div>
                                           {post.excerpt && (
-                                            <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                                            <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
                                               {highlightText(post.excerpt.substring(0, 100), searchTerm)}
                                             </div>
                                           )}
@@ -298,7 +413,7 @@ export default function HomePage() {
                                                 {post.category.name}
                                               </Badge>
                                             )}
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            <span className="text-xs text-muted-foreground">
                                               {getTimeAgo(post.publishedAt || post.createdAt)}
                                             </span>
                                           </div>
@@ -312,8 +427,8 @@ export default function HomePage() {
 
                             {/* Pages Results */}
                             {searchResults.pages.length > 0 && (
-                              <div className="p-3 border-t dark:border-gray-600">
-                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                              <div className="p-3 border-t border-border">
+                                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center">
                                   <Building className="mr-2 h-4 w-4 text-secondary-dynamic" />
                                   Странице ({searchResults.pages.length})
                                 </h4>
@@ -323,12 +438,12 @@ export default function HomePage() {
                                       key={page.id}
                                       href={`/${page.slug}`}
                                       onClick={clearSearch}
-                                      className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+                                      className="block p-2 hover:bg-muted rounded-md transition-colors"
                                     >
-                                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                      <div className="text-sm font-medium text-foreground">
                                         {highlightText(page.title, searchTerm)}
                                       </div>
-                                      <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                                      <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
                                         {highlightText(
                                           page.content.replace(/<[^>]*>/g, '').substring(0, 100),
                                           searchTerm
@@ -342,10 +457,10 @@ export default function HomePage() {
 
                             {/* No Results */}
                             {searchResults.posts.length === 0 && searchResults.pages.length === 0 && !isSearching && (
-                              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                <Search className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-600 mb-2" />
+                              <div className="p-4 text-center text-muted-foreground">
+                                <Search className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                                 <p className="text-sm">Нема резултата за "{searchTerm}"</p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                <p className="text-xs text-muted-foreground mt-1">
                                   Покушајте са другим кључним речима
                                 </p>
                               </div>
@@ -358,13 +473,13 @@ export default function HomePage() {
                                   className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto"
                                   style={{ borderColor: themeColors.primary }}
                                 ></div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Претражује се...</p>
+                                <p className="text-sm text-muted-foreground mt-2">Претражује се...</p>
                               </div>
                             )}
 
                             {/* Show more results link */}
                             {(searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                              <div className="p-3 border-t dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
+                              <div className="p-3 border-t border-border bg-muted/50">
                                 <Link
                                   href={`/pretraga?q=${encodeURIComponent(searchTerm)}`}
                                   onClick={clearSearch}
@@ -380,7 +495,7 @@ export default function HomePage() {
                       </div>
                       <Button
                         type="submit"
-                        className="w-full bg-white hover:bg-blue-50 text-primary-dynamic dark:bg-gray-800 dark:hover:bg-gray-700"
+                        className="w-full bg-white hover:bg-blue-50 text-primary-dynamic"
                       >
                         <Search className="mr-2 h-4 w-4" />
                         Претражи
@@ -394,18 +509,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Main Content - SVETLA POZADINA */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 bg-white dark:bg-gray-900">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Latest News */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
+                <h3 className="text-2xl font-bold text-foreground" style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}>
                   Најновије објаве
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {posts.length > 0 ? `Приказује се ${posts.length} најновијих објава` : 'Нема објава за приказивање'}
                 </p>
               </div>
@@ -420,11 +535,11 @@ export default function HomePage() {
             {isLoading ? (
               <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <Card key={i} className="animate-pulse">
                     <CardContent className="p-6">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                      <div className="h-4 bg-muted rounded w-3/4 mb-3"></div>
+                      <div className="h-3 bg-muted rounded w-full mb-2"></div>
+                      <div className="h-3 bg-muted rounded w-2/3"></div>
                     </CardContent>
                   </Card>
                 ))}
@@ -432,7 +547,7 @@ export default function HomePage() {
             ) : posts.length > 0 ? (
               <div className="space-y-6">
                 {posts.map((post) => (
-                  <Card key={post.id} className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <Card key={post.id} className="hover:shadow-md transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -442,20 +557,20 @@ export default function HomePage() {
                                 {post.category.name}
                               </Badge>
                             )}
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="text-sm text-muted-foreground">
                               {getTimeAgo(post.publishedAt || post.createdAt)}
                             </span>
                             {post.pages && post.pages.length > 0 && (
                               <div className="flex items-center space-x-1">
-                                <span className="text-xs text-gray-400">•</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                <span className="text-xs text-muted-foreground">•</span>
+                                <span className="text-xs text-muted-foreground">
                                   Приказује се на: {post.pages.map(p => p.title).join(', ')}
                                 </span>
                               </div>
                             )}
                           </div>
 
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 hover:text-primary-dynamic transition-colors">
+                          <h4 className="text-lg font-semibold text-foreground mb-2 hover:text-primary-dynamic transition-colors">
                             <Link href={`/objave/${post.slug}`}>
                               {post.title}
                             </Link>
@@ -463,16 +578,12 @@ export default function HomePage() {
 
                           {post.excerpt && (
                             <div
-                              className="text-gray-600 dark:text-gray-300 mb-3 text-sm lg:text-base prose prose-sm max-w-none dark:prose-invert"
+                              className="text-muted-foreground mb-3 text-sm lg:text-base prose prose-sm max-w-none dark:prose-invert"
                               dangerouslySetInnerHTML={{ __html: post.excerpt }}
                             />
                           )}
 
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span className="flex items-center">
-                              <User className="mr-1 h-3 w-3" />
-                              {post.author.name}
-                            </span>
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center">
                               <Eye className="mr-1 h-3 w-3" />
                               {post.viewCount}
@@ -499,11 +610,11 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <Card>
                 <CardContent className="p-12 text-center">
-                  <FileText className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Нема објава на почетној страни</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">Нема објава на почетној страни</h3>
+                  <p className="text-muted-foreground mb-4">
                     Тренутно нема објава додељених почетној страни.
                     Администратор може доделити објаве овој страни из CMS-а.
                   </p>
@@ -519,10 +630,10 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Quick Links */}
             {pages.length > 0 && (
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">Брзи линкови</CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
+                  <CardTitle>Брзи линкови</CardTitle>
+                  <CardDescription>
                     Најчешће тражене информације
                   </CardDescription>
                 </CardHeader>
@@ -531,14 +642,14 @@ export default function HomePage() {
                     <Link
                       key={page.id}
                       href={`/${page.slug}`}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors group"
                     >
-                      <span className="text-sm font-medium dark:text-gray-500 text-gray-700">{page.title}</span>
-                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-primary-dynamic transition-colors" />
+                      <span className="text-sm font-medium">{page.title}</span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary-dynamic transition-colors" />
                     </Link>
                   ))}
 
-                  <div className="pt-2 border-t border-gray-100 dark:border-gray-600">
+                  <div className="pt-2 border-t border-border">
                     <Link
                       href="/dokumenti"
                       className="flex items-center justify-between p-3 rounded-lg transition-colors group hover:bg-primary-dynamic/5"
@@ -554,11 +665,59 @@ export default function HomePage() {
               </Card>
             )}
 
+            {/* Contact Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Контакт информације</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-foreground">Адреса</div>
+                    <div className="text-muted-foreground">{institutionData.address}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Phone className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-foreground">Телефон</div>
+                    <div className="text-muted-foreground">{institutionData.phone}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Mail className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-foreground">Емаил</div>
+                    <div className="text-muted-foreground">{institutionData.email}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Clock className="h-4 w-4 text-primary-dynamic mt-0.5" />
+                  <div className="text-sm">
+                    <div className="font-medium text-foreground">Радно време</div>
+                    <div className="text-muted-foreground">{institutionData.workingHours}</div>
+                  </div>
+                </div>
+
+                <Button 
+                  variant="primary"
+                  asChild
+                  className='w-full'
+                >
+                  <Link href="/kontakt">Контактирај нас</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Categories */}
             {categories.length > 0 && (
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">Категорије објава</CardTitle>
+                  <CardTitle>Категорије објава</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -566,7 +725,7 @@ export default function HomePage() {
                       <Badge
                         key={category.id}
                         variant="outline"
-                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors badge-primary-dynamic border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic dark:hover:bg-primary-dynamic/20"
+                        className="hover:bg-primary-dynamic/10 hover:border-primary-dynamic cursor-pointer transition-colors badge-primary-dynamic"
                         asChild
                       >
                         <Link href={`/kategorije/${category.slug}`}>
@@ -585,28 +744,28 @@ export default function HomePage() {
             )}
 
             {/* Transparency */}
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 card-primary-dynamic">
+            <Card className="card-primary-dynamic">
               <CardHeader>
                 <CardTitle className="text-primary-dynamic">Транспарентност</CardTitle>
-                <CardDescription className="text-primary-dynamic opacity-80 dark:text-primary-dynamic/80">
+                <CardDescription className="text-primary-dynamic opacity-80">
                   Приступ информацијама од јавног значаја
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic dark:hover:bg-primary-dynamic/10" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/budzet">
                       <TrendingUp className="mr-2 h-4 w-4" />
                       Буџет и финансије
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic dark:hover:bg-primary-dynamic/10" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/javne-nabavke">
                       <FileText className="mr-2 h-4 w-4" />
                       Јавне набавке
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic dark:hover:bg-primary-dynamic/10" asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start hover:bg-primary-dynamic/5" asChild>
                     <Link href="/sednice">
                       <Users className="mr-2 h-4 w-4" />
                       Записници са седница
@@ -618,6 +777,176 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-card border-t border-border py-12 mt-16 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                {settings?.siteLogo ? (
+                  <img 
+                    src={mediaApi.getFileUrl(settings.siteLogo)} 
+                    alt={settings.siteName || 'Лого'} 
+                    className="h-6 object-contain"
+                  />
+                ) : (
+                  <Building className="h-6 w-6 text-foreground" />
+                )}
+                <span 
+                  className="text-lg font-bold text-foreground"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  {institutionData.name}
+                </span>
+              </div>
+              <p 
+                className="text-muted-foreground mb-4 text-sm"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                Службени портал локалне самоуправе посвећен транспарентности
+                и доступности информација грађанима.
+              </p>
+              
+              {/* Social Media Links */}
+              <div className="flex items-center space-x-4">
+                {settings?.socialFacebook && (
+                  <a 
+                    href={settings.socialFacebook} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-muted-foreground hover:text-primary-dynamic transition-colors"
+                    title="Facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialTwitter && (
+                  <a 
+                    href={settings.socialTwitter} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-muted-foreground hover:text-primary-dynamic transition-colors"
+                    title="Twitter"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialInstagram && (
+                  <a 
+                    href={settings.socialInstagram} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-muted-foreground hover:text-primary-dynamic transition-colors"
+                    title="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialLinkedin && (
+                  <a 
+                    href={settings.socialLinkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-muted-foreground hover:text-primary-dynamic transition-colors"
+                    title="LinkedIn"
+                  >
+                    <Linkedin className="h-5 w-5" />
+                  </a>
+                )}
+                {settings?.socialYoutube && (
+                  <a 
+                    href={settings.socialYoutube} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-muted-foreground hover:text-primary-dynamic transition-colors"
+                    title="YouTube"
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+              
+              <p 
+                className="text-sm text-muted-foreground mt-4"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                © 2025 {institutionData.name}. Сва права задржана.
+              </p>
+            </div>
+
+            <div>
+              <h4 
+                className="text-lg font-semibold mb-4 text-primary-dynamic"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                Корисни линкови
+              </h4>
+              <div className="space-y-2">
+                {pages.map((page) => (
+                  <Link
+                    key={page.id}
+                    href={`/${page.slug}`}
+                    className="block text-muted-foreground hover:text-primary-dynamic transition-colors text-sm"
+                    style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                  >
+                    {page.title}
+                  </Link>
+                ))}
+                <Link 
+                  href="/dokumenti" 
+                  className="block text-muted-foreground hover:text-primary-dynamic transition-colors text-sm"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  Документи
+                </Link>
+                <Link 
+                  href="/sitemap" 
+                  className="block text-muted-foreground hover:text-primary-dynamic transition-colors text-sm"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  Мапа сајта
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <h4 
+                className="text-lg font-semibold mb-4 text-primary-dynamic"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                Контакт
+              </h4>
+              <div 
+                className="space-y-2 text-muted-foreground text-sm"
+                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+              >
+                <p>{institutionData.address}</p>
+                <p>{institutionData.phone}</p>
+                <p>{institutionData.email}</p>
+                <p>{institutionData.workingHours}</p>
+              </div>
+              {institutionData.mapUrl && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4 border-primary-dynamic text-primary-dynamic hover:bg-primary-dynamic hover:text-white"
+                  asChild
+                >
+                  <a 
+                    href={institutionData.mapUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Прикажи на мапи
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

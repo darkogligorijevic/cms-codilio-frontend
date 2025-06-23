@@ -1,4 +1,4 @@
-// app/dashboard/media/page.tsx - Ažurirana verzija sa kategorijama
+// app/dashboard/media/page.tsx - Updated with Drag & Drop
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -43,37 +42,23 @@ import {
   X,
   Calendar,
   HardDrive,
-  Check,
-  Eye,
-  EyeOff,
-  Building,
-  DollarSign,
-  FileCheck,
-  Clipboard,
-  BarChart3,
-  Folder
+  Check
 } from 'lucide-react';
 import { DragDropUpload } from '@/components/ui/drag-drop-upload';
 import { mediaApi } from '@/lib/api';
-import { MediaCategory, type Media, type CreateMediaDto, type FindMediaOptions, type MediaCategoryInfo } from '@/lib/types';
+import type { Media, CreateMediaDto } from '@/lib/types';
 import { toast } from 'sonner';
-import { useTheme } from 'next-themes';
 
 interface MediaFormData {
   alt: string;
   caption: string;
-  category: MediaCategory;
-  description: string;
-  isPublic: boolean;
 }
 
 export default function MediaPage() {
   const [media, setMedia] = useState<Media[]>([]);
-  const [categories, setCategories] = useState<MediaCategoryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<MediaCategory | 'all'>('all');
-  const [publicFilter, setPublicFilter] = useState<'all' | 'public' | 'private'>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -83,30 +68,21 @@ export default function MediaPage() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  const {theme} = useTheme();
-
   const {
     register,
     handleSubmit,
     setValue,
     reset,
-    watch,
     formState: { errors, isSubmitting }
   } = useForm<MediaFormData>({
     defaultValues: {
       alt: '',
-      caption: '',
-      category: MediaCategory.OTHER,
-      description: '',
-      isPublic: false
+      caption: ''
     }
   });
 
-  const watchedCategory = watch('category');
-  const watchedIsPublic = watch('isPublic');
-
   useEffect(() => {
-    fetchMediaAndCategories();
+    fetchMedia();
     
     // Check if page opened in selection mode
     const urlParams = new URLSearchParams(window.location.search);
@@ -116,17 +92,11 @@ export default function MediaPage() {
     }
   }, []);
 
-  const fetchMediaAndCategories = async () => {
+  const fetchMedia = async () => {
     try {
       setIsLoading(true);
-      
-      const [mediaResponse, categoriesResponse] = await Promise.all([
-        mediaApi.getAll(),
-        mediaApi.getCategories()
-      ]);
-      
-      setMedia(mediaResponse);
-      setCategories(categoriesResponse);
+      const response = await mediaApi.getAll();
+      setMedia(response);
     } catch (error) {
       console.error('Error fetching media:', error);
       toast.error('Greška pri učitavanju medijskih fajlova');
@@ -135,64 +105,19 @@ export default function MediaPage() {
     }
   };
 
-  const fetchFilteredMedia = async () => {
-    try {
-      setIsLoading(true);
-      
-      const options: FindMediaOptions = {};
-      
-      if (categoryFilter !== 'all') {
-        options.category = categoryFilter as MediaCategory;
-      }
-      
-      if (publicFilter === 'public') {
-        options.isPublic = true;
-      } else if (publicFilter === 'private') {
-        options.isPublic = false;
-      }
-      
-      if (searchTerm) {
-        options.search = searchTerm;
-      }
-      
-      const response = await mediaApi.getAll(options);
-      setMedia(response);
-    } catch (error) {
-      console.error('Error fetching filtered media:', error);
-      toast.error('Greška pri filtriranju medijskih fajlova');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Trigger filtering when filters change
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchFilteredMedia();
-    }, 300); // Debounce search
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, categoryFilter, publicFilter]);
-
   const handleFileUpload = async (file: File) => {
     try {
       setIsUploading(true);
-      
-      const uploadData: CreateMediaDto = {
-        category: MediaCategory.OTHER,
-        isPublic: false
-      };
-      
-      const response = await mediaApi.upload(file, uploadData);
+      const response = await mediaApi.upload(file);
       console.log('Upload response:', response);
 
       toast.success(`Fajl "${file.name}" je uspešno učitan`);
-      await fetchFilteredMedia();
+      await fetchMedia();
 
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error(`Greška pri učitavanju fajla "${file.name}"`);
-      throw error;
+      throw error; // Re-throw to handle in DragDropUpload component
     } finally {
       setIsUploading(false);
     }
@@ -202,10 +127,10 @@ export default function MediaPage() {
     if (!selectedMedia) return;
 
     try {
-      await mediaApi.updateMetadata(selectedMedia.id, data);
+      await mediaApi.updateAltCaption(selectedMedia.id, data);
       
       toast.success('Medijski fajl je uspešno ažuriran');
-      await fetchFilteredMedia();
+      fetchMedia();
       setIsEditDialogOpen(false);
       setSelectedMedia(null);
       reset();
@@ -219,9 +144,6 @@ export default function MediaPage() {
     setSelectedMedia(mediaItem);
     setValue('alt', mediaItem.alt || '');
     setValue('caption', mediaItem.caption || '');
-    setValue('category', mediaItem.category || MediaCategory.OTHER);
-    setValue('description', mediaItem.description || '');
-    setValue('isPublic', mediaItem.isPublic || false);
     setIsEditDialogOpen(true);
   };
 
@@ -231,7 +153,7 @@ export default function MediaPage() {
     try {
       await mediaApi.delete(selectedMedia.id);
       toast.success('Medijski fajl je uspešno obrisan');
-      await fetchFilteredMedia();
+      fetchMedia();
       setIsDeleteDialogOpen(false);
       setSelectedMedia(null);
     } catch (error) {
@@ -245,6 +167,7 @@ export default function MediaPage() {
     toast.success('URL je kopiran u clipboard');
   };
 
+  // Selection mode functions
   const toggleSelection = (filename: any) => {
     setSelectedItems(prev => {
       if (prev.includes(filename)) {
@@ -272,11 +195,11 @@ export default function MediaPage() {
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType?.startsWith('image/')) {
-      return <ImageIcon className="h-6 w-6" />;
+      return <ImageIcon className="h-4 w-4" />;
     } else if (mimeType?.includes('pdf')) {
-      return <FileText className="h-6 w-6 dark:invert-100" />;
+      return <FileText className="h-4 w-4" />;
     } else {
-      return <File className="h-6 w-6" />;
+      return <File className="h-4 w-4" />;
     }
   };
 
@@ -286,28 +209,6 @@ export default function MediaPage() {
     if (mimeType?.includes('document')) return 'Dokument';
     if (mimeType?.includes('spreadsheet')) return 'Tabela';
     return 'Fajl';
-  };
-
-  const getCategoryLabel = (category: MediaCategory) => {
-    const categoryInfo = categories.find(cat => cat.value === category);
-    return categoryInfo?.label || 'Ostalo';
-  };
-
-  const getCategoryIcon = (category: MediaCategory) => {
-    switch (category) {
-      case MediaCategory.PROCUREMENT:
-        return <Building className="h-4 w-4" />;
-      case MediaCategory.FINANCIAL:
-        return <DollarSign className="h-4 w-4" />;
-      case MediaCategory.DECISIONS:
-        return <FileCheck className="h-4 w-4" />;
-      case MediaCategory.PLANS:
-        return <Clipboard className="h-4 w-4" />;
-      case MediaCategory.REPORTS:
-        return <BarChart3 className="h-4 w-4" />;
-      default:
-        return <Folder className="h-4 w-4" />;
-    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -326,11 +227,17 @@ export default function MediaPage() {
     });
   };
 
-  const clearFilters = () => {
-    setSearchTerm('');
-    setCategoryFilter('all');
-    setPublicFilter('all');
-  };
+  const filteredMedia = media.filter(item => {
+    const matchesSearch = item.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.alt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.caption?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesType = typeFilter === 'all' || 
+                       (typeFilter === 'images' && item.mimeType?.startsWith('image/')) ||
+                       (typeFilter === 'documents' && !item.mimeType?.startsWith('image/'));
+    
+    return matchesSearch && matchesType;
+  });
 
   return (
     <div className="space-y-6">
@@ -339,7 +246,7 @@ export default function MediaPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Medijski fajlovi</h1>
           <p className="text-muted-foreground">
-            Upravljajte dokumentima, slikama i ostalim fajlovima po kategorijama
+            Upravljajte slikama, dokumentima i ostalim fajlovima
           </p>
         </div>
       </div>
@@ -402,11 +309,11 @@ export default function MediaPage() {
         <CardHeader>
           <CardTitle>Pretraga i filteri</CardTitle>
           <CardDescription>
-            Pronađite fajlove pomoću pretrage i filtera po kategorijama
+            Pronađite fajlove pomoću pretrage i filtera
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="search">Pretraga</Label>
               <div className="relative">
@@ -422,61 +329,24 @@ export default function MediaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Kategorija</Label>
-              <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as MediaCategory | 'all')}>
+              <Label>Tip fajla</Label>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sve kategorije" />
+                  <SelectValue placeholder="Svi tipovi" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Sve kategorije</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      <div className="flex items-center space-x-2">
-                        {getCategoryIcon(category.value)}
-                        <span>{category.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Dostupnost</Label>
-              <Select value={publicFilter} onValueChange={(value) => setPublicFilter(value as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sve" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Sve</SelectItem>
-                  <SelectItem value="public">
-                    <div className="flex items-center space-x-2">
-                      <Eye className="h-4 w-4" />
-                      <span>Javno dostupno</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="private">
-                    <div className="flex items-center space-x-2">
-                      <EyeOff className="h-4 w-4" />
-                      <span>Interno</span>
-                    </div>
-                  </SelectItem>
+                  <SelectItem value="all">Svi tipovi</SelectItem>
+                  <SelectItem value="images">Slike</SelectItem>
+                  <SelectItem value="documents">Dokumenti</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-end">
-              {(searchTerm || categoryFilter !== 'all' || publicFilter !== 'all') && (
-                <Button variant="outline" onClick={clearFilters} className="w-full">
-                  <X className="mr-2 h-4 w-4" />
-                  Očisti filtere
-                </Button>
-              )}
+              <div className="text-sm text-muted-foreground">
+                Prikazuje se {filteredMedia.length} od {media.length} fajlova
+              </div>
             </div>
-          </div>
-          
-          <div className="mt-4 text-sm text-muted-foreground">
-            Prikazuje se {media.length} fajlova
           </div>
         </CardContent>
       </Card>
@@ -488,7 +358,7 @@ export default function MediaPage() {
             <div>
               <CardTitle>Lista fajlova</CardTitle>
               <CardDescription>
-                Ukupno {media.length} fajlova
+                Ukupno {filteredMedia.length} fajlova
               </CardDescription>
             </div>
           </div>
@@ -506,9 +376,9 @@ export default function MediaPage() {
             </div>
           ) : (
             <>
-              {media.length > 0 ? (
+              {filteredMedia.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {media.map((item) => (
+                  {filteredMedia.map((item) => (
                     <Card 
                       key={item.id} 
                       className={`overflow-hidden transition-all ${
@@ -525,12 +395,12 @@ export default function MediaPage() {
                           if (item.mimeType.startsWith('image/')) {
                             toggleSelection(item.filename);
                           } else {
-                            toast.error("Možete izabrati samo slike!")
+                            toast.error("Mozete izabrati samo slike!")
                           }
                         }
                       }}
                     >
-                      <div className="aspect-square bg-gray-50 dark:bg-gray-900 flex items-center justify-center relative group">
+                      <div className="aspect-square bg-gray-50 flex items-center justify-center relative group">
                         {item.mimeType?.startsWith('image/') ? (
                           <img
                             crossOrigin="anonymous"
@@ -538,13 +408,25 @@ export default function MediaPage() {
                             alt={item.alt || item.originalName}
                             className="w-full h-full object-cover"
                           />
+                        ) : item.mimeType?.includes('pdf') ? (
+                          <div className="flex flex-col items-center space-y-3 text-center p-4">
+                            <div className="bg-red-100 p-4 rounded-lg">
+                              <FileText className="h-8 w-8 text-red-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm mb-1">PDF Dokument</div>
+                              <div className="text-xs text-muted-foreground truncate max-w-full">
+                                {item.originalName}
+                              </div>
+                            </div>
+                          </div>
                         ) : (
                           <div className="flex flex-col items-center space-y-3 text-center p-4">
                             <div className="bg-gray-100 p-4 rounded-lg">
-                              {getFileIcon(item.mimeType)}
+                              <File className="h-8 w-8 text-gray-600" />
                             </div>
                             <div>
-                              <div className="font-medium text-sm mb-1">{getFileTypeLabel(item.mimeType)}</div>
+                              <div className="font-medium text-sm mb-1">Fajl</div>
                               <div className="text-xs text-muted-foreground truncate max-w-full">
                                 {item.originalName}
                               </div>
@@ -558,30 +440,6 @@ export default function MediaPage() {
                             <Check className="h-4 w-4" />
                           </div>
                         )}
-                        
-                        {/* Category badge */}
-                        <Badge
-                          variant="secondary"
-                          className="absolute top-2 left-2 text-xs border-none font-bold text-gray-900 px-2 py-1 bg-primary-dynamic flex items-center space-x-1"
-                        >
-                          {getCategoryIcon(item.category)}
-                          <span>{getCategoryLabel(item.category)}</span>
-                        </Badge>
-
-                        {/* Public/Private indicator */}
-                        <div className="absolute bottom-2 left-2">
-                          {item.isPublic ? (
-                            <Badge variant="default" className="text-xs bg-green-600">
-                              <Eye className="h-3 w-3 mr-1" />
-                              Javno
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs">
-                              <EyeOff className="h-3 w-3 mr-1" />
-                              Interno
-                            </Badge>
-                          )}
-                        </div>
                         
                         {/* Overlay actions - only show when NOT in selection mode */}
                         {!selectionMode && (
@@ -634,6 +492,14 @@ export default function MediaPage() {
                             </Button>
                           </div>
                         )}
+
+                        {/* File type badge */}
+                        <Badge
+                          variant="secondary"
+                          className="absolute top-2 left-2 text-xs"
+                        >
+                          {getFileTypeLabel(item.mimeType)}
+                        </Badge>
                       </div>
 
                       <CardContent className="p-3">
@@ -641,12 +507,6 @@ export default function MediaPage() {
                           <h4 className="font-medium text-sm truncate" title={item.originalName}>
                             {item.originalName}
                           </h4>
-                          
-                          {item.description && (
-                            <p className="text-xs text-muted-foreground truncate" title={item.description}>
-                              {item.description}
-                            </p>
-                          )}
                           
                           {item.alt && (
                             <p className="text-xs text-muted-foreground truncate" title={item.alt}>
@@ -675,7 +535,7 @@ export default function MediaPage() {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-muted-foreground">
-                    {searchTerm || categoryFilter !== 'all' || publicFilter !== 'all' ? (
+                    {searchTerm || typeFilter !== 'all' ? (
                       <>
                         <Search className="mx-auto h-12 w-12 mb-4" />
                         <h3 className="text-lg font-medium mb-2">Nema rezultata</h3>
@@ -683,7 +543,10 @@ export default function MediaPage() {
                         <Button
                           variant="outline"
                           className="mt-4"
-                          onClick={clearFilters}
+                          onClick={() => {
+                            setSearchTerm('');
+                            setTypeFilter('all');
+                          }}
                         >
                           Očisti filtere
                         </Button>
@@ -710,45 +573,74 @@ export default function MediaPage() {
         </CardContent>
       </Card>
 
-      {/* Media Statistics by Category */}
+      {/* Media Statistics */}
       {media.length > 0 && !selectionMode && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => {
-            const categoryMedia = media.filter(item => item.category === category.value);
-            const totalSize = categoryMedia.reduce((sum, item) => sum + item.size, 0);
-            
-            return (
-              <Card key={category.value}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center space-x-2">
-                    {getCategoryIcon(category.value)}
-                    <span>{category.label}</span>
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCategoryFilter(category.value)}
-                    title={`Prikaži samo ${category.label}`}
-                  >
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{categoryMedia.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {formatFileSize(totalSize)} • {category.description}
-                  </p>
-                  
-                  {categoryMedia.length > 0 && (
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      Javno: {categoryMedia.filter(item => item.isPublic).length} • 
-                      Interno: {categoryMedia.filter(item => !item.isPublic).length}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Ukupno fajlova
+              </CardTitle>
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{media.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Medijski fajlovi
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Slike
+              </CardTitle>
+              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {media.filter(item => item.mimeType?.startsWith('image/')).length}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Slikovni fajlovi
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Dokumenti
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {media.filter(item => !item.mimeType?.startsWith('image/')).length}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                PDF i ostali dokumenti
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Ukupna veličina
+              </CardTitle>
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatFileSize(media.reduce((sum, item) => sum + item.size, 0))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Zauzeto prostora
+              </p>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -764,50 +656,6 @@ export default function MediaPage() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Kategorija *</Label>
-                <Select value={watchedCategory} onValueChange={(value) => setValue('category', value as MediaCategory)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Izaberite kategoriju" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        <div className="flex items-center space-x-2">
-                          {getCategoryIcon(category.value)}
-                          <div>
-                            <div className="font-medium">{category.label}</div>
-                            <div className="text-xs text-muted-foreground">{category.description}</div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Opis dokumenta</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Detaljan opis dokumenta..."
-                  rows={3}
-                  {...register('description')}
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="isPublic"
-                  checked={watchedIsPublic}
-                  onCheckedChange={(checked) => setValue('isPublic', !!checked)}
-                />
-                <Label htmlFor="isPublic" className="flex items-center space-x-2">
-                  {watchedIsPublic ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  <span>Javno dostupan dokument</span>
-                </Label>
-              </div>
-
               {selectedMedia?.mimeType?.startsWith('image/') && (
                 <div className="space-y-2">
                   <Label htmlFor="alt">Alt tekst (za slike)</Label>
@@ -823,10 +671,11 @@ export default function MediaPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="caption">Naslov/Potpis</Label>
-                <Input
+                <Label htmlFor="caption">Opis fajla</Label>
+                <Textarea
                   id="caption"
-                  placeholder="Kratki naslov ili potpis..."
+                  placeholder="Kratki opis fajla..."
+                  rows={3}
                   {...register('caption')}
                 />
               </div>
@@ -869,7 +718,6 @@ export default function MediaPage() {
               </Button>
               <Button 
                 type="submit" 
-                variant={theme === "light" ? "default" : "secondaryDefault"}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Čuva se...' : 'Sačuvaj izmene'}

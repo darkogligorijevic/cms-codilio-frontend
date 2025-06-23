@@ -46,7 +46,6 @@ import { categoriesApi } from '@/lib/api';
 import type { Category, CreateCategoryDto, UpdateCategoryDto } from '@/lib/types';
 import { toast } from 'sonner';
 import { transliterate } from '@/lib/transliterate';
-import { useTheme } from 'next-themes';
 
 interface CategoryFormData {
   name: string;
@@ -62,7 +61,6 @@ export default function CategoriesPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const {theme} = useTheme();
 
   const {
     register,
@@ -196,7 +194,7 @@ export default function CategoriesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
+            <Button>
               <Plus className="mr-2 h-4 w-4" />
               Nova kategorija
             </Button>
@@ -267,7 +265,7 @@ export default function CategoriesPage() {
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
                   Otkaži
                 </Button>
-                <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'Čuva se...' : (editingCategory ? 'Sačuvaj izmene' : 'Kreiraj kategoriju')}
                 </Button>
               </DialogFooter>
@@ -623,7 +621,7 @@ export default function CategoriesPage() {
                 .sort((a, b) => (b.posts?.length || 0) - (a.posts?.length || 0))
                 .slice(0, 5)
                 .map((category, index) => (
-                  <div key={category.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div key={category.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center justify-center w-6 h-6 bg-blue-100 rounded text-xs font-medium text-blue-600">
                         {index + 1}

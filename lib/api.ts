@@ -40,15 +40,7 @@ import {
   CompleteSetupDto,
   CompleteSetupResponse,
   SetupStatusResponse,
-  UpdateMediaDto,
-  FindMediaOptions,
-  MediaCategory,
-  MediaCategoryInfo,
-  MediaCategoryStats,
-  CreateOrganizationalUnitDto,
-  OrganizationalStatistics,
-  OrganizationalUnit,
-  UpdateOrganizationalUnitDto
+  UpdateMediaDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -400,49 +392,9 @@ export const categoriesApi = {
 
 // Media API
 export const mediaApi = {
-  getAll: async (options?: FindMediaOptions): Promise<Media[]> => {
-    let url = '/media';
-    const params = new URLSearchParams();
-    
-    if (options?.category) params.append('category', options.category);
-    if (options?.isPublic !== undefined) params.append('isPublic', options.isPublic.toString());
-    if (options?.search) params.append('search', options.search);
-    
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-    
-    const response: AxiosResponse<Media[]> = await api.get(url);
-    return response.data;
-  },
-  
-  getPublic: async (options?: Omit<FindMediaOptions, 'isPublic'>): Promise<Media[]> => {
-    let url = '/media/public';
-    const params = new URLSearchParams();
-    
-    if (options?.category) params.append('category', options.category);
-    if (options?.search) params.append('search', options.search);
-    
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-    
-    const response: AxiosResponse<Media[]> = await api.get(url);
-    return response.data;
-  },
-  
-  getCategories: async (): Promise<MediaCategoryInfo[]> => {
-    const response: AxiosResponse<MediaCategoryInfo[]> = await api.get('/media/categories');
-    return response.data;
-  },
-  
-  getByCategory: async (category: MediaCategory): Promise<Media[]> => {
-    const response: AxiosResponse<Media[]> = await api.get(`/media/category/${category}`);
-    return response.data;
-  },
-  
-  getCategoriesStats: async (): Promise<MediaCategoryStats[]> => {
-    const response: AxiosResponse<MediaCategoryStats[]> = await api.get('/media/categories/stats');
+  getAll: async (): Promise<Media[]> => {
+    const response: AxiosResponse<Media[]> = await api.get('/media');
+    console.log(response);
     return response.data;
   },
   
@@ -457,9 +409,6 @@ export const mediaApi = {
     
     if (data?.alt) formData.append('alt', data.alt);
     if (data?.caption) formData.append('caption', data.caption);
-    if (data?.category) formData.append('category', data.category);
-    if (data?.description) formData.append('description', data.description);
-    if (data?.isPublic !== undefined) formData.append('isPublic', data.isPublic.toString());
     
     const response: AxiosResponse<Media> = await api.post('/media/upload', formData, {
       headers: {
@@ -469,15 +418,12 @@ export const mediaApi = {
     return response.data;
   },
   
-  update: async (id: number, file?: File, data?: UpdateMediaDto): Promise<Media> => {
+  update: async (id: number, file?: File, data?: CreateMediaDto): Promise<Media> => {
     const formData = new FormData();
     
     if (file) formData.append('file', file);
     if (data?.alt) formData.append('alt', data.alt);
     if (data?.caption) formData.append('caption', data.caption);
-    if (data?.category) formData.append('category', data.category);
-    if (data?.description) formData.append('description', data.description);
-    if (data?.isPublic !== undefined) formData.append('isPublic', data.isPublic.toString());
     
     const response: AxiosResponse<Media> = await api.patch(`/media/${id}`, formData, {
       headers: {
@@ -487,8 +433,8 @@ export const mediaApi = {
     return response.data;
   },
 
-  updateMetadata: async (id: number, data: UpdateMediaDto): Promise<Media> => {
-    const response: AxiosResponse<Media> = await api.patch(`/media/${id}/metadata`, data);
+  updateAltCaption: async (id: number, data: UpdateMediaDto) : Promise<Media> => {
+    const response: AxiosResponse<Media> = await api.patch(`/media/${id}/alt-caption`, data);
     return response.data;
   },
   
@@ -500,6 +446,7 @@ export const mediaApi = {
     return `${API_BASE_URL}/media/file/${filename}`;
   }
 };
+
 export { api };
 
 export const settingsApi = {
@@ -598,85 +545,4 @@ export const setupApi = {
     const response: AxiosResponse<{ exists: boolean }> = await api.get('/setup/check-admin');
     return response.data;
   },
-};
-
-export const organizationalApi = {
-  // Get all units
-  getAll: async (): Promise<OrganizationalUnit[]> => {
-    const response: AxiosResponse<OrganizationalUnit[]> = await api.get('/organizational-structure');
-    return response.data;
-  },
-
-  // Get units as tree structure
-  getTree: async (): Promise<OrganizationalUnit[]> => {
-    const response: AxiosResponse<OrganizationalUnit[]> = await api.get('/organizational-structure?tree=true');
-    return response.data;
-  },
-
-  // Get root units (top level)
-  getRoots: async (): Promise<OrganizationalUnit[]> => {
-    const response: AxiosResponse<OrganizationalUnit[]> = await api.get('/organizational-structure/roots');
-    return response.data;
-  },
-
-  // Get unit by ID
-  getById: async (id: number): Promise<OrganizationalUnit> => {
-    const response: AxiosResponse<OrganizationalUnit> = await api.get(`/organizational-structure/${id}`);
-    return response.data;
-  },
-
-  // Get unit by code
-  getByCode: async (code: string): Promise<OrganizationalUnit> => {
-    const response: AxiosResponse<OrganizationalUnit> = await api.get(`/organizational-structure/code/${code}`);
-    return response.data;
-  },
-
-  // Get descendants (sub-units)
-  getDescendants: async (id: number): Promise<OrganizationalUnit[]> => {
-    const response: AxiosResponse<OrganizationalUnit[]> = await api.get(`/organizational-structure/${id}/descendants`);
-    return response.data;
-  },
-
-  // Get ancestors (parent units)
-  getAncestors: async (id: number): Promise<OrganizationalUnit[]> => {
-    const response: AxiosResponse<OrganizationalUnit[]> = await api.get(`/organizational-structure/${id}/ancestors`);
-    return response.data;
-  },
-
-  // Create new unit
-  create: async (data: CreateOrganizationalUnitDto): Promise<OrganizationalUnit> => {
-    const response: AxiosResponse<OrganizationalUnit> = await api.post('/organizational-structure', data);
-    return response.data;
-  },
-
-  // Update unit
-  update: async (id: number, data: UpdateOrganizationalUnitDto): Promise<OrganizationalUnit> => {
-    const response: AxiosResponse<OrganizationalUnit> = await api.patch(`/organizational-structure/${id}`, data);
-    return response.data;
-  },
-
-  // Move unit to new parent
-  moveUnit: async (id: number, newParentId: number | null): Promise<OrganizationalUnit> => {
-    const response: AxiosResponse<OrganizationalUnit> = await api.patch(`/organizational-structure/${id}/move`, {
-      newParentId
-    });
-    return response.data;
-  },
-
-  // Delete unit
-  delete: async (id: number): Promise<void> => {
-    await api.delete(`/organizational-structure/${id}`);
-  },
-
-  // Get statistics
-  getStatistics: async (): Promise<OrganizationalStatistics> => {
-    const response: AxiosResponse<OrganizationalStatistics> = await api.get('/organizational-structure/statistics');
-    return response.data;
-  },
-
-  // Export structure
-  exportStructure: async (): Promise<any> => {
-    const response = await api.get('/organizational-structure/export');
-    return response.data;
-  }
 };

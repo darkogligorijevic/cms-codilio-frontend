@@ -1,21 +1,10 @@
-// components/ui/drag-drop-upload.tsx - Ažurirana verzija sa kategorijama
+// components/ui/drag-drop-upload.tsx
 'use client';
 
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { 
   Upload, 
   Image as ImageIcon, 
@@ -24,19 +13,10 @@ import {
   X,
   CheckCircle,
   AlertCircle,
-  Loader2,
-  Eye,
-  EyeOff,
-  Building,
-  DollarSign,
-  FileCheck,
-  Clipboard,
-  BarChart3,
-  Folder
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { MediaCategory, type CreateMediaDto } from '@/lib/types';
 
 interface UploadFile {
   file: File;
@@ -45,59 +25,16 @@ interface UploadFile {
   status: 'pending' | 'uploading' | 'success' | 'error';
   error?: string;
   preview?: string;
-  metadata: CreateMediaDto;
 }
 
 interface DragDropUploadProps {
-  onFileUpload: (file: File, metadata?: CreateMediaDto) => Promise<void>;
+  onFileUpload: (file: File) => Promise<void>;
   accept?: string;
   maxSize?: number; // in MB
   multiple?: boolean;
   className?: string;
   disabled?: boolean;
-  showMetadataForm?: boolean;
-  defaultCategory?: MediaCategory;
-  defaultIsPublic?: boolean;
 }
-
-const categories = [
-  {
-    value: MediaCategory.PROCUREMENT,
-    label: 'Javne nabavke',
-    icon: Building,
-    description: 'Dokumenti vezani za javne nabavke i tendere'
-  },
-  {
-    value: MediaCategory.FINANCIAL,
-    label: 'Finansijski izvještaji',
-    icon: DollarSign,
-    description: 'Budžeti, finansijski planovi i izvještaji'
-  },
-  {
-    value: MediaCategory.DECISIONS,
-    label: 'Odluke',
-    icon: FileCheck,
-    description: 'Odluke donesene na sastancima i sednicama'
-  },
-  {
-    value: MediaCategory.PLANS,
-    label: 'Planovi',
-    icon: Clipboard,
-    description: 'Godišnji planovi rada i razvoja'
-  },
-  {
-    value: MediaCategory.REPORTS,
-    label: 'Izvještaji',
-    icon: BarChart3,
-    description: 'Izvještaji o radu uprave i drugih organa'
-  },
-  {
-    value: MediaCategory.OTHER,
-    label: 'Ostalo',
-    icon: Folder,
-    description: 'Ostali dokumenti i mediji'
-  }
-];
 
 export function DragDropUpload({
   onFileUpload,
@@ -105,20 +42,10 @@ export function DragDropUpload({
   maxSize = 10, // 10MB default
   multiple = true,
   className,
-  disabled = false,
-  showMetadataForm = true,
-  defaultCategory = MediaCategory.OTHER,
-  defaultIsPublic = false
+  disabled = false
 }: DragDropUploadProps) {
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [globalMetadata, setGlobalMetadata] = useState<CreateMediaDto>({
-    category: defaultCategory,
-    isPublic: defaultIsPublic,
-    description: '',
-    alt: '',
-    caption: ''
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getFileIcon = (file: File) => {
@@ -137,12 +64,6 @@ export function DragDropUpload({
     if (file.type.includes('document')) return 'Dokument';
     if (file.type.includes('spreadsheet')) return 'Tabela';
     return 'Fajl';
-  };
-
-  const getCategoryIcon = (category: MediaCategory) => {
-    const categoryInfo = categories.find(cat => cat.value === category);
-    const IconComponent = categoryInfo?.icon || Folder;
-    return <IconComponent className="h-4 w-4" />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -189,15 +110,14 @@ export function DragDropUpload({
     const fileArray = Array.from(files);
     
     for (const file of fileArray) {
-      const error = validateFile(file);
+      const error:any = validateFile(file);
       const uploadFile: UploadFile = {
         file,
         id: Math.random().toString(36).substr(2, 9),
         progress: 0,
         status: error ? 'error' : 'pending',
-        error:error as string,
-        preview: error ? undefined : createFilePreview(file),
-        metadata: { ...globalMetadata }
+        error,
+        preview: error ? undefined : createFilePreview(file)
       };
 
       setUploadFiles(prev => [...prev, uploadFile]);
@@ -226,7 +146,7 @@ export function DragDropUpload({
       }, 300);
 
       // Actual upload
-      await onFileUpload(uploadFile.file, uploadFile.metadata);
+      await onFileUpload(uploadFile.file);
 
       // Clear progress interval and mark as successful
       clearInterval(progressInterval);
@@ -301,71 +221,8 @@ export function DragDropUpload({
     });
   };
 
-  const updateFileMetadata = (id: string, metadata: Partial<CreateMediaDto>) => {
-    setUploadFiles(prev => prev.map(f => 
-      f.id === id ? { ...f, metadata: { ...f.metadata, ...metadata } } : f
-    ));
-  };
-
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Global Metadata Form */}
-      {showMetadataForm && (
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium mb-4">Podrazumevane informacije za fajlove</h3>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Kategorija</Label>
-                <Select 
-                  value={globalMetadata.category} 
-                  onValueChange={(value) => setGlobalMetadata(prev => ({ ...prev, category: value as MediaCategory }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Izaberite kategoriju" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        <div className="flex items-center space-x-2">
-                          <category.icon className="h-4 w-4" />
-                          <div>
-                            <div className="font-medium">{category.label}</div>
-                            <div className="text-xs text-muted-foreground">{category.description}</div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Opis (opciono)</Label>
-                <Input
-                  placeholder="Kratki opis dokumenata..."
-                  value={globalMetadata.description || ''}
-                  onChange={(e) => setGlobalMetadata(prev => ({ ...prev, description: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-center space-x-2">
-              <Checkbox
-                id="globalIsPublic"
-                checked={globalMetadata.isPublic}
-                onCheckedChange={(checked) => setGlobalMetadata(prev => ({ ...prev, isPublic: !!checked }))}
-              />
-              <Label htmlFor="globalIsPublic" className="flex items-center space-x-2">
-                {globalMetadata.isPublic ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                <span>Učitaj kao javno dostupne dokumente</span>
-              </Label>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Drag & Drop Zone */}
       <div
         onDragOver={handleDragOver}
@@ -377,8 +234,8 @@ export function DragDropUpload({
           disabled 
             ? "border-gray-200 bg-gray-50 cursor-not-allowed" 
             : isDragOver 
-              ? "border-gray-600 bg-gray-100 dark:bg-card border-solid" 
-              : "border-gray-300 hover:border-gray-200 hover:bg-gray-50 dark:hover:bg-transparent cursor-pointer"
+              ? "border-blue-500 bg-blue-50 border-solid" 
+              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 cursor-pointer"
         )}
         onClick={() => !disabled && fileInputRef.current?.click()}
       >
@@ -398,16 +255,16 @@ export function DragDropUpload({
         )}>
           <div className={cn(
             "mx-auto rounded-full p-4",
-            isDragOver ? "bg-white dark:bg-gray-600" : "bg-gray-100 dark:bg-gray-600"
+            isDragOver ? "bg-blue-100" : "bg-gray-100"
           )}>
             <Upload className={cn(
               "h-8 w-8",
-              isDragOver ? "text-gray-600 dark:text-gray-200" : "text-gray-400"
+              isDragOver ? "text-blue-600" : "text-gray-400"
             )} />
           </div>
 
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1 dark:text-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-1">
               {isDragOver ? 'Otpustite fajlove ovde' : 'Prevucite fajlove ovde'}
             </h3>
             <p className="text-sm text-gray-500 mb-2">
@@ -417,31 +274,6 @@ export function DragDropUpload({
               Maksimalna veličina: {maxSize}MB • Dozvoljeni tipovi: {accept}
             </p>
           </div>
-
-          {showMetadataForm && (
-            <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-3 rounded">
-              <div className="flex items-center space-x-2 mb-1">
-                {getCategoryIcon(globalMetadata.category as MediaCategory)}
-                <span className="font-medium">
-                  {categories.find(cat => cat.value === globalMetadata.category)?.label}
-                </span>
-                {globalMetadata.isPublic ? (
-                  <Badge variant="default" className="text-xs bg-green-600">
-                    <Eye className="h-3 w-3 mr-1" />
-                    Javno
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="text-xs">
-                    <EyeOff className="h-3 w-3 mr-1" />
-                    Interno
-                  </Badge>
-                )}
-              </div>
-              {globalMetadata.description && (
-                <p className="text-xs">{globalMetadata.description}</p>
-              )}
-            </div>
-          )}
 
           {!disabled && (
             <Button 
@@ -489,22 +321,8 @@ export function DragDropUpload({
                         {uploadFile.file.name}
                       </p>
                       <div className="flex items-center space-x-2 ml-2">
-                        <Badge variant="outline" className="text-xs flex items-center space-x-1">
-                          {getCategoryIcon(uploadFile.metadata.category as MediaCategory)}
-                          <span>{categories.find(cat => cat.value === uploadFile.metadata.category)?.label}</span>
-                        </Badge>
-                        <Badge variant={uploadFile.metadata.isPublic ? "default" : "secondary"} className="text-xs">
-                          {uploadFile.metadata.isPublic ? (
-                            <>
-                              <Eye className="h-3 w-3 mr-1" />
-                              Javno
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="h-3 w-3 mr-1" />
-                              Interno
-                            </>
-                          )}
+                        <Badge variant="outline" className="text-xs">
+                          {getFileTypeLabel(uploadFile.file)}
                         </Badge>
                         <span className="text-xs text-gray-500">
                           {formatFileSize(uploadFile.file.size)}
@@ -563,51 +381,6 @@ export function DragDropUpload({
                         <X className="h-3 w-3" />
                       </Button>
                     </div>
-
-                    {/* Individual file metadata editing (for pending files) */}
-                    {uploadFile.status === 'pending' && (
-                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="text-xs">Kategorija</Label>
-                            <Select 
-                              value={uploadFile.metadata.category} 
-                              onValueChange={(value) => updateFileMetadata(uploadFile.id, { category: value as MediaCategory })}
-                            >
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categories.map((category) => (
-                                  <SelectItem key={category.value} value={category.value}>
-                                    <div className="flex items-center space-x-1">
-                                      <category.icon className="h-3 w-3" />
-                                      <span>{category.label}</span>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`public-${uploadFile.id}`}
-                              checked={uploadFile.metadata.isPublic}
-                              onCheckedChange={(checked) => updateFileMetadata(uploadFile.id, { isPublic: !!checked })}
-                            />
-                            <Label htmlFor={`public-${uploadFile.id}`} className="text-xs">Javno</Label>
-                          </div>
-                        </div>
-                        
-                        <Input
-                          placeholder="Opis fajla..."
-                          value={uploadFile.metadata.description || ''}
-                          onChange={(e) => updateFileMetadata(uploadFile.id, { description: e.target.value })}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}

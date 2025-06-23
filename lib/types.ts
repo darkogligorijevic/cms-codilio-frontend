@@ -14,16 +14,6 @@ export enum UserRole {
   AUTHOR = 'author'
 }
 
-export enum MediaCategory {
-  PROCUREMENT = 'procurement', // Javne Nabavke
-  FINANCIAL = 'financial',     // Finansijski izveštaji
-  DECISIONS = 'decisions',     // Odluke sa sastanaka
-  PLANS = 'plans',             // Godišnji planovi
-  REPORTS = 'reports',         // Izveštaji o radu
-  OTHER = 'other'              // Ostalo
-}
-
-
 export interface User {
   id: number;
   email: string;
@@ -120,9 +110,6 @@ export interface Media {
   path: string;
   alt?: string;
   caption?: string;
-  category: MediaCategory;
-  description?: string;
-  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -253,15 +240,11 @@ export interface SubscribeToNewsletterDto {
 }
 
 export interface CreateContactDto {
-  name?: string;
-  title?: string;
-  type?: ContactType;
-  phone?: string;
-  email?: string;
-  office?: string;
-  order?: number;
-  subject?: string;
-  message?: string;
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
 }
 
 export interface UpdateEmailTemplateDto extends CreateEmailTemplateDto {}
@@ -296,36 +279,11 @@ export interface UpdateCategoryDto extends Partial<CreateCategoryDto> {}
 export interface CreateMediaDto {
   alt?: string;
   caption?: string;
-  category?: MediaCategory;
-  description?: string;
-  isPublic?: boolean;
 }
-
 
 export interface UpdateMediaDto extends CreateMediaDto {}
 
-
-export interface MediaCategoryInfo {
-  value: MediaCategory;
-  label: string;
-  description: string;
-}
-
-
-export interface FindMediaOptions {
-  category?: MediaCategory;
-  isPublic?: boolean;
-  search?: string;
-}
-
-
-export interface MediaCategoryStats {
-  category: MediaCategory;
-  count: number;
-  totalSize: number;
-}
-
-
+// Page selection interface for dropdown
 export interface PageSelectionOption {
   id: number;
   title: string;
@@ -569,91 +527,3 @@ export interface SessionInfo {
   lastActivity: string;
   current: boolean;
 }
-
-export enum UnitType {
-  DEPARTMENT = 'department',
-  DIVISION = 'division',
-  SECTOR = 'sector',
-  SERVICE = 'service',
-  OFFICE = 'office',
-  COMMITTEE = 'committee',
-  OTHER = 'other'
-}
-
-export enum ContactType {
-  MANAGER = 'manager',
-  DEPUTY = 'deputy',
-  SECRETARY = 'secretary',
-  COORDINATOR = 'coordinator',
-  SPECIALIST = 'specialist',
-  OTHER = 'other'
-}
-
-export interface ContactInfo {
-  id: number;
-  name: string;
-  title: string;
-  type: ContactType;
-  phone?: string;
-  email?: string;
-  office?: string;
-  order: number;
-  unitId: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface OrganizationalUnit {
-  id: number;
-  name: string;
-  code: string;
-  type: UnitType;
-  description?: string;
-  managerName?: string;
-  managerTitle?: string;
-  phone?: string;
-  email?: string;
-  location?: string;
-  employeeCount: number;
-  isActive: boolean;
-  parentId?: number;
-  parent?: OrganizationalUnit;
-  children?: OrganizationalUnit[];
-  contacts?: ContactInfo[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateOrganizationalUnitDto {
-  name: string;
-  code: string;
-  type: UnitType;
-  description?: string;
-  managerName?: string;
-  managerTitle?: string;
-  phone?: string;
-  email?: string;
-  location?: string;
-  employeeCount?: number;
-  parentId?: number;
-  contacts?: CreateContactDto[];
-}
-
-export interface UpdateOrganizationalUnitDto extends Partial<CreateOrganizationalUnitDto> {}
-
-export interface MoveUnitDto {
-  newParentId: number | null;
-}
-
-export interface OrganizationalStatistics {
-  totalUnits: number;
-  activeUnits: number;
-  unitsByType: Array<{
-    type: UnitType;
-    count: number;
-  }>;
-  totalEmployees: number;
-}
-
-
-
