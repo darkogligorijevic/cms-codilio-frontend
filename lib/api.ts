@@ -1049,7 +1049,7 @@ export const galleryApi = {
   },
 
   reorderImages: async (galleryId: number, imageOrders: Array<{ id: number; sortOrder: number }>): Promise<GalleryImage[]> => {
-    const response: AxiosResponse<GalleryImage[]> = await api.patch(`/galleries/${galleryId}/images/reorder`, {
+    const response: AxiosResponse<GalleryImage[]> = await api.put(`/galleries/${galleryId}/images/reorder`, {
       imageOrders
     });
     return response.data;
