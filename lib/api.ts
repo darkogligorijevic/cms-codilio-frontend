@@ -48,7 +48,16 @@ import {
   CreateOrganizationalUnitDto,
   OrganizationalStatistics,
   OrganizationalUnit,
-  UpdateOrganizationalUnitDto
+  UpdateOrganizationalUnitDto,
+  CreateGalleryDto,
+  CreateGalleryImageDto,
+  Gallery,
+  GalleryImage,
+  GalleryStatistics,
+  GalleryStatus,
+  GalleryType,
+  UpdateGalleryDto,
+  UpdateGalleryImageDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -916,4 +925,148 @@ export const directorsApi = {
       
       return `${API_BASE_URL}/organizational-structure/directors/files/${cleanFilename}`;
     }
+};
+
+export const galleryApi = {
+  // Gallery management
+  create: async (data: CreateGalleryDto): Promise<Gallery> => {
+    const response: AxiosResponse<Gallery> = await api.post('/galleries', data);
+    return response.data;
+  },
+
+  getAll: async (params?: {
+    status?: GalleryStatus;
+    type?: GalleryType;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    galleries: Gallery[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> => {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.type) searchParams.append('type', params.type);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const url = `/galleries${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getPublished: async (params?: {
+    type?: GalleryType;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    galleries: Gallery[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> => {
+    const searchParams = new URLSearchParams();
+    if (params?.type) searchParams.append('type', params.type);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const url = `/galleries/published${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Gallery> => {
+    const response: AxiosResponse<Gallery> = await api.get(`/galleries/${id}`);
+    return response.data;
+  },
+
+  getBySlug: async (slug: string): Promise<Gallery> => {
+    const response: AxiosResponse<Gallery> = await api.get(`/galleries/slug/${slug}`);
+    return response.data;
+  },
+
+  update: async (id: number, data: UpdateGalleryDto): Promise<Gallery> => {
+    const response: AxiosResponse<Gallery> = await api.patch(`/galleries/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/galleries/${id}`);
+  },
+
+  getStatistics: async (): Promise<GalleryStatistics> => {
+    const response: AxiosResponse<GalleryStatistics> = await api.get('/galleries/statistics');
+    return response.data;
+  },
+
+  getTypes: async (): Promise<Array<{ value: GalleryType; label: string; description: string }>> => {
+    const response = await api.get('/galleries/types');
+    return response.data;
+  },
+
+  // Image management within galleries
+  uploadImages: async (galleryId: number, files: File[], imageData?: CreateGalleryImageDto): Promise<GalleryImage[]> => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    
+    if (imageData?.title) formData.append('title', imageData.title);
+    if (imageData?.description) formData.append('description', imageData.description);
+    if (imageData?.alt) formData.append('alt', imageData.alt);
+    if (imageData?.sortOrder !== undefined) formData.append('sortOrder', imageData.sortOrder.toString());
+
+    const response: AxiosResponse<GalleryImage[]> = await api.post(`/galleries/${galleryId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getImages: async (galleryId: number): Promise<GalleryImage[]> => {
+    const response: AxiosResponse<GalleryImage[]> = await api.get(`/galleries/${galleryId}/images`);
+    return response.data;
+  },
+
+  updateImage: async (galleryId: number, imageId: number, data: UpdateGalleryImageDto): Promise<GalleryImage> => {
+    const response: AxiosResponse<GalleryImage> = await api.patch(`/galleries/${galleryId}/images/${imageId}`, data);
+    return response.data;
+  },
+
+  deleteImage: async (galleryId: number, imageId: number): Promise<void> => {
+    await api.delete(`/galleries/${galleryId}/images/${imageId}`);
+  },
+
+  setCoverImage: async (galleryId: number, imageId: number): Promise<Gallery> => {
+    const response: AxiosResponse<Gallery> = await api.patch(`/galleries/${galleryId}/cover/${imageId}`);
+    return response.data;
+  },
+
+  reorderImages: async (galleryId: number, imageOrders: Array<{ id: number; sortOrder: number }>): Promise<GalleryImage[]> => {
+    const response: AxiosResponse<GalleryImage[]> = await api.patch(`/galleries/${galleryId}/images/reorder`, {
+      imageOrders
+    });
+    return response.data;
+  },
+
+  // Utility functions
+  getImageUrl: (filename: string): string => {
+    const cleanFilename = filename.startsWith('uploads/') 
+      ? filename.replace('uploads/', '') 
+      : filename;
+    
+    return `${API_BASE_URL}/galleries/images/${cleanFilename}`;
+  },
+
+  // Get only image media files for gallery creation
+  getImageMedia: async (): Promise<Media[]> => {
+    const allMedia = await mediaApi.getAll();
+    return allMedia.filter(media => media.mimeType.startsWith('image/'));
+  }
 };

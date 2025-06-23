@@ -1,4 +1,4 @@
-// components/dashboard/sidebar.tsx - Updated with Directors
+// components/dashboard/sidebar.tsx - Updated with Galleries
 'use client';
 
 import Link from 'next/link';
@@ -14,7 +14,8 @@ import {
   PenTool,
   Mail,
   Building2,
-  Crown
+  Crown,
+  Grid3X3
 } from 'lucide-react';
 
 const menuItems = [
@@ -37,6 +38,11 @@ const menuItems = [
     title: 'Kategorije',
     href: '/dashboard/categories',
     icon: FolderOpen,
+  },
+  {
+    title: 'Galerije',
+    href: '/dashboard/galleries',
+    icon: Grid3X3,
   },
   {
     title: 'Mediji',

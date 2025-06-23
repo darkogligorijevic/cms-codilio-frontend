@@ -741,3 +741,95 @@ export interface DirectorStatistics {
   }>;
 }
 
+export interface Gallery {
+  id: number;
+  title: string;
+  slug: string;
+  description?: string;
+  status: GalleryStatus;
+  type: GalleryType;
+  coverImage?: string;
+  viewCount: number;
+  sortOrder: number;
+  eventDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  authorId: number;
+  author: User;
+  images: GalleryImage[];
+}
+
+export interface GalleryImage {
+  id: number;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  title?: string;
+  description?: string;
+  alt?: string;
+  sortOrder: number;
+  isVisible: boolean;
+  uploadedAt: string;
+  galleryId: number;
+}
+
+export enum GalleryStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published'
+}
+
+export enum GalleryType {
+  GENERAL = 'general',
+  EVENT = 'event',
+  PROJECT = 'project',
+  ARCHIVE = 'archive'
+}
+
+export interface CreateGalleryDto {
+  title: string;
+  slug: string;
+  description?: string;
+  status?: GalleryStatus;
+  type?: GalleryType;
+  sortOrder?: number;
+  eventDate?: string;
+}
+
+export interface UpdateGalleryDto extends Partial<CreateGalleryDto> {}
+
+export interface CreateGalleryImageDto {
+  title?: string;
+  description?: string;
+  alt?: string;
+  sortOrder?: number;
+}
+
+export interface UpdateGalleryImageDto extends CreateGalleryImageDto {
+  isVisible?: boolean;
+}
+
+export interface GalleryStatistics {
+  totalGalleries: number;
+  publishedGalleries: number;
+  totalImages: number;
+  galleriesByType: Array<{
+    type: GalleryType;
+    count: number;
+  }>;
+  topGalleries: Array<{
+    id: number;
+    title: string;
+    slug: string;
+    viewCount: number;
+  }>;
+}
+
+// Page assignment for galleries (if you want to assign galleries to specific pages)
+export interface PageGalleryAssignment {
+  pageId: number;
+  galleryId: number;
+  sortOrder: number;
+}
+
