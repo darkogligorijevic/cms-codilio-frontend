@@ -655,5 +655,89 @@ export interface OrganizationalStatistics {
   totalEmployees: number;
 }
 
+export interface Director {
+  id: number;
+  fullName: string;
+  degree?: string;
+  phone?: string;
+  email?: string;
+  office?: string;
+  biography?: string;
+  biographyFile?: string;
+  profileImage?: string;
+  appointmentDate: string;
+  terminationDate?: string;
+  isCurrent: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  documents?: DirectorDocument[];
+}
 
+export interface DirectorDocument {
+  id: number;
+  title: string;
+  type: DocumentType;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  description?: string;
+  documentDate?: string;
+  isPublic: boolean;
+  uploadedAt: string;
+  directorId: number;
+}
+
+export enum DocumentType {
+  APPOINTMENT = 'appointment',        // Решење о именовању
+  DECREE = 'decree',                 // Указ
+  DECISION = 'decision',             // Одлука
+  CONTRACT = 'contract',             // Уговор
+  TERMINATION = 'termination',       // Решење о разрешењу
+  CV = 'cv',                         // Биографија/CV
+  DIPLOMA = 'diploma',               // Диплома
+  CERTIFICATE = 'certificate',       // Сертификат
+  OTHER = 'other'                    // Остало
+}
+
+export interface CreateDirectorDto {
+  fullName: string;
+  degree?: string;
+  phone?: string;
+  email?: string;
+  office?: string;
+  biography?: string;
+  appointmentDate: string;
+  terminationDate?: string;
+  isCurrent?: boolean;
+  isActive?: boolean;
+}
+
+export interface UpdateDirectorDto extends Partial<CreateDirectorDto> {}
+
+export interface CreateDirectorDocumentDto {
+  title: string;
+  type: DocumentType;
+  description?: string;
+  documentDate?: string;
+  isPublic?: boolean;
+}
+
+export interface DirectorStatistics {
+  totalDirectors: number;
+  hasCurrentDirector: boolean;
+  currentDirector?: {
+    id: number;
+    fullName: string;
+    appointmentDate: string;
+  };
+  totalDocuments: number;
+  publicDocuments: number;
+  documentsByType: Array<{
+    type: DocumentType;
+    count: number;
+  }>;
+}
 

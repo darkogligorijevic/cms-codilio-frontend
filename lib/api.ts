@@ -680,3 +680,231 @@ export const organizationalApi = {
     return response.data;
   }
 };
+
+export interface Director {
+  id: number;
+  fullName: string;
+  degree?: string;
+  phone?: string;
+  email?: string;
+  office?: string;
+  biography?: string;
+  biographyFile?: string;
+  profileImage?: string;
+  appointmentDate: string;
+  terminationDate?: string;
+  isCurrent: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  documents?: DirectorDocument[];
+}
+
+export interface DirectorDocument {
+  id: number;
+  title: string;
+  type: DocumentType;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  description?: string;
+  documentDate?: string;
+  isPublic: boolean;
+  uploadedAt: string;
+  directorId: number;
+}
+
+export enum DocumentType {
+  APPOINTMENT = 'appointment',        // Решење о именовању
+  DECREE = 'decree',                 // Указ
+  DECISION = 'decision',             // Одлука
+  CONTRACT = 'contract',             // Уговор
+  TERMINATION = 'termination',       // Решење о разрешењу
+  CV = 'cv',                         // Биографија/CV
+  DIPLOMA = 'diploma',               // Диплома
+  CERTIFICATE = 'certificate',       // Сертификат
+  OTHER = 'other'                    // Остало
+}
+
+export interface CreateDirectorDto {
+  fullName?: string;
+  degree?: string;
+  phone?: string;
+  email?: string;
+  office?: string;
+  biography?: string;
+  appointmentDate: string;
+  terminationDate?: string;
+  isCurrent?: boolean;
+  isActive?: boolean;
+}
+
+export interface UpdateDirectorDto extends Partial<CreateDirectorDto> {}
+
+export interface CreateDirectorDocumentDto {
+  title: string;
+  type: DocumentType;
+  description?: string;
+  documentDate?: string;
+  isPublic?: boolean;
+}
+
+export interface DirectorStatistics {
+  totalDirectors: number;
+  hasCurrentDirector: boolean;
+  currentDirector?: {
+    id: number;
+    fullName: string;
+    appointmentDate: string;
+  };
+  totalDocuments: number;
+  publicDocuments: number;
+  documentsByType: Array<{
+    type: DocumentType;
+    count: number;
+  }>;
+}
+
+// Directors API
+export const directorsApi = {
+  // Directors CRUD
+  getAll: async (): Promise<Director[]> => {
+    const response: AxiosResponse<Director[]> = await api.get('/organizational-structure/directors');
+    return response.data;
+  },
+
+  getCurrent: async (): Promise<Director | null> => {
+    const response: AxiosResponse<Director | null> = await api.get('/organizational-structure/directors/current');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Director> => {
+    const response: AxiosResponse<Director> = await api.get(`/organizational-structure/directors/${id}`);
+    return response.data;
+  },
+
+  create: async (data: CreateDirectorDto): Promise<Director> => {
+    const response: AxiosResponse<Director> = await api.post('/organizational-structure/directors', data);
+    return response.data;
+  },
+
+  update: async (id: number, data: UpdateDirectorDto): Promise<Director> => {
+    const response: AxiosResponse<Director> = await api.patch(`/organizational-structure/directors/${id}`, data);
+    return response.data;
+  },
+
+  setAsCurrent: async (id: number): Promise<Director> => {
+    const response: AxiosResponse<Director> = await api.patch(`/organizational-structure/directors/${id}/set-current`);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/organizational-structure/directors/${id}`);
+  },
+
+  getStatistics: async (): Promise<DirectorStatistics> => {
+    const response: AxiosResponse<DirectorStatistics> = await api.get('/organizational-structure/directors/statistics');
+    return response.data;
+  },
+
+  // Document management
+  uploadDocument: async (
+    directorId: number, 
+    file: File, 
+    metadata: CreateDirectorDocumentDto
+  ): Promise<DirectorDocument> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', metadata.title);
+    formData.append('type', metadata.type);
+    if (metadata.description) formData.append('description', metadata.description);
+    if (metadata.documentDate) formData.append('documentDate', metadata.documentDate);
+    if (metadata.isPublic !== undefined) formData.append('isPublic', metadata.isPublic.toString());
+
+    const response: AxiosResponse<DirectorDocument> = await api.post(
+      `/organizational-structure/directors/${directorId}/documents`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getDocuments: async (directorId: number): Promise<DirectorDocument[]> => {
+    const response: AxiosResponse<DirectorDocument[]> = await api.get(
+      `/organizational-structure/directors/${directorId}/documents`
+    );
+    return response.data;
+  },
+
+  getPublicDocuments: async (directorId: number): Promise<DirectorDocument[]> => {
+    const response: AxiosResponse<DirectorDocument[]> = await api.get(
+      `/organizational-structure/directors/${directorId}/documents/public`
+    );
+    return response.data;
+  },
+
+  updateDocument: async (
+    directorId: number,
+    documentId: number,
+    updateData: Partial<CreateDirectorDocumentDto>
+  ): Promise<DirectorDocument> => {
+    const response: AxiosResponse<DirectorDocument> = await api.patch(
+      `/organizational-structure/directors/${directorId}/documents/${documentId}`,
+      updateData
+    );
+    return response.data;
+  },
+
+  deleteDocument: async (directorId: number, documentId: number): Promise<void> => {
+    await api.delete(`/organizational-structure/directors/${directorId}/documents/${documentId}`);
+  },
+
+  // File uploads
+  uploadBiography: async (directorId: number, file: File): Promise<Director> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response: AxiosResponse<Director> = await api.post(
+      `/organizational-structure/directors/${directorId}/biography`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  uploadProfileImage: async (directorId: number, file: File): Promise<Director> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response: AxiosResponse<Director> = await api.post(
+      `/organizational-structure/directors/${directorId}/profile-image`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  // Utility functions
+  getDocumentTypes: async (): Promise<Array<{ value: DocumentType; label: string; description: string }>> => {
+    const response = await api.get('/organizational-structure/directors/document-types');
+    return response.data;
+  },
+
+  getFileUrl: (filename: string): string => {
+    return `${API_BASE_URL}/organizational-structure/directors/files/${filename}`;
+  }
+};
