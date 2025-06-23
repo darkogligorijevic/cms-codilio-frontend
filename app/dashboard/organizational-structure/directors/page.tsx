@@ -50,6 +50,7 @@ import { toast } from 'sonner';
 import { DirectorForm } from '@/components/dashboard/director-form';
 import { DirectorDocuments } from '@/components/dashboard/director-documents';
 import { useTheme } from 'next-themes';
+import { OrgStructureNav } from '@/components/dashboard/org-structure-nav';
 
 export default function DirectorsPage() {
   const [directors, setDirectors] = useState<Director[]>([]);
@@ -179,6 +180,7 @@ export default function DirectorsPage() {
 
   return (
     <div className="space-y-6">
+      <OrgStructureNav />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

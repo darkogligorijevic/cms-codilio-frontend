@@ -58,18 +58,18 @@ const menuItems = [
     title: 'Org. struktura',
     href: '/dashboard/organizational-structure',
     icon: Building2,
-    submenu: [
-      {
-        title: 'Struktura',
-        href: '/dashboard/organizational-structure',
-        icon: Building2,
-      },
-      {
-        title: 'Direktori',
-        href: '/dashboard/organizational-structure/directors',
-        icon: Crown,
-      }
-    ]
+    // submenu: [
+    //   {
+    //     title: 'Struktura',
+    //     href: '/dashboard/organizational-structure',
+    //     icon: Building2,
+    //   },
+    //   {
+    //     title: 'Direktori',
+    //     href: '/dashboard/organizational-structure/directors',
+    //     icon: Crown,
+    //   }
+    // ]
   },
   {
     title: 'Korisnici',
@@ -93,12 +93,12 @@ export function DashboardSidebar() {
     return pathname.startsWith(href);
   };
 
-  const isSubmenuActive = (item: any) => {
-    if (item.submenu) {
-      return item.submenu.some((subItem: any) => isActive(subItem.href));
-    }
-    return false;
-  };
+  // const isSubmenuActive = (item: any) => {
+  //   if (item.submenu) {
+  //     return item.submenu.some((subItem: any) => isActive(subItem.href));
+  //   }
+  //   return false;
+  // };
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 dark:border-r shadow-lg">
@@ -112,7 +112,7 @@ export function DashboardSidebar() {
         <div className="space-y-1">
           {menuItems.map((item) => {
             const isItemActive = isActive(item.href);
-            const hasActiveSubmenu = isSubmenuActive(item);
+            // const hasActiveSubmenu = isSubmenuActive(item);
             
             return (
               <div key={item.href}>
@@ -120,11 +120,11 @@ export function DashboardSidebar() {
                   href={item.href}
                   className={cn(
                     'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                    isItemActive && !item.submenu
-                      ? 'bg-blue-50 text-primary-dynamic border-r-2 border-primary-dynamic'
-                      : hasActiveSubmenu
-                        ? 'bg-blue-25 text-primary-dynamic'
-                        : 'text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                    isItemActive &&  // !item.submenu
+                        'bg-blue-50 text-primary-dynamic border-r-2 border-primary-dynamic'
+                      // : hasActiveSubmenu
+                      //   ? 'bg-blue-25 text-primary-dynamic'
+                      //   : 'text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
                   )}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
@@ -132,7 +132,7 @@ export function DashboardSidebar() {
                 </Link>
                 
                 {/* Submenu */}
-                {item.submenu && hasActiveSubmenu && (
+                {/* {item.submenu && hasActiveSubmenu && (
                   <div className="ml-6 mt-1 space-y-1">
                     {item.submenu.map((subItem) => (
                       <Link
@@ -150,7 +150,7 @@ export function DashboardSidebar() {
                       </Link>
                     ))}
                   </div>
-                )}
+                )} */}
               </div>
             );
           })}
