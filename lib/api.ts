@@ -497,8 +497,12 @@ export const mediaApi = {
   },
   
   getFileUrl: (filename: string): string => {
-    return `${API_BASE_URL}/media/file/${filename}`;
-  }
+      const cleanFilename = filename.startsWith('uploads/') 
+        ? filename.replace('uploads/', '') 
+        : filename;
+      
+      return `${API_BASE_URL}/media/file/${cleanFilename}`;
+    }
 };
 export { api };
 
@@ -905,6 +909,11 @@ export const directorsApi = {
   },
 
   getFileUrl: (filename: string): string => {
-    return `${API_BASE_URL}/organizational-structure/directors/files/${filename}`;
-  }
+      // Уклањамо "uploads/" префикс ако постоји да избегнемо дуплирање
+      const cleanFilename = filename.startsWith('uploads/') 
+        ? filename.replace('uploads/', '') 
+        : filename;
+      
+      return `${API_BASE_URL}/organizational-structure/directors/files/${cleanFilename}`;
+    }
 };
