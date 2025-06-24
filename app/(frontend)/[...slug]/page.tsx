@@ -1,4 +1,4 @@
-// app/(frontend)/[slug]/page.tsx - Updated with gallery logic
+// app/(frontend)/[...slug]/page.tsx - Catch-all route for dynamic pages and galleries
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
 
 interface DynamicPageProps {
-  params: Promise<{ slug: string | string[] }>;
+  params: Promise<{ slug: string[] }>;
 }
 
 export default function DynamicPage({ params }: DynamicPageProps) {
@@ -29,8 +29,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle both single slug and array of slugs
-  const slugArray = Array.isArray(resolvedParams.slug) ? resolvedParams.slug : [resolvedParams.slug];
+  // Parse the slug array
+  const slugArray = resolvedParams.slug || [];
   const pageSlug = slugArray[0];
   const subSlug = slugArray[1]; // Gallery slug if present
 
@@ -49,7 +49,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   };
 
   useEffect(() => {
-    fetchPageAndGallery();
+    if (pageSlug) {
+      fetchPageAndGallery();
+    }
   }, [pageSlug, subSlug]);
 
   const fetchPageAndGallery = async () => {
