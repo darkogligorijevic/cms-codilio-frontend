@@ -9,14 +9,14 @@ import { TransparencyTemplate } from './transparency/transparency-template';
 import { OrganizationalStructureTemplate } from './organizational-structure/organizationa-structure-template';
 import { DirectorsTemplate } from './directors/directors-template';
 import { DocumentationTemplate } from './documentation/documentation-template';
-import { GalleryTemplate } from './gallery/gallery-template'; // Add this import
+import { GalleryTemplate } from './gallery/gallery-template'; 
 import { DefaultTemplate } from './default/default-template';
 
 // Template registry interface
 export interface TemplateProps {
   page: Page;
   posts: Post[];
-  institutionData: any; // Required, not optional
+  institutionData: any; 
   settings?: any;
 }
 
@@ -32,7 +32,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateComponent> = {
   organizationalStructure: OrganizationalStructureTemplate,
   directors: DirectorsTemplate,
   documentation: DocumentationTemplate,
-  gallery: GalleryTemplate, // Add this line
+  gallery: GalleryTemplate, 
   default: DefaultTemplate,
 } as const;
 

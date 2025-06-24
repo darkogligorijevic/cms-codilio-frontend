@@ -35,7 +35,7 @@ interface SingleGalleryTemplateProps {
   gallery: Gallery;
   institutionData: any;
   settings?: any;
-  parentPageSlug?: string; // Add this to know which gallery page to go back to
+  parentPageSlug?: string; 
 }
 
 export function SingleGalleryTemplate({ gallery, institutionData, settings, parentPageSlug }: SingleGalleryTemplateProps) {

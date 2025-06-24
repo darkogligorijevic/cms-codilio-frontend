@@ -77,6 +77,7 @@ const PAGE_TEMPLATES = [
   { value: 'organizationalStructure', label: 'Organizaciona struktura', description: "Stablo organizacione strukture"},
   { value: 'transparency', label: 'Transparentnost', description: 'Dokumenti i transparentnost' },
   { value: 'directors', label: 'Direktori', description: 'Cela dokumentacija i biografija direktora'},
+  { value: 'gallery', label: 'Galerija', description: 'Prikaz svih galerija sa mogucnoscu pretrage, filtriranja i pregleda pojedinacnih galerija' },
 ];
 
 export default function PagesPage() {
@@ -516,7 +517,7 @@ export default function PagesPage() {
                     id="content"
                     placeholder="Napišite sadržaj stranice..."
                     rows={8}
-                    {...register('content', { required: 'Sadržaj je obavezan' })}
+                    {...register('content')}
                   />
                   {errors.content && (
                     <p className="text-sm text-red-600 flex items-center">

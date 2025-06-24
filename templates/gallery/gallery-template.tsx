@@ -1,4 +1,4 @@
-// templates/gallery/gallery-template.tsx - Main Gallery Template
+// templates/gallery/gallery-template.tsx - Fixed TypeScript issues
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -43,8 +43,9 @@ export function GalleryTemplate({ page, institutionData, settings }: TemplatePro
 
   // Check if we're viewing a specific gallery (subpage)
   // URL structure: /page-slug/gallery-slug
-  const isViewingSingleGallery = params?.slug && Array.isArray(params.slug) && params.slug.length > 1;
-  const gallerySlug = isViewingSingleGallery ? params.slug[1] : null;
+  const slugArray = params?.slug;
+  const isViewingSingleGallery = Array.isArray(slugArray) && slugArray.length > 1;
+  const gallerySlug = isViewingSingleGallery && Array.isArray(slugArray) ? slugArray[1] : null;
 
   useEffect(() => {
     if (gallerySlug) {
@@ -296,7 +297,7 @@ export function GalleryTemplate({ page, institutionData, settings }: TemplatePro
                   )}
                   
                   {/* Overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
                     <Button 
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       asChild
