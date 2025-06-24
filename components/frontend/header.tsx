@@ -223,17 +223,19 @@ export function Header({ pages }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2">
+
+            
+            {/* Dynamic pages navigation */}
+            {desktopPages.map((page, index) => (
+              <HoverDropdown key={`desktop-${page.id}-${index}`} page={page} />
+            ))}
+
             <Link 
               href="/objave" 
               className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-primary-dynamic transition-colors duration-200"
             >
               Објаве
             </Link>
-            
-            {/* Dynamic pages navigation */}
-            {desktopPages.map((page, index) => (
-              <HoverDropdown key={`desktop-${page.id}-${index}`} page={page} />
-            ))}
             
             <div className="flex items-center space-x-4 ml-4">
               {settings?.themeDarkMode && (
@@ -273,6 +275,12 @@ export function Header({ pages }: HeaderProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
             <div className="space-y-2">
+
+              
+              {/* Dynamic pages navigation for mobile */}
+              {mobilePages.map((page, index) => (
+                <MobileNavigationItem key={`mobile-main-${page.id}-${index}`} page={page} />
+              ))}
               <Link 
                 href="/objave" 
                 className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
@@ -280,11 +288,6 @@ export function Header({ pages }: HeaderProps) {
               >
                 Објаве
               </Link>
-              
-              {/* Dynamic pages navigation for mobile */}
-              {mobilePages.map((page, index) => (
-                <MobileNavigationItem key={`mobile-main-${page.id}-${index}`} page={page} />
-              ))}
               
               <Link 
                 href="/dashboard" 

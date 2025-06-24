@@ -1,4 +1,4 @@
-// app/(frontend)/layout.tsx - SA VRAĆENIM ThemeProvider
+// app/(frontend)/layout.tsx - Fixed version
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,17 +6,12 @@ import { Roboto } from "next/font/google";
 import { Header } from '@/components/frontend/header';
 import { Footer } from '@/components/frontend/footer';
 import { pagesApi } from '@/lib/api';
+import type { Page } from '@/lib/types'; // Import the correct type
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
-interface Page {
-  id: number;
-  title: string;
-  slug: string;
-}
-
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
-  const [pages, setPages] = useState<Page[]>([]);
+  const [pages, setPages] = useState<Page[]>([]); // Use the imported Page type
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -33,12 +28,12 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   }, []);
 
   return (
-      <div className={`${roboto.className} min-h-screen flex flex-col`}>
-        <Header pages={pages} />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer pages={pages} />
-      </div>
+    <div className={`${roboto.className} min-h-screen flex flex-col`}>
+      <Header pages={pages} />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer pages={pages} />
+    </div>
   );
 }

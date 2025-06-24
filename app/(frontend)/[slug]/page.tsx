@@ -1,4 +1,4 @@
-// app/(frontend)/[slug]/page.tsx - Updated with gallery logic
+// app/(frontend)/[slug]/page.tsx - Fixed version with gallery routing
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
 
 interface DynamicPageProps {
-  params: Promise<{ slug: string | string[] }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default function DynamicPage({ params }: DynamicPageProps) {
@@ -29,10 +29,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle both single slug and array of slugs
-  const slugArray = Array.isArray(resolvedParams.slug) ? resolvedParams.slug : [resolvedParams.slug];
-  const pageSlug = slugArray[0];
-  const subSlug = slugArray[1]; // Gallery slug if present
+  const pageSlug = resolvedParams.slug;
 
   // Use settings for institution data with fallbacks
   const institutionData = {
@@ -49,49 +46,60 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   };
 
   useEffect(() => {
-    fetchPageAndGallery();
-  }, [pageSlug, subSlug]);
+    if (pageSlug) {
+      fetchPageAndGallery();
+    }
+  }, [pageSlug]);
 
   const fetchPageAndGallery = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // First, try to get the main page
-      const pageData = await pagesApi.getBySlug(pageSlug);
-      setPage(pageData);
-
-      // If this is a gallery page and we have a sub-slug, try to get the gallery
-      if (pageData.template === 'gallery' && subSlug) {
+      // First, try to get a regular page
+      try {
+        const pageData = await pagesApi.getBySlug(pageSlug);
+        setPage(pageData);
+        
+        // If it's a regular page, fetch related posts
+        fetchPagePosts(pageData);
+        return; // Exit early if page found
+        
+      } catch (pageError) {
+        console.log('Page not found, checking for gallery...');
+        
+        // If page not found, try to find a gallery with this slug
         try {
-          const galleryData = await galleryApi.getBySlug(subSlug);
+          const galleryData = await galleryApi.getBySlug(pageSlug);
           setGallery(galleryData);
+          return; // Exit early if gallery found
+          
         } catch (galleryError) {
-          console.error('Gallery not found:', galleryError);
-          // Gallery not found, but page exists - this will show 404 in template
-          setGallery(null);
+          console.error('Neither page nor gallery found for slug:', pageSlug);
+          setError('Страница није пронађена');
         }
       }
+      
     } catch (error) {
-      console.error('Error fetching page:', error);
-      setError('Страница није пронађена');
+      console.error('Error fetching content:', error);
+      setError('Грешка при учитавању садржаја');
     } finally {
       setIsLoading(false);
     }
   };
 
   // Fetch posts specific to this page
-  const fetchPosts = async () => {
-    if (!page?.id) return;
+  const fetchPagePosts = async (pageData: Page) => {
+    if (!pageData?.id) return;
     
     try {
       setIsLoadingPosts(true);
-      console.log('Fetching posts for page:', page.id);
+      console.log('Fetching posts for page:', pageData.id);
 
       // Get posts that are assigned to this specific page
       const allPosts = await postsApi.getPublished(1, 50);
       const pageSpecificPosts = allPosts.posts.filter(post => 
-        post.pages && post.pages.some(p => p.id === page.id))
+        post.pages && post.pages.some(p => p.id === pageData.id));
       
       console.log('Posts for this page:', pageSpecificPosts);
       setPosts(pageSpecificPosts.slice(0, 6));
@@ -102,13 +110,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       setIsLoadingPosts(false);
     }
   };
-
-  // Fetch posts after page is loaded
-  useEffect(() => {
-    if (page?.id) {
-      fetchPosts();
-    }
-  }, [page?.id]);
 
   if (isLoading) {
     return (
@@ -125,7 +126,20 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  if (error || !page) {
+  // If gallery found, render gallery template
+  if (gallery) {
+    return (
+      <SingleGalleryTemplate 
+        gallery={gallery} 
+        institutionData={institutionData}
+        settings={settings}
+        parentPageSlug="galerija" // Assuming the parent gallery page slug
+      />
+    );
+  }
+
+  // If error or neither page nor gallery found
+  if (error || (!page && !gallery)) {
     return (
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm border-b">
@@ -169,70 +183,43 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  // If this is a gallery page with a sub-slug, use SingleGalleryTemplate
-  if (page.template === 'gallery' && subSlug) {
-    if (gallery) {
-      return (
-        <SingleGalleryTemplate 
-          gallery={gallery} 
-          institutionData={institutionData}
-          settings={settings}
-          parentPageSlug={page.slug}
-        />
-      );
-    } else {
-      // Gallery not found, show 404
-      return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Галерија није пронађена</h1>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Галерија коју тражите не постоји или је уклоњена.
-              </p>
-              <Button variant="primary" asChild>
-                <Link href={`/${page.slug}`}>Назад на галерије</Link>
+  // Regular page rendering
+  if (page) {
+    // Get the appropriate template component
+    const TemplateComponent = getTemplate(page?.template);
+
+    // Prepare template props
+    const templateProps: TemplateProps = {
+      page,
+      posts,
+      institutionData,
+      settings
+    };
+
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Page Header */}
+        <div className="bg-white border-b dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{page.title}</h1>
+              <Button variant="outline" asChild>
+                <Link href="/">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Назад на почетну
+                </Link>
               </Button>
             </div>
-          </main>
-        </div>
-      );
-    }
-  }
-
-  // Get the appropriate template component for regular pages
-  const TemplateComponent = getTemplate(page?.template);
-
-  // Prepare template props
-  const templateProps: TemplateProps = {
-    page,
-    posts,
-    institutionData,
-    settings
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Page Header */}
-      <div className="bg-white border-b dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{page.title}</h1>
-            <Button variant="outline" asChild>
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Назад на почетну
-              </Link>
-            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Main Content - Render with selected template */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <TemplateComponent {...templateProps} />
-      </main>
-    </div>
-  );
+        {/* Main Content - Render with selected template */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <TemplateComponent {...templateProps} />
+        </main>
+      </div>
+    );
+  }
+
+  return null;
 }
