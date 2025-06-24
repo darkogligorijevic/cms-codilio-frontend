@@ -1,3 +1,4 @@
+// app/dashboard/galleries/[id]/page.tsx - Fixed version with proper image handling
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -41,7 +42,8 @@ import {
   Move,
   Settings,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  AlertCircle
 } from 'lucide-react';
 import { 
   galleryApi
@@ -85,10 +87,15 @@ export default function GalleryViewPage() {
   const fetchGalleryData = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching gallery data for ID:', galleryId);
+      
       const [galleryData, imagesData] = await Promise.all([
         galleryApi.getById(galleryId),
         galleryApi.getImages(galleryId)
       ]);
+      
+      console.log('Gallery data received:', galleryData);
+      console.log('Images data received:', imagesData);
       
       setGallery(galleryData);
       setImages(imagesData);
@@ -109,7 +116,11 @@ export default function GalleryViewPage() {
       setIsUploading(true);
       const fileArray = Array.from(files);
       
+      console.log('Uploading files:', fileArray.map(f => f.name));
+      
       const uploadedImages = await galleryApi.uploadImages(galleryId, fileArray);
+      
+      console.log('Upload response:', uploadedImages);
       
       toast.success(`Uspešno učitano ${uploadedImages.length} slika`);
       await fetchGalleryData();
@@ -124,6 +135,7 @@ export default function GalleryViewPage() {
   };
 
   const handleEditImage = (image: GalleryImage) => {
+    console.log('Editing image:', image);
     setSelectedImage(image);
     setEditingImage({
       title: image.title || '',
@@ -138,6 +150,8 @@ export default function GalleryViewPage() {
     if (!selectedImage) return;
 
     try {
+      console.log('Updating image:', selectedImage.id, editingImage);
+      
       const updateData: UpdateGalleryImageDto = {
         title: editingImage.title || undefined,
         description: editingImage.description || undefined,
@@ -145,7 +159,9 @@ export default function GalleryViewPage() {
         isVisible: editingImage.isVisible
       };
 
-      await galleryApi.updateImage(galleryId, selectedImage.id, updateData);
+      const updatedImage = await galleryApi.updateImage(galleryId, selectedImage.id, updateData);
+      
+      console.log('Image updated:', updatedImage);
       
       toast.success('Slika je uspešno ažurirana');
       setIsEditImageDialogOpen(false);
@@ -161,6 +177,8 @@ export default function GalleryViewPage() {
     if (!imageToDelete) return;
 
     try {
+      console.log('Deleting image:', imageToDelete.id);
+      
       await galleryApi.deleteImage(galleryId, imageToDelete.id);
       toast.success('Slika je uspešno obrisana');
       setIsDeleteImageDialogOpen(false);
@@ -174,6 +192,8 @@ export default function GalleryViewPage() {
 
   const handleSetCoverImage = async (image: GalleryImage) => {
     try {
+      console.log('Setting cover image:', image.id);
+      
       await galleryApi.setCoverImage(galleryId, image.id);
       toast.success('Slika je postavljena kao naslovna');
       await fetchGalleryData();
@@ -204,6 +224,8 @@ export default function GalleryViewPage() {
         sortOrder: index
       }));
 
+      console.log('Reordering images:', imageOrders);
+      
       await galleryApi.reorderImages(galleryId, imageOrders);
       toast.success('Redosled slika je ažuriran');
     } catch (error) {
@@ -242,6 +264,18 @@ export default function GalleryViewPage() {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // FIXED: Image URL generation with error handling
+  const getImageUrl = (image: GalleryImage) => {
+    try {
+      const url = galleryApi.getImageUrl(image.filename);
+      console.log('Generated image URL:', url, 'for filename:', image.filename);
+      return url;
+    } catch (error) {
+      console.error('Error generating image URL:', error);
+      return '/placeholder-image.jpg'; // Fallback
+    }
   };
 
   if (isLoading) {
@@ -404,10 +438,19 @@ export default function GalleryViewPage() {
                   className="relative group border rounded-lg overflow-hidden transition-all hover:shadow-md"
                 >
                   <div className="aspect-square relative">
+                    {/* FIXED: Image rendering with error handling */}
                     <img
-                      src={galleryApi.getImageUrl(image.filename)}
+                      src={getImageUrl(image)}
                       alt={image.alt || image.originalName}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load image:', image.filename);
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-image.jpg'; // Fallback image
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', image.filename);
+                      }}
                     />
                     
                     {/* Overlay with image info */}
@@ -429,7 +472,7 @@ export default function GalleryViewPage() {
                               Postavi kao naslovnu
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              onClick={() => window.open(galleryApi.getImageUrl(image.filename), '_blank')}
+                              onClick={() => window.open(getImageUrl(image), '_blank')}
                             >
                               <Download className="mr-2 h-4 w-4" />
                               Preuzmi
@@ -565,7 +608,7 @@ export default function GalleryViewPage() {
             {selectedImage && (
               <div className="aspect-video w-full max-w-sm mx-auto">
                 <img
-                  src={galleryApi.getImageUrl(selectedImage.filename)}
+                  src={getImageUrl(selectedImage)}
                   alt={selectedImage.alt || selectedImage.originalName}
                   className="w-full h-full object-cover rounded border"
                 />
@@ -656,7 +699,7 @@ export default function GalleryViewPage() {
           {imageToDelete && (
             <div className="py-4">
               <img
-                src={galleryApi.getImageUrl(imageToDelete.filename)}
+                src={getImageUrl(imageToDelete)}
                 alt={imageToDelete.alt || imageToDelete.originalName}
                 className="w-full h-32 object-cover rounded border"
               />

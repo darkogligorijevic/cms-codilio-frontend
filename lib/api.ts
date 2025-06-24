@@ -1031,7 +1031,7 @@ export const galleryApi = {
     return response.data;
   },
 
-  // Image management within galleries
+  // Image management within galleries - FIXED SECTION
   uploadImages: async (galleryId: number, files: File[], imageData?: CreateGalleryImageDto): Promise<GalleryImage[]> => {
     const formData = new FormData();
     files.forEach(file => {
@@ -1042,6 +1042,9 @@ export const galleryApi = {
     if (imageData?.description) formData.append('description', imageData.description);
     if (imageData?.alt) formData.append('alt', imageData.alt);
     if (imageData?.sortOrder !== undefined) formData.append('sortOrder', imageData.sortOrder.toString());
+
+    console.log('Uploading to gallery:', galleryId);
+    console.log('Files to upload:', files.map(f => f.name));
 
     const response: AxiosResponse<GalleryImage[]> = await api.post(`/galleries/${galleryId}/images`, formData, {
       headers: {
@@ -1071,17 +1074,21 @@ export const galleryApi = {
   },
 
   reorderImages: async (galleryId: number, imageOrders: Array<{ id: number; sortOrder: number }>): Promise<GalleryImage[]> => {
+    console.log('Reordering images for gallery:', galleryId);
+    console.log('Image orders:', imageOrders);
+    
     const response: AxiosResponse<GalleryImage[]> = await api.put(`/galleries/${galleryId}/images/reorder`, {
       imageOrders
     });
     return response.data;
   },
 
-  // Utility functions
   getImageUrl: (filename: string): string => {
-    const cleanFilename = filename.startsWith('uploads/') 
-      ? filename.replace('uploads/', '') 
-      : filename;
+    // Remove any existing path prefixes to avoid duplication
+    const cleanFilename = filename
+      .replace('uploads/', '')
+      .replace('gallery-', '')
+      .replace(/^.*[\\\/]/, ''); // Remove any directory path
     
     return `${API_BASE_URL}/galleries/images/${cleanFilename}`;
   },
