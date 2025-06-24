@@ -1,4 +1,4 @@
-// components/frontend/footer.tsx
+// components/frontend/footer.tsx - Complete hierarchical footer
 'use client';
 
 import { useSettings } from '@/lib/settings-context';
@@ -14,12 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { mediaApi } from '@/lib/api';
-
-interface Page {
-  id: number;
-  title: string;
-  slug: string;
-}
+import type { Page } from '@/lib/types';
 
 interface FooterProps {
   pages: Page[];
@@ -36,6 +31,30 @@ export function Footer({ pages }: FooterProps) {
     workingHours: settings?.contactWorkingHours || "Понедељак - Петак: 07:30 - 15:30",
     mapUrl: settings?.contactMapUrl,
   };
+
+  // Flatten the hierarchical pages for footer display and remove duplicates
+  const flattenPages = (pageList: Page[]): Page[] => {
+    const result: Page[] = [];
+    const addedIds = new Set<number>();
+    
+    const addPage = (page: Page) => {
+      if (!addedIds.has(page.id)) {
+        result.push(page);
+        addedIds.add(page.id);
+      }
+    };
+    
+    pageList.forEach(page => {
+      addPage(page);
+      if (page.children && page.children.length > 0) {
+        page.children.forEach(child => addPage(child));
+      }
+    });
+    
+    return result;
+  };
+
+  const allPages = flattenPages(pages);
 
   return (
     <footer className="bg-footer text-white py-12">
@@ -144,22 +163,25 @@ export function Footer({ pages }: FooterProps) {
               Корисни линкови
             </h4>
             <div className="space-y-2">
-              {pages.map((page) => (
+              {allPages.slice(0, 8).map((page) => (
                 <Link
-                  key={page.id}
+                  key={`footer-${page.id}`}
                   href={`/${page.slug}`}
                   className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                   style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
                 >
+                  {page.parentId && (
+                    <span className="text-gray-500 mr-2">└─</span>
+                  )}
                   {page.title}
                 </Link>
               ))}
               <Link 
-                href="/dokumenti" 
+                href="/objave" 
                 className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
                 style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
               >
-                Документи
+                Објаве
               </Link>
               <Link 
                 href="/sitemap" 

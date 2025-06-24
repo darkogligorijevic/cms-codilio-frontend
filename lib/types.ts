@@ -89,7 +89,10 @@ export interface Page {
   updatedAt: string;
   authorId: number;
   author: User;
-  posts?: Post[]; // Many-to-many relationship with posts
+  parentId?: number;
+  parent?: Page;
+  children?: Page[];
+  posts?: Post[]; 
 }
 
 export interface Post {
@@ -108,7 +111,7 @@ export interface Post {
   categoryId?: number;
   author: User;
   category?: Category;
-  pages?: Page[]; // Many-to-many relationship with pages
+  pages?: Page[]; 
 }
 
 export interface Media {
@@ -281,6 +284,7 @@ export interface CreatePageDto {
   status?: PageStatus;
   template?: string;
   sortOrder?: number;
+  parentId?: number; 
 }
 
 export interface UpdatePageDto extends Partial<CreatePageDto> {}
@@ -289,6 +293,20 @@ export interface CreateCategoryDto {
   name: string;
   slug: string;
   description?: string;
+}
+
+export interface AvailableParentPage {
+  id: number;
+  title: string;
+  slug: string;
+  level: number;
+}
+
+export interface NavigationPage {
+  id: number;
+  title: string;
+  slug: string;
+  children: NavigationPage[];
 }
 
 export interface UpdateCategoryDto extends Partial<CreateCategoryDto> {}
@@ -330,6 +348,7 @@ export interface PageSelectionOption {
   id: number;
   title: string;
   slug: string;
+  parentId?: number;
 }
 
 // Add to lib/types.ts

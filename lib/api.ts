@@ -57,7 +57,8 @@ import {
   GalleryStatus,
   GalleryType,
   UpdateGalleryDto,
-  UpdateGalleryImageDto
+  UpdateGalleryImageDto,
+  AvailableParentPage
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -255,6 +256,12 @@ export const pagesApi = {
     const response: AxiosResponse<Page[]> = await api.get('/pages/published');
     return response.data;
   },
+
+  // New method for hierarchical structure
+  getHierarchical: async (): Promise<Page[]> => {
+    const response: AxiosResponse<Page[]> = await api.get('/pages/hierarchical');
+    return response.data;
+  },
   
   getById: async (id: number): Promise<Page> => {
     const response: AxiosResponse<Page> = await api.get(`/pages/${id}`);
@@ -266,9 +273,19 @@ export const pagesApi = {
     return response.data;
   },
   
-  // New method for getting pages for selection dropdown
+  // Updated method for getting pages for selection dropdown
   getAllForSelection: async (): Promise<PageSelectionOption[]> => {
     const response: AxiosResponse<PageSelectionOption[]> = await api.get('/pages/for-selection');
+    return response.data;
+  },
+
+  // New method for getting available parent pages
+  getAvailableParents: async (excludeId?: number): Promise<AvailableParentPage[]> => {
+    let url = '/pages/available-parents';
+    if (excludeId) {
+      url += `?excludeId=${excludeId}`;
+    }
+    const response: AxiosResponse<AvailableParentPage[]> = await api.get(url);
     return response.data;
   },
   

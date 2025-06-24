@@ -1,4 +1,4 @@
-// app/dashboard/pages/page.tsx
+// app/dashboard/pages/page.tsx - Complete implementation with hierarchical support
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -47,11 +47,14 @@ import {
   Layout,
   BarChart3,
   AlertCircle,
-  Clock
+  Clock,
+  ChevronRight,
+  Folder,
+  FolderOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { pagesApi } from '@/lib/api';
-import type { Page, PageStatus } from '@/lib/types';
+import type { Page, PageStatus, AvailableParentPage } from '@/lib/types';
 import { toast } from 'sonner';
 import { transliterate } from '@/lib/transliterate';
 import { useTheme } from 'next-themes';
@@ -63,6 +66,7 @@ interface PageFormData {
   status: PageStatus;
   template: string;
   sortOrder: number;
+  parentId?: number;
 }
 
 const PAGE_TEMPLATES = [
@@ -77,6 +81,7 @@ const PAGE_TEMPLATES = [
 
 export default function PagesPage() {
   const [pages, setPages] = useState<Page[]>([]);
+  const [availableParents, setAvailableParents] = useState<AvailableParentPage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<PageStatus | 'all'>('all');
@@ -101,7 +106,8 @@ export default function PagesPage() {
       content: '',
       status: 'draft' as PageStatus,
       template: 'default',
-      sortOrder: 0
+      sortOrder: 0,
+      parentId: undefined
     }
   });
 
@@ -128,14 +134,55 @@ export default function PagesPage() {
     try {
       setIsLoading(true);
       const response = await pagesApi.getAll();
-      // Sort by sortOrder
-      const sortedPages = response.sort((a, b) => a.sortOrder - b.sortOrder);
-      setPages(sortedPages);
+      
+      // Prvo sortiramo po hijerarhiji (parent stranice pa deca), zatim po sortOrder
+      const buildHierarchicalOrder = (pages: Page[]): Page[] => {
+        const result: Page[] = [];
+        const processedIds = new Set<number>();
+        
+        // Funkcija za dodavanje stranice i njene dece u ispravnom redosledu
+        const addPageWithChildren = (page: Page) => {
+          if (processedIds.has(page.id)) return;
+          
+          result.push(page);
+          processedIds.add(page.id);
+          
+          // Pronađi svu decu ove stranice i sortiraj ih po sortOrder
+          const children = pages
+            .filter(p => p.parentId === page.id)
+            .sort((a, b) => a.sortOrder - b.sortOrder);
+          
+          // Rekurzivno dodaj decu
+          children.forEach(child => addPageWithChildren(child));
+        };
+        
+        // Prvo dodaj sve root stranice (bez parent-a) sortirane po sortOrder
+        const rootPages = pages
+          .filter(page => !page.parentId)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+        
+        rootPages.forEach(rootPage => addPageWithChildren(rootPage));
+        
+        return result;
+      };
+      
+      const hierarchicallyOrderedPages = buildHierarchicalOrder(response);
+      setPages(hierarchicallyOrderedPages);
     } catch (error) {
       console.error('Error fetching pages:', error);
       toast.error('Greška pri učitavanju stranica');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchAvailableParents = async (excludeId?: number) => {
+    try {
+      const response = await pagesApi.getAvailableParents(excludeId);
+      setAvailableParents(response);
+    } catch (error) {
+      console.error('Error fetching available parents:', error);
+      toast.error('Greška pri učitavanju dostupnih stranica');
     }
   };
 
@@ -147,12 +194,11 @@ export default function PagesPage() {
         content: data.content,
         status: data.status,
         template: data.template,
-        // provalio sam da ga salje kao string ovde tako da sam samo castleovao u number
-        // PROVERI
-        sortOrder: Number(data.sortOrder)
+        sortOrder: data.sortOrder, // Uklanjam Number() jer je valueAsNumber: true
+        parentId: data.parentId || undefined
       };
 
-      console.log(pageData)
+      console.log('Submitting page data:', pageData);
 
       if (editingPage) {
         await pagesApi.update(editingPage.id, pageData);
@@ -178,6 +224,8 @@ export default function PagesPage() {
     setValue('status', page.status);
     setValue('template', page.template);
     setValue('sortOrder', page.sortOrder);
+    setValue('parentId', page.parentId || undefined);
+    fetchAvailableParents(page.id);
     setIsDialogOpen(true);
   };
 
@@ -190,9 +238,13 @@ export default function PagesPage() {
       fetchPages();
       setIsDeleteDialogOpen(false);
       setPageToDelete(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting page:', error);
-      toast.error('Greška pri brisanju stranice');
+      if (error.response?.status === 400) {
+        toast.error('Ne možete obrisati stranicu koja ima podstranice. Prvo obrišite ili premestite podstranice.');
+      } else {
+        toast.error('Greška pri brisanju stranice');
+      }
     }
   };
 
@@ -211,7 +263,20 @@ export default function PagesPage() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingPage(null);
-    reset();
+    reset({
+      title: '',
+      slug: '',
+      content: '',
+      status: 'draft' as PageStatus,
+      template: 'default',
+      sortOrder: 0,
+      parentId: undefined
+    });
+  };
+
+  const handleOpenDialog = () => {
+    fetchAvailableParents();
+    setIsDialogOpen(true);
   };
 
   const getStatusBadge = (status: PageStatus) => {
@@ -272,6 +337,22 @@ export default function PagesPage() {
 
   const publishedCount = pages.filter(page => page.status === 'published').length;
   const draftCount = pages.filter(page => page.status === 'draft').length;
+  const parentPagesCount = pages.filter(page => !page.parentId).length;
+  const subPagesCount = pages.filter(page => page.parentId).length;
+
+  const getPageIndentation = (page: Page) => {
+    return page.parentId ? 'pl-8' : '';
+  };
+
+  const getPageIcon = (page: Page) => {
+    if (page.children && page.children.length > 0) {
+      return <FolderOpen className="h-4 w-4 text-blue-600" />;
+    } else if (page.parentId) {
+      return <FileText className="h-4 w-4 text-gray-500" />;
+    } else {
+      return <Folder className="h-4 w-4 text-gray-600" />;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -285,7 +366,10 @@ export default function PagesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
+            <Button 
+              variant={theme === "light" ? "default" : "secondaryDefault"}
+              onClick={handleOpenDialog}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Nova stranica
             </Button>
@@ -326,7 +410,7 @@ export default function PagesPage() {
                     <Input
                       id="slug"
                       placeholder="o-nama"
-                      {...register('slug')}
+                      {...register('slug', { required: 'URL slug je obavezan' })}
                     />
                     {errors.slug && (
                       <p className="text-sm text-red-600 flex items-center">
@@ -335,6 +419,38 @@ export default function PagesPage() {
                       </p>
                     )}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Nadređena stranica (opciono)</Label>
+                  <Select 
+                    value={watch('parentId')?.toString() || 'none'} 
+                    onValueChange={(value) => setValue('parentId', value === 'none' ? undefined : parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Bez nadređene stranice - glavna stranica" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">
+                        <div className="flex items-center">
+                          <Folder className="mr-2 h-4 w-4" />
+                          Bez nadređene stranice - glavna stranica
+                        </div>
+                      </SelectItem>
+                      {availableParents.map((page) => (
+                        <SelectItem key={page.id} value={page.id.toString()}>
+                          <div className="flex items-center" style={{ paddingLeft: `${page.level * 16}px` }}>
+                            {page.level > 0 && <ChevronRight className="mr-1 h-3 w-3 text-gray-400" />}
+                            <FileText className="mr-2 h-4 w-4" />
+                            {page.title}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Izaberite nadređenu stranicu da kreirate podstranicu
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -381,9 +497,16 @@ export default function PagesPage() {
                       placeholder="0"
                       {...register('sortOrder', { 
                         required: 'Redosled je obavezan',
-                        min: { value: 0, message: 'Redosled mora biti pozitivan broj' }
+                        min: { value: 0, message: 'Redosled mora biti pozitivan broj' },
+                        valueAsNumber: true // Ovo automatski konvertuje u broj
                       })}
                     />
+                    {errors.sortOrder && (
+                      <p className="text-sm text-red-600 flex items-center">
+                        <AlertCircle className="mr-1 h-3 w-3" />
+                        {errors.sortOrder.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -393,7 +516,7 @@ export default function PagesPage() {
                     id="content"
                     placeholder="Napišite sadržaj stranice..."
                     rows={8}
-                    {...register('content')}
+                    {...register('content', { required: 'Sadržaj je obavezan' })}
                   />
                   {errors.content && (
                     <p className="text-sm text-red-600 flex items-center">
@@ -429,7 +552,7 @@ export default function PagesPage() {
           <CardContent>
             <div className="text-2xl font-bold">{pages.length}</div>
             <p className="text-xs text-muted-foreground">
-              Statičke stranice
+              {parentPagesCount} glavnih, {subPagesCount} podstranica
             </p>
           </CardContent>
         </Card>
@@ -480,7 +603,7 @@ export default function PagesPage() {
         </Card>
       </div>
 
-      {/* Filters - FIXED: No empty values in SelectItems */}
+      {/* Filters */}
       <Card>
         <CardHeader>
           <CardTitle>Pretraga i filteri</CardTitle>
@@ -586,14 +709,33 @@ export default function PagesPage() {
               <TableBody>
                 {filteredPages.map((page) => (
                   <TableRow key={page.id} className="group">
-                    <TableCell>
+                    <TableCell className={getPageIndentation(page)}>
                       <div className="space-y-1">
-                        <div className="font-medium group-hover:text-blue-600 transition-colors">
-                          {page.title}
+                        <div className="font-medium group-hover:text-blue-600 transition-colors flex items-center">
+                          <div className="flex items-center mr-2">
+                            {getPageIcon(page)}
+                          </div>
+                          <span>
+                            {page.parentId && (
+                              <span className="text-muted-foreground mr-2">└─</span>
+                            )}
+                            {page.title}
+                          </span>
+                          {page.children && page.children.length > 0 && (
+                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {page.children.length} podstranica
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
                           {getTimeAgo(page.updatedAt)}
+                          {page.parent && (
+                            <>
+                              <span className="mx-2">•</span>
+                              <span>Pod: {page.parent.title}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </TableCell>
@@ -693,7 +835,7 @@ export default function PagesPage() {
                             <p>Počnite kreiranjem prve stranice za vašu instituciju</p>
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                               <DialogTrigger asChild>
-                                <Button className="mt-4">
+                                <Button className="mt-4" onClick={handleOpenDialog}>
                                   <Plus className="mr-2 h-4 w-4" />
                                   Kreiraj prvu stranicu
                                 </Button>
@@ -723,7 +865,7 @@ export default function PagesPage() {
           </DialogHeader>
           
           {pageToDelete && (
-            <div className="py-4 space-y-2 text-sm border rounded-lg p-4 bg-gray-50">
+            <div className="py-4 space-y-2 text-sm border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Naslov:</span>
                 <span className="font-medium">{pageToDelete.title}</span>
@@ -740,10 +882,35 @@ export default function PagesPage() {
                 <span className="text-muted-foreground">Redosled:</span>
                 <span>{pageToDelete.sortOrder}</span>
               </div>
+              {pageToDelete.parentId && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tip:</span>
+                  <Badge variant="outline">Podstranica</Badge>
+                </div>
+              )}
+              {pageToDelete.children && pageToDelete.children.length > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Podstranice:</span>
+                  <Badge variant="destructive">{pageToDelete.children.length} podstranica</Badge>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Kreirana:</span>
                 <span>{formatDate(pageToDelete.createdAt)}</span>
               </div>
+            </div>
+          )}
+
+          {pageToDelete?.children && pageToDelete.children.length > 0 && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div className="flex items-center space-x-2 text-red-800 dark:text-red-300">
+                <AlertCircle className="h-4 w-4" />
+                <span className="font-medium">Upozorenje</span>
+              </div>
+              <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                Ova stranica ima {pageToDelete.children.length} podstranica. 
+                Prvo morate obrisati ili premestiti sve podstranice.
+              </p>
             </div>
           )}
 
@@ -757,8 +924,12 @@ export default function PagesPage() {
             <Button
               variant="destructive"
               onClick={handleDeletePage}
+              disabled={pageToDelete?.children && pageToDelete.children.length > 0}
             >
-              Obriši stranicu
+              {pageToDelete?.children && pageToDelete.children.length > 0 
+                ? 'Ne može se obrisati' 
+                : 'Obriši stranicu'
+              }
             </Button>
           </DialogFooter>
         </DialogContent>
