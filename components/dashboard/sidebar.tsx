@@ -119,7 +119,7 @@ export function DashboardSidebar() {
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-blue-50 hover:text-primary-dynamic',
                     isItemActive &&  // !item.submenu
                         'bg-blue-50 text-primary-dynamic border-r-2 border-primary-dynamic'
                       // : hasActiveSubmenu
