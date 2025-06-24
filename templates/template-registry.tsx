@@ -1,4 +1,4 @@
-// templates/template-registry.tsx - Updated with Documentation Template
+// templates/template-registry.tsx - Updated with Gallery Template
 import { Page, Post } from '@/lib/types';
 
 // Import all templates
@@ -9,6 +9,7 @@ import { TransparencyTemplate } from './transparency/transparency-template';
 import { OrganizationalStructureTemplate } from './organizational-structure/organizationa-structure-template';
 import { DirectorsTemplate } from './directors/directors-template';
 import { DocumentationTemplate } from './documentation/documentation-template';
+import { GalleryTemplate } from './gallery/gallery-template'; // Add this import
 import { DefaultTemplate } from './default/default-template';
 
 // Template registry interface
@@ -31,6 +32,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateComponent> = {
   organizationalStructure: OrganizationalStructureTemplate,
   directors: DirectorsTemplate,
   documentation: DocumentationTemplate,
+  gallery: GalleryTemplate, // Add this line
   default: DefaultTemplate,
 } as const;
 
@@ -42,7 +44,7 @@ export interface TemplateMetadata {
   key: string;
   name: string;
   description: string;
-  category: 'institutional' | 'service' | 'information';
+  category: 'institutional' | 'service' | 'information' | 'media';
   features: string[];
   preview?: string;
 }
@@ -97,6 +99,13 @@ export const TEMPLATE_METADATA: Record<TemplateKey, TemplateMetadata> = {
     description: 'Приказ јавних докумената организованих по категоријама са претрагом и могућношћу преузимања',
     category: 'information',
     features: ['Категоризовани документи', 'Претрага докумената', 'Филтрирање по категорији', 'Преузимање фајлова', 'Статистике', 'Ауто-креирање подстраница'],
+  },
+  gallery: {
+    key: 'gallery',
+    name: 'Галерија',
+    description: 'Приказ свих галерија са могућношћу претраге, филтрирања и прегледа појединачних галерија',
+    category: 'media',
+    features: ['Приказ свих галерија', 'Претрага и филтрирање', 'Категоризација по типу', 'Респонзиван grid layout', 'Hover ефекти', 'Аутоматско рутирање на појединачне галерије'],
   },
   default: {
     key: 'default',
