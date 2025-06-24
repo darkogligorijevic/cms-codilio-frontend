@@ -528,7 +528,12 @@ export const mediaApi = {
         : filename;
       
       return `${API_BASE_URL}/media/file/${cleanFilename}`;
-    }
+    },
+
+    findPublicByCategory: async (category: MediaCategory): Promise<Media[]> => {
+      const response: AxiosResponse<Media[]> = await api.get(`/media/public/category/${category}`);
+      return response.data;
+    },
 };
 export { api };
 

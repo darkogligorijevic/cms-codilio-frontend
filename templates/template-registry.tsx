@@ -1,4 +1,4 @@
-// Templates/TemplateRegistry.tsx - Updated with Directors Template
+// templates/template-registry.tsx - Updated with Documentation Template
 import { Page, Post } from '@/lib/types';
 
 // Import all templates
@@ -8,6 +8,7 @@ import { ServicesTemplate } from './services/services-template';
 import { TransparencyTemplate } from './transparency/transparency-template';
 import { OrganizationalStructureTemplate } from './organizational-structure/organizationa-structure-template';
 import { DirectorsTemplate } from './directors/directors-template';
+import { DocumentationTemplate } from './documentation/documentation-template';
 import { DefaultTemplate } from './default/default-template';
 
 // Template registry interface
@@ -29,6 +30,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateComponent> = {
   transparency: TransparencyTemplate,
   organizationalStructure: OrganizationalStructureTemplate,
   directors: DirectorsTemplate,
+  documentation: DocumentationTemplate,
   default: DefaultTemplate,
 } as const;
 
@@ -88,6 +90,13 @@ export const TEMPLATE_METADATA: Record<TemplateKey, TemplateMetadata> = {
     description: 'Модеран приказ тренутног и бивших директора са документима и детаљним информацијама',
     category: 'institutional',
     features: ['Тренутни директор', 'Историја директора', 'Јавни документи', 'Биографије', 'Контакт информације', 'Статистике'],
+  },
+  documentation: {
+    key: 'documentation',
+    name: 'Документација',
+    description: 'Приказ јавних докумената организованих по категоријама са претрагом и могућношћу преузимања',
+    category: 'information',
+    features: ['Категоризовани документи', 'Претрага докумената', 'Филтрирање по категорији', 'Преузимање фајлова', 'Статистике', 'Ауто-креирање подстраница'],
   },
   default: {
     key: 'default',
