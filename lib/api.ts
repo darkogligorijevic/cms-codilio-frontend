@@ -75,7 +75,7 @@ import {
   UpdateServiceDto
 } from './types';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+export const API_BASE_URL = 'http://localhost:3001/api';
 
 // Create axios instance
 const api = axios.create({
