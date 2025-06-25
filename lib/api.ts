@@ -58,7 +58,21 @@ import {
   GalleryType,
   UpdateGalleryDto,
   UpdateGalleryImageDto,
-  AvailableParentPage
+  AvailableParentPage,
+  CreateServiceDocumentDto,
+  CreateServiceDto,
+  Service,
+  ServiceDocument,
+  ServiceDocumentTypeInfo,
+  ServicePriority,
+  ServicePriorityInfo,
+  ServicesResponse,
+  ServiceStatistics,
+  ServiceStatus,
+  ServiceType,
+  ServiceTypeInfo,
+  UpdateServiceDocumentDto,
+  UpdateServiceDto
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -1113,4 +1127,177 @@ export const galleryApi = {
     });
     return response.data;
   },
+};
+
+export const servicesApi = {
+  // Services CRUD
+  getAll: async (params?: {
+    status?: ServiceStatus;
+    type?: ServiceType;
+    priority?: ServicePriority;
+    search?: string;
+    isOnline?: boolean;
+    requiresAppointment?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<ServicesResponse> => {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.type) searchParams.append('type', params.type);
+    if (params?.priority) searchParams.append('priority', params.priority);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.isOnline !== undefined) searchParams.append('isOnline', params.isOnline.toString());
+    if (params?.requiresAppointment !== undefined) searchParams.append('requiresAppointment', params.requiresAppointment.toString());
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const url = `/services${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const response: AxiosResponse<ServicesResponse> = await api.get(url);
+    return response.data;
+  },
+
+  getPublished: async (params?: {
+    type?: ServiceType;
+    priority?: ServicePriority;
+    search?: string;
+    isOnline?: boolean;
+    requiresAppointment?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<ServicesResponse> => {
+    const searchParams = new URLSearchParams();
+    if (params?.type) searchParams.append('type', params.type);
+    if (params?.priority) searchParams.append('priority', params.priority);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.isOnline !== undefined) searchParams.append('isOnline', params.isOnline.toString());
+    if (params?.requiresAppointment !== undefined) searchParams.append('requiresAppointment', params.requiresAppointment.toString());
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const url = `/services/published${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const response: AxiosResponse<ServicesResponse> = await api.get(url);
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Service> => {
+    const response: AxiosResponse<Service> = await api.get(`/services/${id}`);
+    return response.data;
+  },
+
+  getBySlug: async (slug: string): Promise<Service> => {
+    const response: AxiosResponse<Service> = await api.get(`/services/slug/${slug}`);
+    return response.data;
+  },
+
+  getByType: async (type: ServiceType): Promise<Service[]> => {
+    const response: AxiosResponse<Service[]> = await api.get(`/services/by-type/${type}`);
+    return response.data;
+  },
+
+  create: async (data: CreateServiceDto): Promise<Service> => {
+    const response: AxiosResponse<Service> = await api.post('/services', data);
+    return response.data;
+  },
+
+  update: async (id: number, data: UpdateServiceDto): Promise<Service> => {
+    const response: AxiosResponse<Service> = await api.patch(`/services/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/services/${id}`);
+  },
+
+  incrementRequestCount: async (slug: string): Promise<void> => {
+    await api.patch(`/services/${slug}/request`);
+  },
+
+  // Statistics
+  getStatistics: async (): Promise<ServiceStatistics> => {
+    const response: AxiosResponse<ServiceStatistics> = await api.get('/services/statistics');
+    return response.data;
+  },
+
+  // Metadata
+  getServiceTypes: async (): Promise<ServiceTypeInfo[]> => {
+    const response: AxiosResponse<ServiceTypeInfo[]> = await api.get('/services/types');
+    return response.data;
+  },
+
+  getServicePriorities: async (): Promise<ServicePriorityInfo[]> => {
+    const response: AxiosResponse<ServicePriorityInfo[]> = await api.get('/services/priorities');
+    return response.data;
+  },
+
+  getDocumentTypes: async (): Promise<ServiceDocumentTypeInfo[]> => {
+    const response: AxiosResponse<ServiceDocumentTypeInfo[]> = await api.get('/services/document-types');
+    return response.data;
+  },
+
+  // Document management
+  uploadDocument: async (
+    serviceId: number,
+    file: File,
+    metadata: CreateServiceDocumentDto
+  ): Promise<ServiceDocument> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', metadata.title);
+    formData.append('type', metadata.type);
+    if (metadata.description) formData.append('description', metadata.description);
+    if (metadata.sortOrder !== undefined) formData.append('sortOrder', metadata.sortOrder.toString());
+    if (metadata.isActive !== undefined) formData.append('isActive', metadata.isActive.toString());
+    if (metadata.isPublic !== undefined) formData.append('isPublic', metadata.isPublic.toString());
+
+    const response: AxiosResponse<ServiceDocument> = await api.post(
+      `/services/${serviceId}/documents`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getDocuments: async (serviceId: number): Promise<ServiceDocument[]> => {
+    const response: AxiosResponse<ServiceDocument[]> = await api.get(`/services/${serviceId}/documents`);
+    return response.data;
+  },
+
+  getPublicDocuments: async (serviceId: number): Promise<ServiceDocument[]> => {
+    const response: AxiosResponse<ServiceDocument[]> = await api.get(`/services/${serviceId}/documents/public`);
+    return response.data;
+  },
+
+  updateDocument: async (
+    serviceId: number,
+    documentId: number,
+    data: UpdateServiceDocumentDto
+  ): Promise<ServiceDocument> => {
+    const response: AxiosResponse<ServiceDocument> = await api.patch(
+      `/services/${serviceId}/documents/${documentId}`,
+      data
+    );
+    return response.data;
+  },
+
+  deleteDocument: async (serviceId: number, documentId: number): Promise<void> => {
+    await api.delete(`/services/${serviceId}/documents/${documentId}`);
+  },
+
+  downloadDocument: async (serviceId: number, documentId: number): Promise<void> => {
+    // This will increment download count and redirect to file
+    window.open(`${API_BASE_URL}/services/${serviceId}/documents/${documentId}/download`, '_blank');
+  },
+
+  // Utility functions
+  getFileUrl: (filename: string): string => {
+    const cleanFilename = filename.startsWith('uploads/')
+      ? filename.replace('uploads/', '')
+      : filename;
+
+    return `${API_BASE_URL}/services/files/${cleanFilename}`;
+  }
 };

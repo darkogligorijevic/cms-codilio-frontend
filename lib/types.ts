@@ -851,4 +851,179 @@ export interface PageGalleryAssignment {
   galleryId: number;
   sortOrder: number;
 }
+export enum ServiceType {
+  ADMINISTRATIVE = 'administrative',
+  CONSULTING = 'consulting', 
+  TECHNICAL = 'technical',
+  LEGAL = 'legal',
+  EDUCATIONAL = 'educational',
+  HEALTH = 'health',
+  SOCIAL = 'social',
+  CULTURAL = 'cultural',
+  OTHER = 'other'
+}
 
+export enum ServiceStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published'
+}
+
+export enum ServicePriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  URGENT = 'urgent'
+}
+
+export enum ServiceDocumentType {
+  FORM = 'form',
+  REGULATION = 'regulation',
+  INSTRUCTION = 'instruction',
+  EXAMPLE = 'example',
+  REQUIREMENT = 'requirement',
+  PRICE_LIST = 'price_list',
+  TEMPLATE = 'template',
+  OTHER = 'other'
+}
+
+export interface Service {
+  id: number;
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  description: string;
+  type: ServiceType;
+  status: ServiceStatus;
+  priority: ServicePriority;
+  price?: number;
+  currency?: string;
+  requirements?: string[];
+  steps?: string[];
+  duration?: string;
+  responsibleDepartment?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  workingHours?: string;
+  location?: string;
+  additionalInfo?: string;
+  sortOrder: number;
+  isActive: boolean;
+  isPublic: boolean;
+  requiresAppointment: boolean;
+  isOnline: boolean;
+  viewCount: number;
+  requestCount: number;
+  featuredImage?: string;
+  createdAt: string;
+  updatedAt: string;
+  authorId: number;
+  author: User;
+  documents?: ServiceDocument[];
+}
+
+export interface ServiceDocument {
+  id: number;
+  title: string;
+  type: ServiceDocumentType;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  description?: string;
+  sortOrder: number;
+  isActive: boolean;
+  isPublic: boolean;
+  downloadCount: number;
+  uploadedAt: string;
+  serviceId: number;
+}
+
+export interface CreateServiceDto {
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  description: string;
+  type: ServiceType;
+  status?: ServiceStatus;
+  priority?: ServicePriority;
+  price?: number;
+  currency?: string;
+  requirements?: string[];
+  steps?: string[];
+  duration?: string;
+  responsibleDepartment?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  workingHours?: string;
+  location?: string;
+  additionalInfo?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  isPublic?: boolean;
+  requiresAppointment?: boolean;
+  isOnline?: boolean;
+}
+
+export interface UpdateServiceDto extends Partial<CreateServiceDto> {}
+
+export interface CreateServiceDocumentDto {
+  title: string;
+  type: ServiceDocumentType;
+  description?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  isPublic?: boolean;
+}
+
+export interface UpdateServiceDocumentDto extends Partial<CreateServiceDocumentDto> {}
+
+export interface ServicesResponse {
+  services: Service[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface ServiceStatistics {
+  totalServices: number;
+  publishedServices: number;
+  totalDocuments: number;
+  totalViews: number;
+  totalRequests: number;
+  servicesByType: Array<{
+    type: ServiceType;
+    count: number;
+  }>;
+  servicesByPriority: Array<{
+    priority: ServicePriority;
+    count: number;
+  }>;
+  topServices: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    viewCount: number;
+    requestCount: number;
+  }>;
+}
+
+export interface ServiceTypeInfo {
+  value: ServiceType;
+  label: string;
+  description: string;
+}
+
+export interface ServicePriorityInfo {
+  value: ServicePriority;
+  label: string;
+  description: string;
+}
+
+export interface ServiceDocumentTypeInfo {
+  value: ServiceDocumentType;
+  label: string;
+  description: string;
+}
