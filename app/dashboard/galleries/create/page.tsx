@@ -46,6 +46,7 @@ import {
 import { CreateGalleryDto, GalleryStatus, GalleryType, Media, Page } from '@/lib/types';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { transliterate } from '@/lib/transliterate';
 
 interface FormData extends CreateGalleryDto {
   selectedImages: string[];
@@ -88,7 +89,7 @@ export default function CreateGalleryPage() {
   // Auto-generate slug from title
   useEffect(() => {
     if (watchedTitle && !form.formState.dirtyFields.slug) {
-      const slug = watchedTitle
+      const slug = transliterate(watchedTitle)
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
