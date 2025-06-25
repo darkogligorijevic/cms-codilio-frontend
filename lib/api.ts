@@ -1353,6 +1353,11 @@ export interface DashboardData {
     criticalIssues: number;
     pendingRecommendations: number;
   };
+  documentStats?: {
+    total: number;
+    fulfilled: number;
+    critical: number;
+  };
   alerts: {
     critical: RequirementResult[];
     recommendations: Recommendation[];
@@ -1371,7 +1376,9 @@ export interface DashboardData {
     serverReady?: boolean;
     lastCalculation: string;
     autoCalculationEnabled: boolean;
+    settingsExcluded?: boolean;
   };
+  note?: string;
 }
 
 export interface StatisticsData {
@@ -1424,9 +1431,10 @@ export interface CategoryBreakdown {
   }>;
   lastUpdated: string;
   totalScore: number;
+  note?: string;
 }
 
-// Add this to your existing API exports
+// Updated relofIndexApi
 export const relofIndexApi = {
   // Get current score
   getCurrentScore: async (): Promise<RelofIndexScore> => {
@@ -1509,7 +1517,6 @@ export const relofIndexApi = {
   // Get dashboard data
   getDashboardData: async (): Promise<DashboardData> => {
     const response: AxiosResponse<DashboardData> = await api.get('/relof-index/dashboard');
-    console.log(response.data);
     return response.data;
   },
 
@@ -1527,6 +1534,29 @@ export const relofIndexApi = {
     timestamp: string;
   }> => {
     const response = await api.post('/relof-index/trigger-notification');
+    return response.data;
+  },
+
+  // Additional helper methods
+  getDocumentCategoryBreakdown: async (): Promise<{
+    breakdown: Array<{
+      category: string;
+      name: string;
+      status: string;
+      points: number;
+      issues: string[];
+    }>;
+    summary: {
+      totalCategories: number;
+      fulfilledCategories: number;
+      partialCategories: number;
+      missingCategories: number;
+      maxPossiblePoints: number;
+      earnedPoints: number;
+    };
+    lastUpdated: string;
+  }> => {
+    const response = await api.get('/relof-index/document-categories');
     return response.data;
   }
 };
