@@ -89,14 +89,14 @@ function ScoreHistoryChart({ history }: ScoreHistoryChartProps) {
           return (
             <div key={index} className="flex-1 flex flex-col justify-end items-center">
               <div className="text-xs text-gray-500 mb-1 opacity-0 hover:opacity-100 transition-opacity">
-                {point.totalScore.toFixed(1)}%
+                {Number(point.totalScore).toFixed(1)}%
               </div>
               <div
                 className={`w-full rounded-t transition-all duration-300 hover:opacity-80 cursor-pointer ${
                   isLatest ? 'bg-blue-600' : 'bg-blue-400'
                 }`}
                 style={{ height: `${height}px` }}
-                title={`${new Date(point.calculatedAt).toLocaleDateString('sr-RS')}: ${point.totalScore.toFixed(1)}%`}
+                title={`${new Date(point.calculatedAt).toLocaleDateString('sr-RS')}: ${Number(point.totalScore).toFixed(1)}%`}
               />
               <div className="text-xs text-gray-400 mt-1 rotate-45 origin-left whitespace-nowrap">
                 {new Date(point.calculatedAt).toLocaleDateString('sr-RS', { 
@@ -296,7 +296,7 @@ export default function StatisticsPage() {
               <h2 className="text-2xl font-bold">Тренутни скор</h2>
               <div className="flex items-center space-x-4">
                 <div className="text-4xl font-bold text-blue-600">
-                  {statistics.current.score.toFixed(1)}%
+                  {Number(statistics.current.score).toFixed(1)}%
                 </div>
                 <Badge className={`px-3 py-1 ${getGradeColor(currentGrade)}`}>
                   {currentGrade}
@@ -330,7 +330,7 @@ export default function StatisticsPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{statistics.trends.averageScore.toFixed(1)}%</div>
+            <div className="text-2xl font-bold">{Number(statistics.trends.averageScore).toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">
               За период од {statistics.period}
             </p>
