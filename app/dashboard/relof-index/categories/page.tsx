@@ -1,4 +1,4 @@
-// app/dashboard/relof-index/categories/page.tsx
+// app/dashboard/relof-index/categories/page.tsx - Enhanced version with category details modal
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,6 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   ArrowLeft,
   BarChart3,
@@ -26,7 +33,14 @@ import {
   Briefcase,
   Image,
   Activity,
-  Share2
+  Share2,
+  X,
+  Info,
+  ChevronRight,
+  Calendar,
+  Hash,
+  Star,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -75,6 +89,390 @@ function RequirementStatusIcon({ status }: { status: string }) {
   }
 }
 
+interface CategoryDetailsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categoryData: {
+    category: string;
+    displayName: string;
+    scores: {
+      score: number;
+      maxScore: number;
+      percentage: number;
+    };
+    requirements: {
+      total: number;
+      fulfilled: number;
+      partial: number;
+      missing: number;
+    };
+    topIssues: Array<{
+      name: string;
+      status: string;
+      priority: string;
+      issues: string[];
+    }>;
+  } | null;
+}
+
+function CategoryDetailsModal({ isOpen, onClose, categoryData }: CategoryDetailsModalProps) {
+  if (!categoryData) return null;
+
+  const getScoreColor = (percentage: number) => {
+    if (percentage >= 80) return 'text-green-600';
+    if (percentage >= 60) return 'text-yellow-600';
+    if (percentage >= 40) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
+  const getProgressColor = (percentage: number) => {
+    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 60) return 'bg-yellow-500';
+    if (percentage >= 40) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'bg-red-500';
+      case 'high': return 'bg-orange-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'fulfilled': return 'Испуњено';
+      case 'partial': return 'Делимично';
+      case 'missing': return 'Недостаје';
+      case 'outdated': return 'Застарело';
+      default: return status;
+    }
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'Критично';
+      case 'high': return 'Високо';
+      case 'medium': return 'Средње';
+      case 'low': return 'Ниско';
+      default: return priority;
+    }
+  };
+
+  const completionRate = (categoryData.requirements.fulfilled / categoryData.requirements.total) * 100;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <CategoryIcon category={categoryData.category} className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">{categoryData.displayName}</h3>
+              <p className="text-sm text-gray-500 font-normal">
+                Детаљан преглед категорије
+              </p>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+          {/* Score Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Target className="h-5 w-5 text-blue-600" />
+                  <span>Укупан скор</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className={`text-4xl font-bold ${getScoreColor(categoryData.scores.percentage)}`}>
+                      {categoryData.scores.percentage.toFixed(1)}%
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {categoryData.scores.score} од {categoryData.scores.maxScore} бодова
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Напредак</span>
+                      <span>{categoryData.scores.percentage.toFixed(1)}%</span>
+                    </div>
+                    <Progress 
+                      value={categoryData.scores.percentage} 
+                      className="h-3"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Hash className="h-5 w-5 text-green-600" />
+                  <span>Завршеност</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-green-600">
+                      {completionRate.toFixed(0)}%
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {categoryData.requirements.fulfilled} од {categoryData.requirements.total} захтева
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Испуњеност</span>
+                      <span>{completionRate.toFixed(1)}%</span>
+                    </div>
+                    <Progress 
+                      value={completionRate} 
+                      className="h-3"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Requirements Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5" />
+                <span>Статистика захтева</span>
+              </CardTitle>
+              <CardDescription>
+                Детаљан преглед статуса свих захтева у категорији
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600 mb-1">
+                    {categoryData.requirements.fulfilled}
+                  </div>
+                  <div className="text-sm text-green-600 mb-2">Испуњено</div>
+                  <div className="text-xs text-gray-500">
+                    {((categoryData.requirements.fulfilled / categoryData.requirements.total) * 100).toFixed(1)}%
+                  </div>
+                </div>
+                
+                <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600 mb-1">
+                    {categoryData.requirements.partial}
+                  </div>
+                  <div className="text-sm text-yellow-600 mb-2">Делимично</div>
+                  <div className="text-xs text-gray-500">
+                    {((categoryData.requirements.partial / categoryData.requirements.total) * 100).toFixed(1)}%
+                  </div>
+                </div>
+                
+                <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600 mb-1">
+                    {categoryData.requirements.missing}
+                  </div>
+                  <div className="text-sm text-red-600 mb-2">Недостаје</div>
+                  <div className="text-xs text-gray-500">
+                    {((categoryData.requirements.missing / categoryData.requirements.total) * 100).toFixed(1)}%
+                  </div>
+                </div>
+                
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-600 mb-1">
+                    {categoryData.requirements.total}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">Укупно</div>
+                  <div className="text-xs text-gray-500">
+                    100%
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Issues and Recommendations */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <span>Проблеми и препоруке</span>
+                {categoryData.topIssues.length > 0 && (
+                  <Badge variant="outline" className="ml-auto">
+                    {categoryData.topIssues.length} активних
+                  </Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Кључни проблеми који захтевају пажњу у овој категорији
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {categoryData.topIssues.length > 0 ? (
+                <div className="space-y-4">
+                  {categoryData.topIssues.map((issue, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <RequirementStatusIcon status={issue.status} />
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {issue.name}
+                            </h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs"
+                                style={{ 
+                                  backgroundColor: `${getPriorityColor(issue.priority)}20`,
+                                  borderColor: getPriorityColor(issue.priority).replace('bg-', ''),
+                                  color: getPriorityColor(issue.priority).replace('bg-', '').replace('500', '700')
+                                }}
+                              >
+                                <div className={`w-2 h-2 rounded-full ${getPriorityColor(issue.priority)} mr-1`} />
+                                {getPriorityLabel(issue.priority)}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {getStatusLabel(issue.status)}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {issue.issues && issue.issues.length > 0 && (
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Препознати проблеми:
+                          </h5>
+                          <ul className="space-y-1">
+                            {issue.issues.map((problemDescription, problemIndex) => (
+                              <li key={problemIndex} className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                <ChevronRight className="h-4 w-4 mt-0.5 text-gray-400 flex-shrink-0" />
+                                <span>{problemDescription}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Нема активних проблема
+                  </h3>
+                  <p className="text-gray-500">
+                    Сви захтеви у овој категорији су у реду
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Action Recommendations */}
+          <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-blue-800 dark:text-blue-200">
+                <Zap className="h-5 w-5" />
+                <span>Препоруке за побољшање</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {categoryData.requirements.missing > 0 && (
+                  <div className="flex items-start space-x-3">
+                    <div className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mt-0.5">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-800 dark:text-blue-200">
+                        Приоритет: Недостајући захтеви
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Фокусирајте се на {categoryData.requirements.missing} недостајућих захтева за највећи утицај на скор
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {categoryData.requirements.partial > 0 && (
+                  <div className="flex items-start space-x-3">
+                    <div className="bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mt-0.5">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-800 dark:text-blue-200">
+                        Завршите делимично испуњене
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Постоји {categoryData.requirements.partial} делимично испуњених захтева које можете лако довршити
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {categoryData.topIssues.filter(i => i.priority === 'critical').length > 0 && (
+                  <div className="flex items-start space-x-3">
+                    <div className="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mt-0.5">
+                      !
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-800 dark:text-blue-200">
+                        Критични проблеми
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Решите критичне проблеме првенствено јер имају највећи утицај на коначни скор
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex items-start space-x-3">
+                  <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mt-0.5">
+                    ✓
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-blue-800 dark:text-blue-200">
+                      Редовно ажурирање
+                    </h4>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      Редовно ажурирајте информације да избегнете да захтеви застаре
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex justify-end pt-4 border-t">
+          <Button onClick={onClose} variant="outline">
+            <X className="mr-2 h-4 w-4" />
+            Затвори
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 interface CategoryCardProps {
   categoryData: {
     category: string;
@@ -97,9 +495,10 @@ interface CategoryCardProps {
       issues: string[];
     }>;
   };
+  onViewDetails: (categoryData: any) => void;
 }
 
-function CategoryCard({ categoryData }: CategoryCardProps) {
+function CategoryCard({ categoryData, onViewDetails }: CategoryCardProps) {
   const getScoreColor = (percentage: number) => {
     if (percentage >= 80) return 'text-green-600 bg-green-50 border-green-200';
     if (percentage >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
@@ -242,7 +641,12 @@ function CategoryCard({ categoryData }: CategoryCardProps) {
 
         {/* Action Button */}
         <div className="mt-4 pt-4 border-t">
-          <Button variant="outline" className="w-full" size="sm">
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            size="sm"
+            onClick={() => onViewDetails(categoryData)}
+          >
             <Eye className="mr-2 h-4 w-4" />
             Прегледај детаље
           </Button>
@@ -256,6 +660,8 @@ export default function CategoriesPage() {
   const [categoryBreakdown, setCategoryBreakdown] = useState<CategoryBreakdown | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const fetchCategoryBreakdown = async () => {
     try {
@@ -275,6 +681,16 @@ export default function CategoriesPage() {
     await fetchCategoryBreakdown();
     setIsRefreshing(false);
     toast.success('Подаци о категоријама су освежени');
+  };
+
+  const handleViewDetails = (categoryData: any) => {
+    setSelectedCategory(categoryData);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedCategory(null);
   };
 
   useEffect(() => {
@@ -491,7 +907,11 @@ export default function CategoriesPage() {
         {categoryBreakdown.categories
           .sort((a, b) => b.scores.percentage - a.scores.percentage) // Sort by score descending
           .map((category) => (
-            <CategoryCard key={category.category} categoryData={category} />
+            <CategoryCard 
+              key={category.category} 
+              categoryData={category} 
+              onViewDetails={handleViewDetails}
+            />
           ))}
       </div>
 
@@ -569,6 +989,13 @@ export default function CategoriesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Category Details Modal */}
+      <CategoryDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseModal}
+        categoryData={selectedCategory}
+      />
     </div>
   );
 }
