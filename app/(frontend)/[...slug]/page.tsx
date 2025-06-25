@@ -10,10 +10,11 @@ import {
   FileText
 } from 'lucide-react';
 import Link from 'next/link';
-import { pagesApi, postsApi, mediaApi, galleryApi } from '@/lib/api';
-import type { Page, Post, Gallery } from '@/lib/types';
+import { pagesApi, postsApi, mediaApi, galleryApi, servicesApi } from '@/lib/api';
+import { type Page, type Post, type Gallery, Service } from '@/lib/types';
 import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
+import { SingleServiceTemplate } from '@/templates/services/single-service-template';
 
 interface DynamicPageProps {
   params: Promise<{ slug: string[] }>;
@@ -25,6 +26,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<Page | null>(null);
   const [gallery, setGallery] = useState<Gallery | null>(null);
+  const [service, setService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +52,11 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
   useEffect(() => {
     if (pageSlug) {
-      fetchPageAndGallery();
+      fetchPage();
     }
   }, [pageSlug, subSlug]);
 
-  const fetchPageAndGallery = async () => {
+  const fetchPage = async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -74,6 +76,18 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           setGallery(null);
         }
       }
+
+      if (pageData.template === 'service' && subSlug) {
+        try {
+          const serviceData = await servicesApi.getBySlug(subSlug);
+          setService(serviceData);
+        } catch (serviceError) {
+          console.error('Service not found:', serviceError);
+          setService(null);
+        }
+      }
+
+
     } catch (error) {
       console.error('Error fetching page:', error);
       setError('Страница није пронађена');
@@ -181,7 +195,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           settings={settings}
           parentPageSlug={page.slug}
         />
-      );
+      ); 
     } else {
       // Gallery not found, show 404
       return (
@@ -195,6 +209,37 @@ export default function DynamicPage({ params }: DynamicPageProps) {
               </p>
               <Button variant="primary" asChild>
                 <Link href={`/${page.slug}`}>Назад на галерије</Link>
+              </Button>
+            </div>
+          </main>
+        </div>
+      );
+    }
+  }
+
+  if (page.template === 'service' && subSlug) {
+    if (service) {
+      return (
+        <SingleServiceTemplate 
+          service={service} 
+          institutionData={institutionData}
+          settings={settings}
+          parentPageSlug={page.slug}
+        />
+      ); 
+    } else {
+      // service not found, show 404
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="text-center">
+              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Услуга није пронађена</h1>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Услугу коју тражите не постоји или је уклоњена.
+              </p>
+              <Button variant="primary" asChild>
+                <Link href={`/${page.slug}`}>Назад на услуге</Link>
               </Button>
             </div>
           </main>

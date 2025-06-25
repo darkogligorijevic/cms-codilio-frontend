@@ -10,10 +10,11 @@ import {
   FileText
 } from 'lucide-react';
 import Link from 'next/link';
-import { pagesApi, postsApi, mediaApi, galleryApi } from '@/lib/api';
-import type { Page, Post, Gallery } from '@/lib/types';
+import { pagesApi, postsApi, mediaApi, galleryApi, servicesApi } from '@/lib/api';
+import { type Page, type Post, type Gallery, Service } from '@/lib/types';
 import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
+import { SingleServiceTemplate } from '@/templates/services/single-service-template';
 
 interface DynamicPageProps {
   params: Promise<{ slug: string }>;
@@ -25,6 +26,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<Page | null>(null);
   const [gallery, setGallery] = useState<Gallery | null>(null);
+  const [service, setService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +49,11 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
   useEffect(() => {
     if (pageSlug) {
-      fetchPageAndGallery();
+      fetchPages();
     }
   }, [pageSlug]);
 
-  const fetchPageAndGallery = async () => {
+  const fetchPages = async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -76,6 +78,15 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           
         } catch (galleryError) {
           console.error('Neither page nor gallery found for slug:', pageSlug);
+          setError('Страница није пронађена');
+        }
+
+        try {
+          const serviceData = await servicesApi.getBySlug(pageSlug);
+          setService(serviceData);
+          return;
+        } catch (serviceErrror) {
+          console.error('Neither page nor service found for slug:', pageSlug);
           setError('Страница није пронађена');
         }
       }
@@ -138,8 +149,19 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
+  if (service) {
+    return (
+      <SingleServiceTemplate 
+        service={service}
+        institutionData={institutionData}
+        settings={settings}
+        parentPageSlug="usluge"
+      />
+    )
+  }
+
   // If error or neither page nor gallery found
-  if (error || (!page && !gallery)) {
+  if (error || (!page && !gallery && !service)) {
     return (
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm border-b">
