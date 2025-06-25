@@ -1,4 +1,4 @@
-// templates/services/services-template.tsx
+// templates/services/services-template.tsx - Updated with correct routing
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -419,9 +419,9 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
                         </div>
                       )}
 
-                      {/* Action Button */}
+                      {/* Action Button - Updated routing */}
                       <div className="pt-2">
-                        <Link href={`/usluge/${service.slug}`}>
+                        <Link href={`/${service.slug}`}>
                           <Button 
                             className="w-full group/btn bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                             onClick={() => handleServiceRequest(service.slug)}

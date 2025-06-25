@@ -1,4 +1,4 @@
-// app/(frontend)/[slug]/page.tsx - Fixed version with gallery routing
+// app/(frontend)/[slug]/page.tsx - Updated to handle service routing
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -68,7 +68,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         return; // Exit early if page found
         
       } catch (pageError) {
-        console.log('Page not found, checking for gallery...');
+        console.log('Page not found, checking for gallery or service...');
         
         // If page not found, try to find a gallery with this slug
         try {
@@ -77,17 +77,18 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           return; // Exit early if gallery found
           
         } catch (galleryError) {
-          console.error('Neither page nor gallery found for slug:', pageSlug);
-          setError('Страница није пронађена');
-        }
-
-        try {
-          const serviceData = await servicesApi.getBySlug(pageSlug);
-          setService(serviceData);
-          return;
-        } catch (serviceErrror) {
-          console.error('Neither page nor service found for slug:', pageSlug);
-          setError('Страница није пронађена');
+          console.log('Gallery not found, checking for service...');
+          
+          // If gallery not found, try to find a service with this slug
+          try {
+            const serviceData = await servicesApi.getBySlug(pageSlug);
+            setService(serviceData);
+            return; // Exit early if service found
+            
+          } catch (serviceError) {
+            console.error('Neither page, gallery, nor service found for slug:', pageSlug);
+            setError('Страница није пронађена');
+          }
         }
       }
       
@@ -149,18 +150,19 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
+  // If service found, render service template
   if (service) {
     return (
       <SingleServiceTemplate 
         service={service}
         institutionData={institutionData}
         settings={settings}
-        parentPageSlug="usluge"
+        parentPageSlug="usluge" // Assuming the parent services page slug
       />
-    )
+    );
   }
 
-  // If error or neither page nor gallery found
+  // If error or neither page nor gallery nor service found
   if (error || (!page && !gallery && !service)) {
     return (
       <div className="min-h-screen bg-gray-50">

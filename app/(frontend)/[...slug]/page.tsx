@@ -1,4 +1,3 @@
-// app/(frontend)/[...slug]/page.tsx - Catch-all route for dynamic pages and galleries
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -34,7 +33,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   // Parse the slug array
   const slugArray = resolvedParams.slug || [];
   const pageSlug = slugArray[0];
-  const subSlug = slugArray[1]; // Gallery slug if present
+  const subSlug = slugArray[1]; // Gallery/Service slug if present
 
   // Use settings for institution data with fallbacks
   const institutionData = {
@@ -77,7 +76,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         }
       }
 
-      if (pageData.template === 'service' && subSlug) {
+      // If this is a services page and we have a sub-slug, try to get the service
+      if (pageData.template === 'services' && subSlug) {
         try {
           const serviceData = await servicesApi.getBySlug(subSlug);
           setService(serviceData);
@@ -86,7 +86,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           setService(null);
         }
       }
-
 
     } catch (error) {
       console.error('Error fetching page:', error);
@@ -217,7 +216,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   }
 
-  if (page.template === 'service' && subSlug) {
+  // If this is a services page with a sub-slug, use SingleServiceTemplate
+  if (page.template === 'services' && subSlug) {
     if (service) {
       return (
         <SingleServiceTemplate 
@@ -228,7 +228,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         />
       ); 
     } else {
-      // service not found, show 404
+      // Service not found, show 404
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
