@@ -331,7 +331,6 @@ export default function ServiceDocumentsPage() {
             maxSize={10}
             multiple={true}
             disabled={isUploading}
-            showMetadataForm={false}
           />
         </CardContent>
       </Card>

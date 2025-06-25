@@ -1509,6 +1509,7 @@ export const relofIndexApi = {
   // Get dashboard data
   getDashboardData: async (): Promise<DashboardData> => {
     const response: AxiosResponse<DashboardData> = await api.get('/relof-index/dashboard');
+    console.log(response.data);
     return response.data;
   },
 

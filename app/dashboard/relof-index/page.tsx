@@ -75,7 +75,7 @@ function ScoreGauge({ score, size = 120 }: ScoreGaugeProps) {
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {score.toFixed(1)}%
+            {Number(score).toFixed(1)}%
           </div>
           <div className="text-xs text-gray-500">
             Релоф Индекс
@@ -388,7 +388,7 @@ export default function RelofIndexDashboard() {
                     {dashboardData.score.grade}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    {dashboardData.score.current.toFixed(1)}% од максималних 100%
+                    {Number(dashboardData.score.current).toFixed(1)}% од максималних 100%
                   </p>
                 </div>
                 <TrendIndicator isImproving={dashboardData.trends.isImproving} />
@@ -599,7 +599,7 @@ export default function RelofIndexDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="text-2xl font-bold">
-                    {dashboardData.trends.history[dashboardData.trends.history.length - 1]?.score.toFixed(1) || '0.0'}%
+                    {Number(dashboardData.trends.history[dashboardData.trends.history.length - 1]?.score).toFixed(1) || '0.0'}%
                   </div>
                   <TrendIndicator isImproving={dashboardData.trends.isImproving} />
                 </div>
@@ -621,7 +621,7 @@ export default function RelofIndexDashboard() {
                       <div
                         className="bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
                         style={{ height: `${height}%` }}
-                        title={`${new Date(point.date).toLocaleDateString('sr-RS')}: ${point.score.toFixed(1)}%`}
+                        title={`${new Date(point.date).toLocaleDateString('sr-RS')}: ${Number(point.score).toFixed(1)}%`}
                       />
                       <div className="text-xs text-center text-gray-500 mt-1">
                         {new Date(point.date).toLocaleDateString('sr-RS', { month: 'short', day: 'numeric' })}
