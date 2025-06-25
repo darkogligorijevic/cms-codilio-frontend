@@ -1,4 +1,4 @@
-// components/ui/drag-drop-upload.tsx - Ažurirana verzija sa kategorijama
+// components/ui/drag-drop-upload.tsx - Fixed version
 'use client';
 
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
@@ -9,6 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -32,7 +40,8 @@ import {
   FileCheck,
   Clipboard,
   BarChart3,
-  Folder
+  Folder,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -48,6 +57,12 @@ interface UploadFile {
   metadata: CreateMediaDto;
 }
 
+interface FileMetadataDialog {
+  isOpen: boolean;
+  file: File | null;
+  metadata: CreateMediaDto;
+}
+
 interface DragDropUploadProps {
   onFileUpload: (file: File, metadata?: CreateMediaDto) => Promise<void>;
   accept?: string;
@@ -55,7 +70,6 @@ interface DragDropUploadProps {
   multiple?: boolean;
   className?: string;
   disabled?: boolean;
-  showMetadataForm?: boolean;
   defaultCategory?: MediaCategory;
   defaultIsPublic?: boolean;
 }
@@ -106,7 +120,6 @@ export function DragDropUpload({
   multiple = true,
   className,
   disabled = false,
-  showMetadataForm = true,
   defaultCategory = MediaCategory.OTHER,
   defaultIsPublic = false
 }: DragDropUploadProps) {
@@ -118,6 +131,11 @@ export function DragDropUpload({
     description: '',
     alt: '',
     caption: ''
+  });
+  const [metadataDialog, setMetadataDialog] = useState<FileMetadataDialog>({
+    isOpen: false,
+    file: null,
+    metadata: { ...globalMetadata }
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -185,24 +203,62 @@ export function DragDropUpload({
     return undefined;
   };
 
+  const isDocumentFile = (file: File): boolean => {
+    return !file.type.startsWith('image/');
+  };
+
+  const openMetadataDialog = (file: File) => {
+    setMetadataDialog({
+      isOpen: true,
+      file,
+      metadata: { ...globalMetadata }
+    });
+  };
+
+  const handleMetadataConfirm = async () => {
+    if (!metadataDialog.file) return;
+
+    const uploadFile: UploadFile = {
+      file: metadataDialog.file,
+      id: Math.random().toString(36).substr(2, 9),
+      progress: 0,
+      status: 'pending',
+      preview: createFilePreview(metadataDialog.file),
+      metadata: { ...metadataDialog.metadata }
+    };
+
+    setUploadFiles(prev => [...prev, uploadFile]);
+    setMetadataDialog({ isOpen: false, file: null, metadata: { ...globalMetadata } });
+
+    await handleFileUpload(uploadFile);
+  };
+
   const processFiles = async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     
     for (const file of fileArray) {
       const error = validateFile(file);
-      const uploadFile: UploadFile = {
-        file,
-        id: Math.random().toString(36).substr(2, 9),
-        progress: 0,
-        status: error ? 'error' : 'pending',
-        error:error as string,
-        preview: error ? undefined : createFilePreview(file),
-        metadata: { ...globalMetadata }
-      };
+      
+      if (error) {
+        toast.error(error);
+        continue;
+      }
 
-      setUploadFiles(prev => [...prev, uploadFile]);
+      // For documents, always show metadata dialog
+      if (isDocumentFile(file)) {
+        openMetadataDialog(file);
+      } else {
+        // For images, use global metadata directly
+        const uploadFile: UploadFile = {
+          file,
+          id: Math.random().toString(36).substr(2, 9),
+          progress: 0,
+          status: 'pending',
+          preview: createFilePreview(file),
+          metadata: { ...globalMetadata }
+        };
 
-      if (!error) {
+        setUploadFiles(prev => [...prev, uploadFile]);
         await handleFileUpload(uploadFile);
       }
     }
@@ -225,7 +281,7 @@ export function DragDropUpload({
         }));
       }, 300);
 
-      // Actual upload
+      // Actual upload with the file's specific metadata
       await onFileUpload(uploadFile.file, uploadFile.metadata);
 
       // Clear progress interval and mark as successful
@@ -310,61 +366,7 @@ export function DragDropUpload({
   return (
     <div className={cn("space-y-4", className)}>
       {/* Global Metadata Form */}
-      {showMetadataForm && (
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium mb-4">Podrazumevane informacije za fajlove</h3>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Kategorija</Label>
-                <Select 
-                  value={globalMetadata.category} 
-                  onValueChange={(value) => setGlobalMetadata(prev => ({ ...prev, category: value as MediaCategory }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Izaberite kategoriju" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        <div className="flex items-center space-x-2">
-                          <category.icon className="h-4 w-4" />
-                          <div>
-                            <div className="font-medium">{category.label}</div>
-                            <div className="text-xs text-muted-foreground">{category.description}</div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <div className="space-y-2">
-                <Label>Opis (opciono)</Label>
-                <Input
-                  placeholder="Kratki opis dokumenata..."
-                  value={globalMetadata.description || ''}
-                  onChange={(e) => setGlobalMetadata(prev => ({ ...prev, description: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-center space-x-2">
-              <Checkbox
-                id="globalIsPublic"
-                checked={globalMetadata.isPublic}
-                onCheckedChange={(checked) => setGlobalMetadata(prev => ({ ...prev, isPublic: !!checked }))}
-              />
-              <Label htmlFor="globalIsPublic" className="flex items-center space-x-2">
-                {globalMetadata.isPublic ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                <span>Učitaj kao javno dostupne dokumente</span>
-              </Label>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Drag & Drop Zone */}
       <div
@@ -418,30 +420,18 @@ export function DragDropUpload({
             </p>
           </div>
 
-          {showMetadataForm && (
-            <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-3 rounded">
-              <div className="flex items-center space-x-2 mb-1">
-                {getCategoryIcon(globalMetadata.category as MediaCategory)}
-                <span className="font-medium">
-                  {categories.find(cat => cat.value === globalMetadata.category)?.label}
-                </span>
-                {globalMetadata.isPublic ? (
-                  <Badge variant="default" className="text-xs bg-green-600">
-                    <Eye className="h-3 w-3 mr-1" />
-                    Javno
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="text-xs">
-                    <EyeOff className="h-3 w-3 mr-1" />
-                    Interno
-                  </Badge>
-                )}
-              </div>
-              {globalMetadata.description && (
-                <p className="text-xs">{globalMetadata.description}</p>
-              )}
+          <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-3 rounded">
+            <div className="flex items-center space-x-2 mb-2">
+              <ImageIcon className="h-4 w-4" />
+              <span className="font-medium">Slike:</span>
+              <span>Koriste podešavanja odozgo</span>
             </div>
-          )}
+            <div className="flex items-center space-x-2">
+              <FileText className="h-4 w-4" />
+              <span className="font-medium">Dokumenti:</span>
+              <span>Otvaraju dijalog za podešavanje</span>
+            </div>
+          </div>
 
           {!disabled && (
             <Button 
@@ -458,6 +448,114 @@ export function DragDropUpload({
           )}
         </div>
       </div>
+
+      {/* File Metadata Dialog */}
+      <Dialog open={metadataDialog.isOpen} onOpenChange={(open) => {
+        if (!open) {
+          setMetadataDialog({ isOpen: false, file: null, metadata: { ...globalMetadata } });
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Podešavanja dokumenta</DialogTitle>
+            <DialogDescription>
+              {metadataDialog.file && (
+                <>
+                  Podešavanja za fajl: <strong>{metadataDialog.file.name}</strong>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="category">Kategorija *</Label>
+              <Select 
+                value={metadataDialog.metadata.category} 
+                onValueChange={(value) => setMetadataDialog(prev => ({ 
+                  ...prev, 
+                  metadata: { ...prev.metadata, category: value as MediaCategory } 
+                }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Izaberite kategoriju" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      <div className="flex items-center space-x-2">
+                        <category.icon className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">{category.label}</div>
+                          <div className="text-xs text-muted-foreground">{category.description}</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Opis dokumenta</Label>
+              <Textarea
+                id="description"
+                placeholder="Detaljan opis dokumenta..."
+                rows={3}
+                value={metadataDialog.metadata.description || ''}
+                onChange={(e) => setMetadataDialog(prev => ({ 
+                  ...prev, 
+                  metadata: { ...prev.metadata, description: e.target.value } 
+                }))}
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isPublic"
+                checked={metadataDialog.metadata.isPublic}
+                onCheckedChange={(checked) => setMetadataDialog(prev => ({ 
+                  ...prev, 
+                  metadata: { ...prev.metadata, isPublic: !!checked } 
+                }))}
+              />
+              <Label htmlFor="isPublic" className="flex items-center space-x-2">
+                {metadataDialog.metadata.isPublic ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                <span>Javno dostupan dokument</span>
+              </Label>
+            </div>
+
+            {metadataDialog.file && (
+              <div className="space-y-2 text-sm text-muted-foreground bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                <div className="flex justify-between">
+                  <span>Tip:</span>
+                  <span>{getFileTypeLabel(metadataDialog.file)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Veličina:</span>
+                  <span>{formatFileSize(metadataDialog.file.size)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setMetadataDialog({ isOpen: false, file: null, metadata: { ...globalMetadata } })}
+            >
+              Otkaži
+            </Button>
+            <Button 
+              type="button" 
+              onClick={handleMetadataConfirm}
+            >
+              Učitaj dokument
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Upload Progress */}
       {uploadFiles.length > 0 && (
@@ -564,48 +662,10 @@ export function DragDropUpload({
                       </Button>
                     </div>
 
-                    {/* Individual file metadata editing (for pending files) */}
-                    {uploadFile.status === 'pending' && (
-                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="text-xs">Kategorija</Label>
-                            <Select 
-                              value={uploadFile.metadata.category} 
-                              onValueChange={(value) => updateFileMetadata(uploadFile.id, { category: value as MediaCategory })}
-                            >
-                              <SelectTrigger className="h-8 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categories.map((category) => (
-                                  <SelectItem key={category.value} value={category.value}>
-                                    <div className="flex items-center space-x-1">
-                                      <category.icon className="h-3 w-3" />
-                                      <span>{category.label}</span>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`public-${uploadFile.id}`}
-                              checked={uploadFile.metadata.isPublic}
-                              onCheckedChange={(checked) => updateFileMetadata(uploadFile.id, { isPublic: !!checked })}
-                            />
-                            <Label htmlFor={`public-${uploadFile.id}`} className="text-xs">Javno</Label>
-                          </div>
-                        </div>
-                        
-                        <Input
-                          placeholder="Opis fajla..."
-                          value={uploadFile.metadata.description || ''}
-                          onChange={(e) => updateFileMetadata(uploadFile.id, { description: e.target.value })}
-                          className="h-8 text-xs"
-                        />
+                    {/* Show metadata info */}
+                    {uploadFile.metadata.description && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {uploadFile.metadata.description}
                       </div>
                     )}
                   </div>

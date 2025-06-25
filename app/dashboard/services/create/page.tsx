@@ -125,12 +125,15 @@ export default function CreateServicePage() {
 
     // Auto-generate slug from name
     const generateSlug = (name: string) => {
-        return transliterate(name)
+        console.log("Original: ", name)
+        const slug = transliterate(name)
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
             .trim();
+        console.log("Slug: ", slug)
+        return slug;
     };
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

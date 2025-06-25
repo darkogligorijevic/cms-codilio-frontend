@@ -174,14 +174,18 @@ export default function MediaPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, categoryFilter, publicFilter]);
 
-  const handleFileUpload = async (file: File) => {
+
+  const handleFileUpload = async (file: File, metadata?: CreateMediaDto) => {
     try {
       setIsUploading(true);
       
-      const uploadData: CreateMediaDto = {
+      // Use the provided metadata, or fallback to default for images
+      const uploadData: CreateMediaDto = metadata || {
         category: MediaCategory.OTHER,
         isPublic: false
       };
+      
+      console.log('Uploading file with metadata:', uploadData);
       
       const response = await mediaApi.upload(file, uploadData);
       console.log('Upload response:', response);

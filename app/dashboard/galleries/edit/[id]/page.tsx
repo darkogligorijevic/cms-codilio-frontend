@@ -433,22 +433,41 @@ export default function EditGalleryPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Button variant="ghost" onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Уреди галерију</h1>
-          <p className="text-muted-foreground">
-            Ажурирајте информације о галерији "{gallery.title}"
-          </p>
-        </div>
-      </div>
 
       {/* Gallery Form - Now full width */}
       <div className="space-y-6">
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <div className='flex justify-between'>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Уреди галерију</h1>
+                <p className="text-muted-foreground">
+                  Ажурирајте информације о галерији "{gallery.title}"
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end space-x-2 pt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}
+                disabled={isSubmitting}
+              >
+                Откажи
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                variant={theme === "light" ? "default" : "secondaryDefault"}
+              >
+                {isSubmitting ? 'Чува се...' : 'Сачувај измене'}
+                <Save className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           <div className="grid gap-6 md:grid-cols-2">
             {/* Basic Information */}
             <Card>
@@ -612,26 +631,6 @@ export default function EditGalleryPage() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-2 pt-6 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}
-              disabled={isSubmitting}
-            >
-              Откажи
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              variant={theme === "light" ? "default" : "secondaryDefault"}
-            >
-              {isSubmitting ? 'Чува се...' : 'Сачувај измене'}
-              <Save className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
         </form>
       </div>
 
