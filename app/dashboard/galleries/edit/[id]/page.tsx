@@ -446,384 +446,394 @@ export default function EditGalleryPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Gallery Form - 2/3 width */}
-        <div className="lg:col-span-2 space-y-6">
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Basic Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Основни подаци</CardTitle>
-                  <CardDescription>
-                    Ажурирајте основне информације о галерији
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Наслов галерије *</Label>
-                    <Input
-                      id="title"
-                      placeholder="нпр. Отварање новог парка"
-                      {...form.register('title', { 
-                        required: 'Наслов је обавезан',
-                        minLength: { value: 3, message: 'Наслов мора имати најмање 3 карактера' }
-                      })}
-                    />
-                    {form.formState.errors.title && (
-                      <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="slug">URL скраћеница *</Label>
-                    <Input
-                      id="slug"
-                      placeholder="otvaranje-novog-parka"
-                      {...form.register('slug', {
-                        required: 'URL скраћеница је обавезна',
-                        pattern: {
-                          value: /^[a-z0-9-]+$/,
-                          message: 'Може садржати само мала слова, бројеве и цртице'
-                        }
-                      })}
-                    />
-                    {form.formState.errors.slug && (
-                      <p className="text-sm text-red-600">{form.formState.errors.slug.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Опис галерије</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Кратак опис галерије..."
-                      rows={3}
-                      {...form.register('description')}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Gallery Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Подешавања галерије</CardTitle>
-                  <CardDescription>
-                    Конфигурисање типа и статуса галерије
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Тип галерије</Label>
-                    <Select value={form.watch('type')} onValueChange={(value) => form.setValue('type', value as GalleryType)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Изаберите тип" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {galleryTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div>
-                              <div className="font-medium">{type.label}</div>
-                              <div className="text-xs text-gray-500">{type.description}</div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Статус</Label>
-                    <Select value={form.watch('status')} onValueChange={(value) => form.setValue('status', value as GalleryStatus)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Изаберите статус" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={GalleryStatus.DRAFT}>
-                          <div className="flex items-center space-x-2">
-                            <EyeOff className="h-4 w-4" />
-                            <span>Draft</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value={GalleryStatus.PUBLISHED}>
-                          <div className="flex items-center space-x-2">
-                            <Eye className="h-4 w-4" />
-                            <span>Објављено</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="sortOrder">Редослед</Label>
-                      <Input
-                        id="sortOrder"
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        {...form.register('sortOrder', {
-                          setValueAs: (value) => parseInt(value) || 0
-                        })}
-                      />
-                    </div>
-
-                    {form.watch('type') === GalleryType.EVENT && (
-                      <div className="space-y-2">
-                        <Label htmlFor="eventDate">Датум догађаја</Label>
-                        <Input
-                          id="eventDate"
-                          type="date"
-                          {...form.register('eventDate')}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Current Gallery Info */}
+      {/* Gallery Form - Now full width */}
+      <div className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Basic Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Тренутне информације</CardTitle>
+                <CardTitle>Основни подаци</CardTitle>
                 <CardDescription>
-                  Преглед тренутних података о галерији
+                  Ажурирајте основне информације о галерији
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Број слика</p>
-                    <p className="text-2xl font-bold">{images.length || 0}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Број прегледа</p>
-                    <p className="text-2xl font-bold">{gallery.viewCount}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Креирано</p>
-                    <p className="text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3 inline mr-1" />
-                      {new Date(gallery.createdAt).toLocaleDateString('sr-RS')}
-                    </p>
-                  </div>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Наслов галерије *</Label>
+                  <Input
+                    id="title"
+                    placeholder="нпр. Отварање новог парка"
+                    {...form.register('title', { 
+                      required: 'Наслов је обавезан',
+                      minLength: { value: 3, message: 'Наслов мора имати најмање 3 карактера' }
+                    })}
+                  />
+                  {form.formState.errors.title && (
+                    <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="slug">URL скраћеница *</Label>
+                  <Input
+                    id="slug"
+                    placeholder="otvaranje-novog-parka"
+                    {...form.register('slug', {
+                      required: 'URL скраћеница је обавезна',
+                      pattern: {
+                        value: /^[a-z0-9-]+$/,
+                        message: 'Може садржати само мала слова, бројеве и цртице'
+                      }
+                    })}
+                  />
+                  {form.formState.errors.slug && (
+                    <p className="text-sm text-red-600">{form.formState.errors.slug.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Опис галерије</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Кратак опис галерије..."
+                    rows={3}
+                    {...form.register('description')}
+                  />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Form Actions */}
-            <div className="flex items-center justify-end space-x-2 pt-6 border-t">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}
-                disabled={isSubmitting}
-              >
-                Откажи
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                variant={theme === "light" ? "default" : "secondaryDefault"}
-              >
-                {isSubmitting ? 'Чува се...' : 'Сачувај измене'}
-                <Save className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </form>
-        </div>
+            {/* Gallery Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Подешавања галерије</CardTitle>
+                <CardDescription>
+                  Конфигурисање типа и статуса галерије
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="type">Тип галерије</Label>
+                  <Select value={form.watch('type')} onValueChange={(value) => form.setValue('type', value as GalleryType)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Изаберите тип" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {galleryTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div>
+                            <div className="font-medium">{type.label}</div>
+                            <div className="text-xs text-gray-500">{type.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-        {/* Image Management - 1/3 width */}
-        <div className="space-y-6">
-          {/* Upload Actions */}
+                <div className="space-y-2">
+                  <Label htmlFor="status">Статус</Label>
+                  <Select value={form.watch('status')} onValueChange={(value) => form.setValue('status', value as GalleryStatus)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Изаберите статус" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={GalleryStatus.DRAFT}>
+                        <div className="flex items-center space-x-2">
+                          <EyeOff className="h-4 w-4" />
+                          <span>Draft</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value={GalleryStatus.PUBLISHED}>
+                        <div className="flex items-center space-x-2">
+                          <Eye className="h-4 w-4" />
+                          <span>Објављено</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sortOrder">Редослед</Label>
+                    <Input
+                      id="sortOrder"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...form.register('sortOrder', {
+                        setValueAs: (value) => parseInt(value) || 0
+                      })}
+                    />
+                  </div>
+
+                  {form.watch('type') === GalleryType.EVENT && (
+                    <div className="space-y-2">
+                      <Label htmlFor="eventDate">Датум догађаја</Label>
+                      <Input
+                        id="eventDate"
+                        type="date"
+                        {...form.register('eventDate')}
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Current Gallery Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <ImageIcon className="h-5 w-5" />
-                <span>Управљање сликама</span>
-              </CardTitle>
+              <CardTitle>Тренутне информације</CardTitle>
               <CardDescription>
-                Додајте нове слике или управљајте постојећима
+                Преглед тренутних података о галерији
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-2">
-                <Button 
-                  onClick={() => fileInputRef.current?.click()}
-                  variant={theme === "light" ? "default" : "secondaryDefault"}
-                  className="w-full"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Учитај нове слике
-                </Button>
-                
-                <Button 
-                  onClick={() => setIsAddMediaDialogOpen(true)}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Додај постојеће
-                </Button>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
-
-              {uploadingFiles.length > 0 && (
-                <div className="space-y-2 pt-4 border-t">
-                  <h4 className="text-sm font-medium">Учитавање слика</h4>
-                  {uploadingFiles.map((file) => (
-                    <div key={file.id} className="flex items-center space-x-2 text-sm">
-                      {file.status === 'uploading' && <Loader2 className="h-4 w-4 animate-spin" />}
-                      {file.status === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
-                      {file.status === 'error' && <AlertCircle className="h-4 w-4 text-red-600" />}
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate">{file.name}</p>
-                        {file.status === 'uploading' && (
-                          <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div
-                              className="bg-blue-600 h-1 rounded-full transition-all"
-                              style={{ width: `${file.progress}%` }}
-                            />
-                          </div>
-                        )}
-                        {file.status === 'error' && file.error && (
-                          <p className="text-red-600 text-xs">{file.error}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Број слика</p>
+                  <p className="text-2xl font-bold">{images.length || 0}</p>
                 </div>
-              )}
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Број прегледа</p>
+                  <p className="text-2xl font-bold">{gallery.viewCount}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Креирано</p>
+                  <p className="text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3 inline mr-1" />
+                    {new Date(gallery.createdAt).toLocaleDateString('sr-RS')}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Current Images */}
+          {/* Form Actions */}
+          <div className="flex items-center justify-end space-x-2 pt-6 border-t">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}
+              disabled={isSubmitting}
+            >
+              Откажи
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              variant={theme === "light" ? "default" : "secondaryDefault"}
+            >
+              {isSubmitting ? 'Чува се...' : 'Сачувај измене'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Image Management Section - Now horizontal at the bottom */}
+      <div className="space-y-6 border-t pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">Управљање сликама</h2>
+            <p className="text-muted-foreground">
+              Додајте нове слике или управљајте постојећима
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={() => fileInputRef.current?.click()}
+              variant={theme === "light" ? "default" : "secondaryDefault"}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Учитај нове слике
+            </Button>
+            
+            <Button 
+              onClick={() => setIsAddMediaDialogOpen(true)}
+              variant="outline"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Додај постојеће
+            </Button>
+          </div>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileInputChange}
+          className="hidden"
+        />
+
+        {/* Upload Progress */}
+        {uploadingFiles.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+            <CardContent className="p-4">
+              <h4 className="text-sm font-medium mb-4">Учитавање слика ({uploadingFiles.length})</h4>
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {uploadingFiles.map((file) => (
+                  <div key={file.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <div className="flex-shrink-0">
+                      {file.status === 'uploading' && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                      {file.status === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
+                      {file.status === 'error' && <AlertCircle className="h-4 w-4 text-red-600" />}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{file.name}</p>
+                      {file.status === 'uploading' && (
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                          <div
+                            className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                            style={{ width: `${file.progress}%` }}
+                          />
+                        </div>
+                      )}
+                      {file.status === 'error' && file.error && (
+                        <p className="text-red-600 text-xs mt-1">{file.error}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Current Images - Now in a horizontal grid */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center space-x-2">
                   <Grid3X3 className="h-5 w-5" />
                   <span>Тренутне слике ({images.length})</span>
-                </div>
-                {isLoadingImages && <Loader2 className="h-4 w-4 animate-spin" />}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoadingImages ? (
-                <div className="grid gap-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="aspect-square bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : images.length > 0 ? (
-                <div className="grid gap-3">
-                  {images.map((image) => (
-                    <div key={image.id} className="relative group">
-                      <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          src={galleryApi.getImageUrl(image.filename)}
-                          alt={image.alt || image.title || image.originalName}
-                          className="w-full h-full object-cover"
-                        />
-                        
-                        {/* Overlay with actions */}
-                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="secondary" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditImage(image)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Уреди
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleSetCoverImage(image)}>
-                                <Star className="mr-2 h-4 w-4" />
-                                Постави као насловну
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => handleDeleteImage(image)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Обриши
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-
-                        {/* Cover image indicator */}
-                        {gallery.coverImage === image.filename && (
-                          <div className="absolute top-2 left-2">
-                            <Badge className="bg-yellow-500 text-yellow-900">
-                              <Star className="h-3 w-3 mr-1" />
-                              Насловна
-                            </Badge>
-                          </div>
-                        )}
-
-                        {/* Visibility indicator */}
-                        {!image.isVisible && (
-                          <div className="absolute top-2 right-2">
-                            <Badge variant="secondary">
-                              <EyeOff className="h-3 w-3 mr-1" />
-                              Скривена
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
+                </CardTitle>
+                <CardDescription>
+                  Управљајте сликама у галерији
+                </CardDescription>
+              </div>
+              {isLoadingImages && <Loader2 className="h-4 w-4 animate-spin" />}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoadingImages ? (
+              <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="aspect-square bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : images.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+                {images.map((image) => (
+                  <div key={image.id} className="relative group">
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      <img
+                        src={galleryApi.getImageUrl(image.filename)}
+                        alt={image.alt || image.title || image.originalName}
+                        className="w-full h-full object-cover"
+                      />
                       
-                      <div className="mt-2 space-y-1">
-                        <h4 className="text-sm font-medium truncate">
-                          {image.title || image.originalName}
-                        </h4>
-                        <p className="text-xs text-gray-500">
-                          {formatFileSize(image.size)}
-                        </p>
+                      {/* Overlay with actions */}
+                      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="secondary" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditImage(image)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Уреди
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSetCoverImage(image)}>
+                              <Star className="mr-2 h-4 w-4" />
+                              Постави као насловну
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteImage(image)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Обриши
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
+
+                      {/* Cover image indicator */}
+                      {gallery.coverImage === image.filename && (
+                        <div className="absolute top-1 left-1">
+                          <Badge className="bg-yellow-500 text-yellow-900 text-xs">
+                            <Star className="h-2 w-2 mr-1" />
+                            Насловна
+                          </Badge>
+                        </div>
+                      )}
+
+                      {/* Visibility indicator */}
+                      {!image.isVisible && (
+                        <div className="absolute top-1 right-1">
+                          <Badge variant="secondary" className="text-xs">
+                            <EyeOff className="h-2 w-2 mr-1" />
+                            Скривена
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <ImageIcon className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                    Нема слика
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    Додајте прву слику у ову галерију
-                  </p>
+                    
+                    <div className="mt-2 space-y-1">
+                      <h4 className="text-xs font-medium truncate">
+                        {image.title || image.originalName}
+                      </h4>
+                      <p className="text-xs text-gray-500">
+                        {formatFileSize(image.size)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <ImageIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  Нема слика
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Додајте прву слику у ову галерију
+                </p>
+                <div className="flex items-center justify-center space-x-4">
                   <Button 
                     onClick={() => fileInputRef.current?.click()}
                     variant={theme === "light" ? "default" : "secondaryDefault"}
-                    size="sm"
                   >
                     <Upload className="mr-2 h-4 w-4" />
                     Учитај слике
                   </Button>
+                  <Button 
+                    onClick={() => setIsAddMediaDialogOpen(true)}
+                    variant="outline"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Додај постојеће
+                  </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Add Existing Media Dialog */}
