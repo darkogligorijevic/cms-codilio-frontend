@@ -182,25 +182,24 @@ export default function EditServicePage() {
 
     // Auto-generate slug from name
     const generateSlug = (name: string) => {
-        return transliterate(name)
+        console.log("Original: ", name)
+        const slug = transliterate(name)
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
             .trim();
+        console.log("Slug: ", slug)
+        return slug;
     };
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
         form.setValue('name', name);
 
-        // Auto-generate slug only if it matches the current service slug or is empty
-        const currentSlug = form.getValues('slug');
-        const expectedSlug = service ? generateSlug(service.name) : '';
-        
-        if (!currentSlug || currentSlug === expectedSlug) {
-            form.setValue('slug', generateSlug(name));
-        }
+        // Auto-generate slug
+        const newSlug = generateSlug(name);
+        form.setValue('slug', newSlug);
     };
 
     const handleSubmit = async (data: ServiceFormData) => {

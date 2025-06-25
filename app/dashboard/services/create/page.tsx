@@ -140,11 +140,9 @@ export default function CreateServicePage() {
         const name = e.target.value;
         form.setValue('name', name);
 
-        // Auto-generate slug only if it's empty or hasn't been manually edited
-        const currentSlug = form.getValues('slug');
-        if (!currentSlug || currentSlug === generateSlug(form.getValues('name'))) {
-            form.setValue('slug', generateSlug(name));
-        }
+        // Auto-generate slug
+        const newSlug = generateSlug(name);
+        form.setValue('slug', newSlug);
     };
 
     const handleSubmit = async (data: ServiceFormData) => {
