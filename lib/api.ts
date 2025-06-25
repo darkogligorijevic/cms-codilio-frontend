@@ -110,7 +110,7 @@ export const authApi = {
     const response: AxiosResponse<AuthResponse> = await api.post('/auth/login', credentials);
     return response.data;
   },
-  
+
   logout: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
@@ -149,7 +149,7 @@ export const usersApi = {
     const response: AxiosResponse<UserWithStats> = await api.get(`/users/${id}?withStats=true`);
     return response.data;
   },
-  
+
   toggleStatus: async (id: string): Promise<User> => {
     const response: AxiosResponse<User> = await api.patch(`/users/${id}/toggle-status`);
     return response.data;
@@ -184,50 +184,50 @@ export const postsApi = {
     const response: AxiosResponse<PostsResponse> = await api.get(`/posts?page=${page}&limit=${limit}`);
     return response.data;
   },
-  
+
   getPublished: async (page = 1, limit = 10): Promise<PostsResponse> => {
     const response: AxiosResponse<PostsResponse> = await api.get(`/posts/published?page=${page}&limit=${limit}`);
     return response.data;
   },
-  
+
   getById: async (id: number): Promise<Post> => {
     const response: AxiosResponse<Post> = await api.get(`/posts/${id}`);
     return response.data;
   },
-  
+
   getBySlug: async (slug: string): Promise<Post> => {
     const response: AxiosResponse<Post> = await api.get(`/posts/slug/${slug}`);
     return response.data;
   },
-  
+
   // New method to get posts by page ID
   getByPageId: async (pageId: number, limit = 10): Promise<Post[]> => {
     const response: AxiosResponse<Post[]> = await api.get(`/posts/by-page/${pageId}?limit=${limit}`);
     return response.data;
   },
-  
+
   // New method to get posts by page slug
   getByPageSlug: async (pageSlug: string, limit = 10): Promise<Post[]> => {
     const response: AxiosResponse<Post[]> = await api.get(`/posts/by-page-slug/${pageSlug}?limit=${limit}`);
     return response.data;
   },
-  
+
   // New method to get posts for homepage
   getForHomePage: async (limit = 6): Promise<Post[]> => {
     const response: AxiosResponse<Post[]> = await api.get(`/posts/homepage?limit=${limit}`);
     return response.data;
   },
-  
+
   create: async (data: CreatePostDto): Promise<Post> => {
     const response: AxiosResponse<Post> = await api.post('/posts', data);
     return response.data;
   },
-  
+
   update: async (id: number, data: UpdatePostDto): Promise<Post> => {
     const response: AxiosResponse<Post> = await api.patch(`/posts/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: number): Promise<void> => {
     await api.delete(`/posts/${id}`);
   },
@@ -251,7 +251,7 @@ export const pagesApi = {
     const response: AxiosResponse<Page[]> = await api.get('/pages');
     return response.data;
   },
-  
+
   getPublished: async (): Promise<Page[]> => {
     const response: AxiosResponse<Page[]> = await api.get('/pages/published');
     return response.data;
@@ -262,17 +262,17 @@ export const pagesApi = {
     const response: AxiosResponse<Page[]> = await api.get('/pages/hierarchical');
     return response.data;
   },
-  
+
   getById: async (id: number): Promise<Page> => {
     const response: AxiosResponse<Page> = await api.get(`/pages/${id}`);
     return response.data;
   },
-  
+
   getBySlug: async (slug: string): Promise<Page> => {
     const response: AxiosResponse<Page> = await api.get(`/pages/slug/${slug}`);
     return response.data;
   },
-  
+
   // Updated method for getting pages for selection dropdown
   getAllForSelection: async (): Promise<PageSelectionOption[]> => {
     const response: AxiosResponse<PageSelectionOption[]> = await api.get('/pages/for-selection');
@@ -288,17 +288,17 @@ export const pagesApi = {
     const response: AxiosResponse<AvailableParentPage[]> = await api.get(url);
     return response.data;
   },
-  
+
   create: async (data: CreatePageDto): Promise<Page> => {
     const response: AxiosResponse<Page> = await api.post('/pages', data);
     return response.data;
   },
-  
+
   update: async (id: number, data: UpdatePageDto): Promise<Page> => {
     const response: AxiosResponse<Page> = await api.patch(`/pages/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: number): Promise<void> => {
     await api.delete(`/pages/${id}`);
   }
@@ -345,7 +345,7 @@ export const mailerApi = {
     const response: AxiosResponse<NewsletterSubscribe> = await api.post(`/mailer/newsletter/unsubscribe/${token}`);
     return response.data;
   },
- 
+
   getAllSubscribers: async (): Promise<NewsletterSubscribe[]> => {
     const response: AxiosResponse<NewsletterSubscribe[]> = await api.get('/mailer/newsletter/subscribers');
     return response.data;
@@ -398,27 +398,27 @@ export const categoriesApi = {
     const response: AxiosResponse<Category[]> = await api.get('/categories');
     return response.data;
   },
-  
+
   getById: async (id: number): Promise<Category> => {
     const response: AxiosResponse<Category> = await api.get(`/categories/${id}`);
     return response.data;
   },
-  
+
   getBySlug: async (slug: string): Promise<Category> => {
     const response: AxiosResponse<Category> = await api.get(`/categories/slug/${slug}`);
     return response.data;
   },
-  
+
   create: async (data: CreateCategoryDto): Promise<Category> => {
     const response: AxiosResponse<Category> = await api.post('/categories', data);
     return response.data;
   },
-  
+
   update: async (id: number, data: UpdateCategoryDto): Promise<Category> => {
     const response: AxiosResponse<Category> = await api.patch(`/categories/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: number): Promise<void> => {
     await api.delete(`/categories/${id}`);
   }
@@ -429,64 +429,64 @@ export const mediaApi = {
   getAll: async (options?: FindMediaOptions): Promise<Media[]> => {
     let url = '/media';
     const params = new URLSearchParams();
-    
+
     if (options?.category) params.append('category', options.category);
     if (options?.isPublic !== undefined) params.append('isPublic', options.isPublic.toString());
     if (options?.search) params.append('search', options.search);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     const response: AxiosResponse<Media[]> = await api.get(url);
     return response.data;
   },
-  
+
   getPublic: async (options?: Omit<FindMediaOptions, 'isPublic'>): Promise<Media[]> => {
     let url = '/media/public';
     const params = new URLSearchParams();
-    
+
     if (options?.category) params.append('category', options.category);
     if (options?.search) params.append('search', options.search);
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     const response: AxiosResponse<Media[]> = await api.get(url);
     return response.data;
   },
-  
+
   getCategories: async (): Promise<MediaCategoryInfo[]> => {
     const response: AxiosResponse<MediaCategoryInfo[]> = await api.get('/media/categories');
     return response.data;
   },
-  
+
   getByCategory: async (category: MediaCategory): Promise<Media[]> => {
     const response: AxiosResponse<Media[]> = await api.get(`/media/category/${category}`);
     return response.data;
   },
-  
+
   getCategoriesStats: async (): Promise<MediaCategoryStats[]> => {
     const response: AxiosResponse<MediaCategoryStats[]> = await api.get('/media/categories/stats');
     return response.data;
   },
-  
+
   getById: async (id: number): Promise<Media> => {
     const response: AxiosResponse<Media> = await api.get(`/media/${id}`);
     return response.data;
   },
-  
+
   upload: async (file: File, data?: CreateMediaDto): Promise<Media> => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     if (data?.alt) formData.append('alt', data.alt);
     if (data?.caption) formData.append('caption', data.caption);
     if (data?.category) formData.append('category', data.category);
     if (data?.description) formData.append('description', data.description);
     if (data?.isPublic !== undefined) formData.append('isPublic', data.isPublic.toString());
-    
+
     const response: AxiosResponse<Media> = await api.post('/media/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -494,17 +494,17 @@ export const mediaApi = {
     });
     return response.data;
   },
-  
+
   update: async (id: number, file?: File, data?: UpdateMediaDto): Promise<Media> => {
     const formData = new FormData();
-    
+
     if (file) formData.append('file', file);
     if (data?.alt) formData.append('alt', data.alt);
     if (data?.caption) formData.append('caption', data.caption);
     if (data?.category) formData.append('category', data.category);
     if (data?.description) formData.append('description', data.description);
     if (data?.isPublic !== undefined) formData.append('isPublic', data.isPublic.toString());
-    
+
     const response: AxiosResponse<Media> = await api.patch(`/media/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -517,23 +517,23 @@ export const mediaApi = {
     const response: AxiosResponse<Media> = await api.patch(`/media/${id}/metadata`, data);
     return response.data;
   },
-  
+
   delete: async (id: number): Promise<void> => {
     await api.delete(`/media/${id}`);
   },
-  
-  getFileUrl: (filename: string): string => {
-      const cleanFilename = filename.startsWith('uploads/') 
-        ? filename.replace('uploads/', '') 
-        : filename;
-      
-      return `${API_BASE_URL}/media/file/${cleanFilename}`;
-    },
 
-    findPublicByCategory: async (category: MediaCategory): Promise<Media[]> => {
-      const response: AxiosResponse<Media[]> = await api.get(`/media/public/category/${category}`);
-      return response.data;
-    },
+  getFileUrl: (filename: string): string => {
+    const cleanFilename = filename.startsWith('uploads/')
+      ? filename.replace('uploads/', '')
+      : filename;
+
+    return `${API_BASE_URL}/media/file/${cleanFilename}`;
+  },
+
+  findPublicByCategory: async (category: MediaCategory): Promise<Media[]> => {
+    const response: AxiosResponse<Media[]> = await api.get(`/media/public/category/${category}`);
+    return response.data;
+  },
 };
 export { api };
 
@@ -542,27 +542,27 @@ export const settingsApi = {
     const response: AxiosResponse<Setting[]> = await api.get('/settings');
     return response.data;
   },
-  
+
   getByCategory: async (category: SettingCategory): Promise<Setting[]> => {
     const response: AxiosResponse<Setting[]> = await api.get(`/settings/category/${category}`);
     return response.data;
   },
-  
+
   getByKey: async (key: string): Promise<Setting> => {
     const response: AxiosResponse<Setting> = await api.get(`/settings/${key}`);
     return response.data;
   },
-  
+
   update: async (key: string, data: UpdateSettingDto): Promise<Setting> => {
     const response: AxiosResponse<Setting> = await api.put(`/settings/${key}`, data);
     return response.data;
   },
-  
+
   updateMultiple: async (data: UpdateMultipleSettingsDto): Promise<Setting[]> => {
     const response: AxiosResponse<Setting[]> = await api.put('/settings', data);
     return response.data;
   },
-  
+
   uploadFile: async (key: string, file: File): Promise<Setting> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -573,31 +573,31 @@ export const settingsApi = {
     });
     return response.data;
   },
-  
+
   reset: async (category?: SettingCategory): Promise<Setting[]> => {
     const response: AxiosResponse<Setting[]> = await api.post('/settings/reset', { category });
     return response.data;
   },
-  
+
   export: async (): Promise<Record<string, string>> => {
     const response: AxiosResponse<Record<string, string>> = await api.get('/settings/export');
     return response.data;
   },
-  
+
   import: async (data: ImportSettingsDto): Promise<Setting[]> => {
     const response: AxiosResponse<Setting[]> = await api.post('/settings/import', data);
     return response.data;
   },
-  
+
   // Helper method to get all settings as a structured object
   getStructured: async (): Promise<SiteSettings> => {
     const settings = await settingsApi.getAll();
     const structured: any = {};
-    
+
     settings.forEach(setting => {
       // Convert key format from snake_case to camelCase
       const camelKey = setting.key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-      
+
       // Parse value based on type
       let value: any = setting.value;
       if (setting.type === SettingType.NUMBER) {
@@ -611,10 +611,10 @@ export const settingsApi = {
           value = setting.value;
         }
       }
-      
+
       structured[camelKey] = value;
     });
-    
+
     return structured as SiteSettings;
   }
 };
@@ -776,7 +776,7 @@ export interface CreateDirectorDto {
   isActive?: boolean;
 }
 
-export interface UpdateDirectorDto extends Partial<CreateDirectorDto> {}
+export interface UpdateDirectorDto extends Partial<CreateDirectorDto> { }
 
 export interface CreateDirectorDocumentDto {
   title: string;
@@ -846,8 +846,8 @@ export const directorsApi = {
 
   // Document management
   uploadDocument: async (
-    directorId: number, 
-    file: File, 
+    directorId: number,
+    file: File,
     metadata: CreateDirectorDocumentDto
   ): Promise<DirectorDocument> => {
     const formData = new FormData();
@@ -940,13 +940,13 @@ export const directorsApi = {
   },
 
   getFileUrl: (filename: string): string => {
-      // Уклањамо "uploads/" префикс ако постоји да избегнемо дуплирање
-      const cleanFilename = filename.startsWith('uploads/') 
-        ? filename.replace('uploads/', '') 
-        : filename;
-      
-      return `${API_BASE_URL}/organizational-structure/directors/files/${cleanFilename}`;
-    }
+    // Уклањамо "uploads/" префикс ако постоји да избегнемо дуплирање
+    const cleanFilename = filename.startsWith('uploads/')
+      ? filename.replace('uploads/', '')
+      : filename;
+
+    return `${API_BASE_URL}/organizational-structure/directors/files/${cleanFilename}`;
+  }
 };
 
 export const galleryApi = {
@@ -1037,7 +1037,7 @@ export const galleryApi = {
     files.forEach(file => {
       formData.append('files', file);
     });
-    
+
     if (imageData?.title) formData.append('title', imageData.title);
     if (imageData?.description) formData.append('description', imageData.description);
     if (imageData?.alt) formData.append('alt', imageData.alt);
@@ -1076,9 +1076,15 @@ export const galleryApi = {
   reorderImages: async (galleryId: number, imageOrders: Array<{ id: number; sortOrder: number }>): Promise<GalleryImage[]> => {
     console.log('Reordering images for gallery:', galleryId);
     console.log('Image orders:', imageOrders);
-    
+
     const response: AxiosResponse<GalleryImage[]> = await api.put(`/galleries/${galleryId}/images/reorder`, {
       imageOrders
+    });
+    return response.data;
+  },
+  addExistingMediaToGallery: async (galleryId: number, mediaIds: number[]): Promise<GalleryImage[]> => {
+    const response: AxiosResponse<GalleryImage[]> = await api.post(`/galleries/${galleryId}/add-existing-media`, {
+      mediaIds
     });
     return response.data;
   },
@@ -1089,7 +1095,7 @@ export const galleryApi = {
       .replace('uploads/', '')
       .replace('gallery-', '')
       .replace(/^.*[\\\/]/, ''); // Remove any directory path
-    
+
     return `${API_BASE_URL}/galleries/images/${cleanFilename}`;
   },
 
@@ -1097,5 +1103,14 @@ export const galleryApi = {
   getImageMedia: async (): Promise<Media[]> => {
     const allMedia = await mediaApi.getAll();
     return allMedia.filter(media => media.mimeType.startsWith('image/'));
-  }
+  },
+
+
+  // Alternative method - copy media files by filename  
+  addExistingMediaByFilename: async (galleryId: number, filenames: string[]): Promise<GalleryImage[]> => {
+    const response: AxiosResponse<GalleryImage[]> = await api.post(`/galleries/${galleryId}/add-existing-media-by-filename`, {
+      filenames
+    });
+    return response.data;
+  },
 };

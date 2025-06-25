@@ -36,7 +36,8 @@ import {
   Check,
   Grid3X3,
   Eye,
-  EyeOff
+  EyeOff,
+  Trash2,
 } from 'lucide-react';
 import { 
   galleryApi, 
@@ -51,6 +52,16 @@ import { transliterate } from '@/lib/transliterate';
 interface FormData extends CreateGalleryDto {
   selectedImages: string[];
   assignToPages: number[];
+  newImages: File[];
+}
+
+interface SelectedImage {
+  type: 'existing' | 'new';
+  id?: string;
+  file?: File;
+  filename?: string;
+  preview?: string;
+  name: string;
 }
 
 export default function CreateGalleryPage() {
@@ -58,10 +69,11 @@ export default function CreateGalleryPage() {
   const [galleryTypes, setGalleryTypes] = useState<Array<{ value: GalleryType; label: string; description: string }>>([]);
   const [availableImages, setAvailableImages] = useState<Media[]>([]);
   const [availablePages, setAvailablePages] = useState<Page[]>([]);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [isImageSelectorOpen, setIsImageSelectorOpen] = useState(false);
   const [imageSearchTerm, setImageSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [draggedOver, setDraggedOver] = useState(false);
   
   const router = useRouter();
   const { theme } = useTheme();
@@ -76,7 +88,8 @@ export default function CreateGalleryPage() {
       sortOrder: 0,
       eventDate: '',
       selectedImages: [],
-      assignToPages: []
+      assignToPages: [],
+      newImages: []
     }
   });
 
@@ -105,7 +118,7 @@ export default function CreateGalleryPage() {
       
       const [typesResponse, imagesResponse, pagesResponse] = await Promise.all([
         galleryApi.getTypes(),
-        galleryApi.getImageMedia(), // This will get only images from media
+        galleryApi.getImageMedia(),
         pagesApi.getAll()
       ]);
       
@@ -120,14 +133,111 @@ export default function CreateGalleryPage() {
     }
   };
 
-  const handleImageToggle = (imageFilename: string) => {
-    setSelectedImages(prev => {
-      if (prev.includes(imageFilename)) {
-        return prev.filter(filename => filename !== imageFilename);
-      } else {
-        return [...prev, imageFilename];
+  // Handle existing image selection from media library
+  const handleExistingImageToggle = (image: Media) => {
+    const existingIndex = selectedImages.findIndex(
+      img => img.type === 'existing' && img.filename === image.filename
+    );
+
+    if (existingIndex >= 0) {
+      setSelectedImages(prev => prev.filter((_, index) => index !== existingIndex));
+    } else {
+      const newImage: SelectedImage = {
+        type: 'existing',
+        filename: image.filename,
+        name: image.originalName,
+        preview: mediaApi.getFileUrl(image.filename)
+      };
+      setSelectedImages(prev => [...prev, newImage]);
+    }
+  };
+
+  // Handle new file uploads
+  const handleFileUpload = (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    
+    fileArray.forEach(file => {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} nije slika i neće biti dodana`);
+        return;
       }
+
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} je prevelika (maksimalno 10MB)`);
+        return;
+      }
+
+      // Check if file already selected
+      const exists = selectedImages.some(
+        img => img.type === 'new' && img.file?.name === file.name
+      );
+
+      if (exists) {
+        toast.warning(`${file.name} je već izabrana`);
+        return;
+      }
+
+      // Create preview URL
+      const preview = URL.createObjectURL(file);
+      
+      const newImage: SelectedImage = {
+        type: 'new',
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        name: file.name,
+        preview
+      };
+
+      setSelectedImages(prev => [...prev, newImage]);
     });
+  };
+
+  // File input change handler
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files);
+    }
+    // Clear input
+    e.target.value = '';
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggedOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggedOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggedOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileUpload(files);
+    }
+  };
+
+  // Remove selected image
+  const removeSelectedImage = (index: number) => {
+    const image = selectedImages[index];
+    
+    // Revoke object URL for new images to prevent memory leaks
+    if (image.type === 'new' && image.preview) {
+      URL.revokeObjectURL(image.preview);
+    }
+    
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const filteredImages = availableImages.filter(image => 
@@ -138,6 +248,12 @@ export default function CreateGalleryPage() {
   const handleSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
+      
+      // Validate that we have at least one image
+      if (selectedImages.length === 0) {
+        toast.error('Molimo dodajte barem jednu sliku u galeriju');
+        return;
+      }
       
       // Create gallery first
       const galleryData: CreateGalleryDto = {
@@ -152,15 +268,50 @@ export default function CreateGalleryPage() {
 
       const gallery = await galleryApi.create(galleryData);
       
-      // If images are selected, we need to upload them to the gallery
-      // Since they're already in media, we'll need to copy them to gallery
-      if (selectedImages.length > 0) {
-        // This would require a new API endpoint to add existing media files to gallery
-        // For now, we'll note this in the success message
-        console.log('Selected images:', selectedImages);
+      let successCount = 0;
+      let totalImages = selectedImages.length;
+      
+      // Upload new images to the gallery
+      const newImages = selectedImages.filter(img => img.type === 'new' && img.file);
+      if (newImages.length > 0) {
+        try {
+          const files = newImages.map(img => img.file!);
+          await galleryApi.uploadImages(gallery.id, files, {
+            title: 'Gallery Image',
+            description: `Image for gallery: ${gallery.title}`,
+            sortOrder: 0
+          });
+          successCount += newImages.length;
+          console.log(`Uploaded ${newImages.length} new images to gallery`);
+        } catch (error) {
+          console.error('Error uploading new images:', error);
+          toast.error('Greška pri otpremanju novih slika');
+        }
       }
 
-      toast.success('Galerija je uspešno kreirana');
+      // Add existing images from media library to the gallery
+      const existingImages = selectedImages.filter(img => img.type === 'existing');
+      if (existingImages.length > 0) {
+        try {
+          const filenames = existingImages.map(img => img.filename!);
+          await galleryApi.addExistingMediaByFilename(gallery.id, filenames);
+          successCount += existingImages.length;
+          console.log(`Added ${filenames.length} existing images to gallery`);
+        } catch (error) {
+          console.error('Error adding existing media to gallery:', error);
+          toast.warning('Nove slike su otpremljene, ali greška pri dodavanju postojećih slika');
+        }
+      }
+
+      // Show appropriate success message
+      if (successCount === totalImages) {
+        toast.success(`Galerija je uspešno kreirana sa ${successCount} slika`);
+      } else if (successCount > 0) {
+        toast.warning(`Galerija je kreirana sa ${successCount} od ${totalImages} slika`);
+      } else {
+        toast.error('Galerija je kreirana, ali nijedna slika nije dodana');
+      }
+      
       router.push(`/dashboard/galleries/${gallery.id}`);
     } catch (error: any) {
       console.error('Error creating gallery:', error);
@@ -171,9 +322,19 @@ export default function CreateGalleryPage() {
   };
 
   const confirmImageSelection = () => {
-    form.setValue('selectedImages', selectedImages);
     setIsImageSelectorOpen(false);
   };
+
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      selectedImages.forEach(image => {
+        if (image.type === 'new' && image.preview) {
+          URL.revokeObjectURL(image.preview);
+        }
+      });
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -344,52 +505,115 @@ export default function CreateGalleryPage() {
         {/* Image Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Izbor slika</CardTitle>
+            <CardTitle>Slike galerije</CardTitle>
             <CardDescription>
-              Izaberite slike iz medijske biblioteke za ovu galeriju
+              Otpremite nove slike ili izaberite postojeće iz medijske biblioteke
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {/* Upload Area */}
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                  draggedOver 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  {draggedOver ? 'Otpustite slike ovde' : 'Otpremite nove slike'}
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  Prevucite slike ovde ili kliknite da izaberete fajlove
+                </p>
+                <div className="flex items-center justify-center space-x-4">
+                  <label htmlFor="file-upload">
+                    <Button type="button" variant="outline" asChild>
+                      <span>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Izaberi fajlove
+                      </span>
+                    </Button>
+                  </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsImageSelectorOpen(true)}
+                  >
+                    <Grid3X3 className="mr-2 h-4 w-4" />
+                    Medijska biblioteka
+                  </Button>
+                </div>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                />
+                <p className="text-xs text-gray-400 mt-2">
+                  Podržani formati: JPG, PNG, GIF, WebP (maksimalno 10MB po slici)
+                </p>
+              </div>
+
+              {/* Selected Images Preview */}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
                   Izabrano: {selectedImages.length} slika
                 </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsImageSelectorOpen(true)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Dodaj slike
-                </Button>
+                {selectedImages.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      selectedImages.forEach(image => {
+                        if (image.type === 'new' && image.preview) {
+                          URL.revokeObjectURL(image.preview);
+                        }
+                      });
+                      setSelectedImages([]);
+                    }}
+                  >
+                    <X className="mr-2 h-3 w-3" />
+                    Ukloni sve
+                  </Button>
+                )}
               </div>
 
               {selectedImages.length > 0 && (
-                <div className="grid gap-2 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-                  {selectedImages.map((filename) => {
-                    const image = availableImages.find(img => img.filename === filename);
-                    if (!image) return null;
-                    
-                    return (
-                      <div key={filename} className="relative group">
-                        <img
-                          src={mediaApi.getFileUrl(image.filename)}
-                          alt={image.alt || image.originalName}
-                          className="w-full aspect-square object-cover rounded border"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleImageToggle(filename)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+                  {selectedImages.map((image, index) => (
+                    <div key={`${image.type}-${image.filename || image.id}`} className="relative group">
+                      <img
+                        src={image.preview}
+                        alt={image.name}
+                        className="w-full aspect-square object-cover rounded border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeSelectedImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                      {/* Type indicator */}
+                      <div className="absolute bottom-1 left-1">
+                        <span className={`text-xs px-1 py-0.5 rounded text-white ${
+                          image.type === 'new' ? 'bg-green-600' : 'bg-blue-600'
+                        }`}>
+                          {image.type === 'new' ? 'Nova' : 'Postojeća'}
+                        </span>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -397,7 +621,7 @@ export default function CreateGalleryPage() {
                 <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
                   <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-gray-500 mb-2">Nema izabranih slika</p>
-                  <p className="text-sm text-gray-400">Kliknite "Dodaj slike" da biste dodali slike u galeriju</p>
+                  <p className="text-sm text-gray-400">Otpremite nove slike ili izaberite postojeće</p>
                 </div>
               )}
             </div>
@@ -465,9 +689,9 @@ export default function CreateGalleryPage() {
       <Dialog open={isImageSelectorOpen} onOpenChange={setIsImageSelectorOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Izaberi slike za galeriju</DialogTitle>
+            <DialogTitle>Izaberi slike iz medijske biblioteke</DialogTitle>
             <DialogDescription>
-              Kliknite na slike da ih dodate ili uklonite iz galerije
+              Kliknite na slike da ih dodate u galeriju
             </DialogDescription>
           </DialogHeader>
 
@@ -485,37 +709,43 @@ export default function CreateGalleryPage() {
 
             {/* Images Grid */}
             <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredImages.map((image) => (
-                <div
-                  key={image.id}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all ${
-                    selectedImages.includes(image.filename)
-                      ? 'border-blue-500 ring-2 ring-blue-200'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => handleImageToggle(image.filename)}
-                >
-                  <img
-                    src={mediaApi.getFileUrl(image.filename)}
-                    alt={image.alt || image.originalName}
-                    className="w-full aspect-square object-cover"
-                  />
-                  
-                  {/* Selection indicator */}
-                  {selectedImages.includes(image.filename) && (
-                    <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
-                      <Check className="h-3 w-3" />
-                    </div>
-                  )}
+              {filteredImages.map((image) => {
+                const isSelected = selectedImages.some(
+                  img => img.type === 'existing' && img.filename === image.filename
+                );
+                
+                return (
+                  <div
+                    key={image.id}
+                    className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all ${
+                      isSelected
+                        ? 'border-blue-500 ring-2 ring-blue-200'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => handleExistingImageToggle(image)}
+                  >
+                    <img
+                      src={mediaApi.getFileUrl(image.filename)}
+                      alt={image.alt || image.originalName}
+                      className="w-full aspect-square object-cover"
+                    />
+                    
+                    {/* Selection indicator */}
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
+                        <Check className="h-3 w-3" />
+                      </div>
+                    )}
 
-                  {/* Image info */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                    <p className="text-xs truncate" title={image.originalName}>
-                      {image.originalName}
-                    </p>
+                    {/* Image info */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                      <p className="text-xs truncate" title={image.originalName}>
+                        {image.originalName}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {filteredImages.length === 0 && (
@@ -524,11 +754,6 @@ export default function CreateGalleryPage() {
                 <p className="text-gray-500">
                   {imageSearchTerm ? 'Nema slika koje odgovaraju pretrazi' : 'Nema dostupnih slika'}
                 </p>
-                {!imageSearchTerm && (
-                  <p className="text-sm text-gray-400 mt-2">
-                    Prvo učitajte slike u medijsku biblioteku
-                  </p>
-                )}
               </div>
             )}
           </div>
@@ -536,14 +761,11 @@ export default function CreateGalleryPage() {
           <DialogFooter>
             <div className="flex items-center justify-between w-full">
               <p className="text-sm text-muted-foreground">
-                Izabrano: {selectedImages.length} slika
+                Izabrano iz biblioteke: {selectedImages.filter(img => img.type === 'existing').length} slika
               </p>
               <div className="space-x-2">
                 <Button variant="outline" onClick={() => setIsImageSelectorOpen(false)}>
-                  Otkaži
-                </Button>
-                <Button onClick={confirmImageSelection} variant={theme === "light" ? "default" : "secondaryDefault"}>
-                  Potvrdi izbor
+                  Zatvori
                 </Button>
               </div>
             </div>

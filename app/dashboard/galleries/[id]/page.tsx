@@ -325,7 +325,7 @@ export default function GalleryViewPage() {
         </div>
         
         <div className="flex items-center space-x-2">
-          <Button variant="outline" onClick={() => router.push(`/dashboard/galleries/${gallery.id}/edit`)}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/galleries/edit/${gallery.id}`)}>
             <Edit className="mr-2 h-4 w-4" />
             Uredi galeriju
           </Button>
