@@ -366,7 +366,7 @@ export default function GalleriesPage() {
                             <Eye className="mr-2 h-4 w-4" />
                             Prikaži
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/dashboard/galleries/${gallery.id}/edit`)}>
+                          <DropdownMenuItem onClick={() => router.push(`/dashboard/galleries/edit/${gallery.id}`)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Uredi
                           </DropdownMenuItem>
