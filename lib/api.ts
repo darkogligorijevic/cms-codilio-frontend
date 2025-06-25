@@ -1301,3 +1301,231 @@ export const servicesApi = {
     return `${API_BASE_URL}/services/files/${cleanFilename}`;
   }
 };
+
+export interface RelofIndexScore {
+  id: number;
+  totalScore: number;
+  categoryScores: Record<string, {
+    score: number;
+    maxScore: number;
+    percentage: number;
+  }>;
+  requirements: RequirementResult[];
+  recommendations: Recommendation[];
+  summary: string;
+  notificationSent: boolean;
+  lastNotificationSent?: string;
+  calculatedAt: string;
+  updatedAt: string;
+}
+
+export interface RequirementResult {
+  id: string;
+  category: string;
+  name: string;
+  description: string;
+  status: 'fulfilled' | 'partial' | 'missing' | 'outdated';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  points: number;
+  lastChecked: string;
+  daysOverdue?: number;
+  specificIssues?: string[];
+}
+
+export interface Recommendation {
+  category: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  estimatedImpact: number;
+  actionItems: string[];
+}
+
+export interface DashboardData {
+  score: {
+    current: number;
+    grade: string;
+    calculatedAt: string;
+  };
+  quickStats: {
+    totalRequirements: number;
+    fulfilledRequirements: number;
+    criticalIssues: number;
+    pendingRecommendations: number;
+  };
+  alerts: {
+    critical: RequirementResult[];
+    recommendations: Recommendation[];
+  };
+  trends: {
+    history: Array<{
+      date: string;
+      score: number;
+    }>;
+    isImproving: boolean | null;
+  };
+  system: {
+    totalConnections?: number;
+    subscribedClients?: number;
+    timestamp?: string;
+    serverReady?: boolean;
+    lastCalculation: string;
+    autoCalculationEnabled: boolean;
+  };
+}
+
+export interface StatisticsData {
+  period: string;
+  current: {
+    score: number;
+    calculatedAt: string;
+  };
+  trends: {
+    averageScore: number;
+    trend: number;
+    improvementRate: number;
+    isImproving: boolean;
+  };
+  extremes: {
+    bestScore: {
+      score: number;
+      date: string;
+    };
+    worstScore: {
+      score: number;
+      date: string;
+    };
+  };
+  dataPoints: number;
+  lastUpdated: string;
+}
+
+export interface CategoryBreakdown {
+  categories: Array<{
+    category: string;
+    displayName: string;
+    scores: {
+      score: number;
+      maxScore: number;
+      percentage: number;
+    };
+    requirements: {
+      total: number;
+      fulfilled: number;
+      partial: number;
+      missing: number;
+    };
+    topIssues: Array<{
+      name: string;
+      status: string;
+      priority: string;
+      issues: string[];
+    }>;
+  }>;
+  lastUpdated: string;
+  totalScore: number;
+}
+
+// Add this to your existing API exports
+export const relofIndexApi = {
+  // Get current score
+  getCurrentScore: async (): Promise<RelofIndexScore> => {
+    const response: AxiosResponse<RelofIndexScore> = await api.get('/relof-index/current');
+    return response.data;
+  },
+
+  // Get score history
+  getScoreHistory: async (days: number = 30): Promise<RelofIndexScore[]> => {
+    const response: AxiosResponse<RelofIndexScore[]> = await api.get(`/relof-index/history?days=${days}`);
+    return response.data;
+  },
+
+  // Trigger recalculation
+  recalculateScore: async (reason?: string): Promise<{
+    message: string;
+    reason: string;
+    newScore: RelofIndexScore;
+    calculationTime: number;
+    timestamp: string;
+  }> => {
+    const response = await api.post('/relof-index/recalculate', { reason });
+    return response.data;
+  },
+
+  // Get requirements with filters
+  getRequirements: async (filters?: {
+    category?: string;
+    status?: string;
+    priority?: string;
+  }): Promise<{
+    total: number;
+    filtered: {
+      category?: string;
+      status?: string;
+      priority?: string;
+    };
+    requirements: Record<string, RequirementResult[]>;
+    lastUpdated: string;
+  }> => {
+    const params = new URLSearchParams();
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.priority) params.append('priority', filters.priority);
+
+    const response = await api.get(`/relof-index/requirements?${params.toString()}`);
+    return response.data;
+  },
+
+  // Get recommendations
+  getRecommendations: async (filters?: {
+    priority?: string;
+    limit?: number;
+  }): Promise<{
+    total: number;
+    totalEstimatedImpact: number;
+    recommendations: Recommendation[];
+    lastUpdated: string;
+  }> => {
+    const params = new URLSearchParams();
+    if (filters?.priority) params.append('priority', filters.priority);
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+
+    const response = await api.get(`/relof-index/recommendations?${params.toString()}`);
+    return response.data;
+  },
+
+  // Get category breakdown
+  getCategoryBreakdown: async (): Promise<CategoryBreakdown> => {
+    const response: AxiosResponse<CategoryBreakdown> = await api.get('/relof-index/categories');
+    return response.data;
+  },
+
+  // Get statistics and trends
+  getStatistics: async (period: string = '30d'): Promise<StatisticsData> => {
+    const response: AxiosResponse<StatisticsData> = await api.get(`/relof-index/statistics?period=${period}`);
+    return response.data;
+  },
+
+  // Get dashboard data
+  getDashboardData: async (): Promise<DashboardData> => {
+    const response: AxiosResponse<DashboardData> = await api.get('/relof-index/dashboard');
+    return response.data;
+  },
+
+  // Trigger notification
+  triggerNotification: async (): Promise<{
+    success: boolean;
+    message: string;
+    data?: {
+      score: number;
+      issuesCount: number;
+      criticalIssuesCount?: number;
+      recommendationsCount?: number;
+      allRequirementsFulfilled?: boolean;
+    };
+    timestamp: string;
+  }> => {
+    const response = await api.post('/relof-index/trigger-notification');
+    return response.data;
+  }
+};

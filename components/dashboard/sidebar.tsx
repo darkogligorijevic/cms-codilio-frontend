@@ -1,3 +1,4 @@
+// components/dashboard/sidebar.tsx
 'use client';
 
 import Link from 'next/link';
@@ -15,7 +16,8 @@ import {
   Building2,
   Crown,
   Grid3X3,
-  Briefcase  // Add Services icon
+  Briefcase,
+  BarChart3
 } from 'lucide-react';
 
 const menuItems = [
@@ -23,6 +25,11 @@ const menuItems = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    title: 'Релоф Индекс',
+    href: '/dashboard/relof-index',
+    icon: BarChart3,
   },
   {
     title: 'Objave',
@@ -40,7 +47,7 @@ const menuItems = [
     icon: FolderOpen,
   },
   {
-    title: 'Usluge',  // Add Services menu item
+    title: 'Usluge',
     href: '/dashboard/services',
     icon: Briefcase,
   },
