@@ -226,7 +226,7 @@ export default function RelofIndexDashboard() {
     try {
       setIsRecalculating(true);
       const result = await relofIndexApi.recalculateScore('Manual recalculation from dashboard');
-      toast.success(`Релоф Индекс поново израчунат: ${result.newScore.totalScore.toFixed(1)}%`);
+      toast.success(`Релоф Индекс поново израчунат: ${Number(result.newScore.totalScore).toFixed(1)}%`);
       await fetchDashboardData(); // Refresh data
     } catch (error: any) {
       console.error('Error recalculating score:', error);
