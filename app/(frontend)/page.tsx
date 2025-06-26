@@ -120,7 +120,7 @@ export default function HomePage() {
 
       const filteredPages = pagesResponse.filter(page =>
         page.title.toLowerCase().includes(searchLower) ||
-        page.content.toLowerCase().includes(searchLower)
+        String(page.content).toLowerCase().includes(searchLower)
       ).slice(0, 3);
 
       setSearchResults({
@@ -330,7 +330,7 @@ export default function HomePage() {
                                       </div>
                                       <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                                         {highlightText(
-                                          page.content.replace(/<[^>]*>/g, '').substring(0, 100),
+                                          String(page.content).replace(/<[^>]*>/g, '').substring(0, 100),
                                           searchTerm
                                         )}
                                       </div>

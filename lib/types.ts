@@ -1048,6 +1048,9 @@ export enum SectionType {
 }
 
 export interface SectionData {
+  // Allow dynamic indexing
+  [key: string]: any;
+  
   // Common fields
   title?: string;
   subtitle?: string;
@@ -1148,4 +1151,41 @@ export interface SectionTypeInfo {
   value: SectionType;
   label: string;
   description: string;
+}
+
+export interface FieldOption {
+  value: string;
+  label: string;
+}
+
+export interface BaseFieldConfig {
+  key: string;
+  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object';
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  language?: string;
+  rows?: number;
+}
+
+export interface SelectFieldConfig extends BaseFieldConfig {
+  type: 'select';
+  options: FieldOption[];
+}
+
+export interface ArrayFieldConfig extends BaseFieldConfig {
+  type: 'array';
+  itemSchema: Record<string, FieldConfig>;
+}
+
+export interface ObjectFieldConfig extends BaseFieldConfig {
+  type: 'object';
+  schema: Record<string, FieldConfig>;
+}
+
+export type FieldConfig = BaseFieldConfig | SelectFieldConfig | ArrayFieldConfig | ObjectFieldConfig;
+
+export interface SectionFieldConfig {
+  required?: string[];
+  fields: FieldConfig[];
 }

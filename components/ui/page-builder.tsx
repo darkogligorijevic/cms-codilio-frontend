@@ -51,6 +51,9 @@ import {
 } from '@/lib/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SECTION_FIELD_CONFIGS } from '@/lib/section-field-configs';
+import { DynamicField } from '@/components/ui/dynamic-field';
+import { SectionFieldConfig } from '@/lib/types';
 
 interface PageBuilderProps {
   pageId: number;
@@ -542,6 +545,7 @@ function EditSectionDialog({
   initialData 
 }: EditSectionDialogProps) {
   const [formData, setFormData] = useState<UpdatePageSectionDto>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (section) {
@@ -555,10 +559,8 @@ function EditSectionDialog({
     }
   }, [section]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
+  // Get field configuration for current section type
+  const fieldConfig: SectionFieldConfig | undefined = formData.type ? SECTION_FIELD_CONFIGS[formData.type] : undefined;
 
   const updateSectionData = (key: string, value: any) => {
     setFormData(prev => ({
@@ -568,6 +570,38 @@ function EditSectionDialog({
         [key]: value
       }
     }));
+    
+    // Clear error for this field
+    if (errors[key]) {
+      setErrors(prev => ({ ...prev, [key]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // Validate name
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Naziv sekcije je obavezan';
+    }
+    
+    // Validate required fields for section type
+    fieldConfig?.required?.forEach(fieldKey => {
+      if (!formData.data?.[fieldKey]) {
+        const field = fieldConfig.fields.find(f => f.key === fieldKey);
+        newErrors[fieldKey] = `${field?.label} je obavezno polje`;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      onSave(formData);
+    }
   };
 
   if (!section) return null;
@@ -589,18 +623,15 @@ function EditSectionDialog({
               <h4 className="font-medium">Osnovne postavke</h4>
               
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Naziv sekcije</Label>
-                  <Input
-                    id="name"
-                    value={formData.name || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    required
-                  />
-                </div>
+                <DynamicField
+                  field={{ key: 'name', type: 'text', label: 'Naziv sekcije', required: true }}
+                  value={formData.name}
+                  onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
+                  error={errors.name}
+                />
 
                 <div className="space-y-2">
-                  <Label htmlFor="type">Tip sekcije</Label>
+                  <Label>Tip sekcije</Label>
                   <Select 
                     value={formData.type} 
                     onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as SectionType }))}
@@ -621,172 +652,39 @@ function EditSectionDialog({
 
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="isVisible"
                   checked={formData.isVisible}
-                  onCheckedChange={(checked: boolean) => setFormData(prev => ({ ...prev, isVisible: checked }))}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isVisible: checked }))}
                 />
-                <Label htmlFor="isVisible">Prikaži sekciju</Label>
+                <Label>Prikaži sekciju</Label>
               </div>
             </div>
 
-            {/* Content Settings */}
-            <div className="space-y-4">
-              <h4 className="font-medium">Sadržaj</h4>
-              
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Naslov</Label>
-                  <Input
-                    id="title"
-                    placeholder="Unesite naslov sekcije"
-                    value={formData.data?.title || ''}
-                    onChange={(e) => updateSectionData('title', e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subtitle">Podnaslov</Label>
-                  <Input
-                    id="subtitle"
-                    placeholder="Unesite podnaslov"
-                    value={formData.data?.subtitle || ''}
-                    onChange={(e) => updateSectionData('subtitle', e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Opis</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Unesite opis sekcije"
-                    rows={4}
-                    value={formData.data?.description || ''}
-                    onChange={(e) => updateSectionData('description', e.target.value)}
-                  />
-                </div>
-
-                {/* Button Settings */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="buttonText">Tekst dugmeta</Label>
-                    <Input
-                      id="buttonText"
-                      placeholder="Saznaj više"
-                      value={formData.data?.buttonText || ''}
-                      onChange={(e) => updateSectionData('buttonText', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="buttonLink">Link dugmeta</Label>
-                    <Input
-                      id="buttonLink"
-                      placeholder="/o-nama"
-                      value={formData.data?.buttonLink || ''}
-                      onChange={(e) => updateSectionData('buttonLink', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Styling */}
-            <div className="space-y-4">
-              <h4 className="font-medium">Stilizovanje</h4>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="textColor">Boja teksta</Label>
-                  <Input
-                    id="textColor"
-                    type="color"
-                    value={formData.data?.textColor || '#000000'}
-                    onChange={(e) => updateSectionData('textColor', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cssClasses">CSS klase</Label>
-                <Input
-                  id="cssClasses"
-                  placeholder="custom-class another-class"
-                  value={formData.cssClasses || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cssClasses: e.target.value }))}
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="layout">Layout</Label>
-                  <Select 
-                    value={formData.data?.layout || 'contained'} 
-                    onValueChange={(value) => updateSectionData('layout', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full-width">Puna širina</SelectItem>
-                      <SelectItem value="contained">Ograničeno</SelectItem>
-                      <SelectItem value="narrow">Usko</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="padding">Padding</Label>
-                  <Select 
-                    value={formData.data?.padding || 'medium'} 
-                    onValueChange={(value) => updateSectionData('padding', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Bez</SelectItem>
-                      <SelectItem value="small">Malo</SelectItem>
-                      <SelectItem value="medium">Srednje</SelectItem>
-                      <SelectItem value="large">Veliko</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="margin">Margin</Label>
-                  <Select 
-                    value={formData.data?.margin || 'medium'} 
-                    onValueChange={(value) => updateSectionData('margin', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Bez</SelectItem>
-                      <SelectItem value="small">Malo</SelectItem>
-                      <SelectItem value="medium">Srednje</SelectItem>
-                      <SelectItem value="large">Veliko</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            {/* Type-specific content */}
-            {formData.type === SectionType.CUSTOM_HTML && (
+            {/* Dynamic Content Fields */}
+            {fieldConfig && (
               <div className="space-y-4">
-                <h4 className="font-medium">Custom HTML</h4>
-                <div className="space-y-2">
-                  <Label htmlFor="htmlContent">HTML sadržaj</Label>
-                  <Textarea
-                    id="htmlContent"
-                    placeholder="<div>Your custom HTML content</div>"
-                    rows={8}
-                    value={formData.data?.htmlContent || ''}
-                    onChange={(e) => updateSectionData('htmlContent', e.target.value)}
+                <h4 className="font-medium">Sadržaj sekcije</h4>
+                
+                {fieldConfig.fields.map((field) => (
+                  <DynamicField
+                    key={field.key}
+                    field={field}
+                    value={formData.data?.[field.key]}
+                    onChange={(value) => updateSectionData(field.key, value)}
+                    error={errors[field.key]}
                   />
-                </div>
+                ))}
               </div>
             )}
+
+            {/* CSS Classes */}
+            <div className="space-y-2">
+              <Label>CSS klase (opciono)</Label>
+              <Input
+                placeholder="custom-class another-class"
+                value={formData.cssClasses || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, cssClasses: e.target.value }))}
+              />
+            </div>
           </div>
 
           <DialogFooter>

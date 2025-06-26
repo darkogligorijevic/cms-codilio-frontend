@@ -1,3 +1,4 @@
+// app/(frontend)/[...slug]/page.tsx - Updated to support Page Builder
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -10,10 +11,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { pagesApi, postsApi, mediaApi, galleryApi, servicesApi } from '@/lib/api';
-import { type Page, type Post, type Gallery, Service } from '@/lib/types';
+import { type Page, type Post, type Gallery, Service, PageSection } from '@/lib/types';
 import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
 import { SingleServiceTemplate } from '@/templates/services/single-service-template';
+import { PageBuilderRenderer } from '@/components/frontend/section-renderer';
 
 interface DynamicPageProps {
   params: Promise<{ slug: string[] }>;
@@ -24,6 +26,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const { settings } = useSettings();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<Page | null>(null);
+  const [sections, setSections] = useState<PageSection[]>([]); // Add sections state
   const [gallery, setGallery] = useState<Gallery | null>(null);
   const [service, setService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +66,17 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       // First, try to get the main page
       const pageData = await pagesApi.getBySlug(pageSlug);
       setPage(pageData);
+
+      // If page uses page builder, fetch sections
+      if (pageData.usePageBuilder) {
+        try {
+          const sectionsData = await pagesApi.getSections(pageData.id);
+          setSections(sectionsData);
+        } catch (sectionsError) {
+          console.error('Error fetching sections:', sectionsError);
+          setSections([]);
+        }
+      }
 
       // If this is a gallery page and we have a sub-slug, try to get the gallery
       if (pageData.template === 'gallery' && subSlug) {
@@ -248,37 +262,43 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   }
 
-  // Get the appropriate template component for regular pages
-  const TemplateComponent = getTemplate(page?.template);
-
-  // Prepare template props
-  const templateProps: TemplateProps = {
-    page,
-    posts,
-    institutionData,
-    settings
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Page Header */}
-      <div className="bg-white border-b dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{page.title}</h1>
-            <Button variant="outline" asChild>
-              <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Назад на почетну
-              </Link>
-            </Button>
+      {/* Page Header - Only show if not using page builder or if sections don't have hero */}
+      {!page.usePageBuilder && (
+        <div className="bg-white border-b dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{page.title}</h1>
+              <Button variant="outline" asChild>
+                <Link href="/">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Назад на почетну
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Content - Render with selected template */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <TemplateComponent {...templateProps} />
+      {/* Main Content */}
+      <main className={page.usePageBuilder ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"}>
+        {page.usePageBuilder ? (
+          // Render sections using Page Builder
+          <PageBuilderRenderer sections={sections} />
+        ) : (
+          // Render with traditional template
+          (() => {
+            const TemplateComponent = getTemplate(page.template);
+            const templateProps: TemplateProps = {
+              page,
+              posts,
+              institutionData,
+              settings
+            };
+            return <TemplateComponent {...templateProps} />;
+          })()
+        )}
       </main>
     </div>
   );
