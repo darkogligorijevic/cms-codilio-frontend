@@ -1344,6 +1344,8 @@ export interface Recommendation {
 export interface DashboardData {
   score: {
     current: number;
+    previous: number | null; // NEW: Previous score for comparison
+    change: number | null;   // NEW: Score change from previous
     grade: string;
     calculatedAt: string;
   };
@@ -1353,6 +1355,11 @@ export interface DashboardData {
     criticalIssues: number;
     pendingRecommendations: number;
   };
+  documentStats: {           // NEW: Document-specific statistics
+    total: number;
+    fulfilled: number;
+    critical: number;
+  };
   alerts: {
     critical: RequirementResult[];
     recommendations: Recommendation[];
@@ -1361,8 +1368,10 @@ export interface DashboardData {
     history: Array<{
       date: string;
       score: number;
+      change: number | null;    // NEW: Change for each history point
+      isImproving: boolean;     // NEW: Improvement flag for each point
     }>;
-    isImproving: boolean | null;
+    isImproving: boolean | null; // Now reliably calculated from DB
   };
   system: {
     totalConnections?: number;
@@ -1509,7 +1518,7 @@ export const relofIndexApi = {
   // Get dashboard data
   getDashboardData: async (): Promise<DashboardData> => {
     const response: AxiosResponse<DashboardData> = await api.get('/relof-index/dashboard');
-    console.log(response.data);
+    console.log(response);
     return response.data;
   },
 

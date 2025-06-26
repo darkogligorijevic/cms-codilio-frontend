@@ -92,7 +92,7 @@ interface TrendIndicatorProps {
 }
 
 function TrendIndicator({ isImproving, value }: TrendIndicatorProps) {
-  if (isImproving === null) {
+  if (isImproving === false && value === 0 ) {
     return (
       <div className="flex items-center space-x-1 text-gray-500">
         <Minus className="h-4 w-4" />
@@ -209,6 +209,7 @@ export default function RelofIndexDashboard() {
     try {
       setIsLoading(true);
       const data = await relofIndexApi.getDashboardData();
+      console.log(data);
       setDashboardData(data);
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
@@ -391,7 +392,7 @@ export default function RelofIndexDashboard() {
                     {Number(dashboardData.score.current).toFixed(1)}% од максималних 100%
                   </p>
                 </div>
-                <TrendIndicator isImproving={dashboardData.trends.isImproving} />
+                <TrendIndicator isImproving={dashboardData.trends.isImproving} value={Number(dashboardData.score.change)} />
               </div>
             </div>
 
