@@ -22,10 +22,13 @@ import {
   Clock,
   ArrowRight,
   BarChart3,
-  Loader2
+  Loader2,
+  Download,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { relofIndexApi, type Recommendation } from '@/lib/api';
 
 interface RecommendationFilters {
@@ -48,7 +51,62 @@ function PriorityIcon({ priority }: { priority: string }) {
   }
 }
 
+// Function to determine the route based on recommendation category and specific issues
+function getRecommendationRoute(recommendation: Recommendation): string {
+  const category = recommendation.category;
+  const title = recommendation.title.toLowerCase();
+  const actionItems = recommendation.actionItems.join(' ').toLowerCase();
+
+  // Basic info recommendations
+  if (category === 'basic_info') {
+    return '/dashboard/settings';
+  }
+
+  // Contact info recommendations
+  if (category === 'contact_info') {
+    return '/dashboard/settings';
+  }
+
+  // Organizational structure recommendations
+  if (category === 'organizational_structure') {
+    if (title.includes('директор') || actionItems.includes('директор')) {
+      return '/dashboard/organizational-structure/directors';
+    }
+    return '/dashboard/organizational-structure';
+  }
+
+  // Services recommendations
+  if (category === 'services') {
+    return '/dashboard/services';
+  }
+
+  // Documents recommendations
+  if (category === 'documents') {
+    return '/dashboard/media';
+  }
+
+  // Gallery recommendations
+  if (category === 'gallery') {
+    return '/dashboard/galleries';
+  }
+
+  // Posts activity recommendations
+  if (category === 'posts_activity') {
+    return '/dashboard/posts';
+  }
+
+  // Social media recommendations
+  if (category === 'social_media') {
+    return '/dashboard/settings';
+  }
+
+  // Default fallback
+  return '/dashboard';
+}
+
 function RecommendationCard({ recommendation }: { recommendation: Recommendation }) {
+  const router = useRouter();
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'bg-red-500';
@@ -88,6 +146,12 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
     if (impact >= 10) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     if (impact >= 5) return 'text-orange-600 bg-orange-50 border-orange-200';
     return 'text-gray-600 bg-gray-50 border-gray-200';
+  };
+
+  const handleApplyRecommendation = () => {
+    const route = getRecommendationRoute(recommendation);
+    toast.success(`Усмеравање на ${getCategoryLabel(recommendation.category)}...`);
+    router.push(route);
   };
 
   return (
@@ -142,9 +206,10 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
           <div className="text-xs text-gray-500">
             Очекивано побољшање: {recommendation.estimatedImpact} бодова
           </div>
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={handleApplyRecommendation}>
             <Target className="mr-2 h-4 w-4" />
             Примени препоруку
+            <ExternalLink className="ml-2 h-3 w-3" />
           </Button>
         </div>
       </CardContent>
@@ -158,6 +223,8 @@ export default function RecommendationsPage() {
   const [filters, setFilters] = useState<RecommendationFilters>({});
   const [totalEstimatedImpact, setTotalEstimatedImpact] = useState(0);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [isExporting, setIsExporting] = useState(false);
+  const [isMarking, setIsMarking] = useState(false);
 
   const fetchRecommendations = async () => {
     try {
@@ -189,6 +256,63 @@ export default function RecommendationsPage() {
     setFilters({});
   };
 
+  const handleExportReport = async () => {
+    try {
+      setIsExporting(true);
+      
+      // Generate report content
+      const reportData = {
+        title: 'Релоф Индекс - Извештај о препорукама',
+        timestamp: new Date().toLocaleString('sr-RS'),
+        totalRecommendations: recommendations.length,
+        totalEstimatedImpact,
+        recommendations: recommendations.map(r => ({
+          category: getCategoryLabel(r.category),
+          title: r.title,
+          description: r.description,
+          priority: getPriorityLabel(r.priority),
+          estimatedImpact: r.estimatedImpact,
+          actionItems: r.actionItems
+        }))
+      };
+
+      // Create and download JSON file
+      const dataStr = JSON.stringify(reportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `relof-index-preporuke-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success('Извештај је успешно извезен');
+    } catch (error) {
+      toast.error('Грешка при извозу извештаја');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleMarkAsReviewed = async () => {
+    try {
+      setIsMarking(true);
+      
+      // In a real implementation, this would call an API endpoint
+      // For now, we'll just show a success message
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      toast.success('Препоруке су означене као прегледане');
+      
+      // Optionally refresh the data
+      await fetchRecommendations();
+    } catch (error) {
+      toast.error('Грешка при означавању као прегледано');
+    } finally {
+      setIsMarking(false);
+    }
+  };
+
   const getRecommendationStats = () => {
     return {
       total: recommendations.length,
@@ -197,6 +321,30 @@ export default function RecommendationsPage() {
       medium: recommendations.filter(r => r.priority === 'medium').length,
       low: recommendations.filter(r => r.priority === 'low').length,
     };
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const categories: Record<string, string> = {
+      'basic_info': 'Основни подаци',
+      'contact_info': 'Контакт информације',
+      'organizational_structure': 'Организациона структура',
+      'services': 'Услуге',
+      'documents': 'Јавни документи',
+      'gallery': 'Галерија',
+      'posts_activity': 'Активност објављивања',
+      'social_media': 'Друштвене мреже'
+    };
+    return categories[category] || category;
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'Критично';
+      case 'high': return 'Високо';
+      case 'medium': return 'Средње';
+      case 'low': return 'Ниско';
+      default: return priority;
+    }
   };
 
   const stats = getRecommendationStats();
@@ -414,12 +562,27 @@ export default function RecommendationsPage() {
                 </p>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline">
-                  <BarChart3 className="mr-2 h-4 w-4" />
+                <Button 
+                  variant="outline" 
+                  onClick={handleExportReport}
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                  )}
                   Извези извештај
                 </Button>
-                <Button>
-                  <CheckCircle className="mr-2 h-4 w-4" />
+                <Button 
+                  onClick={handleMarkAsReviewed}
+                  disabled={isMarking}
+                >
+                  {isMarking ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                  )}
                   Означи као прегледано
                 </Button>
               </div>

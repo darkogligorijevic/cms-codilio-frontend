@@ -166,7 +166,7 @@ function CategoryDetailsModal({ isOpen, onClose, categoryData }: CategoryDetails
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-h-[90vh] max-w-4xl flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-3">
             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
