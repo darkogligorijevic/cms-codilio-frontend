@@ -1,4 +1,4 @@
-// app/dashboard/pages/page.tsx - Complete implementation with hierarchical support
+// app/dashboard/pages/page.tsx - Updated with Page Builder support
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -50,11 +52,14 @@ import {
   Clock,
   ChevronRight,
   Folder,
-  FolderOpen
+  FolderOpen,
+  Settings,
+  Code
 } from 'lucide-react';
 import Link from 'next/link';
 import { pagesApi } from '@/lib/api';
-import type { Page, PageStatus, AvailableParentPage } from '@/lib/types';
+import { PageBuilder } from '@/components/ui/page-builder';
+import type { Page, PageStatus, AvailableParentPage, UpdatePageBuilderDto } from '@/lib/types';
 import { toast } from 'sonner';
 import { transliterate } from '@/lib/transliterate';
 import { useTheme } from 'next-themes';
@@ -67,6 +72,7 @@ interface PageFormData {
   template: string;
   sortOrder: number;
   parentId?: number;
+  usePageBuilder: boolean;
 }
 
 const PAGE_TEMPLATES = [
@@ -91,6 +97,8 @@ export default function PagesPage() {
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<Page | null>(null);
+  const [selectedPageForBuilder, setSelectedPageForBuilder] = useState<Page | null>(null);
+  const [isPageBuilderOpen, setIsPageBuilderOpen] = useState(false);
   const {theme} = useTheme();
 
   const {
@@ -108,11 +116,13 @@ export default function PagesPage() {
       status: 'draft' as PageStatus,
       template: 'default',
       sortOrder: 0,
-      parentId: undefined
+      parentId: undefined,
+      usePageBuilder: false
     }
   });
 
   const watchedTitle = watch('title');
+  const watchUsePageBuilder = watch('usePageBuilder');
 
   useEffect(() => {
     fetchPages();
@@ -136,28 +146,24 @@ export default function PagesPage() {
       setIsLoading(true);
       const response = await pagesApi.getAll();
       
-      // Prvo sortiramo po hijerarhiji (parent stranice pa deca), zatim po sortOrder
+      // Sort pages hierarchically
       const buildHierarchicalOrder = (pages: Page[]): Page[] => {
         const result: Page[] = [];
         const processedIds = new Set<number>();
         
-        // Funkcija za dodavanje stranice i njene dece u ispravnom redosledu
         const addPageWithChildren = (page: Page) => {
           if (processedIds.has(page.id)) return;
           
           result.push(page);
           processedIds.add(page.id);
           
-          // Pronađi svu decu ove stranice i sortiraj ih po sortOrder
           const children = pages
             .filter(p => p.parentId === page.id)
             .sort((a, b) => a.sortOrder - b.sortOrder);
           
-          // Rekurzivno dodaj decu
           children.forEach(child => addPageWithChildren(child));
         };
         
-        // Prvo dodaj sve root stranice (bez parent-a) sortirane po sortOrder
         const rootPages = pages
           .filter(page => !page.parentId)
           .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -195,8 +201,9 @@ export default function PagesPage() {
         content: data.content,
         status: data.status,
         template: data.template,
-        sortOrder: data.sortOrder, // Uklanjam Number() jer je valueAsNumber: true
-        parentId: data.parentId || undefined
+        sortOrder: data.sortOrder,
+        parentId: data.parentId || undefined,
+        usePageBuilder: data.usePageBuilder
       };
 
       console.log('Submitting page data:', pageData);
@@ -221,11 +228,12 @@ export default function PagesPage() {
     setEditingPage(page);
     setValue('title', page.title);
     setValue('slug', page.slug);
-    setValue('content', page.content);
+    setValue('content', page.content || '');
     setValue('status', page.status);
     setValue('template', page.template);
     setValue('sortOrder', page.sortOrder);
     setValue('parentId', page.parentId || undefined);
+    setValue('usePageBuilder', page.usePageBuilder || false);
     fetchAvailableParents(page.id);
     setIsDialogOpen(true);
   };
@@ -261,6 +269,27 @@ export default function PagesPage() {
     }
   };
 
+  const handleTogglePageBuilder = async (page: Page) => {
+    try {
+      const updateData: UpdatePageBuilderDto = {
+        usePageBuilder: !page.usePageBuilder,
+        content: page.content as string
+      };
+      
+      await pagesApi.updatePageBuilder(page.id, updateData);
+      toast.success(`Page Builder je ${!page.usePageBuilder ? 'uključen' : 'isključen'}`);
+      fetchPages();
+    } catch (error) {
+      console.error('Error toggling page builder:', error);
+      toast.error('Greška pri prebacivanju Page Builder-a');
+    }
+  };
+
+  const handleOpenPageBuilder = (page: Page) => {
+    setSelectedPageForBuilder(page);
+    setIsPageBuilderOpen(true);
+  };
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingPage(null);
@@ -271,7 +300,8 @@ export default function PagesPage() {
       status: 'draft' as PageStatus,
       template: 'default',
       sortOrder: 0,
-      parentId: undefined
+      parentId: undefined,
+      usePageBuilder: false
     });
   };
 
@@ -328,7 +358,7 @@ export default function PagesPage() {
 
   const filteredPages = pages.filter(page => {
     const matchesSearch = page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         page.content.toLowerCase().includes(searchTerm.toLowerCase());
+                         (page.content && page.content.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === 'all' || page.status === statusFilter;
     const matchesTemplate = templateFilter === 'all' || page.template === templateFilter;
@@ -340,6 +370,7 @@ export default function PagesPage() {
   const draftCount = pages.filter(page => page.status === 'draft').length;
   const parentPagesCount = pages.filter(page => !page.parentId).length;
   const subPagesCount = pages.filter(page => page.parentId).length;
+  const pageBuilderCount = pages.filter(page => page.usePageBuilder).length;
 
   const getPageIndentation = (page: Page) => {
     return page.parentId ? 'pl-8' : '';
@@ -499,7 +530,7 @@ export default function PagesPage() {
                       {...register('sortOrder', { 
                         required: 'Redosled je obavezan',
                         min: { value: 0, message: 'Redosled mora biti pozitivan broj' },
-                        valueAsNumber: true // Ovo automatski konvertuje u broj
+                        valueAsNumber: true
                       })}
                     />
                     {errors.sortOrder && (
@@ -511,21 +542,55 @@ export default function PagesPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="content">Sadržaj stranice</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="Napišite sadržaj stranice..."
-                    rows={8}
-                    {...register('content')}
+                {/* Page Builder Toggle */}
+                <div className="flex items-center space-x-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Switch
+                    id="usePageBuilder"
+                    checked={watchUsePageBuilder}
+                    onCheckedChange={(checked) => setValue('usePageBuilder', checked)}
                   />
-                  {errors.content && (
-                    <p className="text-sm text-red-600 flex items-center">
-                      <AlertCircle className="mr-1 h-3 w-3" />
-                      {errors.content.message}
+                  <div>
+                    <Label htmlFor="usePageBuilder" className="font-medium">
+                      Koristi Page Builder
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Omogućava vizuelno uređivanje stranice pomoću sekcija
                     </p>
-                  )}
+                  </div>
                 </div>
+
+                {/* Content field - only show if page builder is not enabled */}
+                {!watchUsePageBuilder && (
+                  <div className="space-y-2">
+                    <Label htmlFor="content">Sadržaj stranice</Label>
+                    <Textarea
+                      id="content"
+                      placeholder="Napišite sadržaj stranice..."
+                      rows={8}
+                      {...register('content')}
+                    />
+                    {errors.content && (
+                      <p className="text-sm text-red-600 flex items-center">
+                        <AlertCircle className="mr-1 h-3 w-3" />
+                        {errors.content.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {watchUsePageBuilder && (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Layout className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Page Builder je uključen
+                      </span>
+                    </div>
+                    <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                      Sadržaj stranice ćete urediti preko Page Builder-a nakon što sačuvate stranicu.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <DialogFooter>
@@ -542,7 +607,7 @@ export default function PagesPage() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -584,6 +649,21 @@ export default function PagesPage() {
             <div className="text-2xl font-bold text-orange-600">{draftCount}</div>
             <p className="text-xs text-muted-foreground">
               U pripremi
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Page Builder
+            </CardTitle>
+            <Layout className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">{pageBuilderCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Koristi sekcije
             </p>
           </CardContent>
         </Card>
@@ -701,6 +781,7 @@ export default function PagesPage() {
                   <TableHead>Stranica</TableHead>
                   <TableHead>Template</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Builder</TableHead>
                   <TableHead>Autor</TableHead>
                   <TableHead>Redosled</TableHead>
                   <TableHead>Datum</TableHead>
@@ -753,6 +834,30 @@ export default function PagesPage() {
                       </button>
                     </TableCell>
                     <TableCell>
+                      <button
+                        onClick={() => handleTogglePageBuilder(page)}
+                        className="hover:opacity-80 transition-opacity"
+                        title={`${page.usePageBuilder ? 'Isključi' : 'Uključi'} Page Builder`}
+                      >
+                        <Badge 
+                          variant={page.usePageBuilder ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {page.usePageBuilder ? (
+                            <>
+                              <Layout className="mr-1 h-3 w-3" />
+                              Uključen
+                            </>
+                          ) : (
+                            <>
+                              <Code className="mr-1 h-3 w-3" />
+                              Isključen
+                            </>
+                          )}
+                        </Badge>
+                      </button>
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center space-x-1">
                         <UserIcon className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm">{page.author.name}</span>
@@ -772,6 +877,16 @@ export default function PagesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end space-x-1">
+                        {page.usePageBuilder && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenPageBuilder(page)}
+                            title="Otvori Page Builder"
+                          >
+                            <Layout className="h-4 w-4" />
+                          </Button>
+                        )}
                         {page.status === 'published' && (
                           <Button
                             variant="ghost"
@@ -810,7 +925,7 @@ export default function PagesPage() {
                 ))}
                 {filteredPages.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-12">
+                    <TableCell colSpan={8} className="text-center py-12">
                       <div className="text-muted-foreground space-y-2">
                         {searchTerm || statusFilter !== 'all' || templateFilter !== 'all' ? (
                           <>
@@ -854,6 +969,50 @@ export default function PagesPage() {
         </CardContent>
       </Card>
 
+      {/* Page Builder Dialog */}
+      <Dialog open={isPageBuilderOpen} onOpenChange={setIsPageBuilderOpen}>
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Layout className="h-5 w-5" />
+              <span>Page Builder - {selectedPageForBuilder?.title}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Dodajte i uredite sekcije na vašoj stranici pomoću drag & drop funkcionalnosti
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-hidden">
+            {selectedPageForBuilder && (
+              <PageBuilder 
+                pageId={selectedPageForBuilder.id}
+                className="h-full overflow-y-auto"
+              />
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsPageBuilderOpen(false)}
+            >
+              Zatvori
+            </Button>
+            {selectedPageForBuilder?.status === 'published' && (
+              <Button asChild>
+                <Link 
+                  href={`/${selectedPageForBuilder.slug}`} 
+                  target="_blank"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Pregledaj stranicu
+                </Link>
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
@@ -878,6 +1037,12 @@ export default function PagesPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Template:</span>
                 {getTemplateBadge(pageToDelete.template)}
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Page Builder:</span>
+                <Badge variant={pageToDelete.usePageBuilder ? "default" : "secondary"}>
+                  {pageToDelete.usePageBuilder ? 'Uključen' : 'Isključen'}
+                </Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Redosled:</span>

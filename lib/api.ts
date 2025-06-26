@@ -72,7 +72,13 @@ import {
   ServiceType,
   ServiceTypeInfo,
   UpdateServiceDocumentDto,
-  UpdateServiceDto
+  UpdateServiceDto,
+  CreatePageSectionDto,
+  PageSection,
+  ReorderSectionsDto,
+  SectionTypeInfo,
+  UpdatePageBuilderDto,
+  UpdatePageSectionDto
 } from './types';
 
 export const API_BASE_URL = 'http://localhost:3001/api';
@@ -261,6 +267,11 @@ interface PageSelectionOption {
 
 // Pages API
 export const pagesApi = {
+  create: async (data: CreatePageDto): Promise<Page> => {
+    const response: AxiosResponse<Page> = await api.post('/pages', data);
+    return response.data;
+  },
+
   getAll: async (): Promise<Page[]> => {
     const response: AxiosResponse<Page[]> = await api.get('/pages');
     return response.data;
@@ -271,7 +282,6 @@ export const pagesApi = {
     return response.data;
   },
 
-  // New method for hierarchical structure
   getHierarchical: async (): Promise<Page[]> => {
     const response: AxiosResponse<Page[]> = await api.get('/pages/hierarchical');
     return response.data;
@@ -287,13 +297,15 @@ export const pagesApi = {
     return response.data;
   },
 
-  // Updated method for getting pages for selection dropdown
-  getAllForSelection: async (): Promise<PageSelectionOption[]> => {
-    const response: AxiosResponse<PageSelectionOption[]> = await api.get('/pages/for-selection');
+  update: async (id: number, data: UpdatePageDto): Promise<Page> => {
+    const response: AxiosResponse<Page> = await api.patch(`/pages/${id}`, data);
     return response.data;
   },
 
-  // New method for getting available parent pages
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/pages/${id}`);
+  },
+
   getAvailableParents: async (excludeId?: number): Promise<AvailableParentPage[]> => {
     let url = '/pages/available-parents';
     if (excludeId) {
@@ -303,19 +315,61 @@ export const pagesApi = {
     return response.data;
   },
 
-  create: async (data: CreatePageDto): Promise<Page> => {
-    const response: AxiosResponse<Page> = await api.post('/pages', data);
+  getAllForSelection: async (): Promise<Array<{ id: number; title: string; slug: string; parentId?: number }>> => {
+    const response = await api.get('/pages/for-selection');
     return response.data;
   },
 
-  update: async (id: number, data: UpdatePageDto): Promise<Page> => {
-    const response: AxiosResponse<Page> = await api.patch(`/pages/${id}`, data);
+  // PAGE BUILDER METHODS
+  getSectionTypes: async (): Promise<SectionTypeInfo[]> => {
+    const response: AxiosResponse<SectionTypeInfo[]> = await api.get('/pages/section-types');
     return response.data;
   },
 
-  delete: async (id: number): Promise<void> => {
-    await api.delete(`/pages/${id}`);
-  }
+  updatePageBuilder: async (pageId: number, data: UpdatePageBuilderDto): Promise<Page> => {
+    const response: AxiosResponse<Page> = await api.patch(`/pages/${pageId}/page-builder`, data);
+    return response.data;
+  },
+
+  // SECTION MANAGEMENT
+  getSections: async (pageId: number): Promise<PageSection[]> => {
+    const response: AxiosResponse<PageSection[]> = await api.get(`/pages/${pageId}/sections`);
+    return response.data;
+  },
+
+  createSection: async (pageId: number, data: CreatePageSectionDto): Promise<PageSection> => {
+    const response: AxiosResponse<PageSection> = await api.post(`/pages/${pageId}/sections`, data);
+    return response.data;
+  },
+
+  getSectionById: async (sectionId: number): Promise<PageSection> => {
+    const response: AxiosResponse<PageSection> = await api.get(`/pages/sections/${sectionId}`);
+    return response.data;
+  },
+
+  updateSection: async (sectionId: number, data: UpdatePageSectionDto): Promise<PageSection> => {
+    const response: AxiosResponse<PageSection> = await api.patch(`/pages/sections/${sectionId}`, data);
+    return response.data;
+  },
+
+  deleteSection: async (sectionId: number): Promise<void> => {
+    await api.delete(`/pages/sections/${sectionId}`);
+  },
+
+  reorderSections: async (pageId: number, data: ReorderSectionsDto): Promise<PageSection[]> => {
+    const response: AxiosResponse<PageSection[]> = await api.patch(`/pages/${pageId}/sections/reorder`, data);
+    return response.data;
+  },
+
+  duplicateSection: async (sectionId: number): Promise<PageSection> => {
+    const response: AxiosResponse<PageSection> = await api.post(`/pages/sections/${sectionId}/duplicate`);
+    return response.data;
+  },
+
+  toggleSectionVisibility: async (sectionId: number): Promise<PageSection> => {
+    const response: AxiosResponse<PageSection> = await api.patch(`/pages/sections/${sectionId}/toggle-visibility`);
+    return response.data;
+  },
 };
 
 export const mailerApi = {

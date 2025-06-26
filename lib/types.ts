@@ -81,10 +81,11 @@ export interface Page {
   id: number;
   title: string;
   slug: string;
-  content: string;
+  content?: string | null;
   status: PageStatus;
   template: string;
   sortOrder: number;
+  usePageBuilder: boolean; // Add this field
   createdAt: string;
   updatedAt: string;
   authorId: number;
@@ -92,7 +93,8 @@ export interface Page {
   parentId?: number;
   parent?: Page;
   children?: Page[];
-  posts?: Post[]; 
+  posts?: Post[];
+  sections?: PageSection[]; // Add this field
 }
 
 export interface Post {
@@ -1024,6 +1026,126 @@ export interface ServicePriorityInfo {
 
 export interface ServiceDocumentTypeInfo {
   value: ServiceDocumentType;
+  label: string;
+  description: string;
+}
+
+export enum SectionType {
+  HERO_STACK = 'hero_stack',
+  HERO_LEFT = 'hero_left', 
+  HERO_IMAGE = 'hero_image',
+  HERO_VIDEO = 'hero_video',
+  CARD_TOP = 'card_top',
+  CARD_BOTTOM = 'card_bottom',
+  CARD_LEFT = 'card_left',
+  CARD_RIGHT = 'card_right',
+  CONTACT_ONE = 'contact_one',
+  CONTACT_TWO = 'contact_two',
+  CTA_ONE = 'cta_one',
+  LOGOS_ONE = 'logos_one',
+  TEAM_ONE = 'team_one',
+  CUSTOM_HTML = 'custom_html'
+}
+
+export interface SectionData {
+  // Common fields
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  backgroundImage?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  
+  // Button fields
+  buttonText?: string;
+  buttonLink?: string;
+  buttonStyle?: 'primary' | 'secondary' | 'outline';
+  
+  // Hero specific
+  heroText?: string;
+  heroSubtext?: string;
+  videoUrl?: string;
+  
+  // Card specific
+  cards?: Array<{
+    title: string;
+    description: string;
+    image?: string;
+    link?: string;
+  }>;
+  
+  // Contact specific
+  contactInfo?: {
+    address?: string;
+    phone?: string;
+    email?: string;
+    workingHours?: string;
+    mapUrl?: string;
+  };
+  
+  // Team specific
+  teamMembers?: Array<{
+    name: string;
+    position: string;
+    image?: string;
+    bio?: string;
+  }>;
+  
+  // Logos specific
+  logos?: Array<{
+    name: string;
+    image: string;
+    link?: string;
+  }>;
+  
+  // Custom HTML
+  htmlContent?: string;
+  
+  // Layout options
+  layout?: 'full-width' | 'contained' | 'narrow';
+  padding?: 'none' | 'small' | 'medium' | 'large';
+  margin?: 'none' | 'small' | 'medium' | 'large';
+}
+
+export interface PageSection {
+  id: number;
+  type: SectionType;
+  name: string;
+  data: SectionData;
+  sortOrder: number;
+  isVisible: boolean;
+  cssClasses?: string;
+  createdAt: string;
+  updatedAt: string;
+  pageId: number;
+}
+
+export interface CreatePageSectionDto {
+  type: SectionType;
+  name: string;
+  data: SectionData;
+  sortOrder?: number;
+  isVisible?: boolean;
+  cssClasses?: string;
+}
+
+export interface UpdatePageSectionDto extends Partial<CreatePageSectionDto> {}
+
+export interface ReorderSectionsDto {
+  sections: Array<{
+    id: number;
+    sortOrder: number;
+  }>;
+}
+
+export interface UpdatePageBuilderDto {
+  usePageBuilder: boolean;
+  content?: string;
+}
+
+export interface SectionTypeInfo {
+  value: SectionType;
   label: string;
   description: string;
 }
