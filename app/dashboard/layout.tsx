@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/auth-context';
 import { DashboardSidebar } from '@/components/dashboard/sidebar';
 import { DashboardHeader } from '@/components/dashboard/header';
+import FloatingChatWidget from '@/components/dashboard/floating-chat-widget';
 
 export default function DashboardLayout({
   children,
@@ -40,6 +41,7 @@ export default function DashboardLayout({
         <DashboardHeader />
         <main className="p-6">
           {children}
+          <FloatingChatWidget />
         </main>
       </div>
     </div>
