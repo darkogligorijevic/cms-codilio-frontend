@@ -785,7 +785,7 @@ export interface CreateDirectorDto {
   office?: string;
   biography?: string;
   appointmentDate: string;
-  terminationDate?: string;
+  terminationDate?: string | null;
   isCurrent?: boolean;
   isActive?: boolean;
 }

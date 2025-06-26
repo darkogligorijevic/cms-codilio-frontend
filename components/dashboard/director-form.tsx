@@ -131,7 +131,7 @@ export function DirectorForm({ director, onSubmit, onCancel }: DirectorFormProps
         office: data.office,
         biography: data.biography,
         appointmentDate: data.appointmentDate,
-        terminationDate: data.terminationDate,
+        terminationDate: data.terminationDate || null,
         isCurrent: data.isCurrent,
         isActive: data.isActive,
       };
@@ -258,15 +258,16 @@ export function DirectorForm({ director, onSubmit, onCancel }: DirectorFormProps
                   <p className="text-sm text-red-600">{form.formState.errors.appointmentDate.message}</p>
                 )}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="terminationDate">Датум престанка функције</Label>
-                <Input
-                  id="terminationDate"
-                  type="date"
-                  {...form.register('terminationDate')}
-                />
-              </div>
+              {!form.getValues('isCurrent') && (
+                <div className="space-y-2">
+                  <Label htmlFor="terminationDate">Датум престанка функције</Label>
+                  <Input
+                    id="terminationDate"
+                    type="date"
+                    {...form.register('terminationDate')}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
