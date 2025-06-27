@@ -13,17 +13,19 @@ export function HeroLeftSection({ data, className }: HeroLeftSectionProps) {
     <section className={cn('', className)}>
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
         <div className="space-y-6">
-          {data.title && (
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-              {data.title}
-            </h1>
-          )}
-          
-          {data.subtitle && (
-            <h2 className="text-xl sm:text-2xl font-medium text-gray-600 dark:text-gray-300">
-              {data.subtitle}
-            </h2>
-          )}
+          <div className='flex flex-col gap-2'>
+            {data.title && (
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+                {data.title}
+              </h1>
+            )}
+            
+            {data.subtitle && (
+              <h2 className="text-xl sm:text-2xl font-medium text-gray-600 dark:text-gray-300">
+                {data.subtitle}
+              </h2>
+            )}
+          </div>
           
           {data.description && (
             <p className="text-lg text-gray-700 dark:text-gray-200">
@@ -38,6 +40,7 @@ export function HeroLeftSection({ data, className }: HeroLeftSectionProps) {
                 size="lg"
                 variant={data.buttonStyle === 'secondary' ? 'secondary' : 
                         data.buttonStyle === 'outline' ? 'outline' : 'primary'}
+                
               >
                 <a href={data.buttonLink}>
                   {data.buttonText}

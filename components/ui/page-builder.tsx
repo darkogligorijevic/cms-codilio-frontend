@@ -1,4 +1,4 @@
-// components/ui/page-builder.tsx
+// components/ui/page-builder.tsx - Complete enhanced version with tabs
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -51,7 +52,11 @@ import {
 } from '@/lib/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { SECTION_FIELD_CONFIGS } from '@/lib/section-field-configs';
+import { 
+  BASE_SECTION_CONFIGS, 
+  getLayoutFieldsForSection, 
+  COMMON_LAYOUT_FIELDS 
+} from '@/lib/section-field-configs';
 import { DynamicField } from '@/components/ui/dynamic-field';
 import { SectionFieldConfig } from '@/lib/types';
 
@@ -459,7 +464,7 @@ function AddSectionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Dodaj novu sekciju</DialogTitle>
@@ -510,6 +515,12 @@ function AddSectionDialog({
               />
               <Label htmlFor="isVisible">Prikaži sekciju</Label>
             </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                💡 <strong>Tip:</strong> Nakon dodavanja sekcije, moći ćete da uredite njen sadržaj, layout opcije i napredne postavke.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>
@@ -526,7 +537,7 @@ function AddSectionDialog({
   );
 }
 
-// Edit Section Dialog Component
+// Edit Section Dialog Component - WITH TABS
 interface EditSectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -560,7 +571,8 @@ function EditSectionDialog({
   }, [section]);
 
   // Get field configuration for current section type
-  const fieldConfig: SectionFieldConfig | undefined = formData.type ? SECTION_FIELD_CONFIGS[formData.type] : undefined;
+  const fieldConfig: SectionFieldConfig | undefined = formData.type ? BASE_SECTION_CONFIGS[formData.type] : undefined;
+  const layoutFields = formData.type ? getLayoutFieldsForSection(formData.type) : COMMON_LAYOUT_FIELDS;
 
   const updateSectionData = (key: string, value: any) => {
     setFormData(prev => ({
@@ -608,7 +620,7 @@ function EditSectionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Uredi sekciju</DialogTitle>
@@ -617,74 +629,152 @@ function EditSectionDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            {/* Basic Settings */}
-            <div className="space-y-4">
-              <h4 className="font-medium">Osnovne postavke</h4>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <DynamicField
-                  field={{ key: 'name', type: 'text', label: 'Naziv sekcije', required: true }}
-                  value={formData.name}
-                  onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
-                  error={errors.name}
-                />
+          <div className="max-h-[60vh] overflow-y-auto py-4">
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="content">Sadržaj</TabsTrigger>
+                <TabsTrigger value="layout">Layout & Stil</TabsTrigger>
+                <TabsTrigger value="advanced">Napredno</TabsTrigger>
+              </TabsList>
 
-                <div className="space-y-2">
-                  <Label>Tip sekcije</Label>
-                  <Select 
-                    value={formData.type} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as SectionType }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sectionTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {/* Content Tab */}
+              <TabsContent value="content" className="space-y-6 mt-6">
+                {/* Basic Settings */}
+                <div className="space-y-4">
+                  <h4 className="font-medium">Osnovne postavke</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <DynamicField
+                      field={{ key: 'name', type: 'text', label: 'Naziv sekcije', required: true }}
+                      value={formData.name}
+                      onChange={(value) => setFormData(prev => ({ ...prev, name: value }))}
+                      error={errors.name}
+                    />
+
+                    <div className="space-y-2">
+                      <Label>Tip sekcije</Label>
+                      <Select 
+                        value={formData.type} 
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as SectionType }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sectionTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={formData.isVisible}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isVisible: checked }))}
+                    />
+                    <Label>Prikaži sekciju</Label>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={formData.isVisible}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isVisible: checked }))}
-                />
-                <Label>Prikaži sekciju</Label>
-              </div>
-            </div>
+                {/* Dynamic Content Fields */}
+                {fieldConfig && (
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Sadržaj sekcije</h4>
+                    
+                    {fieldConfig.fields.map((field) => (
+                      <DynamicField
+                        key={field.key}
+                        field={field}
+                        value={formData.data?.[field.key]}
+                        onChange={(value) => updateSectionData(field.key, value)}
+                        error={errors[field.key]}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
 
-            {/* Dynamic Content Fields */}
-            {fieldConfig && (
-              <div className="space-y-4">
-                <h4 className="font-medium">Sadržaj sekcije</h4>
-                
-                {fieldConfig.fields.map((field) => (
-                  <DynamicField
-                    key={field.key}
-                    field={field}
-                    value={formData.data?.[field.key]}
-                    onChange={(value) => updateSectionData(field.key, value)}
-                    error={errors[field.key]}
-                  />
-                ))}
-              </div>
-            )}
+              {/* Layout & Style Tab */}
+              <TabsContent value="layout" className="space-y-6 mt-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Layout opcije</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Kontrolišite kako se sekcija prikazuje na stranici
+                  </p>
+                  
+                  {layoutFields.map((field) => (
+                    <DynamicField
+                      key={field.key}
+                      field={field}
+                      value={formData.data?.[field.key]}
+                      onChange={(value) => updateSectionData(field.key, value)}
+                      error={errors[field.key]}
+                    />
+                  ))}
+                </div>
 
-            {/* CSS Classes */}
-            <div className="space-y-2">
-              <Label>CSS klase (opciono)</Label>
-              <Input
-                placeholder="custom-class another-class"
-                value={formData.cssClasses || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, cssClasses: e.target.value }))}
-              />
-            </div>
+                {/* Preview */}
+                <div className="space-y-4 border-t pt-4">
+                  <h4 className="font-medium">Preview stilizovanja</h4>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                    <div className="text-sm space-y-2">
+                      <div><strong>Layout:</strong> {formData.data?.layout || 'contained'}</div>
+                      <div><strong>Padding:</strong> {formData.data?.padding || 'medium'}</div>
+                      <div><strong>Margin:</strong> {formData.data?.margin || 'medium'}</div>
+                      {formData.data?.backgroundColor && (
+                        <div className="flex items-center space-x-2">
+                          <strong>Pozadina:</strong>
+                          <div 
+                            className="w-6 h-6 rounded border"
+                            style={{ backgroundColor: formData.data.backgroundColor }}
+                          ></div>
+                          <span>{formData.data.backgroundColor}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Advanced Tab */}
+              <TabsContent value="advanced" className="space-y-6 mt-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Napredne opcije</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Dodatne opcije za developere i napredne korisnike
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <Label>CSS klase (opciono)</Label>
+                    <Input
+                      placeholder="custom-class another-class"
+                      value={formData.cssClasses || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, cssClasses: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Dodajte custom CSS klase odvojene razmakom
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>JSON data (readonly)</Label>
+                    <Textarea
+                      value={JSON.stringify(formData.data, null, 2)}
+                      readOnly
+                      rows={8}
+                      className="font-mono text-xs"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Preview podataka koji će biti sačuvani
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           <DialogFooter>

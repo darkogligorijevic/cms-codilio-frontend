@@ -1121,6 +1121,9 @@ export interface PageSection {
   cssClasses?: string;
   createdAt: string;
   updatedAt: string;
+  layout?: string | null;
+  padding?: string | null;
+  margin?: string | null;
   pageId: number;
 }
 

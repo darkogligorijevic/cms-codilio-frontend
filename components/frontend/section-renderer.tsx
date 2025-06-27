@@ -8,15 +8,15 @@ import { HeroLeftSection } from '@/components/frontend/sections/hero/hero-left';
 import { CustomHTMLSection } from '@/components/frontend/sections/custom-html-section';
 import { CardTopSection } from '@/components/frontend/sections/card/top-card';
 import { ContactOneSection } from '@/components/frontend/sections/contact/contact-one';
-// import { HeroImageSection } from '@/components/frontend/sections/hero/image-hero';
-// import { HeroVideoSection } from '@/components/frontend/sections/hero/vide-hero';
-// import { CardBottomSection } from '@/components/frontend/sections/card/bottom-card';
-// import { CardLeftSection } from '@/components/frontend/sections/card/left-card';
-// import { CardRightSection } from '@/components/frontend/sections/card/right-card';
-// import { ContactTwoSection } from '@/components/frontend/sections/contact/contact-two';
-// import { CTAOneSection } from '@/components/frontend/sections/cta/cta-one';
-// import { LogosOneSection } from '@/components/frontend/sections/logos/logos-one';
-// import { TeamOneSection } from '@/components/frontend/sections/team/team-one';
+import { HeroImageSection } from '@/components/frontend/sections/hero/image-hero';
+import { HeroVideoSection } from '@/components/frontend/sections/hero/video-hero';
+import { CardBottomSection } from '@/components/frontend/sections/card/bottom-card';
+import { CardLeftSection } from '@/components/frontend/sections/card/left-card';
+import { CardRightSection } from '@/components/frontend/sections/card/right-card';
+import { ContactTwoSection } from '@/components/frontend/sections/contact/contact-two';
+import { CTAOneSection } from '@/components/frontend/sections/cta/cta-one';
+import { LogosOneSection } from '@/components/frontend/sections/logos/logos-one';
+import { TeamOneSection } from '@/components/frontend/sections/team/team-one';
 
 interface SectionRendererProps {
   section: PageSection;
@@ -39,11 +39,11 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
         classes.push('w-full');
         break;
       case 'narrow':
-        classes.push('max-w-4xl mx-auto px-4 sm:px-6 lg:px-8');
+        classes.push('max-w-4xl mx-auto');
         break;
       case 'contained':
       default:
-        classes.push('max-w-7xl mx-auto px-4 sm:px-6 lg:px-8');
+        classes.push('max-w-7xl mx-auto');
         break;
     }
 
@@ -63,21 +63,6 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
         break;
     }
 
-    // Margin
-    switch (section.data.margin) {
-      case 'none':
-        break;
-      case 'small':
-        classes.push('my-4');
-        break;
-      case 'large':
-        classes.push('my-16');
-        break;
-      case 'medium':
-      default:
-        classes.push('my-8');
-        break;
-    }
 
     return classes.join(' ');
   };
@@ -122,24 +107,24 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
         return <CardTopSection {...commonProps} />;
       case SectionType.CONTACT_ONE:
         return <ContactOneSection {...commonProps} />;
-      // case SectionType.HERO_IMAGE:
-      //   return <HeroImageSection {...commonProps} />;
-      // case SectionType.HERO_VIDEO:
-      //   return <HeroVideoSection {...commonProps} />;
-      // case SectionType.CARD_BOTTOM:
-      //   return <CardBottomSection {...commonProps} />;
-      // case SectionType.CARD_LEFT:
-      //   return <CardLeftSection {...commonProps} />;
-      // case SectionType.CARD_RIGHT:
-      //   return <CardRightSection {...commonProps} />;
-      // case SectionType.CONTACT_TWO:
-      //   return <ContactTwoSection {...commonProps} />;
-      // case SectionType.CTA_ONE:
-      //   return <CTAOneSection {...commonProps} />;
-      // case SectionType.LOGOS_ONE:
-      //   return <LogosOneSection {...commonProps} />;
-      // case SectionType.TEAM_ONE:
-      //   return <TeamOneSection {...commonProps} />;
+      case SectionType.HERO_IMAGE:
+        return <HeroImageSection {...commonProps} />;
+      case SectionType.HERO_VIDEO:
+        return <HeroVideoSection {...commonProps} />;
+      case SectionType.CARD_BOTTOM:
+        return <CardBottomSection {...commonProps} />;
+      case SectionType.CARD_LEFT:
+        return <CardLeftSection {...commonProps} />;
+      case SectionType.CARD_RIGHT:
+        return <CardRightSection {...commonProps} />;
+      case SectionType.CONTACT_TWO:
+        return <ContactTwoSection {...commonProps} />;
+      case SectionType.CTA_ONE:
+        return <CTAOneSection {...commonProps} />;
+      case SectionType.LOGOS_ONE:
+        return <LogosOneSection {...commonProps} />;
+      case SectionType.TEAM_ONE:
+        return <TeamOneSection {...commonProps} />;
       default:
         return (
           <div className="text-center py-8">
@@ -187,7 +172,7 @@ export function PageBuilderRenderer({ sections, className }: PageBuilderRenderer
   }
 
   return (
-    <div className={cn('space-y-0', className)}>
+    <div className={cn(className)}>
       {visibleSections.map((section) => (
         <SectionRenderer 
           key={section.id} 

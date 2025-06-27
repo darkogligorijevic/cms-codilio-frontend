@@ -30,7 +30,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   return (
     <div className={`${roboto.className} min-h-screen flex flex-col`}>
       <Header pages={pages} />
-      <main className="flex-1">
+      <main>
         {children}
       </main>
       <Footer pages={pages} />
