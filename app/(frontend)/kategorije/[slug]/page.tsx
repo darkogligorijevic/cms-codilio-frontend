@@ -219,7 +219,6 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <div className="bg-white/20 p-4 rounded-lg">
-              {/* asdsada */}
                 {getCategoryIcon(category?.name)}
               </div>
               <div>

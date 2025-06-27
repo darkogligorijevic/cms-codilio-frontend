@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { mediaApi } from '@/lib/api';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import type { Page } from '@/lib/types';
+import { useAuth } from '@/lib/auth-context';
 
 interface HeaderProps {
   pages: Page[];
@@ -22,6 +23,7 @@ interface HeaderProps {
 
 export function Header({ pages }: HeaderProps) {
   const { settings } = useSettings();
+  const context = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredDropdown, setHoveredDropdown] = useState<number | null>(null);
 
@@ -241,13 +243,15 @@ export function Header({ pages }: HeaderProps) {
               {settings?.themeDarkMode && (
                 <ModeToggle />
               )}
-              
+            {context?.isAuthenticated && (
+
               <Button variant="outline" size="sm" asChild>
                 <Link href="/dashboard">
                   <ExternalLink className="mr-2 h-4 w-4" />
                   CMS
                 </Link>
               </Button>
+            )}
             </div>
           </nav>
 

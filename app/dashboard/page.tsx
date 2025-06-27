@@ -1,7 +1,7 @@
-// app/dashboard/page.tsx
+// app/dashboard/page.tsx - Fixed TypeScript errors
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,19 @@ import {
   Calendar,
   Clock,
   BarChart3,
-  Activity
+  Activity,
+  Settings,
+  Upload,
+  Edit,
+  Trash2,
+  UserPlus,
+  Plus
 } from 'lucide-react';
 import Link from 'next/link';
-import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
+import { postsApi, pagesApi, categoriesApi, mediaApi, usersApi } from '@/lib/api';
 import type { Post, Page } from '@/lib/types';
 import { useTheme } from 'next-themes';
+import { useActivityTracker, type RecentActivity } from '@/lib/use-activity-tracker';
 
 interface DashboardStats {
   totalPosts: number;
@@ -33,14 +40,9 @@ interface DashboardStats {
   totalViews: number;
 }
 
-interface RecentActivity {
-  id: string;
-  type: 'post' | 'page' | 'media';
-  title: string;
-  action: string;
-  timestamp: string;
-  status?: string;
-}
+// Type definitions for better TypeScript support
+type ActionType = 'created' | 'updated' | 'deleted' | 'uploaded' | 'published';
+type ActivityType = 'post' | 'page' | 'media' | 'user' | 'category' | 'settings' | 'gallery' | 'service' | 'organization' | 'system';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -58,7 +60,18 @@ export default function DashboardPage() {
   const [recentPages, setRecentPages] = useState<Page[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { theme } = useTheme()
+  const { theme } = useTheme();
+
+  // Handle real-time activity updates
+  const handleActivityUpdate = useCallback((activity: RecentActivity) => {
+    setRecentActivity(prev => [activity, ...prev.slice(0, 7)]);
+  }, []);
+
+  // Use activity tracker hook
+  useActivityTracker({
+    onActivityUpdate: handleActivityUpdate,
+    enabled: true
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -93,40 +106,8 @@ export default function DashboardPage() {
         setRecentPosts(postsResponse.posts.slice(0, 5));
         setRecentPages(pagesResponse.slice(0, 3));
 
-        // Mock recent activity (u realnoj aplikaciji bi ovo došlo iz API-ja)
-        setRecentActivity([
-          {
-            id: '1',
-            type: 'post',
-            title: 'Nova objava o gradskim projektima',
-            action: 'objavljena',
-            timestamp: '2 sata',
-            status: 'published'
-          },
-          {
-            id: '2',
-            type: 'page',
-            title: 'Stranica o transparentnosti',
-            action: 'kreirana',
-            timestamp: '5 sati',
-            status: 'draft'
-          },
-          {
-            id: '3',
-            type: 'media',
-            title: 'slika-gradiliste.jpg',
-            action: 'učitana',
-            timestamp: '1 dan',
-          },
-          {
-            id: '4',
-            type: 'post',
-            title: 'Izveštaj o budžetu',
-            action: 'ažurirana',
-            timestamp: '2 dana',
-            status: 'published'
-          }
-        ]);
+        // Generate real activity feed
+        await generateRealActivityFeed();
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -137,6 +118,83 @@ export default function DashboardPage() {
 
     fetchDashboardData();
   }, []);
+
+  const generateRealActivityFeed = async () => {
+    try {
+      const activities: RecentActivity[] = [];
+      
+      // Get recent posts
+      const recentPostsData = await postsApi.getAll(1, 5);
+      recentPostsData.posts.forEach(post => {
+        activities.push({
+          id: `post-${post.id}`,
+          type: 'post',
+          title: post.title,
+          action: post.status === 'published' ? 'published' : 'updated',
+          timestamp: post.updatedAt,
+          status: post.status,
+          author: post.author.name,
+          url: `/dashboard/posts/${post.id}`
+        });
+      });
+
+      // Get recent pages
+      const recentPagesData = await pagesApi.getAll();
+      recentPagesData.slice(0, 3).forEach(page => {
+        activities.push({
+          id: `page-${page.id}`,
+          type: 'page',
+          title: page.title,
+          action: page.status === 'published' ? 'published' : 'updated',
+          timestamp: page.updatedAt,
+          status: page.status,
+          author: page.author.name,
+          url: `/dashboard/pages/${page.id}`
+        });
+      });
+
+      // Get recent media
+      const recentMediaData = await mediaApi.getAll();
+      recentMediaData.slice(0, 3).forEach(media => {
+        activities.push({
+          id: `media-${media.id}`,
+          type: 'media',
+          title: media.originalName,
+          action: 'uploaded',
+          timestamp: media.createdAt,
+          status: media.isPublic ? 'public' : 'private',
+          url: `/dashboard/media`
+        });
+      });
+
+      // Get recent users (if available)
+      try {
+        const recentUsersData = await usersApi.getAll();
+        recentUsersData.slice(0, 2).forEach(user => {
+          activities.push({
+            id: `user-${user.id}`,
+            type: 'user',
+            title: user.name,
+            action: 'created',
+            timestamp: user.createdAt,
+            status: user.isActive ? 'active' : 'inactive',
+            url: `/dashboard/users/${user.id}`
+          });
+        });
+      } catch (error) {
+        console.log('Could not fetch users for activity feed');
+      }
+
+      // Sort by timestamp (newest first) and take latest 8
+      const sortedActivities = activities
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 8);
+
+      setRecentActivity(sortedActivities);
+    } catch (error) {
+      console.error('Error generating activity feed:', error);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     return status === 'published' ? (
@@ -150,7 +208,7 @@ export default function DashboardPage() {
     );
   };
 
-  const getActivityIcon = (type: string) => {
+  const getActivityIcon = (type: ActivityType) => {
     switch (type) {
       case 'post':
         return <FileText className="h-4 w-4" />;
@@ -158,9 +216,93 @@ export default function DashboardPage() {
         return <FolderOpen className="h-4 w-4" />;
       case 'media':
         return <Image className="h-4 w-4" />;
+      case 'user':
+        return <Users className="h-4 w-4" />;
+      case 'category':
+        return <BarChart3 className="h-4 w-4" />;
+      case 'settings':
+        return <Settings className="h-4 w-4" />;
+      case 'gallery':
+        return <Image className="h-4 w-4" />;
+      case 'service':
+        return <FileText className="h-4 w-4" />;
+      case 'organization':
+        return <Users className="h-4 w-4" />;
+      case 'system':
+        return <Settings className="h-4 w-4" />;
       default:
         return <Activity className="h-4 w-4" />;
     }
+  };
+
+  const getActionIcon = (action: ActionType) => {
+    switch (action) {
+      case 'created':
+        return <Plus className="h-3 w-3" />;
+      case 'updated':
+        return <Edit className="h-3 w-3" />;
+      case 'deleted':
+        return <Trash2 className="h-3 w-3" />;
+      case 'uploaded':
+        return <Upload className="h-3 w-3" />;
+      case 'published':
+        return <Eye className="h-3 w-3" />;
+      default:
+        return <Activity className="h-3 w-3" />;
+    }
+  };
+
+  const getActionText = (action: string, type: string): string => {
+    // Properly typed action map with Record<ActionType, string>
+    const actionMap: Record<ActionType, string> = {
+      created: 'kreiran',
+      updated: 'ažuriran', 
+      deleted: 'obrisan',
+      uploaded: 'učitan',
+      published: 'objavljen'
+    };
+
+    // Properly typed type map with Record<ActivityType, string>
+    const typeMap: Record<ActivityType, string> = {
+      post: 'post',
+      page: 'stranica',
+      media: 'fajl',
+      user: 'korisnik',
+      category: 'kategorija',
+      settings: 'postavka',
+      gallery: 'galerija',
+      service: 'usluga',
+      organization: 'organizacija',
+      system: 'sistem'
+    };
+
+    // Type guard functions to ensure safe access
+    const isValidAction = (key: string): key is ActionType => {
+      return key in actionMap;
+    };
+
+    const isValidType = (key: string): key is ActivityType => {
+      return key in typeMap;
+    };
+
+    // Safe access with fallbacks
+    const actionText = isValidAction(action) ? actionMap[action] : action;
+    const typeText = isValidType(type) ? typeMap[type] : type;
+    
+    return `${typeText} ${actionText}`;
+  };
+
+  const formatTimeAgo = (timestamp: string): string => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'upravo';
+    if (diffInSeconds < 3600) return `pre ${Math.floor(diffInSeconds / 60)} min`;
+    if (diffInSeconds < 86400) return `pre ${Math.floor(diffInSeconds / 3600)} h`;
+    if (diffInSeconds < 604800) return `pre ${Math.floor(diffInSeconds / 86400)} dana`;
+    
+    return date.toLocaleDateString('sr-RS');
   };
 
   if (isLoading) {
@@ -308,40 +450,70 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* Real-time Activity Feed */}
         <Card>
           <CardHeader>
-            <CardTitle>Poslednja aktivnost</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="h-4 w-4" />
+              <span>Poslednja aktivnost</span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Uživo"></div>
+            </CardTitle>
             <CardDescription>
-              Šta se dešava na portalu
+              Šta se dešava na portalu u realnom vremenu
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentActivity.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 relative">
                     {getActivityIcon(activity.type)}
+                    <div className="absolute -bottom-1 -right-1 bg-background rounded-full">
+                      {getActionIcon(activity.action)}
+                    </div>
                   </div>
                   <div className="flex-1 space-y-1">
                     <p className="text-sm">
                       <span className="font-medium">{activity.title}</span>
-                      {' '}je {activity.action}
+                      {' - '}
+                      <span className="text-muted-foreground">
+                        {getActionText(activity.action, activity.type)}
+                      </span>
                     </p>
                     <div className="flex items-center space-x-2">
                       <p className="text-xs text-muted-foreground flex items-center">
                         <Clock className="mr-1 h-3 w-3" />
-                        pre {activity.timestamp}
+                        {formatTimeAgo(activity.timestamp)}
                       </p>
                       {activity.status && (
                         <Badge variant="outline" className="text-xs">
-                          {activity.status === 'published' ? 'Objavljeno' : 'Draft'}
+                          {activity.status === 'published' ? 'Objavljeno' : 
+                           activity.status === 'active' ? 'Aktivno' :
+                           activity.status === 'public' ? 'Javno' :
+                           activity.status}
                         </Badge>
+                      )}
+                      {activity.author && (
+                        <span className="text-xs text-muted-foreground">
+                          • {activity.author}
+                        </span>
                       )}
                     </div>
                   </div>
+                  {activity.url && (
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" asChild>
+                      <Link href={activity.url}>
+                        <Eye className="h-3 w-3" />
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               ))}
+              {recentActivity.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nema aktivnosti za prikaz
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
