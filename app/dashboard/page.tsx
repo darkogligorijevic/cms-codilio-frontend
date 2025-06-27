@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx - Fixed TypeScript errors
+// app/dashboard/page.tsx - Fixed TypeScript issues
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -40,9 +40,30 @@ interface DashboardStats {
   totalViews: number;
 }
 
-// Type definitions for better TypeScript support
+// Type definitions for action and type mappings
 type ActionType = 'created' | 'updated' | 'deleted' | 'uploaded' | 'published';
-type ActivityType = 'post' | 'page' | 'media' | 'user' | 'category' | 'settings' | 'gallery' | 'service' | 'organization' | 'system';
+type ActivityTypeKey = 'post' | 'page' | 'media' | 'user' | 'category' | 'settings' | 'gallery' | 'service' | 'organization' | 'system';
+
+const ACTION_MAP: Record<ActionType, string> = {
+  created: 'kreiran',
+  updated: 'ažuriran', 
+  deleted: 'obrisan',
+  uploaded: 'učitan',
+  published: 'objavljen'
+} as const;
+
+const TYPE_MAP: Record<ActivityTypeKey, string> = {
+  post: 'post',
+  page: 'stranica',
+  media: 'fajl',
+  user: 'korisnik',
+  category: 'kategorija',
+  settings: 'postavka',
+  gallery: 'galerija',
+  service: 'usluga',
+  organization: 'organizacija',
+  system: 'sistem'
+} as const;
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -208,7 +229,7 @@ export default function DashboardPage() {
     );
   };
 
-  const getActivityIcon = (type: ActivityType) => {
+  const getActivityIcon = (type: string) => {
     switch (type) {
       case 'post':
         return <FileText className="h-4 w-4" />;
@@ -235,7 +256,7 @@ export default function DashboardPage() {
     }
   };
 
-  const getActionIcon = (action: ActionType) => {
+  const getActionIcon = (action: string) => {
     switch (action) {
       case 'created':
         return <Plus className="h-3 w-3" />;
@@ -253,46 +274,19 @@ export default function DashboardPage() {
   };
 
   const getActionText = (action: string, type: string): string => {
-    // Properly typed action map with Record<ActionType, string>
-    const actionMap: Record<ActionType, string> = {
-      created: 'kreiran',
-      updated: 'ažuriran', 
-      deleted: 'obrisan',
-      uploaded: 'učitan',
-      published: 'objavljen'
-    };
-
-    // Properly typed type map with Record<ActivityType, string>
-    const typeMap: Record<ActivityType, string> = {
-      post: 'post',
-      page: 'stranica',
-      media: 'fajl',
-      user: 'korisnik',
-      category: 'kategorija',
-      settings: 'postavka',
-      gallery: 'galerija',
-      service: 'usluga',
-      organization: 'organizacija',
-      system: 'sistem'
-    };
-
-    // Type guard functions to ensure safe access
-    const isValidAction = (key: string): key is ActionType => {
-      return key in actionMap;
-    };
-
-    const isValidType = (key: string): key is ActivityType => {
-      return key in typeMap;
-    };
-
-    // Safe access with fallbacks
-    const actionText = isValidAction(action) ? actionMap[action] : action;
-    const typeText = isValidType(type) ? typeMap[type] : type;
+    // Type-safe access to mappings with fallbacks
+    const actionText = (action in ACTION_MAP) 
+      ? ACTION_MAP[action as ActionType] 
+      : action;
+    
+    const typeText = (type in TYPE_MAP) 
+      ? TYPE_MAP[type as ActivityTypeKey] 
+      : type;
     
     return `${typeText} ${actionText}`;
   };
 
-  const formatTimeAgo = (timestamp: string): string => {
+  const formatTimeAgo = (timestamp: string) => {
     const now = new Date();
     const date = new Date(timestamp);
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);

@@ -1,4 +1,4 @@
-// hooks/useActivityTracker.ts
+// lib/use-activity-tracker.ts
 'use client';
 
 import { useEffect, useCallback } from 'react';
