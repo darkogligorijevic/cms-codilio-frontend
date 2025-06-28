@@ -3,7 +3,6 @@ pipeline {
     
     environment {
         IMAGE_NAME = "codilio/codilio-frontend"
-        NODE_VERSION = "18"
     }
 
     stages {
@@ -11,19 +10,6 @@ pipeline {
             steps {
                 git branch: 'dark-mode-darko-dev', 
                     url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git'
-            }
-        }
-
-        stage('Install Dependencies & Build') {
-            steps {
-                script {
-                    // Install dependencies and build the Next.js app
-                    sh 'npm ci'
-                    sh 'npm run build'
-                    
-                    // Verify build was successful
-                    sh 'ls -la .next/'
-                }
             }
         }
 
@@ -56,9 +42,6 @@ pipeline {
                     sh "docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true"
                     sh "docker rmi ${IMAGE_NAME}:latest || true"
                     sh "docker logout || true"
-                    
-                    // Clean node_modules and .next to save space
-                    sh "rm -rf node_modules .next || true"
                 }
             }
         }
