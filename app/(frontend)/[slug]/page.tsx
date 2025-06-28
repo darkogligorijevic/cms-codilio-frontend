@@ -1,4 +1,4 @@
-// app/(frontend)/[slug]/page.tsx - Updated to support Page Builder
+// app/(frontend)/[slug]/page.tsx - Updated to support kategorije and objave templates
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -10,8 +10,8 @@ import {
   FileText
 } from 'lucide-react';
 import Link from 'next/link';
-import { pagesApi, postsApi, mediaApi, galleryApi, servicesApi } from '@/lib/api';
-import { type Page, type Post, type Gallery, Service, PageSection } from '@/lib/types';
+import { pagesApi, postsApi, mediaApi, galleryApi, servicesApi, categoriesApi } from '@/lib/api';
+import { type Page, type Post, type Gallery, Service, PageSection, Category } from '@/lib/types';
 import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
 import { SingleServiceTemplate } from '@/templates/services/single-service-template';
@@ -26,9 +26,10 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const { settings } = useSettings();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState<Page | null>(null);
-  const [sections, setSections] = useState<PageSection[]>([]); // Add sections state
+  const [sections, setSections] = useState<PageSection[]>([]);
   const [gallery, setGallery] = useState<Gallery | null>(null);
   const [service, setService] = useState<Service | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +77,29 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           }
         }
         
-        // If it's a regular page, fetch related posts
+        // For categories template, fetch categories data
+        if (pageData.template === 'categories') {
+          try {
+            const categoriesData = await categoriesApi.getAll();
+            setCategories(categoriesData);
+          } catch (categoriesError) {
+            console.error('Error fetching categories:', categoriesError);
+            setCategories([]);
+          }
+        }
+        
+        // For posts template, fetch posts data
+        if (pageData.template === 'posts') {
+          try {
+            const postsData = await postsApi.getPublished(1, 50);
+            setPosts(postsData.posts);
+          } catch (postsError) {
+            console.error('Error fetching posts:', postsError);
+            setPosts([]);
+          }
+        }
+        
+        // If it's a regular page or template page, fetch related posts
         fetchPagePosts(pageData);
         return; // Exit early if page found
         

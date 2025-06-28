@@ -1,8 +1,7 @@
-// app/kategorije/[slug]/page.tsx - Ažurirano za dinamičke dugmiće i ćirilicu
+// templates/categories/category-archive-template.tsx
 'use client';
 
-import { use, useEffect, useState } from 'react';
-import { useSettings } from '@/lib/settings-context';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,43 +21,38 @@ import {
   Hash
 } from 'lucide-react';
 import Link from 'next/link';
-import { categoriesApi, postsApi, mediaApi } from '@/lib/api';
+import { mediaApi } from '@/lib/api';
 import type { Category, Post } from '@/lib/types';
 import { useThemeColors } from '@/lib/theme-hooks';
 
-interface CategoryArchiveProps {
-  params: Promise<{ slug: string }>;
+interface CategoryArchiveTemplateProps {
+  category: Category;
+  institutionData: any;
+  settings?: any;
 }
 
-export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
+export function CategoryArchiveTemplate({ 
+  category, 
+  institutionData, 
+  settings 
+}: CategoryArchiveTemplateProps) {
   const themeColors = useThemeColors();
-  const resolvedParams = use(params);
-  const { settings } = useSettings();
-  const [category, setCategory] = useState<Category | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
 
-  // Use settings for institution data with fallbacks
-  const institutionData = {
-    name: settings?.siteName || "Локална институција",
-  };
-
   useEffect(() => {
-    fetchCategoryData();
-  }, [resolvedParams.slug]);
+    if (category?.posts) {
+      const publishedPosts = category.posts.filter(post => post.status === "published");
+      setPosts(publishedPosts);
+      setFilteredPosts(publishedPosts);
+    }
+  }, [category]);
 
   useEffect(() => {
     // Apply search filter
-    if (!posts || !Array.isArray(posts)) {
-      setFilteredPosts([]);
-      return;
-    }
-
     if (searchTerm.trim()) {
       const filtered = posts.filter(post =>
         post?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,48 +65,6 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
     }
     setCurrentPage(1); // Reset to first page when searching
   }, [searchTerm, posts]);
-
-  const fetchCategoryData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Fetch category by slug
-      const categoryData = await categoriesApi.getBySlug(resolvedParams.slug);
-      
-      if (!categoryData) {
-        setError('Категорија није пронађена');
-        return;
-      }
-      
-      setCategory(categoryData);
-
-      // Fetch all posts from this category
-      if (categoryData.posts && Array.isArray(categoryData.posts)) {
-        // Posts are already included in category response with relations
-        setPosts(categoryData.posts);
-      } else {
-        // Fallback: fetch posts separately and filter by category
-        try {
-          const postsResponse = await postsApi.getPublished(1, 100);
-          const categoryPosts = postsResponse.posts.filter(post => 
-            post.categoryId === categoryData.id
-          );
-          setPosts(categoryPosts);
-        } catch (postsError) {
-          console.error('Error fetching posts:', postsError);
-          setPosts([]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching category data:', error);
-      setError('Категорија није пронађена');
-      setCategory(null);
-      setPosts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('sr-RS', {
@@ -140,7 +92,7 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
   // Pagination logic
   const totalPages = Math.ceil((filteredPosts?.length || 0) / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
-  const paginatedPosts = filteredPosts?.slice(startIndex, startIndex + postsPerPage).filter(post => post.status === "published") || [];
+  const paginatedPosts = filteredPosts?.slice(startIndex, startIndex + postsPerPage) || [];
 
   const getCategoryIcon = (categoryName?: string) => {
     if (!categoryName) return <Tag className="h-8 w-8" />;
@@ -161,55 +113,8 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
     return <Tag className="h-8 w-8" />;
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        
-        
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (error || !category) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        
-        
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <Tag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Категорија није пронађена</h1>
-            <p className="text-gray-600 mb-6">
-              Категорија коју тражите не постоји или је уклоњена.
-            </p>
-            <div className="space-x-4">
-              <Button variant="primary" asChild>
-                <Link href="/kategorije">Све категорије</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/objave">Све објаве</Link>
-              </Button>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-    
       {/* Category Header */}
       <div className="text-white py-12"         
            style={{
@@ -494,8 +399,6 @@ export default function CategoryArchivePage({ params }: CategoryArchiveProps) {
           </Card>
         </div>
       </main>
-
-
     </div>
   );
 }

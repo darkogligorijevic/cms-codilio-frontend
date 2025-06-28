@@ -1,4 +1,4 @@
-// templates/template-registry.tsx - Updated with Gallery Template
+// templates/template-registry.tsx - Updated with Categories and Posts Templates
 import { Page, Post } from '@/lib/types';
 
 // Import all templates
@@ -10,6 +10,8 @@ import { OrganizationalStructureTemplate } from './organizational-structure/orga
 import { DirectorsTemplate } from './directors/directors-template';
 import { DocumentationTemplate } from './documentation/documentation-template';
 import { GalleryTemplate } from './gallery/gallery-template'; 
+import { CategoriesTemplate } from './categories/categories-template';
+import { PostsTemplate } from './posts/posts-template';
 import { DefaultTemplate } from './default/default-template';
 
 // Template registry interface
@@ -33,6 +35,8 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateComponent> = {
   directors: DirectorsTemplate,
   documentation: DocumentationTemplate,
   gallery: GalleryTemplate, 
+  categories: CategoriesTemplate,
+  posts: PostsTemplate,
   default: DefaultTemplate,
 } as const;
 
@@ -44,7 +48,7 @@ export interface TemplateMetadata {
   key: string;
   name: string;
   description: string;
-  category: 'institutional' | 'service' | 'information' | 'media';
+  category: 'institutional' | 'service' | 'information' | 'media' | 'content';
   features: string[];
   preview?: string;
 }
@@ -106,6 +110,20 @@ export const TEMPLATE_METADATA: Record<TemplateKey, TemplateMetadata> = {
     description: 'Приказ свих галерија са могућношћу претраге, филтрирања и прегледа појединачних галерија',
     category: 'media',
     features: ['Приказ свих галерија', 'Претрага и филтрирање', 'Категоризација по типу', 'Респонзиван grid layout', 'Hover ефекти', 'Аутоматско рутирање на појединачне галерије'],
+  },
+  categories: {
+    key: 'categories',
+    name: 'Категорије објава',
+    description: 'Приказ свих категорија објава са могућношћу прегледа и навигације до појединачних категорија',
+    category: 'content',
+    features: ['Приказ свих категорија', 'Статистике по категоријама', 'Брза навигација', 'Претрага категорија', 'Најпопуларније категорије', 'Респонзиван grid layout'],
+  },
+  posts: {
+    key: 'posts',
+    name: 'Објаве',
+    description: 'Приказ свих објава са могућношћу претраге, филтрирања по категоријама и пагинацијом',
+    category: 'content',
+    features: ['Приказ свих објава', 'Претрага објава', 'Филтрирање по категоријама', 'Пагинација', 'Сортирање', 'Респонзиван grid layout'],
   },
   default: {
     key: 'default',

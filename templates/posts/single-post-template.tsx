@@ -1,10 +1,8 @@
-// app/objave/[slug]/page.tsx - Ažurirano za dinamičke dugmiće i ćirilicu
+// templates/posts/single-post-template.tsx
 'use client';
 
-import { use, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSettings } from '@/lib/settings-context';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +12,6 @@ import {
   ArrowLeft,
   Share2,
   FileText,
-  Building,
   ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
@@ -22,46 +19,46 @@ import { postsApi, mediaApi } from '@/lib/api';
 import type { Post } from '@/lib/types';
 import { useTheme } from 'next-themes';
 
-interface SinglePostProps {
-  params: Promise<{ slug: string }>;
+interface SinglePostTemplateProps {
+  post: Post;
+  institutionData: any;
+  settings?: any;
 }
 
-export default function SinglePostPage({ params }: SinglePostProps) {
-  const resolvedParams = use(params);
-  const router = useRouter();
-  const { settings } = useSettings();
-  const [post, setPost] = useState<Post | null>(null);
+export function SinglePostTemplate({ post, institutionData, settings }: SinglePostTemplateProps) {
   const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
-    fetchPost();
-  }, [resolvedParams.slug]);
+    fetchRelatedPosts();
+    incrementViewCount();
+  }, [post.slug]);
 
-  const fetchPost = async () => {
+  const fetchRelatedPosts = async () => {
     try {
       setIsLoading(true);
-      setError(null);
-
-      // Fetch the post by slug
-      const postData = await postsApi.getBySlug(resolvedParams.slug);
-      setPost(postData);
-
+      
       // Fetch related posts from the same category
-      if (postData.categoryId) {
+      if (post.categoryId) {
         const postsResponse = await postsApi.getPublished(1, 4);
         const related = postsResponse.posts
-          .filter(p => p.categoryId === postData.categoryId && p.id !== postData.id)
+          .filter(p => p.categoryId === post.categoryId && p.id !== post.id)
           .slice(0, 3);
         setRelatedPosts(related);
       }
     } catch (error) {
-      console.error('Error fetching post:', error);
-      setError('Објава није пронађена');
+      console.error('Error fetching related posts:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const incrementViewCount = async () => {
+    try {
+      await postsApi.incrementView(post.slug);
+    } catch (error) {
+      console.error('Грешка приликом повећања прегледа', error);
     }
   };
 
@@ -89,65 +86,8 @@ export default function SinglePostPage({ params }: SinglePostProps) {
     }
   };
 
-  useEffect(() => {
-    const increaseView = async () => {
-      if (post?.id) {
-        try {
-          await postsApi.incrementView(resolvedParams.slug); // PATCH poziv ka backendu
-        } catch (e) {
-          console.error('Грешка приликом повећања прегледа', e);
-        }
-      }
-    };
-
-    increaseView();
-  }, [post?.id]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        
-        {/* Loading Content */}
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-8"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-5/6"></div>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (error || !post) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
-        {/* Error Content */}
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Објава није пронађена</h1>
-            <p className="text-gray-600 mb-6">
-              Објава коју тражите не постоји или је уклоњена.
-            </p>
-            <Button variant="primary" asChild>
-              <Link href="/objave">
-                Погледај све објаве
-              </Link>
-            </Button>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="space-y-8">
       {/* Breadcrumb */}
       <div className="bg-white border-b dark:bg-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -170,7 +110,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <article>
           {/* Post Header */}
           <div className="mb-8">
@@ -214,8 +154,8 @@ export default function SinglePostPage({ params }: SinglePostProps) {
               </div>
               <div className="flex items-center">
                 <Eye className="mr-2 h-4 w-4" />
-                {/* +1 kada se udje da ga odma racuna */}
-                <span>{post.viewCount + 1} прегледа</span> 
+                {/* +1 када se udje da ga odma racuna */}
+                <span>{post.viewCount + 1} прегледa</span> 
               </div>
             </div>
           </div>
@@ -302,8 +242,7 @@ export default function SinglePostPage({ params }: SinglePostProps) {
             </Link>
           </Button>
         </div>
-      </main>
-
+      </div>
     </div>
   );
 }
