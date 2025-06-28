@@ -1,27 +1,24 @@
-// components/dashboard/floating-chat-widget.tsx - Fixed version
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, MessageCircle, X, Minimize2, AlertTriangle } from 'lucide-react';
+import { Send, Bot, User, Loader2, MessageCircle, X, Minimize2, AlertTriangle, RefreshCw, Settings } from 'lucide-react';
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: Date;
   error?: boolean;
 }
 
 interface FloatingChatWidgetProps {
-  sessionId?: string;
   context?: string;
   apiUrl?: string;
 }
 
 const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({ 
-  sessionId = `session-${Date.now()}`,
-  context = 'Ti si AI asistent za CodilioCMS dashboard. Pomažeš korisnicima da koriste sistem. Odgovaraj na srpskom jeziku.',
-  apiUrl = 'http://localhost:3001/api'
+  context = 'Ti si AI asistent za dashboard. Pomažeš korisnicima da koriste sistem. Odgovaraj na srpskom jeziku.',
+  apiUrl = 'http://31.97.47.83:5001'
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -31,6 +28,11 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [currentModel, setCurrentModel] = useState<string>('llama3.2');
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [showModelSelect, setShowModelSelect] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -45,60 +47,96 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
     if (isOpen) {
       setUnreadCount(0);
       setError(null);
+      if (!sessionId) {
+        initializeChat();
+      }
     }
   }, [isOpen]);
 
-  // Check API connection status
-  useEffect(() => {
-    checkConnection();
-  }, []);
+  const initializeChat = async () => {
+    addSystemMessage('🚀 Pokretanje AI asistenta...');
+    
+    // Create new session
+    await createNewSession();
+    
+    // Check server health
+    await checkServerHealth();
+    
+    // Load available models
+    await loadModels();
+    
+    addSystemMessage('✅ AI asistent je spreman za korišćenje!');
+  };
 
-  const checkConnection = async () => {
+  const createNewSession = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/api/session/new`, {
+        method: 'POST',
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setSessionId(data.session_id);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+    
+    // Fallback: generate local session ID
+    const fallbackId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setSessionId(fallbackId);
+    return false;
+  };
+
+  const checkServerHealth = async () => {
     try {
       setConnectionStatus('checking');
-      const response = await fetch(`${apiUrl}/ai-agent/status`, {
+      const response = await fetch(`${apiUrl}/api/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000)
       });
       
       if (response.ok) {
-        const status = await response.json();
-        setConnectionStatus(status.ragReady ? 'connected' : 'disconnected');
+        const data = await response.json();
+        if (data.ollama_available) {
+          setConnectionStatus('connected');
+        } else {
+          setConnectionStatus('disconnected');
+        }
       } else {
         setConnectionStatus('disconnected');
       }
     } catch (error) {
-      console.error('Connection check failed:', error);
+      console.error('Health check failed:', error);
       setConnectionStatus('disconnected');
     }
   };
 
-  // Load chat history when opened
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      loadChatHistory();
-    }
-  }, [isOpen, sessionId]);
-
-  const loadChatHistory = async () => {
+  const loadModels = async () => {
     try {
-      const response = await fetch(`${apiUrl}/ai-agent/history/${sessionId}`, {
+      const response = await fetch(`${apiUrl}/api/models`, {
         signal: AbortSignal.timeout(10000)
       });
       
       if (response.ok) {
-        const history = await response.json();
-        const formattedMessages = history.map((msg: any) => ({
-          id: msg.id.toString(),
-          role: msg.role,
-          content: msg.content,
-          timestamp: new Date(msg.createdAt),
-        }));
-        setMessages(formattedMessages);
+        const data = await response.json();
+        if (data.success && data.models.length > 0) {
+          setAvailableModels(data.models);
+          
+          if (data.default && data.models.includes(data.default)) {
+            setCurrentModel(data.default);
+          } else {
+            setCurrentModel(data.models[0]);
+          }
+        }
       }
     } catch (error) {
-      console.error('Failed to load chat history:', error);
-      // Don't show error for history loading failure
+      console.error('Error loading models:', error);
+      addSystemMessage('❌ Greška učitavanja modela');
     }
   };
 
@@ -106,6 +144,11 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
     e.preventDefault();
     
     if (!inputValue.trim() || isLoading) return;
+
+    if (connectionStatus === 'disconnected') {
+      addErrorMessage('❌ Server nije dostupan!');
+      return;
+    }
 
     const messageText = inputValue.trim();
     const userMessage: Message = {
@@ -119,20 +162,21 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
     setInputValue('');
     setIsLoading(true);
     setError(null);
+    setMessageCount(prev => prev + 1);
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const response = await fetch(`${apiUrl}/ai-agent/chat`, {
+      const response = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message: messageText,
-          sessionId,
-          context,
+          model: currentModel,
+          session_id: sessionId,
         }),
         signal: controller.signal,
       });
@@ -145,23 +189,33 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
 
       const data = await response.json();
       
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response || 'Izvinjavam se, nisam mogao da generišem odgovor.',
-        timestamp: new Date(data.timestamp || new Date()),
-      };
+      if (data.success) {
+        // Update session ID if changed
+        if (data.session_id) {
+          setSessionId(data.session_id);
+        }
+        
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.response || 'Izvinjavam se, nisam mogao da generišem odgovor.',
+          timestamp: new Date(),
+        };
 
-      setMessages(prev => [...prev, aiMessage]);
-      
-      // If chat is closed/minimized, show unread indicator
-      if (!isOpen || isMinimized) {
-        setUnreadCount(prev => prev + 1);
-      }
+        setMessages(prev => [...prev, aiMessage]);
+        setMessageCount(prev => prev + 1);
+        
+        // If chat is closed/minimized, show unread indicator
+        if (!isOpen || isMinimized) {
+          setUnreadCount(prev => prev + 1);
+        }
 
-      // Update connection status on successful response
-      if (connectionStatus !== 'connected') {
-        setConnectionStatus('connected');
+        // Update connection status on successful response
+        if (connectionStatus !== 'connected') {
+          setConnectionStatus('connected');
+        }
+      } else {
+        throw new Error(data.error || 'Unknown server error');
       }
 
     } catch (error: any) {
@@ -178,19 +232,50 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
         setConnectionStatus('disconnected');
       }
 
-      const errorResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: errorMessage,
-        timestamp: new Date(),
-        error: true,
-      };
-      
-      setMessages(prev => [...prev, errorResponse]);
+      addErrorMessage(errorMessage);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const addSystemMessage = (text: string) => {
+    const systemMessage: Message = {
+      id: `system-${Date.now()}`,
+      role: 'system',
+      content: text,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, systemMessage]);
+  };
+
+  const addErrorMessage = (text: string) => {
+    const errorMessage: Message = {
+      id: `error-${Date.now()}`,
+      role: 'error',
+      content: text,
+      timestamp: new Date(),
+      error: true,
+    };
+    setMessages(prev => [...prev, errorMessage]);
+  };
+
+  const clearChat = async () => {
+    try {
+      if (sessionId) {
+        await fetch(`${apiUrl}/api/session/${sessionId}/clear`, {
+          method: 'DELETE'
+        });
+      }
+    } catch (error) {
+      console.error('Clear session error:', error);
+    }
+    
+    // Clear chat area and create new session
+    setMessages([]);
+    setMessageCount(0);
+    await createNewSession();
+    addSystemMessage('🗑️ Chat je obrisan! Nova sesija je kreirana.');
   };
 
   const toggleChat = () => {
@@ -208,7 +293,8 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
   };
 
   const retryConnection = () => {
-    checkConnection();
+    checkServerHealth();
+    loadModels();
   };
 
   const ConnectionIndicator = () => {
@@ -234,9 +320,46 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
       <div className="flex items-center space-x-2 text-xs">
         <div className={`w-2 h-2 rounded-full ${getIndicatorColor()}`} />
         <span className="text-white opacity-75">{getIndicatorText()}</span>
+        <span className="text-white opacity-50">({currentModel})</span>
       </div>
     );
   };
+
+  const ModelSelector = () => {
+    if (!showModelSelect) return null;
+
+    return (
+      <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 min-w-[200px]">
+        <div className="p-2 border-b">
+          <h4 className="font-medium text-sm text-gray-700">Izaberi model</h4>
+        </div>
+        <div className="max-h-48 overflow-y-auto">
+          {availableModels.map((model) => (
+            <button
+              key={model}
+              onClick={() => {
+                setCurrentModel(model);
+                setShowModelSelect(false);
+                addSystemMessage(`🔄 Model promenjen na: ${model}`);
+              }}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 ${
+                model === currentModel ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+              }`}
+            >
+              {model}
+              {model === currentModel && <span className="ml-2">✓</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Auto health check every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(checkServerHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
@@ -261,9 +384,28 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
                     className="p-1 hover:bg-blue-700 rounded text-xs"
                     title="Ponovo pokušaj konekciju"
                   >
-                    🔄
+                    <RefreshCw className="w-3 h-3" />
                   </button>
                 )}
+                {availableModels.length > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowModelSelect(!showModelSelect)}
+                      className="p-1 hover:bg-blue-700 rounded text-xs"
+                      title="Promeni model"
+                    >
+                      <Settings className="w-3 h-3" />
+                    </button>
+                    <ModelSelector />
+                  </div>
+                )}
+                <button
+                  onClick={clearChat}
+                  className="p-1 hover:bg-blue-700 rounded text-xs"
+                  title="Očisti chat"
+                >
+                  🗑️
+                </button>
                 <button
                   onClick={minimizeChat}
                   className="p-1 hover:bg-blue-700 rounded"
@@ -300,7 +442,7 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
                   <Bot className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p>Zdravo! Kako mogu da vam pomognem danas?</p>
                   <p className="text-xs text-gray-400 mt-2">
-                    Pitate me o CodilioCMS dashboard-u, Relof Indeksu, ili bilo čemu drugom.
+                    Pitate me o bilo čemu što vas zanima.
                   </p>
                 </div>
               )}
@@ -308,26 +450,34 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${
+                    message.role === 'user' ? 'justify-end' : 
+                    message.role === 'system' || message.role === 'error' ? 'justify-center' : 'justify-start'
+                  }`}
                 >
                   <div
                     className={`flex space-x-2 max-w-[85%] ${
-                      message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                      message.role === 'user' ? 'flex-row-reverse space-x-reverse' : 
+                      message.role === 'system' || message.role === 'error' ? 'max-w-[95%]' : ''
                     }`}
                   >
-                    <div className="flex-shrink-0">
-                      {message.role === 'user' ? (
-                        <User className="w-6 h-6 p-1 bg-blue-600 text-white rounded-full" />
-                      ) : (
-                        <Bot className={`w-6 h-6 p-1 ${message.error ? 'bg-red-500' : 'bg-gray-600'} text-white rounded-full`} />
-                      )}
-                    </div>
+                    {message.role !== 'system' && message.role !== 'error' && (
+                      <div className="flex-shrink-0">
+                        {message.role === 'user' ? (
+                          <User className="w-6 h-6 p-1 bg-blue-600 text-white rounded-full" />
+                        ) : (
+                          <Bot className="w-6 h-6 p-1 bg-gray-600 text-white rounded-full" />
+                        )}
+                      </div>
+                    )}
                     <div
                       className={`p-2 rounded-lg text-sm ${
                         message.role === 'user'
                           ? 'bg-blue-600 text-white rounded-br-sm'
-                          : message.error
-                          ? 'bg-red-50 text-red-800 border border-red-200 rounded-bl-sm'
+                          : message.role === 'system'
+                          ? 'bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-lg text-center'
+                          : message.role === 'error'
+                          ? 'bg-red-50 text-red-800 border border-red-200 rounded-lg text-center'
                           : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
                       }`}
                     >
@@ -335,8 +485,10 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
                       <p className={`text-xs mt-1 ${
                         message.role === 'user' 
                           ? 'text-blue-100' 
-                          : message.error 
-                          ? 'text-red-400' 
+                          : message.role === 'system'
+                          ? 'text-yellow-600'
+                          : message.role === 'error' 
+                          ? 'text-red-600' 
                           : 'text-gray-400'
                       }`}>
                         {message.timestamp.toLocaleTimeString('sr-RS', { 
@@ -394,6 +546,11 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
               {connectionStatus === 'disconnected' && (
                 <p className="text-xs text-red-500 mt-1">
                   AI asistent trenutno nije dostupan
+                </p>
+              )}
+              {messageCount > 0 && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Poruke u sesiji: {messageCount}
                 </p>
               )}
             </form>
