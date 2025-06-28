@@ -45,24 +45,24 @@ type ActionType = 'created' | 'updated' | 'deleted' | 'uploaded' | 'published';
 type ActivityTypeKey = 'post' | 'page' | 'media' | 'user' | 'category' | 'settings' | 'gallery' | 'service' | 'organization' | 'system';
 
 const ACTION_MAP: Record<ActionType, string> = {
-  created: 'kreiran',
-  updated: 'ažuriran', 
-  deleted: 'obrisan',
-  uploaded: 'učitan',
-  published: 'objavljen'
+  created: 'креиран',
+  updated: 'ажуриран', 
+  deleted: 'обрисан',
+  uploaded: 'учитан',
+  published: 'објављен'
 } as const;
 
 const TYPE_MAP: Record<ActivityTypeKey, string> = {
-  post: 'post',
-  page: 'stranica',
-  media: 'fajl',
-  user: 'korisnik',
-  category: 'kategorija',
-  settings: 'postavka',
-  gallery: 'galerija',
-  service: 'usluga',
-  organization: 'organizacija',
-  system: 'sistem'
+  post: 'пост',
+  page: 'страница',
+  media: 'фајл',
+  user: 'корисник',
+  category: 'категорија',
+  settings: 'поставка',
+  gallery: 'галерија',
+  service: 'услуга',
+  organization: 'организација',
+  system: 'систем'
 } as const;
 
 export default function DashboardPage() {
@@ -220,11 +220,11 @@ export default function DashboardPage() {
   const getStatusBadge = (status: string) => {
     return status === 'published' ? (
       <Badge variant="default" className="bg-green-100 text-green-800">
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
-        Draft
+        Скица
       </Badge>
     );
   };
@@ -291,10 +291,10 @@ export default function DashboardPage() {
     const date = new Date(timestamp);
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return 'upravo';
-    if (diffInSeconds < 3600) return `pre ${Math.floor(diffInSeconds / 60)} min`;
-    if (diffInSeconds < 86400) return `pre ${Math.floor(diffInSeconds / 3600)} h`;
-    if (diffInSeconds < 604800) return `pre ${Math.floor(diffInSeconds / 86400)} dana`;
+    if (diffInSeconds < 60) return 'управо';
+    if (diffInSeconds < 3600) return `пре ${Math.floor(diffInSeconds / 60)} мин`;
+    if (diffInSeconds < 86400) return `пре ${Math.floor(diffInSeconds / 3600)} ч`;
+    if (diffInSeconds < 604800) return `пре ${Math.floor(diffInSeconds / 86400)} дана`;
     
     return date.toLocaleDateString('sr-RS');
   };
@@ -325,16 +325,16 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Контролна табла</h1>
           <p className="text-muted-foreground">
-            Pregled aktivnosti na portalu lokalne institucije
+            Преглед активности на порталу локалне институције
           </p>
         </div>
         <div className="flex items-center space-x-2">
             <Button asChild variant={theme === "light" ? "default" : "secondaryDefault"}>
               <Link href="/dashboard/posts">
                 <FileText className="mr-2 h-4 w-4" />
-                Nova objava
+                Нова објава
               </Link>
             </Button>
         </div>
@@ -345,14 +345,14 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno objava
+              Укупно објава
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalPosts}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.publishedPosts} objavljeno, {stats.draftPosts} draft
+              {stats.publishedPosts} објављено, {stats.draftPosts} скица
             </p>
           </CardContent>
         </Card>
@@ -360,14 +360,14 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Stranice
+              Странице
             </CardTitle>
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalPages}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.publishedPages} objavljeno
+              {stats.publishedPages} објављено
             </p>
           </CardContent>
         </Card>
@@ -375,7 +375,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupni pregledi
+              Укупни прегледи
             </CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               <TrendingUp className="inline h-3 w-3 mr-1" />
-              Transparentnost u akciji
+              Транспарентност у акцији
             </p>
           </CardContent>
         </Card>
@@ -391,14 +391,14 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Medijski fajlovi
+              Медијски фајлови
             </CardTitle>
             <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalMedia}</div>
             <p className="text-xs text-muted-foreground">
-              Dokumenti i slike
+              Документи и слике
             </p>
           </CardContent>
         </Card>
@@ -408,9 +408,9 @@ export default function DashboardPage() {
         {/* Recent Posts */}
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Poslednje objave</CardTitle>
+            <CardTitle>Последње објаве</CardTitle>
             <CardDescription>
-              Najnovije objave i njihov status
+              Најновије објаве и њихов статус
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -422,14 +422,14 @@ export default function DashboardPage() {
                       {post.title}
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      {post.category?.name || 'Bez kategorije'} • {post.viewCount} pregleda
+                      {post.category?.name || 'Без категорије'} • {post.viewCount} прегледа
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     {getStatusBadge(post.status)}
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/dashboard/posts/${post.id}`}>
-                        Uredi
+                        Уреди
                       </Link>
                     </Button>
                   </div>
@@ -437,7 +437,7 @@ export default function DashboardPage() {
               ))}
               {recentPosts.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nema objava za prikaz
+                  Нема објава за приказ
                 </p>
               )}
             </div>
@@ -449,11 +449,11 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Activity className="h-4 w-4" />
-              <span>Poslednja aktivnost</span>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Uživo"></div>
+              <span>Последња активност</span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Уживо"></div>
             </CardTitle>
             <CardDescription>
-              Šta se dešava na portalu u realnom vremenu
+              Шта се дешава на порталу у реалном времену
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -481,9 +481,9 @@ export default function DashboardPage() {
                       </p>
                       {activity.status && (
                         <Badge variant="outline" className="text-xs">
-                          {activity.status === 'published' ? 'Objavljeno' : 
-                           activity.status === 'active' ? 'Aktivno' :
-                           activity.status === 'public' ? 'Javno' :
+                          {activity.status === 'published' ? 'Објављено' : 
+                           activity.status === 'active' ? 'Активно' :
+                           activity.status === 'public' ? 'Јавно' :
                            activity.status}
                         </Badge>
                       )}
@@ -505,7 +505,7 @@ export default function DashboardPage() {
               ))}
               {recentActivity.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nema aktivnosti za prikaz
+                  Нема активности за приказ
                 </p>
               )}
             </div>
@@ -515,34 +515,34 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <Card className="col-span-2 lg:col-span-1">
           <CardHeader>
-            <CardTitle>Brze akcije</CardTitle>
+            <CardTitle>Брзе акције</CardTitle>
             <CardDescription>
-              Česte funkcionalnosti
+              Честе функционалности
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button className="w-full justify-start" variant="outline" asChild>
               <Link href="/dashboard/posts">
                 <FileText className="mr-2 h-4 w-4" />
-                Dodaj novu objavu
+                Додај нову објаву
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
               <Link href="/dashboard/pages">
                 <FolderOpen className="mr-2 h-4 w-4" />
-                Kreiraj stranicu
+                Креирај страницу
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
               <Link href="/dashboard/media">
                 <Image className="mr-2 h-4 w-4" />
-                Učitaj dokument
+                Учитај документ
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
               <Link href="/dashboard/categories">
                 <BarChart3 className="mr-2 h-4 w-4" />
-                Upravljaj kategorijama
+                Управљај категоријама
               </Link>
             </Button>
           </CardContent>
@@ -551,9 +551,9 @@ export default function DashboardPage() {
         {/* Pages Overview */}
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Importantes stranice</CardTitle>
+            <CardTitle>Важне странице</CardTitle>
             <CardDescription>
-              Ključne stranice za transparentnost
+              Кључне странице за транспарентност
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -565,14 +565,14 @@ export default function DashboardPage() {
                       {page.title}
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Template: {page.template} • Redosled: {page.sortOrder}
+                      Шаблон: {page.template} • Редослед: {page.sortOrder}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     {getStatusBadge(page.status)}
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/dashboard/pages/${page.id}`}>
-                        Uredi
+                        Уреди
                       </Link>
                     </Button>
                   </div>
@@ -580,7 +580,7 @@ export default function DashboardPage() {
               ))}
               {recentPages.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nema stranica za prikaz
+                  Нема страница за приказ
                 </p>
               )}
             </div>
