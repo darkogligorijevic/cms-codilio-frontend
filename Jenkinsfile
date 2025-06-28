@@ -9,8 +9,8 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'darko-dev', 
-                    url: 'https://github.com/samodjolo/cms-codilio-frontend.git'
+                git branch: 'dark-mode-darko-dev', 
+                    url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git'
             }
         }
 
