@@ -67,17 +67,19 @@ export function Footer({ pages }: FooterProps) {
                 <img 
                   src={mediaApi.getFileUrl(settings.siteLogo)} 
                   alt={settings.siteName || 'Лого'} 
-                  className="h-6 object-cover filter dark:brightness-0 dark:invert"
+                  className="h-14 w-14 object-cover filter dark:brightness-0 dark:invert"
                 />
               ) : (
+                <div>
                 <Building className="h-6 w-6" />
+                <span 
+                  className="text-lg font-bold"
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  {institutionData.name}
+                </span>
+              </div>
               )}
-              <span 
-                className="text-lg font-bold"
-                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
-              >
-                {institutionData.name}
-              </span>
             </div>
             <p 
               className="text-gray-300 mb-4 text-sm"
@@ -176,13 +178,6 @@ export function Footer({ pages }: FooterProps) {
                   {page.title}
                 </Link>
               ))}
-              <Link 
-                href="/objave" 
-                className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"
-                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
-              >
-                Објаве
-              </Link>
               <Link 
                 href="/sitemap" 
                 className="block text-gray-300 hover:text-white hover:text-primary-dynamic transition-colors text-sm"

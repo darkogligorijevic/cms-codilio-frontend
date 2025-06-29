@@ -226,7 +226,7 @@ export function Header({ pages }: HeaderProps) {
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
       isScrolled 
         ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg " 
-        : "bg-black/10 backdrop-blur-sm "
+        : "bg-black/15 backdrop-blur-sm "
     )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -236,25 +236,29 @@ export function Header({ pages }: HeaderProps) {
               <img 
                 src={mediaApi.getFileUrl(settings.siteLogo)} 
                 alt={settings.siteName || 'Лого'} 
-                className="h-8 object-contain"
+                className="h-16 w-16 object-contain"
               />
             ) : (
-              <Building className={cn(
-                "h-8 w-8 transition-colors duration-200",
-                isScrolled ? "text-primary-dynamic" : "text-white"
-              )} />
-            )}
-            <div>
-              <h1 
-                className={cn(
-                  "text-lg font-bold transition-colors duration-200",
-                  isScrolled ? "text-gray-900 dark:text-white" : "text-white"
+              <div className='flex items-center gap-2'>
+                <Building className={cn(
+                  "h-8 w-8 transition-colors duration-200",
+                  isScrolled ? "text-primary-dynamic" : "text-white"
                 )}
-                style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
-              >
-                {institutionData.name}
-              </h1>
-            </div>
+                />
+                        
+                <h1 
+                  className={cn(
+                    "text-lg font-bold transition-colors duration-200",
+                    isScrolled ? "text-gray-900 dark:text-white" : "text-white"
+                  )}
+                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                >
+                  {institutionData.name}
+                </h1>
+              </div>
+              
+            )}
+
           </Link>
 
           {/* Desktop Navigation */}

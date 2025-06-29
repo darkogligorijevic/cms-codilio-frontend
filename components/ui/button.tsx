@@ -25,7 +25,7 @@ const buttonVariants = cva(
         
         // DINAMIČNI DUGMIĆI
         primary:
-          "bg-primary-dynamic text-secondary-static shadow-xs hover:bg-primary-dynamic/90",
+          "bg-primary-dynamic hover:scale-105 text-secondary-static shadow-xs hover:bg-primary-dynamic/90",
         secondary:
           "bg-secondary-dynamic text-primary-static shadow-xs hover:bg-secondary-dynamic/90",
       },
