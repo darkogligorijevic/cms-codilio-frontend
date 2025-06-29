@@ -122,13 +122,13 @@ export default function SettingsPage() {
 
   // Tab configurations
   const tabs = [
-    { value: SettingCategory.GENERAL, label: 'Opšte', icon: Building },
-    { value: SettingCategory.CONTACT, label: 'Kontakt', icon: Phone },
-    { value: SettingCategory.SOCIAL, label: 'Društvene mreže', icon: Share2 },
-    { value: SettingCategory.SEO, label: 'SEO', icon: Search },
-    { value: SettingCategory.EMAIL, label: 'Email', icon: Mail },
-    { value: SettingCategory.APPEARANCE, label: 'Izgled', icon: Palette },
-    { value: SettingCategory.ADVANCED, label: 'Napredno', icon: Shield },
+    { value: SettingCategory.GENERAL, label: 'Опште', icon: Building },
+    { value: SettingCategory.CONTACT, label: 'Контакт', icon: Phone },
+    { value: SettingCategory.SOCIAL, label: 'Друштвене мреже', icon: Share2 },
+    { value: SettingCategory.SEO, label: 'СЕО', icon: Search },
+    { value: SettingCategory.EMAIL, label: 'Имејл', icon: Mail },
+    { value: SettingCategory.APPEARANCE, label: 'Изглед', icon: Palette },
+    { value: SettingCategory.ADVANCED, label: 'Напредно', icon: Shield },
   ];
 
   // Initialize form data when settings change
@@ -204,7 +204,7 @@ export default function SettingsPage() {
             fileUpdates.push({ key, value: uploadedSetting.value });
           } catch (error) {
             console.error(`Error uploading ${key}:`, error);
-            toast.error(`Greška pri upload-u ${key === SETTING_KEYS.SITE_LOGO ? 'loga' : 'favicona'}`);
+            toast.error(`Грешка при учитавању ${key === SETTING_KEYS.SITE_LOGO ? 'лога' : 'фавикона'}`);
             return;
           }
         }
@@ -268,10 +268,10 @@ export default function SettingsPage() {
       // Refresh settings to get the latest file URLs
       await refreshSettings();
       
-      toast.success('Podešavanja su uspešno sačuvana');
+      toast.success('Подешавања су успешно сачувана');
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error('Greška pri čuvanju podešavanja');
+      toast.error('Грешка при чувању подешавања');
     } finally {
       setIsSaving(false);
     }
@@ -281,11 +281,11 @@ export default function SettingsPage() {
     try {
       // Validate file
       if (!file.type.startsWith('image/')) {
-        toast.error('Molimo izaberite sliku');
+        toast.error('Молимо изаберите слику');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Fajl je prevelik. Maksimalna veličina je 5MB');
+        toast.error('Фајл је превелик. Максимална величина је 5МБ');
         return;
       }
 
@@ -299,10 +299,10 @@ export default function SettingsPage() {
       const preview = URL.createObjectURL(file);
       setLogoPreview(preview);
       
-      toast.success('Logo je spreman za čuvanje');
+      toast.success('Лого је спреман за чување');
     } catch (error) {
       console.error('Error preparing logo:', error);
-      toast.error('Greška pri pripremi loga');
+      toast.error('Грешка при припреми лога');
     }
   };
 
@@ -310,11 +310,11 @@ export default function SettingsPage() {
     try {
       // Validate file
       if (!file.type.match(/image\/(x-icon|png)/)) {
-        toast.error('Molimo izaberite ICO ili PNG fajl');
+        toast.error('Молимо изаберите ИЦО или ПНГ фајл');
         return;
       }
       if (file.size > 1024 * 1024) {
-        toast.error('Fajl je prevelik. Maksimalna veličina je 1MB');
+        toast.error('Фајл је превелик. Максимална величина је 1МБ');
         return;
       }
 
@@ -328,10 +328,10 @@ export default function SettingsPage() {
       const preview = URL.createObjectURL(file);
       setFaviconPreview(preview);
       
-      toast.success('Favicon je spreman za čuvanje');
+      toast.success('Фавикон је спреман за чување');
     } catch (error) {
       console.error('Error preparing favicon:', error);
-      toast.error('Greška pri pripremi favicona');
+      toast.error('Грешка при припреми фавикона');
     }
   };
 
@@ -345,7 +345,7 @@ export default function SettingsPage() {
     // Clear preview
     setLogoPreview(null);
     
-    toast.success('Logo je označen za uklanjanje');
+    toast.success('Лого је означен за уклањање');
   };
 
   const handleRemoveFavicon = () => {
@@ -358,7 +358,7 @@ export default function SettingsPage() {
     // Clear preview
     setFaviconPreview(null);
     
-    toast.success('Favicon je označen za uklanjanje');
+    toast.success('Фавикон је означен за уклањање');
   };
 
   const handleDragOver = (e: React.DragEvent, type: 'logo' | 'favicon') => {
@@ -417,10 +417,10 @@ export default function SettingsPage() {
       await refreshSettings();
       
       setIsResetDialogOpen(false);
-      toast.success('Podešavanja su resetovana');
+      toast.success('Подешавања су ресетована');
     } catch (error) {
       console.error('Error resetting settings:', error);
-      toast.error('Greška pri resetovanju podešavanja');
+      toast.error('Грешка при ресетовању подешавања');
     }
   };
 
@@ -440,7 +440,7 @@ export default function SettingsPage() {
     setPendingFileUploads({});
     setHasChanges(false);
     
-    toast.success('Izmene su poništene');
+    toast.success('Измене су поништене');
   };
 
   const handleExport = async () => {
@@ -453,7 +453,7 @@ export default function SettingsPage() {
       a.download = `cms-settings-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Podešavanja su eksportovana');
+      toast.success('Подешавања су експортована');
     } catch (error) {
       console.error('Error exporting settings:', error);
     }
@@ -467,7 +467,7 @@ export default function SettingsPage() {
       setImportData('');
     } catch (error) {
       console.error('Error importing settings:', error);
-      toast.error('Neispravni format podataka');
+      toast.error('Неисправни формат података');
     }
   };
 
@@ -484,9 +484,9 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Podešavanja</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Подешавања</h1>
           <p className="text-muted-foreground">
-            Upravljajte podešavanjima vašeg CMS portala
+            Управљајте подешавањима вашег ЦМС портала
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -496,24 +496,24 @@ export default function SettingsPage() {
             onClick={handleExport}
           >
             <Download className="mr-2 h-4 w-4" />
-            Eksportuj
+            Експортуј
           </Button>
           <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <Upload className="mr-2 h-4 w-4" />
-                Importuj
+                Импортуј
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Importuj podešavanja</DialogTitle>
+                <DialogTitle>Импортуј подешавања</DialogTitle>
                 <DialogDescription>
-                  Zalepite JSON podatke eksportovanih podešavanja
+                  Залепите ЈСОН податке експортованих подешавања
                 </DialogDescription>
               </DialogHeader>
               <Textarea
-                placeholder='{"site_name": "Moj CMS", ...}'
+                placeholder='{"site_name": "Мој ЦМС", ...}'
                 value={importData}
                 onChange={(e) => setImportData(e.target.value)}
                 rows={10}
@@ -521,10 +521,10 @@ export default function SettingsPage() {
               />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
-                  Otkaži
+                  Откажи
                 </Button>
                 <Button onClick={handleImport} disabled={!importData}>
-                  Importuj
+                  Импортуј
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -539,7 +539,7 @@ export default function SettingsPage() {
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-5 w-5 text-yellow-600" />
               <p className="text-sm font-medium text-yellow-800">
-                Imate nesačuvane izmene
+                Имате несачуване измене
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -549,7 +549,7 @@ export default function SettingsPage() {
                 onClick={handleFormReset}
                 className='dark:text-gray-900 dark:hover:bg-white dark:hover:text-gray-900'
               >
-                Poništi
+                Поништи
               </Button>
               <Button
                 size="sm"
@@ -559,12 +559,12 @@ export default function SettingsPage() {
                 {isSaving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Čuva se...
+                    Чува се...
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Sačuvaj izmene
+                    Сачувај измене
                   </>
                 )}
               </Button>
@@ -592,19 +592,19 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.GENERAL}>
             <Card>
               <CardHeader>
-                <CardTitle>Opšta podešavanja</CardTitle>
+                <CardTitle>Општа подешавања</CardTitle>
                 <CardDescription>
-                  Osnovna podešavanja vašeg CMS portala
+                  Основна подешавања вашег ЦМС портала
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.SITE_NAME}>Naziv sajta</Label>
+                    <Label htmlFor={SETTING_KEYS.SITE_NAME}>Назив сајта</Label>
                     <Input
                       id={SETTING_KEYS.SITE_NAME}
-                      {...register(SETTING_KEYS.SITE_NAME, { required: 'Naziv sajta je obavezan' })}
-                      placeholder="Moja institucija"
+                      {...register(SETTING_KEYS.SITE_NAME, { required: 'Назив сајта је обавезан' })}
+                      placeholder="Моја институција"
                     />
                     {errors[SETTING_KEYS.SITE_NAME] && (
                       <p className="text-sm text-red-600">{errors[SETTING_KEYS.SITE_NAME]!.message}</p>
@@ -612,21 +612,21 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.SITE_TAGLINE}>Slogan</Label>
+                    <Label htmlFor={SETTING_KEYS.SITE_TAGLINE}>Слоган</Label>
                     <Input
                       id={SETTING_KEYS.SITE_TAGLINE}
                       {...register(SETTING_KEYS.SITE_TAGLINE)}
-                      placeholder="Transparentnost i dostupnost"
+                      placeholder="Транспарентност и доступност"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Logo sajta</Label>
+                    <Label>Лого сајта</Label>
                     <div className="space-y-3">
                       {logoPreview && (
                         <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium">Trenutni logo:</span>
+                            <span className="text-sm font-medium">Тренутни лого:</span>
                             <Button
                               type="button"
                               variant="ghost"
@@ -674,25 +674,25 @@ export default function SettingsPage() {
                               isDraggingLogo ? "text-blue-600" : "text-gray-400"
                             )} />
                             <p className="mb-2 text-sm text-gray-500">
-                              <span className="font-semibold">Kliknite za upload</span> ili prevucite fajl
+                              <span className="font-semibold">Кликните за учитавање</span> или превуците фајл
                             </p>
-                            <p className="text-xs text-gray-500">PNG, JPG, GIF do 5MB</p>
+                            <p className="text-xs text-gray-500">ПНГ, ЈПГ, ГИФ до 5МБ</p>
                           </div>
                         </label>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Preporučene dimenzije: 200x60px, maksimalna veličina: 5MB
+                      Препоручене димензије: 200x60пx, максимална величина: 5МБ
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Favicon</Label>
+                    <Label>Фавикон</Label>
                     <div className="space-y-3">
                       {faviconPreview && (
                         <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium">Trenutni favicon:</span>
+                            <span className="text-sm font-medium">Тренутни фавикон:</span>
                             <Button
                               type="button"
                               variant="ghost"
@@ -740,20 +740,20 @@ export default function SettingsPage() {
                               isDraggingFavicon ? "text-blue-600" : "text-gray-400"
                             )} />
                             <p className="mb-2 text-sm text-gray-500">
-                              <span className="font-semibold">Kliknite za upload</span> ili prevucite fajl
+                              <span className="font-semibold">Кликните за учитавање</span> или превуците фајл
                             </p>
-                            <p className="text-xs text-gray-500">ICO ili PNG do 1MB</p>
+                            <p className="text-xs text-gray-500">ИЦО или ПНГ до 1МБ</p>
                           </div>
                         </label>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Formati: ICO ili PNG, preporučeno: 32x32px
+                      Формати: ИЦО или ПНГ, препоручено: 32x32пx
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.SITE_LANGUAGE}>Jezik</Label>
+                    <Label htmlFor={SETTING_KEYS.SITE_LANGUAGE}>Језик</Label>
                     <Select
                       value={formValues[SETTING_KEYS.SITE_LANGUAGE] as any || 'sr'}
                       onValueChange={(value) => setValue(SETTING_KEYS.SITE_LANGUAGE, value)}
@@ -762,7 +762,7 @@ export default function SettingsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="sr">Srpski</SelectItem>
+                        <SelectItem value="sr">Српски</SelectItem>
                         <SelectItem value="en">English</SelectItem>
                         <SelectItem value="de">Deutsch</SelectItem>
                       </SelectContent>
@@ -770,7 +770,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.TIMEZONE}>Vremenska zona</Label>
+                    <Label htmlFor={SETTING_KEYS.TIMEZONE}>Временска зона</Label>
                     <Select
                       value={formValues[SETTING_KEYS.TIMEZONE] as any || 'Europe/Belgrade'}
                       onValueChange={(value) => setValue(SETTING_KEYS.TIMEZONE, value)}
@@ -779,9 +779,9 @@ export default function SettingsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Europe/Belgrade">Beograd (UTC+1)</SelectItem>
-                        <SelectItem value="Europe/London">London (UTC+0)</SelectItem>
-                        <SelectItem value="America/New_York">New York (UTC-5)</SelectItem>
+                        <SelectItem value="Europe/Belgrade">Београд (УТЦ+1)</SelectItem>
+                        <SelectItem value="Europe/London">Лондон (УТЦ+0)</SelectItem>
+                        <SelectItem value="America/New_York">Њујорк (УТЦ-5)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -794,9 +794,9 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.CONTACT}>
             <Card>
               <CardHeader>
-                <CardTitle>Kontakt informacije</CardTitle>
+                <CardTitle>Контакт информације</CardTitle>
                 <CardDescription>
-                  Kontakt podaci vaše institucije
+                  Контакт подаци ваше институције
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -804,12 +804,12 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.CONTACT_ADDRESS}>
                       <MapPin className="inline-block mr-2 h-4 w-4" />
-                      Adresa
+                      Адреса
                     </Label>
                     <Textarea
                       id={SETTING_KEYS.CONTACT_ADDRESS}
                       {...register(SETTING_KEYS.CONTACT_ADDRESS)}
-                      placeholder="Ulica i broj, Poštanski broj Grad"
+                      placeholder="Улица и број, Поштански број Град"
                       rows={3}
                     />
                   </div>
@@ -817,7 +817,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.CONTACT_PHONE}>
                       <Phone className="inline-block mr-2 h-4 w-4" />
-                      Telefon
+                      Телефон
                     </Label>
                     <Input
                       id={SETTING_KEYS.CONTACT_PHONE}
@@ -829,7 +829,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.CONTACT_EMAIL}>
                       <Mail className="inline-block mr-2 h-4 w-4" />
-                      Email
+                      Имејл
                     </Label>
                     <Input
                       id={SETTING_KEYS.CONTACT_EMAIL}
@@ -842,12 +842,12 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.CONTACT_WORKING_HOURS}>
                       <Clock className="inline-block mr-2 h-4 w-4" />
-                      Radno vreme
+                      Радно време
                     </Label>
                     <Textarea
                       id={SETTING_KEYS.CONTACT_WORKING_HOURS}
                       {...register(SETTING_KEYS.CONTACT_WORKING_HOURS)}
-                      placeholder="Ponedeljak - Petak: 08:00 - 16:00"
+                      placeholder="Понедељак - Петак: 08:00 - 16:00"
                       rows={2}
                     />
                   </div>
@@ -855,7 +855,7 @@ export default function SettingsPage() {
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor={SETTING_KEYS.CONTACT_MAP_URL}>
                       <Globe className="inline-block mr-2 h-4 w-4" />
-                      Google Maps URL
+                      Гугл мапе УРЛ
                     </Label>
                     <Input
                       id={SETTING_KEYS.CONTACT_MAP_URL}
@@ -863,7 +863,7 @@ export default function SettingsPage() {
                       placeholder="https://maps.google.com/..."
                     />
                     <p className="text-xs text-muted-foreground">
-                      Unesite embed URL sa Google Maps-a
+                      Унесите ембед УРЛ са Гугл мапа
                     </p>
                   </div>
                 </div>
@@ -875,9 +875,9 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.SOCIAL}>
             <Card>
               <CardHeader>
-                <CardTitle>Društvene mreže</CardTitle>
+                <CardTitle>Друштвене мреже</CardTitle>
                 <CardDescription>
-                  Linkovi ka profilima na društvenim mrežama
+                  Линкови ка профилима на друштвеним мрежама
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -885,7 +885,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.SOCIAL_FACEBOOK}>
                       <Facebook className="inline-block mr-2 h-4 w-4" />
-                      Facebook
+                      Фејсбук
                     </Label>
                     <Input
                       id={SETTING_KEYS.SOCIAL_FACEBOOK}
@@ -897,7 +897,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.SOCIAL_TWITTER}>
                       <Twitter className="inline-block mr-2 h-4 w-4" />
-                      Twitter/X
+                      Твитер/X
                     </Label>
                     <Input
                       id={SETTING_KEYS.SOCIAL_TWITTER}
@@ -909,7 +909,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.SOCIAL_INSTAGRAM}>
                       <Instagram className="inline-block mr-2 h-4 w-4" />
-                      Instagram
+                      Инстаграм
                     </Label>
                     <Input
                       id={SETTING_KEYS.SOCIAL_INSTAGRAM}
@@ -921,7 +921,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.SOCIAL_LINKEDIN}>
                       <Linkedin className="inline-block mr-2 h-4 w-4" />
-                      LinkedIn
+                      ЛинкедИн
                     </Label>
                     <Input
                       id={SETTING_KEYS.SOCIAL_LINKEDIN}
@@ -933,7 +933,7 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor={SETTING_KEYS.SOCIAL_YOUTUBE}>
                       <Youtube className="inline-block mr-2 h-4 w-4" />
-                      YouTube
+                      Јутјуб
                     </Label>
                     <Input
                       id={SETTING_KEYS.SOCIAL_YOUTUBE}
@@ -950,54 +950,54 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.SEO}>
             <Card>
               <CardHeader>
-                <CardTitle>SEO podešavanja</CardTitle>
+                <CardTitle>СЕО подешавања</CardTitle>
                 <CardDescription>
-                  Optimizacija za pretraživače i analitika
+                  Оптимизација за претраживаче и аналитика
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.SEO_TITLE}>Meta naslov</Label>
+                    <Label htmlFor={SETTING_KEYS.SEO_TITLE}>Мета наслов</Label>
                     <Input
                       id={SETTING_KEYS.SEO_TITLE}
                       {...register(SETTING_KEYS.SEO_TITLE)}
-                      placeholder="Moja institucija - Zvanični portal"
+                      placeholder="Моја институција - Званични портал"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Prikazuje se u rezultatima pretrage (50-60 karaktera)
+                      Приказује се у резултатима претраге (50-60 карактера)
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.SEO_DESCRIPTION}>Meta opis</Label>
+                    <Label htmlFor={SETTING_KEYS.SEO_DESCRIPTION}>Мета опис</Label>
                     <Textarea
                       id={SETTING_KEYS.SEO_DESCRIPTION}
                       {...register(SETTING_KEYS.SEO_DESCRIPTION)}
-                      placeholder="Zvanični portal lokalne institucije sa najnovijim vestima..."
+                      placeholder="Званични портал локалне институције са најновијим вестима..."
                       rows={3}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Kratak opis sajta (150-160 karaktera)
+                      Кратак опис сајта (150-160 карактера)
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.SEO_KEYWORDS}>Ključne reči</Label>
+                    <Label htmlFor={SETTING_KEYS.SEO_KEYWORDS}>Кључне речи</Label>
                     <Input
                       id={SETTING_KEYS.SEO_KEYWORDS}
                       {...register(SETTING_KEYS.SEO_KEYWORDS)}
-                      placeholder="institucija, lokalna samouprava, transparentnost"
+                      placeholder="институција, локална самоуправа, транспарентност"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Odvojene zarezom
+                      Одвојене зарезом
                     </p>
                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor={SETTING_KEYS.SEO_GOOGLE_ANALYTICS}>
-                        Google Analytics ID
+                        Гугл аналитикс ИД
                       </Label>
                       <Input
                         id={SETTING_KEYS.SEO_GOOGLE_ANALYTICS}
@@ -1008,7 +1008,7 @@ export default function SettingsPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor={SETTING_KEYS.SEO_GOOGLE_TAG_MANAGER}>
-                        Google Tag Manager ID
+                        Гугл таг менаџер ИД
                       </Label>
                       <Input
                         id={SETTING_KEYS.SEO_GOOGLE_TAG_MANAGER}
@@ -1026,15 +1026,15 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.EMAIL}>
             <Card>
               <CardHeader>
-                <CardTitle>Email podešavanja</CardTitle>
+                <CardTitle>Имејл подешавања</CardTitle>
                 <CardDescription>
-                  SMTP konfiguracija za slanje email poruka
+                  СМТП конфигурација за слање имејл порука
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_HOST}>SMTP Server</Label>
+                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_HOST}>СМТП сервер</Label>
                     <Input
                       id={SETTING_KEYS.EMAIL_SMTP_HOST}
                       {...register(SETTING_KEYS.EMAIL_SMTP_HOST)}
@@ -1043,7 +1043,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_PORT}>SMTP Port</Label>
+                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_PORT}>СМТП порт</Label>
                     <Input
                       id={SETTING_KEYS.EMAIL_SMTP_PORT}
                       type="number"
@@ -1053,7 +1053,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_USER}>SMTP korisničko ime</Label>
+                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_USER}>СМТП корисничко име</Label>
                     <Input
                       id={SETTING_KEYS.EMAIL_SMTP_USER}
                       {...register(SETTING_KEYS.EMAIL_SMTP_USER)}
@@ -1062,7 +1062,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_PASS}>SMTP lozinka</Label>
+                    <Label htmlFor={SETTING_KEYS.EMAIL_SMTP_PASS}>СМТП лозинка</Label>
                     <Input
                       id={SETTING_KEYS.EMAIL_SMTP_PASS}
                       type="password"
@@ -1072,16 +1072,16 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.EMAIL_FROM_NAME}>Ime pošiljaoca</Label>
+                    <Label htmlFor={SETTING_KEYS.EMAIL_FROM_NAME}>Име пошиљаоца</Label>
                     <Input
                       id={SETTING_KEYS.EMAIL_FROM_NAME}
                       {...register(SETTING_KEYS.EMAIL_FROM_NAME)}
-                      placeholder="Moja institucija"
+                      placeholder="Моја институција"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.EMAIL_FROM_ADDRESS}>Email pošiljaoca</Label>
+                    <Label htmlFor={SETTING_KEYS.EMAIL_FROM_ADDRESS}>Имејл пошиљаоца</Label>
                     <Input
                       id={SETTING_KEYS.EMAIL_FROM_ADDRESS}
                       type="email"
@@ -1095,10 +1095,10 @@ export default function SettingsPage() {
                   <div className="flex items-start space-x-2">
                     <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-medium text-yellow-800">Napomena</h4>
+                      <h4 className="text-sm font-medium text-yellow-800">Напомена</h4>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Za Gmail koristite App Password umesto običnu lozinku.
-                        Za druge provajdere proverite SMTP dokumentaciju.
+                        За Гмејл користите апликациону лозинку уместо обичне лозинке.
+                        За друге провајдере проверите СМТП документацију.
                       </p>
                     </div>
                   </div>
@@ -1111,15 +1111,15 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.APPEARANCE}>
             <Card>
               <CardHeader>
-                <CardTitle>Podešavanja izgleda</CardTitle>
+                <CardTitle>Подешавања изгледа</CardTitle>
                 <CardDescription>
-                  Prilagodite vizuelni identitet portala
+                  Прилагодите визуелни идентитет портала
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.THEME_PRIMARY_COLOR}>Primarna boja</Label>
+                    <Label htmlFor={SETTING_KEYS.THEME_PRIMARY_COLOR}>Примарна боја</Label>
                     <div className="flex items-center space-x-2">
                       <Input
                         id={SETTING_KEYS.THEME_PRIMARY_COLOR}
@@ -1138,7 +1138,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.THEME_SECONDARY_COLOR}>Sekundarna boja</Label>
+                    <Label htmlFor={SETTING_KEYS.THEME_SECONDARY_COLOR}>Секундарна боја</Label>
                     <div className="flex items-center space-x-2">
                       <Input
                         id={SETTING_KEYS.THEME_SECONDARY_COLOR}
@@ -1157,7 +1157,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={SETTING_KEYS.THEME_FONT_FAMILY}>Font familija</Label>
+                    <Label htmlFor={SETTING_KEYS.THEME_FONT_FAMILY}>Фонт фамилија</Label>
                     <Select
                       value={(formValues[SETTING_KEYS.THEME_FONT_FAMILY] as string) || 'Inter'}
                       onValueChange={(value) => setValue(SETTING_KEYS.THEME_FONT_FAMILY, value)}
@@ -1166,11 +1166,11 @@ export default function SettingsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Open Sans">Open Sans</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Inter">Интер</SelectItem>
+                        <SelectItem value="Roboto">Робото</SelectItem>
+                        <SelectItem value="Open Sans">Опен Санс</SelectItem>
+                        <SelectItem value="Lato">Лато</SelectItem>
+                        <SelectItem value="Poppins">Попинс</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1184,32 +1184,32 @@ export default function SettingsPage() {
                         className="rounded"
                       />
                       <Label htmlFor={SETTING_KEYS.THEME_DARK_MODE}>
-                        Omogući tamni režim
+                        Омогући тамни режим
                       </Label>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Dozvolite korisnicima da biraju između svetle i tamne teme
+                      Дозволите корисницима да бирају између светле и тамне теме
                     </p>
                   </div>
                 </div>
 
                 {/* Preview */}
                 <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
-                  <h4 className="text-sm font-medium mb-4">Pregled boja</h4>
+                  <h4 className="text-sm font-medium mb-4">Преглед боја</h4>
                   <div className="space-y-3">
                     <div className="flex items-center space-x-4">
                       <div 
                         className="w-20 h-10 rounded-md border"
                         style={{ backgroundColor: (formValues[SETTING_KEYS.THEME_PRIMARY_COLOR] as string) || '#3B82F6' }}
                       />
-                      <span className="text-sm">Primarna boja</span>
+                      <span className="text-sm">Примарна боја</span>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div 
                         className="w-20 h-10 rounded-md border"
                         style={{ backgroundColor: (formValues[SETTING_KEYS.THEME_SECONDARY_COLOR] as string) || '#10B981' }}
                       />
-                      <span className="text-sm">Sekundarna boja</span>
+                      <span className="text-sm">Секундарна боја</span>
                     </div>
                   </div>
                 </div>
@@ -1221,9 +1221,9 @@ export default function SettingsPage() {
           <TabsContent value={SettingCategory.ADVANCED}>
             <Card>
               <CardHeader>
-                <CardTitle>Napredna podešavanja</CardTitle>
+                <CardTitle>Напредна подешавања</CardTitle>
                 <CardDescription>
-                  Dodatne opcije i konfiguracija sistema
+                  Додатне опције и конфигурација система
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -1237,19 +1237,19 @@ export default function SettingsPage() {
                         className="rounded"
                       />
                       <Label htmlFor={SETTING_KEYS.MAINTENANCE_MODE}>
-                        Režim održavanja
+                        Режим одржавања
                       </Label>
                     </div>
                     
                     {formValues[SETTING_KEYS.MAINTENANCE_MODE] === true && (
                       <div className="ml-6 space-y-2">
                         <Label htmlFor={SETTING_KEYS.MAINTENANCE_MESSAGE}>
-                          Poruka održavanja
+                          Порука одржавања
                         </Label>
                         <Textarea
                           id={SETTING_KEYS.MAINTENANCE_MESSAGE}
                           {...register(SETTING_KEYS.MAINTENANCE_MESSAGE)}
-                          placeholder="Sajt je trenutno u održavanju. Molimo vas pokušajte ponovo za nekoliko minuta."
+                          placeholder="Сајт је тренутно у одржавању. Молимо вас покушајте поново за неколико минута."
                           rows={3}
                         />
                       </div>
@@ -1259,15 +1259,15 @@ export default function SettingsPage() {
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor={SETTING_KEYS.POSTS_PER_PAGE}>
-                        Objava po stranici
+                        Објава по страници
                       </Label>
                       <Input
                         id={SETTING_KEYS.POSTS_PER_PAGE}
                         type="number"
                         {...register(SETTING_KEYS.POSTS_PER_PAGE, { 
                           valueAsNumber: true,
-                          min: { value: 1, message: 'Minimum je 1' },
-                          max: { value: 50, message: 'Maksimum je 50' }
+                          min: { value: 1, message: 'Минимум је 1' },
+                          max: { value: 50, message: 'Максимум је 50' }
                         })}
                         placeholder="10"
                       />
@@ -1275,7 +1275,7 @@ export default function SettingsPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor={SETTING_KEYS.API_KEY_GOOGLE_MAPS}>
-                        Google Maps API ključ
+                        Гугл мапе АПИ кључ
                       </Label>
                       <Input
                         id={SETTING_KEYS.API_KEY_GOOGLE_MAPS}
@@ -1295,7 +1295,7 @@ export default function SettingsPage() {
                         className="rounded"
                       />
                       <Label htmlFor={SETTING_KEYS.ALLOW_COMMENTS}>
-                        Dozvoli komentare na objavama
+                        Дозволи коментаре на објавама
                       </Label>
                     </div>
 
@@ -1307,7 +1307,7 @@ export default function SettingsPage() {
                         className="rounded"
                       />
                       <Label htmlFor={SETTING_KEYS.ALLOW_REGISTRATION}>
-                        Dozvoli registraciju novih korisnika
+                        Дозволи регистрацију нових корисника
                       </Label>
                     </div>
                   </div>
@@ -1316,32 +1316,32 @@ export default function SettingsPage() {
                     <div className="flex items-start space-x-2">
                       <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
                       <div>
-                        <h4 className="text-sm font-medium text-red-800">Opasna zona</h4>
+                        <h4 className="text-sm font-medium text-red-800">Опасна зона</h4>
                         <p className="text-sm text-red-700 mt-1">
-                          Ove akcije mogu trajno promeniti podatke.
+                          Ове акције могу трајно променити податке.
                         </p>
                         <div className="mt-3">
                           <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
                             <DialogTrigger asChild>
                               <Button variant="destructive" size="sm">
                                 <RotateCcw className="mr-2 h-4 w-4" />
-                                Resetuj podešavanja
+                                Ресетуј подешавања
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Resetuj podešavanja</DialogTitle>
+                                <DialogTitle>Ресетуј подешавања</DialogTitle>
                                 <DialogDescription>
-                                  Da li ste sigurni da želite da resetujete podešavanja na podrazumevane vrednosti?
-                                  Ova akcija će obrisati sve vaše izmene.
+                                  Да ли сте сигурни да желите да ресетујете подешавања на подразумеване вредности?
+                                  Ова акција ће обрисати све ваше измене.
                                 </DialogDescription>
                               </DialogHeader>
                               <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsResetDialogOpen(false)}>
-                                  Otkaži
+                                  Откажи
                                 </Button>
                                 <Button variant="destructive" onClick={handleReset}>
-                                  Resetuj
+                                  Ресетуј
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
@@ -1367,12 +1367,12 @@ export default function SettingsPage() {
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Čuva se...
+                Чува се...
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Sačuvaj sve izmene
+                Сачувај све измене
               </>
             )}
           </Button>
