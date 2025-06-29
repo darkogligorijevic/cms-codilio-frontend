@@ -111,7 +111,7 @@ export default function ServicesPage() {
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error('Error fetching services:', error);
-      toast.error('Greška pri učitavanju usluga');
+      toast.error('Грешка при учитавању услуга');
     } finally {
       setIsLoading(false);
     }
@@ -131,25 +131,25 @@ export default function ServicesPage() {
 
     try {
       await servicesApi.delete(serviceToDelete.id);
-      toast.success('Usluga je uspešno obrisana');
+      toast.success('Услуга је успешно обрисана');
       setDeleteDialogOpen(false);
       setServiceToDelete(null);
       fetchServices();
       fetchStatistics();
     } catch (error) {
       console.error('Error deleting service:', error);
-      toast.error('Greška pri brisanju usluge');
+      toast.error('Грешка при брисању услуге');
     }
   };
 
   const getStatusBadge = (status: ServiceStatus) => {
     return status === ServiceStatus.PUBLISHED ? (
       <Badge variant="default" className="bg-green-600">
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
-        Nacrt
+        Нацрт
       </Badge>
     );
   };
@@ -163,10 +163,10 @@ export default function ServicesPage() {
     };
 
     const labels = {
-      [ServicePriority.LOW]: 'Nizak',
-      [ServicePriority.MEDIUM]: 'Srednji',
-      [ServicePriority.HIGH]: 'Visok',
-      [ServicePriority.URGENT]: 'Hitan'
+      [ServicePriority.LOW]: 'Низак',
+      [ServicePriority.MEDIUM]: 'Средњи',
+      [ServicePriority.HIGH]: 'Висок',
+      [ServicePriority.URGENT]: 'Хитан'
     };
 
     return (
@@ -178,15 +178,15 @@ export default function ServicesPage() {
 
   const getTypeLabel = (type: ServiceType) => {
     const labels = {
-      [ServiceType.ADMINISTRATIVE]: 'Administrativne',
-      [ServiceType.CONSULTING]: 'Savetodavne',
-      [ServiceType.TECHNICAL]: 'Tehničke',
-      [ServiceType.LEGAL]: 'Pravne',
-      [ServiceType.EDUCATIONAL]: 'Obrazovne',
-      [ServiceType.HEALTH]: 'Zdravstvene',
-      [ServiceType.SOCIAL]: 'Socijalne',
-      [ServiceType.CULTURAL]: 'Kulturne',
-      [ServiceType.OTHER]: 'Ostalo'
+      [ServiceType.ADMINISTRATIVE]: 'Административне',
+      [ServiceType.CONSULTING]: 'Саветодавне',
+      [ServiceType.TECHNICAL]: 'Техничке',
+      [ServiceType.LEGAL]: 'Правне',
+      [ServiceType.EDUCATIONAL]: 'Образовне',
+      [ServiceType.HEALTH]: 'Здравствене',
+      [ServiceType.SOCIAL]: 'Социјалне',
+      [ServiceType.CULTURAL]: 'Културне',
+      [ServiceType.OTHER]: 'Остало'
     };
     return labels[type] || type;
   };
@@ -203,7 +203,7 @@ export default function ServicesPage() {
 
   const copyServiceSlug = (slug: string) => {
     navigator.clipboard.writeText(slug);
-    toast.success('Slug je kopiran u clipboard');
+    toast.success('Слуг је копиран у клипборд');
   };
 
   return (
@@ -211,9 +211,9 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Usluge</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Услуге</h1>
           <p className="text-muted-foreground">
-            Upravljanje uslugama lokalne institucije
+            Управљање услугама локалне институције
           </p>
         </div>
         <Button 
@@ -221,7 +221,7 @@ export default function ServicesPage() {
           variant={theme === "light" ? "default" : "secondaryDefault"}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Nova usluga
+          Нова услуга
         </Button>
       </div>
 
@@ -231,14 +231,14 @@ export default function ServicesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Ukupno usluga
+                Укупно услуга
               </CardTitle>
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalServices}</div>
               <p className="text-xs text-muted-foreground">
-                {statistics.publishedServices} objavljeno
+                {statistics.publishedServices} објављено
               </p>
             </CardContent>
           </Card>
@@ -246,7 +246,7 @@ export default function ServicesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Ukupni pregledi
+                Укупни прегледи
               </CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -254,7 +254,7 @@ export default function ServicesPage() {
               <div className="text-2xl font-bold">{statistics.totalViews.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 <TrendingUp className="inline h-3 w-3 mr-1" />
-                Interes građana
+                Интерес грађана
               </p>
             </CardContent>
           </Card>
@@ -262,14 +262,14 @@ export default function ServicesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Zahtevi za uslugama
+                Захтеви за услугама
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalRequests.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
-                Aktivni zahtevi
+                Активни захтеви
               </p>
             </CardContent>
           </Card>
@@ -277,14 +277,14 @@ export default function ServicesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Dokumenti
+                Документи
               </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalDocuments}</div>
               <p className="text-xs text-muted-foreground">
-                Prateći dokumenti
+                Пратећи документи
               </p>
             </CardContent>
           </Card>
@@ -296,7 +296,7 @@ export default function ServicesPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center space-x-2">
             <Filter className="h-5 w-5" />
-            <span>Filteri</span>
+            <span>Филтери</span>
             {hasActiveFilters && (
               <Button
                 variant="ghost"
@@ -305,7 +305,7 @@ export default function ServicesPage() {
                 className="ml-auto"
               >
                 <X className="mr-2 h-4 w-4" />
-                Očisti filtere
+                Очисти филтере
               </Button>
             )}
           </CardTitle>
@@ -313,11 +313,11 @@ export default function ServicesPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Pretraga</label>
+              <label className="text-sm font-medium">Претрага</label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Pretraži usluge..."
+                  placeholder="Претражи услуге..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -326,52 +326,52 @@ export default function ServicesPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">Статус</label>
               <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ServiceStatus | 'all')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sve statusи" />
+                  <SelectValue placeholder="Све статуси" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi statusi</SelectItem>
-                  <SelectItem value={ServiceStatus.PUBLISHED}>Objavljeno</SelectItem>
-                  <SelectItem value={ServiceStatus.DRAFT}>Nacrt</SelectItem>
+                  <SelectItem value="all">Сви статуси</SelectItem>
+                  <SelectItem value={ServiceStatus.PUBLISHED}>Објављено</SelectItem>
+                  <SelectItem value={ServiceStatus.DRAFT}>Нацрт</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Tip usluge</label>
+              <label className="text-sm font-medium">Тип услуге</label>
               <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as ServiceType | 'all')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi tipovi" />
+                  <SelectValue placeholder="Сви типови" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi tipovi</SelectItem>
-                  <SelectItem value={ServiceType.ADMINISTRATIVE}>Administrativne</SelectItem>
-                  <SelectItem value={ServiceType.CONSULTING}>Savetodavne</SelectItem>
-                  <SelectItem value={ServiceType.TECHNICAL}>Tehničke</SelectItem>
-                  <SelectItem value={ServiceType.LEGAL}>Pravne</SelectItem>
-                  <SelectItem value={ServiceType.EDUCATIONAL}>Obrazovne</SelectItem>
-                  <SelectItem value={ServiceType.HEALTH}>Zdravstvene</SelectItem>
-                  <SelectItem value={ServiceType.SOCIAL}>Socijalne</SelectItem>
-                  <SelectItem value={ServiceType.CULTURAL}>Kulturne</SelectItem>
-                  <SelectItem value={ServiceType.OTHER}>Ostalo</SelectItem>
+                  <SelectItem value="all">Сви типови</SelectItem>
+                  <SelectItem value={ServiceType.ADMINISTRATIVE}>Административне</SelectItem>
+                  <SelectItem value={ServiceType.CONSULTING}>Саветодавне</SelectItem>
+                  <SelectItem value={ServiceType.TECHNICAL}>Техничке</SelectItem>
+                  <SelectItem value={ServiceType.LEGAL}>Правне</SelectItem>
+                  <SelectItem value={ServiceType.EDUCATIONAL}>Образовне</SelectItem>
+                  <SelectItem value={ServiceType.HEALTH}>Здравствене</SelectItem>
+                  <SelectItem value={ServiceType.SOCIAL}>Социјалне</SelectItem>
+                  <SelectItem value={ServiceType.CULTURAL}>Културне</SelectItem>
+                  <SelectItem value={ServiceType.OTHER}>Остало</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Prioritet</label>
+              <label className="text-sm font-medium">Приоритет</label>
               <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value as ServicePriority | 'all')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi prioriteti" />
+                  <SelectValue placeholder="Сви приоритети" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi prioriteti</SelectItem>
-                  <SelectItem value={ServicePriority.LOW}>Nizak</SelectItem>
-                  <SelectItem value={ServicePriority.MEDIUM}>Srednji</SelectItem>
-                  <SelectItem value={ServicePriority.HIGH}>Visok</SelectItem>
-                  <SelectItem value={ServicePriority.URGENT}>Hitan</SelectItem>
+                  <SelectItem value="all">Сви приоритети</SelectItem>
+                  <SelectItem value={ServicePriority.LOW}>Низак</SelectItem>
+                  <SelectItem value={ServicePriority.MEDIUM}>Средњи</SelectItem>
+                  <SelectItem value={ServicePriority.HIGH}>Висок</SelectItem>
+                  <SelectItem value={ServicePriority.URGENT}>Хитан</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -382,9 +382,9 @@ export default function ServicesPage() {
       {/* Services Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista usluga</CardTitle>
+          <CardTitle>Листа услуга</CardTitle>
           <CardDescription>
-            Pregled svih usluga u sistemu
+            Преглед свих услуга у систему
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -404,13 +404,13 @@ export default function ServicesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Naziv usluge</TableHead>
-                    <TableHead>Tip</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Prioritet</TableHead>
-                    <TableHead>Pregledi</TableHead>
-                    <TableHead>Zahtevi</TableHead>
-                    <TableHead className="text-right">Akcije</TableHead>
+                    <TableHead>Назив услуге</TableHead>
+                    <TableHead>Тип</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Приоритет</TableHead>
+                    <TableHead>Прегледи</TableHead>
+                    <TableHead>Захтеви</TableHead>
+                    <TableHead className="text-right">Акције</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -423,20 +423,20 @@ export default function ServicesPage() {
                             <code 
                               className="bg-gray-100 px-2 py-1 rounded text-xs cursor-pointer hover:bg-gray-200"
                               onClick={() => copyServiceSlug(service.slug)}
-                              title="Kliknite da kopirate slug"
+                              title="Кликните да копирате слуг"
                             >
                               {service.slug}
                             </code>
                             {service.isOnline && (
                               <Badge variant="outline" className="text-xs">
                                 <Globe className="h-3 w-3 mr-1" />
-                                Online
+                                Онлајн
                               </Badge>
                             )}
                             {service.requiresAppointment && (
                               <Badge variant="outline" className="text-xs">
                                 <Calendar className="h-3 w-3 mr-1" />
-                                Zakazivanje
+                                Заказивање
                               </Badge>
                             )}
                           </div>
@@ -477,25 +477,25 @@ export default function ServicesPage() {
                               onClick={() => router.push(`/dashboard/services/${service.id}`)}
                             >
                               <Eye className="mr-2 h-4 w-4" />
-                              Pregledaj
+                              Прегледај
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => router.push(`/dashboard/services/${service.id}/edit`)}
                             >
                               <Edit className="mr-2 h-4 w-4" />
-                              Uredi
+                              Уреди
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => router.push(`/dashboard/services/${service.id}/documents`)}
                             >
                               <FileText className="mr-2 h-4 w-4" />
-                              Dokumenti ({service.documents?.length || 0})
+                              Документи ({service.documents?.length || 0})
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => copyServiceSlug(service.slug)}
                             >
                               <Copy className="mr-2 h-4 w-4" />
-                              Kopiraj slug
+                              Копирај слуг
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -506,7 +506,7 @@ export default function ServicesPage() {
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Obriši
+                              Обриши
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -520,18 +520,18 @@ export default function ServicesPage() {
             <div className="text-center py-12">
               <Building className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                {hasActiveFilters ? 'Nema rezultata' : 'Nema usluga'}
+                {hasActiveFilters ? 'Нема резултата' : 'Нема услуга'}
               </h3>
               <p className="text-gray-500 mb-4">
                 {hasActiveFilters 
-                  ? 'Probajte sa drugim filterima za pretragu' 
-                  : 'Dodajte prvu uslugu za građane'
+                  ? 'Пробајте са другим филтерима за претрагу' 
+                  : 'Додајте прву услугу за грађане'
                 }
               </p>
               {hasActiveFilters ? (
                 <Button variant="outline" onClick={clearFilters}>
                   <X className="mr-2 h-4 w-4" />
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               ) : (
                 <Button 
@@ -539,7 +539,7 @@ export default function ServicesPage() {
                   variant={theme === "light" ? "default" : "secondaryDefault"}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Dodaj prvu uslugu
+                  Додај прву услугу
                 </Button>
               )}
             </div>
@@ -551,7 +551,7 @@ export default function ServicesPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Stranica {currentPage} od {totalPages}
+            Страница {currentPage} од {totalPages}
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -560,7 +560,7 @@ export default function ServicesPage() {
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
-              Prethodna
+              Претходна
             </Button>
             <Button
               variant="outline"
@@ -568,7 +568,7 @@ export default function ServicesPage() {
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
             >
-              Sledeća
+              Следећа
             </Button>
           </div>
         </div>
@@ -578,11 +578,11 @@ export default function ServicesPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete uslugu{' '}
-              <strong>{serviceToDelete?.name}</strong>? Ova akcija će obrisati i sve
-              povezane dokumente i ne može se poništiti.
+              Да ли сте сигурни да желите да обришете услугу{' '}
+              <strong>{serviceToDelete?.name}</strong>? Ова акција ће обрисати и све
+              повезане документе и не може се поништити.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -590,13 +590,13 @@ export default function ServicesPage() {
               variant="outline" 
               onClick={() => setDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button 
               variant="destructive" 
               onClick={handleDelete}
             >
-              Obriši uslugu
+              Обриши услугу
             </Button>
           </DialogFooter>
         </DialogContent>

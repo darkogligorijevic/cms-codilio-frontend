@@ -120,7 +120,7 @@ export default function ServiceDocumentsPage() {
       setService(serviceData);
     } catch (error) {
       console.error('Error fetching service:', error);
-      toast.error('Greška pri učitavanju usluge');
+      toast.error('Грешка при учитавању услуге');
       router.push('/dashboard/services');
     }
   };
@@ -134,7 +134,7 @@ export default function ServiceDocumentsPage() {
       setDocuments(documentsData);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      toast.error('Greška pri učitavanju dokumenata');
+      toast.error('Грешка при учитавању докумената');
     } finally {
       setIsLoading(false);
     }
@@ -166,11 +166,11 @@ export default function ServiceDocumentsPage() {
 
       await servicesApi.uploadDocument(parseInt(serviceId), file, documentMetadata);
       
-      toast.success('Dokument je uspešno učitan');
+      toast.success('Документ је успешно учитан');
       fetchDocuments();
     } catch (error: any) {
       console.error('Error uploading document:', error);
-      toast.error(error.response?.data?.message || 'Greška pri učitavanju dokumenta');
+      toast.error(error.response?.data?.message || 'Грешка при учитавању документа');
       throw error;
     } finally {
       setIsUploading(false);
@@ -180,7 +180,7 @@ export default function ServiceDocumentsPage() {
   const handleManualUpload = async (data: DocumentFormData) => {
     const file = fileInputRef.current?.files?.[0];
     if (!file) {
-      toast.error('Molimo izaberite fajl');
+      toast.error('Молимо изаберите фајл');
       return;
     }
 
@@ -188,7 +188,7 @@ export default function ServiceDocumentsPage() {
       setIsUploading(true);
       await servicesApi.uploadDocument(parseInt(serviceId!), file, data);
       
-      toast.success('Dokument je uspešno učitan');
+      toast.success('Документ је успешно учитан');
       setIsUploadDialogOpen(false);
       uploadForm.reset();
       if (fileInputRef.current) {
@@ -198,7 +198,7 @@ export default function ServiceDocumentsPage() {
       fetchDocuments();
     } catch (error: any) {
       console.error('Error uploading document:', error);
-      toast.error(error.response?.data?.message || 'Greška pri učitavanju dokumenta');
+      toast.error(error.response?.data?.message || 'Грешка при учитавању документа');
     } finally {
       setIsUploading(false);
     }
@@ -222,13 +222,13 @@ export default function ServiceDocumentsPage() {
 
     try {
       await servicesApi.updateDocument(parseInt(serviceId), selectedDocument.id, data);
-      toast.success('Dokument je uspešno ažuriran');
+      toast.success('Документ је успешно ажуриран');
       setIsEditDialogOpen(false);
       setSelectedDocument(null);
       fetchDocuments();
     } catch (error: any) {
       console.error('Error updating document:', error);
-      toast.error(error.response?.data?.message || 'Greška pri ažuriranju dokumenta');
+      toast.error(error.response?.data?.message || 'Грешка при ажурирању документа');
     }
   };
 
@@ -242,13 +242,13 @@ export default function ServiceDocumentsPage() {
 
     try {
       await servicesApi.deleteDocument(parseInt(serviceId), documentToDelete.id);
-      toast.success('Dokument je uspešno obrisan');
+      toast.success('Документ је успешно обрисан');
       setIsDeleteDialogOpen(false);
       setDocumentToDelete(null);
       fetchDocuments();
     } catch (error: any) {
       console.error('Error deleting document:', error);
-      toast.error(error.response?.data?.message || 'Greška pri brisanju dokumenta');
+      toast.error(error.response?.data?.message || 'Грешка при брисању документа');
     }
   };
 
@@ -298,12 +298,12 @@ export default function ServiceDocumentsPage() {
             onClick={() => router.push(`/dashboard/services/${serviceId}`)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Nazad na uslugu
+            Назад на услугу
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dokumenti usluge</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Документи услуге</h1>
             <p className="text-muted-foreground">
-              Upravljanje dokumentima za uslugu "{service.name}"
+              Управљање документима за услугу "{service.name}"
             </p>
           </div>
         </div>
@@ -312,16 +312,16 @@ export default function ServiceDocumentsPage() {
           variant={theme === "light" ? "default" : "secondaryDefault"}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Dodaj dokument
+          Додај документ
         </Button>
       </div>
 
       {/* Drag & Drop Upload */}
       <Card>
         <CardHeader>
-          <CardTitle>Brzo učitavanje</CardTitle>
+          <CardTitle>Брзо учитавање</CardTitle>
           <CardDescription>
-            Prevucite fajlove ovde za brzo učitavanje ili koristite dugme ispod za detaljno podešavanje
+            Превуците фајлове овде за брзо учитавање или користите дугме испод за детаљно подешавање
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -338,9 +338,9 @@ export default function ServiceDocumentsPage() {
       {/* Documents List */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista dokumenata ({documents.length})</CardTitle>
+          <CardTitle>Листа докумената ({documents.length})</CardTitle>
           <CardDescription>
-            Svi dokumenti povezani sa ovom uslugom
+            Сви документи повезани са овом услугом
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -374,12 +374,12 @@ export default function ServiceDocumentsPage() {
                           {document.isPublic ? (
                             <>
                               <Eye className="h-3 w-3 mr-1" />
-                              Javno
+                              Јавно
                             </>
                           ) : (
                             <>
                               <EyeOff className="h-3 w-3 mr-1" />
-                              Interno
+                              Интерно
                             </>
                           )}
                         </Badge>
@@ -388,21 +388,21 @@ export default function ServiceDocumentsPage() {
                         </Badge>
                         {!document.isActive && (
                           <Badge variant="destructive" className="text-xs">
-                            Neaktivan
+                            Неактиван
                           </Badge>
                         )}
                       </div>
                       
                       <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                        <p>Ime fajla: {document.originalName}</p>
+                        <p>Име фајла: {document.originalName}</p>
                         {document.description && (
-                          <p>Opis: {document.description}</p>
+                          <p>Опис: {document.description}</p>
                         )}
                         <div className="flex items-center space-x-4 text-xs">
-                          <span>Veličina: {formatFileSize(document.size)}</span>
-                          <span>Preuzimanja: {document.downloadCount}</span>
-                          <span>Redni broj: {document.sortOrder}</span>
-                          <span>Učitano: {formatDate(document.uploadedAt)}</span>
+                          <span>Величина: {formatFileSize(document.size)}</span>
+                          <span>Преузимања: {document.downloadCount}</span>
+                          <span>Редни број: {document.sortOrder}</span>
+                          <span>Учитано: {formatDate(document.uploadedAt)}</span>
                         </div>
                       </div>
                     </div>
@@ -417,11 +417,11 @@ export default function ServiceDocumentsPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleDownload(document)}>
                         <Download className="mr-2 h-4 w-4" />
-                        Preuzmi
+                        Преузми
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleEdit(document)}>
                         <Edit className="mr-2 h-4 w-4" />
-                        Uredi
+                        Уреди
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -429,7 +429,7 @@ export default function ServiceDocumentsPage() {
                         className="text-red-600"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Obriši
+                        Обриши
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -439,16 +439,16 @@ export default function ServiceDocumentsPage() {
           ) : (
             <div className="text-center py-12">
               <FileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Nema dokumenata</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Нема докумената</h3>
               <p className="text-gray-500 mb-4">
-                Dodajte prvi dokument za ovu uslugu
+                Додајте први документ за ову услугу
               </p>
               <Button 
                 onClick={() => setIsUploadDialogOpen(true)}
                 variant={theme === "light" ? "default" : "secondaryDefault"}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Dodaj dokument
+                Додај документ
               </Button>
             </div>
           )}
@@ -459,16 +459,16 @@ export default function ServiceDocumentsPage() {
       <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Dodaj novi dokument</DialogTitle>
+            <DialogTitle>Додај нови документ</DialogTitle>
             <DialogDescription>
-              Učitajte dokument sa detaljnim podešavanjima
+              Учитајте документ са детаљним подешавањима
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={uploadForm.handleSubmit(handleManualUpload)} className="space-y-4">
             {/* File Upload */}
             <div className="space-y-2">
-              <Label>Fajl *</Label>
+              <Label>Фајл *</Label>
               <div className="flex items-center space-x-2">
                 <Button
                   type="button"
@@ -477,7 +477,7 @@ export default function ServiceDocumentsPage() {
                   className="flex-1"
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  {uploadForm.watch('title') || 'Izaberite fajl'}
+                  {uploadForm.watch('title') || 'Изаберите фајл'}
                 </Button>
               </div>
               <input
@@ -493,18 +493,18 @@ export default function ServiceDocumentsPage() {
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv,.jpg,.jpeg,.png,.gif,.webp,.svg"
               />
               <p className="text-xs text-gray-500">
-                Maksimalna veličina: 10MB
+                Максимална величина: 10MB
               </p>
             </div>
 
             {/* Document Info */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="upload-title">Naziv dokumenta *</Label>
+                <Label htmlFor="upload-title">Назив документа *</Label>
                 <Input
                   id="upload-title"
-                  placeholder="Obrazac za prijavu..."
-                  {...uploadForm.register('title', { required: 'Naziv je obavezan' })}
+                  placeholder="Образац за пријаву..."
+                  {...uploadForm.register('title', { required: 'Назив је обавезан' })}
                 />
                 {uploadForm.formState.errors.title && (
                   <p className="text-sm text-red-600">{uploadForm.formState.errors.title.message}</p>
@@ -512,13 +512,13 @@ export default function ServiceDocumentsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="upload-type">Tip dokumenta</Label>
+                <Label htmlFor="upload-type">Тип документа</Label>
                 <Select 
                   value={uploadForm.watch('type')} 
                   onValueChange={(value) => uploadForm.setValue('type', value as ServiceDocumentType)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Izaberite tip" />
+                    <SelectValue placeholder="Изаберите тип" />
                   </SelectTrigger>
                   <SelectContent>
                     {documentTypes.map((type) => (
@@ -535,10 +535,10 @@ export default function ServiceDocumentsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="upload-description">Opis</Label>
+              <Label htmlFor="upload-description">Опис</Label>
               <Textarea
                 id="upload-description"
-                placeholder="Kraći opis dokumenta..."
+                placeholder="Краћи опис документа..."
                 rows={3}
                 {...uploadForm.register('description')}
               />
@@ -546,7 +546,7 @@ export default function ServiceDocumentsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="upload-sort">Redni broj</Label>
+                <Label htmlFor="upload-sort">Редни број</Label>
                 <Input
                   id="upload-sort"
                   type="number"
@@ -564,7 +564,7 @@ export default function ServiceDocumentsPage() {
                     checked={uploadForm.watch('isActive')}
                     onCheckedChange={(checked) => uploadForm.setValue('isActive', !!checked)}
                   />
-                  <Label htmlFor="upload-active">Aktivno</Label>
+                  <Label htmlFor="upload-active">Активно</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -573,7 +573,7 @@ export default function ServiceDocumentsPage() {
                     checked={uploadForm.watch('isPublic')}
                     onCheckedChange={(checked) => uploadForm.setValue('isPublic', !!checked)}
                   />
-                  <Label htmlFor="upload-public">Javno dostupno</Label>
+                  <Label htmlFor="upload-public">Јавно доступно</Label>
                 </div>
               </div>
             </div>
@@ -585,14 +585,14 @@ export default function ServiceDocumentsPage() {
                 onClick={() => setIsUploadDialogOpen(false)}
                 disabled={isUploading}
               >
-                Otkaži
+                Откажи
               </Button>
               <Button 
                 type="submit" 
                 disabled={isUploading}
                 variant={theme === "light" ? "default" : "secondaryDefault"}
               >
-                {isUploading ? 'Učitava se...' : 'Učitaj dokument'}
+                {isUploading ? 'Учитава се...' : 'Учитај документ'}
               </Button>
             </DialogFooter>
           </form>
@@ -603,20 +603,20 @@ export default function ServiceDocumentsPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Uredi dokument</DialogTitle>
+            <DialogTitle>Уреди документ</DialogTitle>
             <DialogDescription>
-              Ažurirajte informacije o dokumentu
+              Ажурирајте информације о документу
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-title">Naziv dokumenta *</Label>
+                <Label htmlFor="edit-title">Назив документа *</Label>
                 <Input
                   id="edit-title"
-                  placeholder="Obrazac za prijavu..."
-                  {...editForm.register('title', { required: 'Naziv je obavezan' })}
+                  placeholder="Образац за пријаву..."
+                  {...editForm.register('title', { required: 'Назив је обавезан' })}
                 />
                 {editForm.formState.errors.title && (
                   <p className="text-sm text-red-600">{editForm.formState.errors.title.message}</p>
@@ -624,13 +624,13 @@ export default function ServiceDocumentsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-type">Tip dokumenta</Label>
+                <Label htmlFor="edit-type">Тип документа</Label>
                 <Select 
                   value={editForm.watch('type')} 
                   onValueChange={(value) => editForm.setValue('type', value as ServiceDocumentType)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Izaberite tip" />
+                    <SelectValue placeholder="Изаберите тип" />
                   </SelectTrigger>
                   <SelectContent>
                     {documentTypes.map((type) => (
@@ -647,10 +647,10 @@ export default function ServiceDocumentsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Opis</Label>
+              <Label htmlFor="edit-description">Опис</Label>
               <Textarea
                 id="edit-description"
-                placeholder="Kraći opis dokumenta..."
+                placeholder="Краћи опис документа..."
                 rows={3}
                 {...editForm.register('description')}
               />
@@ -658,7 +658,7 @@ export default function ServiceDocumentsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-sort">Redni broj</Label>
+                <Label htmlFor="edit-sort">Редни број</Label>
                 <Input
                   id="edit-sort"
                   type="number"
@@ -676,7 +676,7 @@ export default function ServiceDocumentsPage() {
                     checked={editForm.watch('isActive')}
                     onCheckedChange={(checked) => editForm.setValue('isActive', !!checked)}
                   />
-                  <Label htmlFor="edit-active">Aktivno</Label>
+                  <Label htmlFor="edit-active">Активно</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -685,7 +685,7 @@ export default function ServiceDocumentsPage() {
                     checked={editForm.watch('isPublic')}
                     onCheckedChange={(checked) => editForm.setValue('isPublic', !!checked)}
                   />
-                  <Label htmlFor="edit-public">Javno dostupno</Label>
+                  <Label htmlFor="edit-public">Јавно доступно</Label>
                 </div>
               </div>
             </div>
@@ -696,13 +696,13 @@ export default function ServiceDocumentsPage() {
                 variant="outline" 
                 onClick={() => setIsEditDialogOpen(false)}
               >
-                Otkaži
+                Откажи
               </Button>
               <Button 
                 type="submit"
                 variant={theme === "light" ? "default" : "secondaryDefault"}
               >
-                Ažuriraj
+                Ажурирај
               </Button>
             </DialogFooter>
           </form>
@@ -713,10 +713,10 @@ export default function ServiceDocumentsPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete dokument{' '}
-              <strong>{documentToDelete?.title}</strong>? Ova akcija se ne može poništiti.
+              Да ли сте сигурни да желите да обришете документ{' '}
+              <strong>{documentToDelete?.title}</strong>? Ова акција се не може поништити.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -724,13 +724,13 @@ export default function ServiceDocumentsPage() {
               variant="outline" 
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button 
               variant="destructive" 
               onClick={confirmDelete}
             >
-              Obriši
+              Обриши
             </Button>
           </DialogFooter>
         </DialogContent>

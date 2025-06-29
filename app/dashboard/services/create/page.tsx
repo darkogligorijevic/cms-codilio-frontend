@@ -160,11 +160,11 @@ export default function CreateServicePage() {
             };
 
             await servicesApi.create(filteredData);
-            toast.success('Usluga je uspešno kreirana');
+            toast.success('Услуга је успешно креирана');
             router.push('/dashboard/services');
         } catch (error: any) {
             console.error('Error saving service:', error);
-            toast.error(error.response?.data?.message || 'Greška pri čuvanju usluge');
+            toast.error(error.response?.data?.message || 'Грешка при чувању услуге');
         } finally {
             setIsLoading(false);
         }
@@ -178,12 +178,12 @@ export default function CreateServicePage() {
                     onClick={() => router.push('/dashboard/services')}
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Nazad
+                    Назад
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Nova usluga</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Нова услуга</h1>
                     <p className="text-muted-foreground">
-                        Kreirajte novu uslugu za građane
+                        Креирајте нову услугу за грађане
                     </p>
                 </div>
             </div>
@@ -191,10 +191,10 @@ export default function CreateServicePage() {
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="basic">Osnovni podaci</TabsTrigger>
-                        <TabsTrigger value="details">Detalji</TabsTrigger>
-                        <TabsTrigger value="contact">Kontakt</TabsTrigger>
-                        <TabsTrigger value="settings">Podešavanja</TabsTrigger>
+                        <TabsTrigger value="basic">Основни подаци</TabsTrigger>
+                        <TabsTrigger value="details">Детаљи</TabsTrigger>
+                        <TabsTrigger value="contact">Контакт</TabsTrigger>
+                        <TabsTrigger value="settings">Подешавања</TabsTrigger>
                     </TabsList>
 
                     {/* Basic Information Tab */}
@@ -203,21 +203,21 @@ export default function CreateServicePage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center space-x-2">
                                     <Building className="h-5 w-5" />
-                                    <span>Osnovne informacije</span>
+                                    <span>Основне информације</span>
                                 </CardTitle>
                                 <CardDescription>
-                                    Osnovni podaci o usluzi
+                                    Основни подаци о услузи
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="name">Naziv usluge *</Label>
+                                        <Label htmlFor="name">Назив услуге *</Label>
                                         <Input
                                             id="name"
-                                            placeholder="npr. Izdavanje građevinske dozvole"
+                                            placeholder="нпр. Издавање грађевинске дозволе"
                                             {...form.register('name', {
-                                                required: 'Naziv je obavezan',
+                                                required: 'Назив је обавезан',
                                                 onChange: handleNameChange
                                             })}
                                         />
@@ -227,15 +227,15 @@ export default function CreateServicePage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="slug">URL skraćenica *</Label>
+                                        <Label htmlFor="slug">URL скраћеница *</Label>
                                         <Input
                                             id="slug"
                                             placeholder="izdavanje-gradjevinske-dozvole"
                                             {...form.register('slug', {
-                                                required: 'URL skraćenica je obavezna',
+                                                required: 'URL скраћеница је обавезна',
                                                 pattern: {
                                                     value: /^[a-z0-9-]+$/,
-                                                    message: 'URL može sadržati samo mala slova, brojeve i crtice'
+                                                    message: 'URL може садржати само мала слова, бројеве и цртице'
                                                 }
                                             })}
                                         />
@@ -246,21 +246,21 @@ export default function CreateServicePage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="shortDescription">Kratki opis</Label>
+                                    <Label htmlFor="shortDescription">Кратки опис</Label>
                                     <Input
                                         id="shortDescription"
-                                        placeholder="Kratki opis usluge u jednoj rečenici..."
+                                        placeholder="Кратки опис услуге у једној реченици..."
                                         {...form.register('shortDescription')}
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="description">Detaljan opis *</Label>
+                                    <Label htmlFor="description">Детаљан опис *</Label>
                                     <Textarea
                                         id="description"
-                                        placeholder="Detaljan opis usluge, uslova za ostvarivanje prava, postupka..."
+                                        placeholder="Детаљан опис услуге, услова за остваривање права, поступка..."
                                         rows={6}
-                                        {...form.register('description', { required: 'Opis je obavezan' })}
+                                        {...form.register('description', { required: 'Опис је обавезан' })}
                                     />
                                     {form.formState.errors.description && (
                                         <p className="text-sm text-red-600">{form.formState.errors.description.message}</p>
@@ -269,58 +269,58 @@ export default function CreateServicePage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="type">Tip usluge</Label>
+                                        <Label htmlFor="type">Тип услуге</Label>
                                         <Select
                                             value={form.watch('type')}
                                             onValueChange={(value) => form.setValue('type', value as ServiceType)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Izaberite tip" />
+                                                <SelectValue placeholder="Изаберите тип" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={ServiceType.ADMINISTRATIVE}>Administrativne usluge</SelectItem>
-                                                <SelectItem value={ServiceType.CONSULTING}>Savetodavne usluge</SelectItem>
-                                                <SelectItem value={ServiceType.TECHNICAL}>Tehničke usluge</SelectItem>
-                                                <SelectItem value={ServiceType.LEGAL}>Pravne usluge</SelectItem>
-                                                <SelectItem value={ServiceType.EDUCATIONAL}>Obrazovne usluge</SelectItem>
-                                                <SelectItem value={ServiceType.HEALTH}>Zdravstvene usluge</SelectItem>
-                                                <SelectItem value={ServiceType.SOCIAL}>Socijalne usluge</SelectItem>
-                                                <SelectItem value={ServiceType.CULTURAL}>Kulturne usluge</SelectItem>
-                                                <SelectItem value={ServiceType.OTHER}>Ostalo</SelectItem>
+                                                <SelectItem value={ServiceType.ADMINISTRATIVE}>Административне услуге</SelectItem>
+                                                <SelectItem value={ServiceType.CONSULTING}>Саветодавне услуге</SelectItem>
+                                                <SelectItem value={ServiceType.TECHNICAL}>Техничке услуге</SelectItem>
+                                                <SelectItem value={ServiceType.LEGAL}>Правне услуге</SelectItem>
+                                                <SelectItem value={ServiceType.EDUCATIONAL}>Образовне услуге</SelectItem>
+                                                <SelectItem value={ServiceType.HEALTH}>Здравствене услуге</SelectItem>
+                                                <SelectItem value={ServiceType.SOCIAL}>Социјалне услуге</SelectItem>
+                                                <SelectItem value={ServiceType.CULTURAL}>Културне услуге</SelectItem>
+                                                <SelectItem value={ServiceType.OTHER}>Остало</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="status">Status</Label>
+                                        <Label htmlFor="status">Статус</Label>
                                         <Select
                                             value={form.watch('status')}
                                             onValueChange={(value) => form.setValue('status', value as ServiceStatus)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Izaberite status" />
+                                                <SelectValue placeholder="Изаберите статус" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={ServiceStatus.DRAFT}>Nacrt</SelectItem>
-                                                <SelectItem value={ServiceStatus.PUBLISHED}>Objavljeno</SelectItem>
+                                                <SelectItem value={ServiceStatus.DRAFT}>Нацрт</SelectItem>
+                                                <SelectItem value={ServiceStatus.PUBLISHED}>Објављено</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="priority">Prioritet</Label>
+                                        <Label htmlFor="priority">Приоритет</Label>
                                         <Select
                                             value={form.watch('priority')}
                                             onValueChange={(value) => form.setValue('priority', value as ServicePriority)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Izaberite prioritet" />
+                                                <SelectValue placeholder="Изаберите приоритет" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={ServicePriority.LOW}>Nizak prioritet</SelectItem>
-                                                <SelectItem value={ServicePriority.MEDIUM}>Srednji prioritet</SelectItem>
-                                                <SelectItem value={ServicePriority.HIGH}>Visok prioritet</SelectItem>
-                                                <SelectItem value={ServicePriority.URGENT}>Hitan</SelectItem>
+                                                <SelectItem value={ServicePriority.LOW}>Низак приоритет</SelectItem>
+                                                <SelectItem value={ServicePriority.MEDIUM}>Средњи приоритет</SelectItem>
+                                                <SelectItem value={ServicePriority.HIGH}>Висок приоритет</SelectItem>
+                                                <SelectItem value={ServicePriority.URGENT}>Хитан</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -337,13 +337,13 @@ export default function CreateServicePage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center space-x-2">
                                         <DollarSign className="h-5 w-5" />
-                                        <span>Cena usluge</span>
+                                        <span>Цена услуге</span>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="price">Cena</Label>
+                                            <Label htmlFor="price">Цена</Label>
                                             <Input
                                                 id="price"
                                                 type="number"
@@ -356,7 +356,7 @@ export default function CreateServicePage() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="currency">Valuta</Label>
+                                            <Label htmlFor="currency">Валута</Label>
                                             <Select
                                                 value={form.watch('currency')}
                                                 onValueChange={(value) => form.setValue('currency', value)}
@@ -365,19 +365,19 @@ export default function CreateServicePage() {
                                                     <SelectValue placeholder="RSD" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="RSD">RSD - Srpski dinar</SelectItem>
-                                                    <SelectItem value="EUR">EUR - Euro</SelectItem>
-                                                    <SelectItem value="USD">USD - Američki dolar</SelectItem>
+                                                    <SelectItem value="RSD">RSD - Српски динар</SelectItem>
+                                                    <SelectItem value="EUR">EUR - Еуро</SelectItem>
+                                                    <SelectItem value="USD">USD - Амерички долар</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="duration">Vreme realizacije</Label>
+                                        <Label htmlFor="duration">Време реализације</Label>
                                         <Input
                                             id="duration"
-                                            placeholder="npr. 7-15 radnih dana, odmah, do 30 dana..."
+                                            placeholder="нпр. 7-15 радних дана, одмах, до 30 дана..."
                                             {...form.register('duration')}
                                         />
                                     </div>
@@ -389,33 +389,33 @@ export default function CreateServicePage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center space-x-2">
                                         <Building className="h-5 w-5" />
-                                        <span>Nadležnost</span>
+                                        <span>Надлежност</span>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="responsibleDepartment">Nadležno odeljenje</Label>
+                                        <Label htmlFor="responsibleDepartment">Надлежно одељење</Label>
                                         <Input
                                             id="responsibleDepartment"
-                                            placeholder="npr. Odeljenje za urbanizam i građevinarstvo"
+                                            placeholder="нпр. Одељење за урбанизам и грађевинарство"
                                             {...form.register('responsibleDepartment')}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="location">Lokacija</Label>
+                                        <Label htmlFor="location">Локација</Label>
                                         <Input
                                             id="location"
-                                            placeholder="npr. Zgrada opštine, I sprat, kancelarija 12"
+                                            placeholder="нпр. Зграда општине, I спрат, канцеларија 12"
                                             {...form.register('location')}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="workingHours">Radno vreme</Label>
+                                        <Label htmlFor="workingHours">Радно време</Label>
                                         <Input
                                             id="workingHours"
-                                            placeholder="npr. Ponedeljak-Petak 08:00-16:00"
+                                            placeholder="нпр. Понедељак-Петак 08:00-16:00"
                                             {...form.register('workingHours')}
                                         />
                                     </div>
@@ -428,17 +428,17 @@ export default function CreateServicePage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center space-x-2">
                                     <FileText className="h-5 w-5" />
-                                    <span>Potrebna dokumenta</span>
+                                    <span>Потребна документа</span>
                                 </CardTitle>
                                 <CardDescription>
-                                    Lista dokumenata potrebnih za ostvarivanje usluge
+                                    Листа докумената потребних за остваривање услуге
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {requirementFields.map((field, index) => (
                                     <div key={field.id} className="flex items-center space-x-2">
                                         <Input
-                                            placeholder={`Dokument ${index + 1}`}
+                                            placeholder={`Документ ${index + 1}`}
                                             {...form.register(`requirements.${index}.value`)}
                                         />
                                         {requirementFields.length > 1 && (
@@ -459,7 +459,7 @@ export default function CreateServicePage() {
                                     onClick={() => appendRequirement({ value: '' })}
                                 >
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Dodaj dokument
+                                    Додај документ
                                 </Button>
                             </CardContent>
                         </Card>
@@ -469,10 +469,10 @@ export default function CreateServicePage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center space-x-2">
                                     <Info className="h-5 w-5" />
-                                    <span>Koraci za ostvarivanje</span>
+                                    <span>Кораци за остваривање</span>
                                 </CardTitle>
                                 <CardDescription>
-                                    Postupak koji građanin treba da prati
+                                    Поступак који грађанин треба да прати
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -482,7 +482,7 @@ export default function CreateServicePage() {
                                             {index + 1}
                                         </div>
                                         <Input
-                                            placeholder={`Korak ${index + 1}`}
+                                            placeholder={`Корак ${index + 1}`}
                                             {...form.register(`steps.${index}.value`)}
                                         />
                                         {stepFields.length > 1 && (
@@ -503,7 +503,7 @@ export default function CreateServicePage() {
                                     onClick={() => appendStep({ value: '' })}
                                 >
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Dodaj korak
+                                    Додај корак
                                 </Button>
                             </CardContent>
                         </Card>
@@ -515,25 +515,25 @@ export default function CreateServicePage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center space-x-2">
                                     <User className="h-5 w-5" />
-                                    <span>Kontakt informacije</span>
+                                    <span>Контакт информације</span>
                                 </CardTitle>
                                 <CardDescription>
-                                    Podaci za kontakt u vezi sa uslugom
+                                    Подаци за контакт у вези са услугом
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="contactPerson">Kontakt osoba</Label>
+                                    <Label htmlFor="contactPerson">Контакт особа</Label>
                                     <Input
                                         id="contactPerson"
-                                        placeholder="Ime i prezime kontakt osobe"
+                                        placeholder="Име и презиме контакт особе"
                                         {...form.register('contactPerson')}
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="contactPhone">Telefon</Label>
+                                        <Label htmlFor="contactPhone">Телефон</Label>
                                         <Input
                                             id="contactPhone"
                                             placeholder="+381 11 123 4567"
@@ -542,7 +542,7 @@ export default function CreateServicePage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="contactEmail">Email</Label>
+                                        <Label htmlFor="contactEmail">Емаил</Label>
                                         <Input
                                             id="contactEmail"
                                             type="email"
@@ -553,10 +553,10 @@ export default function CreateServicePage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="additionalInfo">Dodatne informacije</Label>
+                                    <Label htmlFor="additionalInfo">Додатне информације</Label>
                                     <Textarea
                                         id="additionalInfo"
-                                        placeholder="Dodatne napomene, specifičnosti, izuzeci..."
+                                        placeholder="Додатне напомене, специфичности, изузеци..."
                                         rows={4}
                                         {...form.register('additionalInfo')}
                                     />
@@ -571,11 +571,11 @@ export default function CreateServicePage() {
                             {/* General Settings */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Opšta podešavanja</CardTitle>
+                                    <CardTitle>Општа подешавања</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="sortOrder">Redni broj</Label>
+                                        <Label htmlFor="sortOrder">Редни број</Label>
                                         <Input
                                             id="sortOrder"
                                             type="number"
@@ -585,7 +585,7 @@ export default function CreateServicePage() {
                                             })}
                                         />
                                         <p className="text-xs text-muted-foreground">
-                                            Redosled prikazivanja (manji broj = veći prioritet)
+                                            Редослед приказивања (мањи број = већи приоритет)
                                         </p>
                                     </div>
 
@@ -595,7 +595,7 @@ export default function CreateServicePage() {
                                             checked={form.watch('isActive')}
                                             onCheckedChange={(checked) => form.setValue('isActive', !!checked)}
                                         />
-                                        <Label htmlFor="isActive">Aktivna usluga</Label>
+                                        <Label htmlFor="isActive">Активна услуга</Label>
                                     </div>
 
                                     <div className="flex items-center space-x-2">
@@ -604,7 +604,7 @@ export default function CreateServicePage() {
                                             checked={form.watch('isPublic')}
                                             onCheckedChange={(checked) => form.setValue('isPublic', !!checked)}
                                         />
-                                        <Label htmlFor="isPublic">Javno dostupna</Label>
+                                        <Label htmlFor="isPublic">Јавно доступна</Label>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -612,7 +612,7 @@ export default function CreateServicePage() {
                             {/* Service Type Settings */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Tip usluge</CardTitle>
+                                    <CardTitle>Тип услуге</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="flex items-center space-x-2">
@@ -623,11 +623,11 @@ export default function CreateServicePage() {
                                         />
                                         <Label htmlFor="isOnline" className="flex items-center space-x-2">
                                             <Globe className="h-4 w-4" />
-                                            <span>Online usluga</span>
+                                            <span>Онлајн услуга</span>
                                         </Label>
                                     </div>
                                     <p className="text-xs text-muted-foreground ml-6">
-                                        Usluga se može ostvariti putem interneta
+                                        Услуга се може остварити путем интернета
                                     </p>
 
                                     <div className="flex items-center space-x-2">
@@ -638,11 +638,11 @@ export default function CreateServicePage() {
                                         />
                                         <Label htmlFor="requiresAppointment" className="flex items-center space-x-2">
                                             <Calendar className="h-4 w-4" />
-                                            <span>Potrebno zakazivanje</span>
+                                            <span>Потребно заказивање</span>
                                         </Label>
                                     </div>
                                     <p className="text-xs text-muted-foreground ml-6">
-                                        Građani moraju da zakažu termin
+                                        Грађани морају да закажу термин
                                     </p>
                                 </CardContent>
                             </Card>
@@ -653,13 +653,13 @@ export default function CreateServicePage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center space-x-2 text-yellow-800 dark:text-yellow-200">
                                     <AlertTriangle className="h-5 w-5" />
-                                    <span>Napomena</span>
+                                    <span>Напомена</span>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                                    Usluge sa statusom "Objavljeno" će biti vidljive građanima na web portalu.
-                                    Preporučuje se da prvo testirate uslugu kao "Nacrt" pa je zatim objavite.
+                                    Услуге са статусом "Објављено" ће бити видљиве грађанима на веб порталу.
+                                    Препоручује се да прво тестирате услугу као "Нацрт" па је затим објавите.
                                 </p>
                             </CardContent>
                         </Card>
@@ -674,7 +674,7 @@ export default function CreateServicePage() {
                         onClick={() => router.push('/dashboard/services')}
                         disabled={isLoading}
                     >
-                        Otkaži
+                        Откажи
                     </Button>
                     <Button
                         type="submit"
@@ -685,12 +685,12 @@ export default function CreateServicePage() {
                         {isLoading ? (
                             <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                Čuva se...
+                                Чува се...
                             </>
                         ) : (
                             <>
                                 <Save className="mr-2 h-4 w-4" />
-                                Kreiraj uslugu
+                                Креирај услугу
                             </>
                         )}
                     </Button>

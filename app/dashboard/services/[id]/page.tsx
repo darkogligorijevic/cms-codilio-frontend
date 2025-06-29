@@ -72,7 +72,7 @@ export default function ServiceDetailPage() {
       setService(serviceData);
     } catch (error) {
       console.error('Error fetching service:', error);
-      toast.error('Greška pri učitavanju usluge');
+      toast.error('Грешка при учитавању услуге');
       router.push('/dashboard/services');
     } finally {
       setIsLoading(false);
@@ -95,22 +95,22 @@ export default function ServiceDetailPage() {
 
     try {
       await servicesApi.delete(service.id);
-      toast.success('Usluga je uspešno obrisana');
+      toast.success('Услуга је успешно обрисана');
       router.push('/dashboard/services');
     } catch (error) {
       console.error('Error deleting service:', error);
-      toast.error('Greška pri brisanju usluge');
+      toast.error('Грешка при брисању услуге');
     }
   };
 
   const getStatusBadge = (status: ServiceStatus) => {
     return status === ServiceStatus.PUBLISHED ? (
       <Badge variant="default" className="bg-green-600">
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
-        Nacrt
+        Нацрт
       </Badge>
     );
   };
@@ -124,10 +124,10 @@ export default function ServiceDetailPage() {
     };
 
     const labels = {
-      [ServicePriority.LOW]: 'Nizak',
-      [ServicePriority.MEDIUM]: 'Srednji',
-      [ServicePriority.HIGH]: 'Visok',
-      [ServicePriority.URGENT]: 'Hitan'
+      [ServicePriority.LOW]: 'Низак',
+      [ServicePriority.MEDIUM]: 'Средњи',
+      [ServicePriority.HIGH]: 'Висок',
+      [ServicePriority.URGENT]: 'Хитан'
     };
 
     return (
@@ -139,15 +139,15 @@ export default function ServiceDetailPage() {
 
   const getTypeLabel = (type: ServiceType) => {
     const labels = {
-      [ServiceType.ADMINISTRATIVE]: 'Administrativne usluge',
-      [ServiceType.CONSULTING]: 'Savetodavne usluge',
-      [ServiceType.TECHNICAL]: 'Tehničke usluge',
-      [ServiceType.LEGAL]: 'Pravne usluge',
-      [ServiceType.EDUCATIONAL]: 'Obrazovne usluge',
-      [ServiceType.HEALTH]: 'Zdravstvene usluge',
-      [ServiceType.SOCIAL]: 'Socijalne usluge',
-      [ServiceType.CULTURAL]: 'Kulturne usluge',
-      [ServiceType.OTHER]: 'Ostalo'
+      [ServiceType.ADMINISTRATIVE]: 'Административне услуге',
+      [ServiceType.CONSULTING]: 'Саветодавне услуге',
+      [ServiceType.TECHNICAL]: 'Техничке услуге',
+      [ServiceType.LEGAL]: 'Правне услуге',
+      [ServiceType.EDUCATIONAL]: 'Образовне услуге',
+      [ServiceType.HEALTH]: 'Здравствене услуге',
+      [ServiceType.SOCIAL]: 'Социјалне услуге',
+      [ServiceType.CULTURAL]: 'Културне услуге',
+      [ServiceType.OTHER]: 'Остало'
     };
     return labels[type] || type;
   };
@@ -162,14 +162,14 @@ export default function ServiceDetailPage() {
 
   const getDocumentTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      'form': 'Obrazac/Formular',
-      'regulation': 'Pravilnik',
-      'instruction': 'Upustvo',
-      'example': 'Primer',
-      'requirement': 'Uslov/Zahtev',
-      'price_list': 'Cenovnik',
-      'template': 'Šablon',
-      'other': 'Ostalo'
+      'form': 'Образац/Формулар',
+      'regulation': 'Правилник',
+      'instruction': 'Упутство',
+      'example': 'Пример',
+      'requirement': 'Услов/Захтев',
+      'price_list': 'Ценовник',
+      'template': 'Шаблон',
+      'other': 'Остало'
     };
     return labels[type] || type;
   };
@@ -185,9 +185,9 @@ export default function ServiceDetailPage() {
   if (!service) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium mb-2">Usluga nije pronađena</h3>
+        <h3 className="text-lg font-medium mb-2">Услуга није пронађена</h3>
         <Button onClick={() => router.push('/dashboard/services')}>
-          Nazad na listu usluga
+          Назад на листу услуга
         </Button>
       </div>
     );
@@ -203,7 +203,7 @@ export default function ServiceDetailPage() {
             onClick={() => router.push('/dashboard/services')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Nazad
+            Назад
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{service.name}</h1>
@@ -221,21 +221,21 @@ export default function ServiceDetailPage() {
             onClick={() => router.push(`/dashboard/services/${service.id}/documents`)}
           >
             <FileText className="mr-2 h-4 w-4" />
-            Dokumenti ({documents.length})
+            Документи ({documents.length})
           </Button>
           <Button
             variant="outline"
             onClick={() => router.push(`/dashboard/services/${service.id}/edit`)}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Uredi
+            Уреди
           </Button>
           <Button
             variant="destructive"
             onClick={() => setDeleteDialogOpen(true)}
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Obriši
+            Обриши
           </Button>
         </div>
       </div>
@@ -244,7 +244,7 @@ export default function ServiceDetailPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pregledi</CardTitle>
+            <CardTitle className="text-sm font-medium">Прегледи</CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -254,7 +254,7 @@ export default function ServiceDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Zahtevi</CardTitle>
+            <CardTitle className="text-sm font-medium">Захтеви</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -264,7 +264,7 @@ export default function ServiceDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Dokumenti</CardTitle>
+            <CardTitle className="text-sm font-medium">Документи</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -274,7 +274,7 @@ export default function ServiceDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Redni broj</CardTitle>
+            <CardTitle className="text-sm font-medium">Редни број</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -289,12 +289,12 @@ export default function ServiceDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Building className="h-5 w-5" />
-              <span>Osnovne informacije</span>
+              <span>Основне информације</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h4 className="font-medium text-sm text-muted-foreground mb-1">URL skraćenica</h4>
+              <h4 className="font-medium text-sm text-muted-foreground mb-1">URL скраћеница</h4>
               <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">
                 {service.slug}
               </code>
@@ -302,19 +302,19 @@ export default function ServiceDetailPage() {
             
             {service.shortDescription && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Kratki opis</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Кратки опис</h4>
                 <p className="text-sm">{service.shortDescription}</p>
               </div>
             )}
             
             <div>
-              <h4 className="font-medium text-sm text-muted-foreground mb-1">Opis</h4>
+              <h4 className="font-medium text-sm text-muted-foreground mb-1">Опис</h4>
               <p className="text-sm whitespace-pre-wrap">{service.description}</p>
             </div>
 
             {service.price && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Cena</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Цена</h4>
                 <div className="flex items-center space-x-2">
                   <DollarSign className="h-4 w-4 text-green-600" />
                   <span className="text-sm font-medium">
@@ -326,7 +326,7 @@ export default function ServiceDetailPage() {
 
             {service.duration && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Vreme realizacije</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Време реализације</h4>
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-blue-600" />
                   <span className="text-sm">{service.duration}</span>
@@ -338,23 +338,23 @@ export default function ServiceDetailPage() {
               {service.isOnline && (
                 <Badge variant="outline" className="text-xs">
                   <Globe className="h-3 w-3 mr-1" />
-                  Online usluga
+                  Онлајн услуга
                 </Badge>
               )}
               {service.requiresAppointment && (
                 <Badge variant="outline" className="text-xs">
                   <Calendar className="h-3 w-3 mr-1" />
-                  Potrebno zakazivanje
+                  Потребно заказивање
                 </Badge>
               )}
               {!service.isActive && (
                 <Badge variant="destructive" className="text-xs">
-                  Neaktivna
+                  Неактивна
                 </Badge>
               )}
               {!service.isPublic && (
                 <Badge variant="secondary" className="text-xs">
-                  Interni
+                  Интерни
                 </Badge>
               )}
             </div>
@@ -366,13 +366,13 @@ export default function ServiceDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <User className="h-5 w-5" />
-              <span>Kontakt i lokacija</span>
+              <span>Контакт и локација</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {service.responsibleDepartment && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Nadležno odeljenje</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Надлежно одељење</h4>
                 <div className="flex items-center space-x-2">
                   <Building className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">{service.responsibleDepartment}</span>
@@ -382,7 +382,7 @@ export default function ServiceDetailPage() {
 
             {service.contactPerson && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Kontakt osoba</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Контакт особа</h4>
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">{service.contactPerson}</span>
@@ -392,7 +392,7 @@ export default function ServiceDetailPage() {
 
             {service.contactPhone && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Telefon</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Телефон</h4>
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4 text-green-600" />
                   <a href={`tel:${service.contactPhone}`} className="text-sm text-blue-600 hover:underline">
@@ -404,7 +404,7 @@ export default function ServiceDetailPage() {
 
             {service.contactEmail && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Email</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Емаил</h4>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4 text-blue-600" />
                   <a href={`mailto:${service.contactEmail}`} className="text-sm text-blue-600 hover:underline">
@@ -416,7 +416,7 @@ export default function ServiceDetailPage() {
 
             {service.location && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Lokacija</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Локација</h4>
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4 text-red-500" />
                   <span className="text-sm">{service.location}</span>
@@ -426,7 +426,7 @@ export default function ServiceDetailPage() {
 
             {service.workingHours && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-1">Radno vreme</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Радно време</h4>
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-orange-500" />
                   <span className="text-sm">{service.workingHours}</span>
@@ -445,7 +445,7 @@ export default function ServiceDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <FileText className="h-5 w-5" />
-                <span>Potrebna dokumenta</span>
+                <span>Потребна документа</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -469,7 +469,7 @@ export default function ServiceDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <BarChart3 className="h-5 w-5" />
-                <span>Koraci za ostvarivanje</span>
+                <span>Кораци за остваривање</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -495,7 +495,7 @@ export default function ServiceDetailPage() {
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <FileText className="h-5 w-5" />
-                <span>Dokumenti ({documents.length})</span>
+                <span>Документи ({documents.length})</span>
               </div>
               <Button 
                 variant="outline" 
@@ -503,7 +503,7 @@ export default function ServiceDetailPage() {
                 onClick={() => router.push(`/dashboard/services/${service.id}/documents`)}
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
-                Upravljaj dokumentima
+                Управљај документима
               </Button>
             </CardTitle>
           </CardHeader>
@@ -522,7 +522,7 @@ export default function ServiceDetailPage() {
                         {doc.isPublic && (
                           <>
                             <span>•</span>
-                            <Badge variant="outline" className="text-xs">Javno</Badge>
+                            <Badge variant="outline" className="text-xs">Јавно</Badge>
                           </>
                         )}
                       </div>
@@ -544,7 +544,7 @@ export default function ServiceDetailPage() {
                   variant="outline" 
                   onClick={() => router.push(`/dashboard/services/${service.id}/documents`)}
                 >
-                  Prikaži još {documents.length - 4} dokumenata
+                  Прикажи још {documents.length - 4} докумената
                 </Button>
               </div>
             )}
@@ -556,7 +556,7 @@ export default function ServiceDetailPage() {
       {service.additionalInfo && (
         <Card>
           <CardHeader>
-            <CardTitle>Dodatne informacije</CardTitle>
+            <CardTitle>Додатне информације</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm whitespace-pre-wrap">{service.additionalInfo}</p>
@@ -568,11 +568,11 @@ export default function ServiceDetailPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete uslugu{' '}
-              <strong>{service.name}</strong>? Ova akcija će obrisati i sve
-              povezane dokumente i ne može se poništiti.
+              Да ли сте сигурни да желите да обришете услугу{' '}
+              <strong>{service.name}</strong>? Ова акција ће обрисати и све
+              повезане документе и не може се поништити.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -580,13 +580,13 @@ export default function ServiceDetailPage() {
               variant="outline" 
               onClick={() => setDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button 
               variant="destructive" 
               onClick={handleDelete}
             >
-              Obriši uslugu
+              Обриши услугу
             </Button>
           </DialogFooter>
         </DialogContent>
