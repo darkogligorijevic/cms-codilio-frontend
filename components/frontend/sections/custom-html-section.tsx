@@ -11,7 +11,7 @@ export function CustomHTMLSection({ data, className }: CustomHTMLSectionProps) {
   if (!data.htmlContent) {
     return (
       <section className={cn('text-center py-8', className)}>
-        <p className="text-gray-500">Nema HTML sadržaja za prikaz.</p>
+        <p className="text-gray-500">Нема HTML садржаја за приказ</p>
       </section>
     );
   }

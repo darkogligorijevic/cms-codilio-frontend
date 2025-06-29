@@ -33,27 +33,27 @@ export function ContactOneSection({ data, className }: ContactOneSectionProps) {
           <form className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Ime i prezime</Label>
+                <Label htmlFor="name">Име и презиме</Label>
                 <Input id="name" placeholder="Vaše ime" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Имејл</Label>
                 <Input id="email" type="email" placeholder="vas@email.com" />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="subject">Naslov</Label>
+              <Label htmlFor="subject">Наслов</Label>
               <Input id="subject" placeholder="Naslov poruke" />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="message">Poruka</Label>
+              <Label htmlFor="message">Порука</Label>
               <Textarea id="message" placeholder="Vaša poruka..." rows={5} />
             </div>
             
             <Button type="submit" size="lg" className="w-full sm:w-auto">
-              Pošaljite poruku
+              Пошаљите поруку
             </Button>
           </form>
         </div>
@@ -72,7 +72,7 @@ export function ContactOneSection({ data, className }: ContactOneSectionProps) {
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-5 w-5 text-gray-600 dark:text-gray-300 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Adresa</p>
+                    <p className="font-medium">Адреса</p>
                     <p className="text-gray-600 dark:text-gray-300">{data.contactInfo.address}</p>
                   </div>
                 </div>
@@ -82,7 +82,7 @@ export function ContactOneSection({ data, className }: ContactOneSectionProps) {
                 <div className="flex items-start space-x-3">
                   <Phone className="h-5 w-5 text-gray-600 dark:text-gray-300 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Telefon</p>
+                    <p className="font-medium">Телефон</p>
                     <p className="text-gray-600 dark:text-gray-300">{data.contactInfo.phone}</p>
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export function ContactOneSection({ data, className }: ContactOneSectionProps) {
                 <div className="flex items-start space-x-3">
                   <Mail className="h-5 w-5 text-gray-600 dark:text-gray-300 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Email</p>
+                    <p className="font-medium">Имејл</p>
                     <p className="text-gray-600 dark:text-gray-300">{data.contactInfo.email}</p>
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export function ContactOneSection({ data, className }: ContactOneSectionProps) {
                 <div className="flex items-start space-x-3">
                   <Clock className="h-5 w-5 text-gray-600 dark:text-gray-300 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Radno vreme</p>
+                    <p className="font-medium">Радно време</p>
                     <p className="text-gray-600 dark:text-gray-300">{data.contactInfo.workingHours}</p>
                   </div>
                 </div>

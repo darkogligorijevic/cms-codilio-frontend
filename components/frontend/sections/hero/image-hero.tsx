@@ -10,19 +10,20 @@ interface HeroImageSectionProps {
 
 export function HeroImageSection({ data, className }: HeroImageSectionProps) {
   return (
-    <section 
-      className={cn('relative min-h-[60vh] flex items-center justify-center text-white', className)}
+    <section
+      className={cn(
+        'relative min-h-[60vh] flex items-center justify-center text-white',
+        // Use after pseudo-element to ensure it covers padding too
+        'after:absolute after:inset-0 after:bg-black after:opacity-60 after:z-0',
+        className
+      )}
       style={{
-        backgroundImage: data.backgroundImage,
+        backgroundImage: `url(${data.backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}
     >
-      {/* Background overlay for better text readability */}
-      <div className='absolute bg-black w-full h-full opacity-60'/>
-
-      
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className='space-y-6'>
@@ -51,7 +52,7 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
                 size="lg"
                 variant={data.buttonStyle === 'secondary' ? 'secondary' : 
                         data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="shadow-lg"
+                className="text-black shadow-lg dark:border-white dark:text-white"
               >
                 <a href={data.buttonLink}>
                   {data.buttonText}
@@ -63,7 +64,7 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
         <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
           <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
         </div>

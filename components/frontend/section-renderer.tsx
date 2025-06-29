@@ -38,39 +38,28 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
       case 'full-width':
         classes.push('w-full');
         break;
-      case 'narrow':
-        classes.push('max-w-4xl mx-auto');
-        break;
       case 'contained':
       default:
         classes.push('max-w-7xl mx-auto');
         break;
     }
-
-    // Padding
-    switch (section.data.padding) {
-      case 'none':
-        break;
-      case 'small':
-        classes.push('py-8');
-        break;
-      case 'large':
-        classes.push('py-24');
-        break;
-      case 'medium':
-      default:
-        classes.push('py-16');
-        break;
-    }
-
-
+    
     return classes.join(' ');
   };
 
-  // Get inline styles for background and text colors
+  // Check if this is a hero section that handles its own spacing
+  const isFullHeightSection = [
+    SectionType.HERO_IMAGE,
+    SectionType.HERO_VIDEO,
+    SectionType.HERO_STACK,
+    SectionType.HERO_LEFT
+  ].includes(section.type);
+
+  // Get inline styles for background and text colors - APPLY PER SECTION
   const getInlineStyles = () => {
     const styles: React.CSSProperties = {};
     
+    // Apply background color to THIS section only
     if (section.data.backgroundColor) {
       styles.backgroundColor = section.data.backgroundColor;
     }
@@ -138,11 +127,13 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     <section
       className={cn(
         'relative',
+        // Only apply py-16 to non-hero sections
+        !isFullHeightSection && 'py-12 lg:py-16',
         getLayoutClasses(),
         section.cssClasses,
         className
       )}
-      style={getInlineStyles()}
+      style={getInlineStyles()} // Apply styles per section
       data-section-id={section.id}
       data-section-type={section.type}
     >
@@ -158,7 +149,7 @@ interface PageBuilderRendererProps {
 }
 
 export function PageBuilderRenderer({ sections, className }: PageBuilderRendererProps) {
-  // Filter only visible sections and sort by sortOrder
+
   const visibleSections = sections
     .filter(section => section.isVisible)
     .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -170,6 +161,9 @@ export function PageBuilderRenderer({ sections, className }: PageBuilderRenderer
       </div>
     );
   }
+
+  // REMOVED: No longer applying background to the entire page
+  // Each section handles its own background color now
 
   return (
     <div className={cn(className)}>

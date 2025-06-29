@@ -1163,7 +1163,7 @@ export interface FieldOption {
 
 export interface BaseFieldConfig {
   key: string;
-  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object';
+  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object' | 'color';
   label: string;
   placeholder?: string;
   required?: boolean;

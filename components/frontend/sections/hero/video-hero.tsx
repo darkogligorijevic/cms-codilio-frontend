@@ -79,12 +79,12 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
                 {isPlaying ? (
                   <>
                     <Pause className="mr-2 h-5 w-5" />
-                    Pauziraj video
+                    Паузирај видео
                   </>
                 ) : (
                   <>
                     <Play className="mr-2 h-5 w-5" />
-                    Pusti video
+                    Пусти видео
                   </>
                 )}
               </Button>

@@ -40,7 +40,7 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <MapPin className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">Adresa</CardTitle>
+                  <CardTitle className="text-lg">Адреса</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 dark:text-gray-300">
@@ -57,7 +57,7 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <Phone className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">Telefon</CardTitle>
+                  <CardTitle className="text-lg">Телефон</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <a 
@@ -77,7 +77,7 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <Mail className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">Email</CardTitle>
+                  <CardTitle className="text-lg">Имејл</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <a 
@@ -97,7 +97,7 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <Clock className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">Radno vreme</CardTitle>
+                  <CardTitle className="text-lg">Радно време</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 dark:text-gray-300">
@@ -113,9 +113,9 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
         {data.contactInfo?.mapUrl && (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-2xl font-bold mb-2">Lokacija</h3>
+              <h3 className="text-2xl font-bold mb-2">Локација</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Pronađite nas na mapi
+                Пронађите нас на мапи!
               </p>
             </div>
             
@@ -129,7 +129,7 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Mapa lokacije"
+                  title="Мапа локације"
                 />
               </div>
               
@@ -139,7 +139,7 @@ export function ContactTwoSection({ data, className }: ContactTwoSectionProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute top-4 right-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow group"
-                title="Otvori u Google Maps"
+                title="Отвори у Google Maps"
               >
                 <ExternalLink className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-primary" />
               </a>
