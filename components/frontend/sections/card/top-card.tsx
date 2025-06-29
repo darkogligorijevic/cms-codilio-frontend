@@ -40,7 +40,7 @@ export function CardTopSection({ data, className }: CardTopSectionProps) {
         {data.cards && data.cards.length > 0 && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {data.cards.map((card, index) => (
-              <Card key={index} className="h-full">
+              <Card key={index} className="h-full flex flex-col">
                 {card.image && (
                   <div className="aspect-video overflow-hidden rounded-t-lg">
                     <img
@@ -50,17 +50,17 @@ export function CardTopSection({ data, className }: CardTopSectionProps) {
                     />
                   </div>
                 )}
-                <CardHeader>
-                  <CardTitle>{card.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <CardDescription className="text-base">
+                <CardContent className="flex-1 flex flex-col text-center gap-2">
+                  <CardHeader>
+                    <CardTitle className='text-xl'>{card.title}</CardTitle>
+                  </CardHeader>
+                  <CardDescription className="text-base flex-1">
                     {card.description}
                   </CardDescription>
                   {card.link && (
-                    <div className="mt-4">
-                      <Button variant="outline" asChild>
-                        <a href={card.link}>Saznaj više</a>
+                    <div className="mt-2">
+                      <Button variant="outline" asChild className="w-full">
+                        <a href={card.link}>Сазнај више</a>
                       </Button>
                     </div>
                   )}

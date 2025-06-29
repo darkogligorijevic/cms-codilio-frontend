@@ -1174,39 +1174,6 @@ export function SetupWizard() {
       </div>
 
       <div className="w-full max-w-6xl relative">
-        {process.env.NODE_ENV === 'development' && (
-  <div className="fixed top-4 right-4 z-50 bg-black text-white p-2 rounded text-xs">
-    <div>Step: {currentStep}/{STEPS.length - 1}</div>
-    <div>Completed: [{completedSteps.join(', ')}]</div>
-    <button 
-      onClick={() => {
-        console.log('🐛 DEBUG STATE:');
-        console.log('Current step:', currentStep);
-        console.log('Completed steps:', completedSteps);
-        console.log('Current step data:', STEPS[currentStep]);
-      }}
-      className="bg-red-500 px-2 py-1 mt-1 rounded text-xs"
-    >
-      Debug
-    </button>
-  </div>
-        )}{process.env.NODE_ENV === 'development' && (
-          <div className="fixed top-4 right-4 z-50 bg-black text-white p-2 rounded text-xs">
-            <div>Step: {currentStep}/{STEPS.length - 1}</div>
-            <div>Completed: [{completedSteps.join(', ')}]</div>
-            <button 
-              onClick={() => {
-                console.log('🐛 DEBUG STATE:');
-                console.log('Current step:', currentStep);
-                console.log('Completed steps:', completedSteps);
-                console.log('Current step data:', STEPS[currentStep]);
-              }}
-              className="bg-red-500 px-2 py-1 mt-1 rounded text-xs"
-            >
-              Debug
-            </button>
-          </div>
-        )}
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">

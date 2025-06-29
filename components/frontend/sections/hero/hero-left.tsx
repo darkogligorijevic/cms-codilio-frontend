@@ -11,8 +11,8 @@ interface HeroLeftSectionProps {
 export function HeroLeftSection({ data, className }: HeroLeftSectionProps) {
   return (
     <section className={cn('', className)}>
-      <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-        <div className="space-y-6">
+      <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center text-center lg:text-left">
+        <div className="space-y-6 lg:pl-32">
           <div className='flex flex-col gap-2'>
             {data.title && (
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
@@ -55,7 +55,7 @@ export function HeroLeftSection({ data, className }: HeroLeftSectionProps) {
             <img
               src={data.image}
               alt={data.title || 'Hero image'}
-              className="w-full h-auto rounded-lg shadow-lg"
+              className="w-full h-full rounded-lg shadow-lg"
             />
           </div>
         )}

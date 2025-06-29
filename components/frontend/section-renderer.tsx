@@ -24,7 +24,6 @@ interface SectionRendererProps {
 }
 
 export function SectionRenderer({ section, className }: SectionRendererProps) {
-  // Don't render if section is not visible
   if (!section.isVisible) {
     return null;
   }
@@ -38,39 +37,44 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
       case 'full-width':
         classes.push('w-full');
         break;
-      case 'narrow':
-        classes.push('max-w-4xl mx-auto');
-        break;
       case 'contained':
       default:
         classes.push('max-w-7xl mx-auto');
         break;
     }
 
-    // Padding
-    switch (section.data.padding) {
-      case 'none':
+    switch (section.data.height) {
+      case '100%':
+        classes.push('min-h-screen');
         break;
-      case 'small':
-        classes.push('py-8');
+      case '75%':
+        classes.push('min-h-[75vh]');
         break;
-      case 'large':
-        classes.push('py-24');
+      case '50%':
+        classes.push('min-h-[50vh]');
         break;
-      case 'medium':
+      case '25%':
+        classes.push('min-h-[25vh]');
+        break;
       default:
-        classes.push('py-16');
+        classes.push('min-h-screen');
         break;
     }
-
-
+    
     return classes.join(' ');
   };
 
-  // Get inline styles for background and text colors
+  const isFullHeightSection = [
+    SectionType.HERO_IMAGE,
+    SectionType.HERO_VIDEO,
+    SectionType.HERO_STACK,
+    SectionType.HERO_LEFT
+  ].includes(section.type);
+
   const getInlineStyles = () => {
     const styles: React.CSSProperties = {};
     
+    // Apply background color to THIS section only
     if (section.data.backgroundColor) {
       styles.backgroundColor = section.data.backgroundColor;
     }
@@ -89,7 +93,6 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     return styles;
   };
 
-  // Render the appropriate section component based on type
   const renderSectionContent = () => {
     const commonProps = {
       data: section.data,
@@ -128,7 +131,7 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
       default:
         return (
           <div className="text-center py-8">
-            <p className="text-gray-500">Nepoznat tip sekcije: {section.type}</p>
+            <p className="text-gray-500">Непознат тип секције: {section.type}</p>
           </div>
         );
     }
@@ -138,6 +141,7 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     <section
       className={cn(
         'relative',
+        !isFullHeightSection && 'py-12 lg:py-16',
         getLayoutClasses(),
         section.cssClasses,
         className
@@ -158,7 +162,7 @@ interface PageBuilderRendererProps {
 }
 
 export function PageBuilderRenderer({ sections, className }: PageBuilderRendererProps) {
-  // Filter only visible sections and sort by sortOrder
+
   const visibleSections = sections
     .filter(section => section.isVisible)
     .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -166,7 +170,7 @@ export function PageBuilderRenderer({ sections, className }: PageBuilderRenderer
   if (visibleSections.length === 0) {
     return (
       <div className={cn('text-center py-16', className)}>
-        <p className="text-gray-500">Nema sekcija za prikaz na ovoj stranici.</p>
+        <p className="text-gray-500">Нема секција за приказ на овој страници.</p>
       </div>
     );
   }

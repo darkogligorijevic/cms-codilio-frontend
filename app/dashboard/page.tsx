@@ -494,13 +494,6 @@ export default function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  {activity.url && (
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" asChild>
-                      <Link href={activity.url}>
-                        <Eye className="h-3 w-3" />
-                      </Link>
-                    </Button>
-                  )}
                 </div>
               ))}
               {recentActivity.length === 0 && (

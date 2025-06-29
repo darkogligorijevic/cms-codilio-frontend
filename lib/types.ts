@@ -1107,8 +1107,7 @@ export interface SectionData {
   
   // Layout options
   layout?: 'full-width' | 'contained' | 'narrow';
-  padding?: 'none' | 'small' | 'medium' | 'large';
-  margin?: 'none' | 'small' | 'medium' | 'large';
+  height?: '100%' | '75%' | '50%' | '25%';
 }
 
 export interface PageSection {
@@ -1122,8 +1121,7 @@ export interface PageSection {
   createdAt: string;
   updatedAt: string;
   layout?: string | null;
-  padding?: string | null;
-  margin?: string | null;
+  height?: string | null;
   pageId: number;
 }
 
@@ -1163,7 +1161,7 @@ export interface FieldOption {
 
 export interface BaseFieldConfig {
   key: string;
-  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object';
+  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object' | 'color';
   label: string;
   placeholder?: string;
   required?: boolean;

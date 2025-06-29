@@ -723,8 +723,6 @@ function EditSectionDialog({
                   <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                     <div className="text-sm space-y-2">
                       <div><strong>Layout:</strong> {formData.data?.layout || 'contained'}</div>
-                      <div><strong>Padding:</strong> {formData.data?.padding || 'medium'}</div>
-                      <div><strong>Margin:</strong> {formData.data?.margin || 'medium'}</div>
                       {formData.data?.backgroundColor && (
                         <div className="flex items-center space-x-2">
                           <strong>Pozadina:</strong>
