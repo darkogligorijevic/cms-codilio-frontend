@@ -24,7 +24,6 @@ interface SectionRendererProps {
 }
 
 export function SectionRenderer({ section, className }: SectionRendererProps) {
-  // Don't render if section is not visible
   if (!section.isVisible) {
     return null;
   }
@@ -43,11 +42,28 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
         classes.push('max-w-7xl mx-auto');
         break;
     }
+
+    switch (section.data.height) {
+      case '100%':
+        classes.push('min-h-screen');
+        break;
+      case '75%':
+        classes.push('min-h-[75vh]');
+        break;
+      case '50%':
+        classes.push('min-h-[50vh]');
+        break;
+      case '25%':
+        classes.push('min-h-[25vh]');
+        break;
+      default:
+        classes.push('min-h-screen');
+        break;
+    }
     
     return classes.join(' ');
   };
 
-  // Check if this is a hero section that handles its own spacing
   const isFullHeightSection = [
     SectionType.HERO_IMAGE,
     SectionType.HERO_VIDEO,
@@ -55,7 +71,6 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     SectionType.HERO_LEFT
   ].includes(section.type);
 
-  // Get inline styles for background and text colors - APPLY PER SECTION
   const getInlineStyles = () => {
     const styles: React.CSSProperties = {};
     
@@ -78,7 +93,6 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     return styles;
   };
 
-  // Render the appropriate section component based on type
   const renderSectionContent = () => {
     const commonProps = {
       data: section.data,
@@ -117,7 +131,7 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
       default:
         return (
           <div className="text-center py-8">
-            <p className="text-gray-500">Nepoznat tip sekcije: {section.type}</p>
+            <p className="text-gray-500">Непознат тип секције: {section.type}</p>
           </div>
         );
     }
@@ -127,13 +141,12 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     <section
       className={cn(
         'relative',
-        // Only apply py-16 to non-hero sections
         !isFullHeightSection && 'py-12 lg:py-16',
         getLayoutClasses(),
         section.cssClasses,
         className
       )}
-      style={getInlineStyles()} // Apply styles per section
+      style={getInlineStyles()}
       data-section-id={section.id}
       data-section-type={section.type}
     >
@@ -157,13 +170,10 @@ export function PageBuilderRenderer({ sections, className }: PageBuilderRenderer
   if (visibleSections.length === 0) {
     return (
       <div className={cn('text-center py-16', className)}>
-        <p className="text-gray-500">Nema sekcija za prikaz na ovoj stranici.</p>
+        <p className="text-gray-500">Нема секција за приказ на овој страници.</p>
       </div>
     );
   }
-
-  // REMOVED: No longer applying background to the entire page
-  // Each section handles its own background color now
 
   return (
     <div className={cn(className)}>

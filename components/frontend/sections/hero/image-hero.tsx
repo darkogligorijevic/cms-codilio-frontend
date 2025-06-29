@@ -12,7 +12,7 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
   return (
     <section
       className={cn(
-        'relative min-h-[60vh] flex items-center justify-center text-white',
+        'relative flex items-center justify-center text-white',
         // Use after pseudo-element to ensure it covers padding too
         'after:absolute after:inset-0 after:bg-black after:opacity-60 after:z-0',
         className
