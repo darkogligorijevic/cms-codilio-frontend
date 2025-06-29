@@ -74,7 +74,7 @@ export function CardLeftSection({ data, className }: CardLeftSectionProps) {
                   {card.link && (
                     <div className="pt-2">
                       <Button variant="outline" asChild>
-                        <a href={card.link}>Saznaj više</a>
+                        <a href={card.link}>Сазнај више</a>
                       </Button>
                     </div>
                   )}

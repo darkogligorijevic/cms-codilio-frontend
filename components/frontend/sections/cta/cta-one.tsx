@@ -11,7 +11,7 @@ interface CTAOneSectionProps {
 export function CTAOneSection({ data, className }: CTAOneSectionProps) {
   return (
     <section 
-      className={cn('py-16 px-4 sm:px-6 lg:px-8', className)}
+      className={cn('py-16 px-4 sm:px-6 lg:px-8 dark:text-black', className)}
       style={{
         backgroundColor: data.backgroundColor || '#f3f4f6'
       }}
@@ -37,7 +37,7 @@ export function CTAOneSection({ data, className }: CTAOneSectionProps) {
                 size="lg"
                 variant={data.buttonStyle === 'secondary' ? 'secondary' : 
                         data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-shadow"
+                className="text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-shadow text-black"
               >
                 <a href={data.buttonLink}>
                   {data.buttonText}
@@ -47,14 +47,6 @@ export function CTAOneSection({ data, className }: CTAOneSectionProps) {
           )}
         </div>
 
-        {/* Decorative Elements */}
-        <div className="mt-12 flex justify-center">
-          <div className="flex space-x-2">
-            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-          </div>
-        </div>
       </div>
     </section>
   );

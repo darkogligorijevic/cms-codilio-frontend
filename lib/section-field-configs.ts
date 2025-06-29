@@ -8,31 +8,19 @@ const COMMON_LAYOUT_FIELDS = [
     type: 'select' as const,
     label: 'Layout širina',
     options: [
-      { value: 'contained', label: 'Standardni (max-width)' },
-      { value: 'narrow', label: 'Uži (za tekst)' },
-      { value: 'full-width', label: 'Puna širina' }
+      { value: 'contained', label: 'Стандардни (max-width)' },
+      { value: 'full-width', label: 'Пуна ширина' }
     ]
   },
   {
-    key: 'padding',
+    key: 'height',
     type: 'select' as const,
-    label: 'Unutrašnji razmak',
+    label: 'Visina',
     options: [
-      { value: 'none', label: 'Bez razmaka' },
-      { value: 'small', label: 'Mali (py-8)' },
-      { value: 'medium', label: 'Srednji (py-16)' },
-      { value: 'large', label: 'Veliki (py-24)' }
-    ]
-  },
-  {
-    key: 'margin',
-    type: 'select' as const,
-    label: 'Spoljašnji razmak',
-    options: [
-      { value: 'none', label: 'Bez razmaka' },
-      { value: 'small', label: 'Mali (my-4)' },
-      { value: 'medium', label: 'Srednji (my-8)' },
-      { value: 'large', label: 'Veliki (my-16)' }
+      { value: '100%', label: 'Преко целог екрана' },
+      { value: '75%', label: '75% екрана' },
+      { value: '50%', label: '50% екрана' },
+      { value: '25%', label: '25% екрана' },
     ]
   },
   {
@@ -313,20 +301,19 @@ const SECTION_LAYOUT_OVERRIDES: Partial<Record<SectionType, typeof COMMON_LAYOUT
     label: 'Layout širina',
     options: [
       { value: 'contained', label: 'Standardni (max-width)' },
-      { value: 'narrow', label: 'Uži (za tekst)' },
       { value: 'full-width', label: 'Puna širina' }
     ]
-  },
+    },
     {
-      key: 'padding',
-      type: 'select' as const,
-      label: 'Visina sekcije',
-      options: [
-        { value: 'none', label: 'Bez padding-a'},
-        { value: 'small', label: 'Mala (60vh)' },
-        { value: 'medium', label: 'Srednja (70vh)' },
-        { value: 'large', label: 'Velika (100vh)' }
-      ]
+    key: 'height',
+    type: 'select' as const,
+    label: 'Visina',
+    options: [
+      { value: '100%', label: 'Преко целог екрана' },
+      { value: '75%', label: '75% екрана' },
+      { value: '50%', label: '50% екрана' },
+      { value: '25%', label: '25% екрана' },
+    ]
     },
     {
       key: 'textColor',
@@ -336,16 +323,16 @@ const SECTION_LAYOUT_OVERRIDES: Partial<Record<SectionType, typeof COMMON_LAYOUT
     },
   ],
   [SectionType.HERO_VIDEO]: [
-    // Similar to hero image
     {
-      key: 'padding',
-      type: 'select' as const,
-      label: 'Visina sekcije',
-      options: [
-        { value: 'small', label: 'Mala (60vh)' },
-        { value: 'medium', label: 'Srednja (70vh)' },
-        { value: 'large', label: 'Velika (100vh)' }
-      ]
+    key: 'height',
+    type: 'select' as const,
+    label: 'Visina',
+    options: [
+      { value: '100%', label: 'Преко целог екрана' },
+      { value: '75%', label: '75% екрана' },
+      { value: '50%', label: '50% екрана' },
+      { value: '25%', label: '25% екрана' },
+    ]
     },
     {
       key: 'textColor',

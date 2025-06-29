@@ -24,7 +24,7 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
   const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}&rel=0&showinfo=0` : null;
 
   return (
-    <section className={cn('relative min-h-[70vh] flex items-center justify-center', className)}>
+    <section className={cn('relative flex items-center justify-center', className)}>
       {/* Video Background */}
       {embedUrl && (
         <div className="absolute inset-0 w-full h-full">
@@ -79,12 +79,12 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
                 {isPlaying ? (
                   <>
                     <Pause className="mr-2 h-5 w-5" />
-                    Pauziraj video
+                    Паузирај видео
                   </>
                 ) : (
                   <>
                     <Play className="mr-2 h-5 w-5" />
-                    Pusti video
+                    Пусти видео
                   </>
                 )}
               </Button>

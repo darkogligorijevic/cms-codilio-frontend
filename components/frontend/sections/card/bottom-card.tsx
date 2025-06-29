@@ -28,7 +28,7 @@ export function CardBottomSection({ data, className }: CardBottomSectionProps) {
                   {card.link && (
                     <div className="mt-4">
                       <Button variant="outline" asChild>
-                        <a href={card.link}>Saznaj više</a>
+                        <a href={card.link}>Сазнај више</a>
                       </Button>
                     </div>
                   )}
