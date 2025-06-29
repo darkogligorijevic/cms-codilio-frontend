@@ -65,7 +65,7 @@ export default function ProfilePage() {
       }));
     } catch (error) {
       console.error('Error loading user data:', error);
-      toast.error('Greška pri učitavanju korisničkih podataka');
+      toast.error('Грешка при учитавању корисничких података');
     }
   };
 
@@ -80,7 +80,7 @@ export default function ProfilePage() {
       setRecentPosts(userPosts);
     } catch (error) {
       console.error('Error loading posts:', error);
-      toast.error('Greška pri učitavanju objava');
+      toast.error('Грешка при учитавању објава');
     } finally {
       setIsLoading(false);
     }
@@ -98,22 +98,22 @@ export default function ProfilePage() {
 
     // Validation
     if (!formData.name.trim()) {
-      toast.error('Ime je obavezno');
+      toast.error('Име је обавезно');
       return;
     }
 
     if (!formData.email.trim()) {
-      toast.error('Email je obavezan');
+      toast.error('Имејл је обавезан');
       return;
     }
 
     if (formData.newPassword && formData.newPassword.length < 6) {
-      toast.error('Nova lozinka mora imati najmanje 6 karaktera');
+      toast.error('Нова лозинка мора имати најмање 6 карактера');
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('Lozinke se ne poklapaju');
+      toast.error('Лозинке се не поклапају');
       return;
     }
 
@@ -144,13 +144,13 @@ export default function ProfilePage() {
       }));
 
       setIsEditing(false);
-      toast.success('Profil je uspešno ažuriran');
+      toast.success('Профил је успешно ажуриран');
       
       // Reload user data
       await loadUserData();
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      toast.error(error.response?.data?.message || 'Greška pri ažuriranju profila');
+      toast.error(error.response?.data?.message || 'Грешка при ажурирању профила');
     } finally {
       setIsSaving(false);
     }
@@ -172,11 +172,11 @@ export default function ProfilePage() {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'Administrator';
+        return 'Администратор';
       case 'author':
-        return 'Autor';
+        return 'Аутор';
       case 'editor':
-        return 'Urednik';
+        return 'Уредник';
       default:
         return role;
     }
@@ -214,18 +214,18 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Profil korisnika</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Профил корисника</h1>
           <p className="text-muted-foreground">
-            Upravljajte svojim profilom i podešavanjima
+            Управљајте својим профилом и подешавањима
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="profile">Osnovni podaci</TabsTrigger>
-          <TabsTrigger value="activity">Aktivnost</TabsTrigger>
-          <TabsTrigger value="security">Bezbednost</TabsTrigger>
+          <TabsTrigger value="profile">Основни подаци</TabsTrigger>
+          <TabsTrigger value="activity">Активност</TabsTrigger>
+          <TabsTrigger value="security">Безбедност</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -251,7 +251,7 @@ export default function ProfilePage() {
                         {getRoleLabel(userStats.role)}
                       </Badge>
                       <Badge variant={userStats.isActive ? "default" : "secondary"}>
-                        {userStats.isActive ? 'Aktivan' : 'Neaktivan'}
+                        {userStats.isActive ? 'Активан' : 'Неактиван'}
                       </Badge>
                     </div>
                   </div>
@@ -259,7 +259,7 @@ export default function ProfilePage() {
                 {!isEditing && (
                   <Button onClick={() => setIsEditing(true)}>
                     <Edit2 className="h-4 w-4 mr-2" />
-                    Uredi profil
+                    Уреди профил
                   </Button>
                 )}
               </div>
@@ -269,22 +269,22 @@ export default function ProfilePage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Ime i prezime</Label>
+                    <Label htmlFor="name">Име и презиме</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Unesite ime i prezime"
+                      placeholder="Унесите име и презиме"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email adresa</Label>
+                    <Label htmlFor="email">Имејл адреса</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="Unesite email adresu"
+                      placeholder="Унесите имејл адресу"
                     />
                   </div>
                 </div>
@@ -292,37 +292,37 @@ export default function ProfilePage() {
                 <div className="border-t pt-4">
                   <h4 className="font-medium mb-3 flex items-center">
                     <Lock className="h-4 w-4 mr-2" />
-                    Promena lozinke (opciono)
+                    Промена лозинке (опционо)
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Trenutna lozinka</Label>
+                      <Label htmlFor="currentPassword">Тренутна лозинка</Label>
                       <Input
                         id="currentPassword"
                         type="password"
                         value={formData.currentPassword}
                         onChange={(e) => handleInputChange('currentPassword', e.target.value)}
-                        placeholder="Trenutna lozinka"
+                        placeholder="Тренутна лозинка"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">Nova lozinka</Label>
+                      <Label htmlFor="newPassword">Нова лозинка</Label>
                       <Input
                         id="newPassword"
                         type="password"
                         value={formData.newPassword}
                         onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                        placeholder="Nova lozinka"
+                        placeholder="Нова лозинка"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Potvrdi lozinku</Label>
+                      <Label htmlFor="confirmPassword">Потврди лозинку</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                        placeholder="Potvrdi novu lozinku"
+                        placeholder="Потврди нову лозинку"
                       />
                     </div>
                   </div>
@@ -336,18 +336,18 @@ export default function ProfilePage() {
                     {isSaving ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Čuva...
+                        Чува...
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 mr-2" />
-                        Sačuvaj izmene
+                        Сачувај измене
                       </>
                     )}
                   </Button>
                   <Button variant="outline" onClick={handleCancelEdit}>
                     <X className="h-4 w-4 mr-2" />
-                    Otkaži
+                    Откажи
                   </Button>
                 </div>
               </CardContent>
@@ -358,33 +358,33 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ukupno objava</CardTitle>
+                <CardTitle className="text-sm font-medium">Укупно објава</CardTitle>
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{userStats.postsCount}</div>
                 <p className="text-xs text-muted-foreground">
-                  Sve vaše objave
+                  Све ваше објаве
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Poslednja objava</CardTitle>
+                <CardTitle className="text-sm font-medium">Последња објава</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {userStats.lastPostDate ? 
                     formatDate(userStats.lastPostDate).split(' ')[0] : 
-                    'N/A'
+                    'Н/А'
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {userStats.lastPostDate ? 
                     formatDate(userStats.lastPostDate) : 
-                    'Nemate objave'
+                    'Немате објаве'
                   }
                 </p>
               </CardContent>
@@ -392,7 +392,7 @@ export default function ProfilePage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Registrovan</CardTitle>
+                <CardTitle className="text-sm font-medium">Регистрован</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -411,9 +411,9 @@ export default function ProfilePage() {
           {/* Recent Posts */}
           <Card>
             <CardHeader>
-              <CardTitle>Poslednje objave</CardTitle>
+              <CardTitle>Последње објаве</CardTitle>
               <CardDescription>
-                Vaše najnovije objave i njihov status
+                Ваше најновије објаве и њихов статус
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -438,12 +438,12 @@ export default function ProfilePage() {
                           <Calendar className="h-3 w-3" />
                           <span>{formatDate(post.createdAt)}</span>
                           <Eye className="h-3 w-3" />
-                          <span>{post.viewCount} pregleda</span>
+                          <span>{post.viewCount} прегледа</span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
-                          {post.status === 'published' ? 'Objavljeno' : 'Draft'}
+                          {post.status === 'published' ? 'Објављено' : 'Нацрт'}
                         </Badge>
                       </div>
                     </div>
@@ -453,10 +453,10 @@ export default function ProfilePage() {
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Nema objava
+                    Нема објава
                   </h3>
                   <p className="text-gray-500">
-                    Počnite pisanje svoje prve objave.
+                    Почните писање своје прве објаве.
                   </p>
                 </div>
               )}
@@ -468,22 +468,22 @@ export default function ProfilePage() {
           {/* Security Settings */}
           <Card>
             <CardHeader>
-              <CardTitle>Bezbednosna podešavanja</CardTitle>
+              <CardTitle>Безбедносна подешавања</CardTitle>
               <CardDescription>
-                Upravljajte bezbednošću vašeg naloga
+                Управљајте безбедношћу вашег налога
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Dvostruka autentifikacija</h4>
+                    <h4 className="font-medium">Двострука аутентификација</h4>
                     <p className="text-sm text-muted-foreground">
-                      Povećajte bezbednost naloga aktiviranjem 2FA
+                      Повећајте безбедност налога активирањем 2ФА
                     </p>
                   </div>
                   <Button variant="outline" disabled>
-                    Uskoro dostupno
+                    Ускоро доступно
                   </Button>
                 </div>
               </div>
@@ -491,13 +491,13 @@ export default function ProfilePage() {
               <div className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Aktivne sesije</h4>
+                    <h4 className="font-medium">Активне сесије</h4>
                     <p className="text-sm text-muted-foreground">
-                      Upravljajte uređajima koji pristupaju vašem nalogu
+                      Управљајте уређајима који приступају вашем налогу
                     </p>
                   </div>
                   <Button variant="outline" disabled>
-                    Uskoro dostupno
+                    Ускоро доступно
                   </Button>
                 </div>
               </div>
@@ -505,13 +505,13 @@ export default function ProfilePage() {
               <div className="p-4 border border-red-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium text-red-700">Opasna zona</h4>
+                    <h4 className="font-medium text-red-700">Опасна зона</h4>
                     <p className="text-sm text-red-600">
-                      Brisanje naloga je nepovratno
+                      Брисање налога је неповратно
                     </p>
                   </div>
                   <Button variant="destructive" disabled>
-                    Obriši nalog
+                    Обриши налог
                   </Button>
                 </div>
               </div>
