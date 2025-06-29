@@ -1,4 +1,4 @@
-// lib/section-field-configs.ts - Much better approach
+// lib/section-field-configs.ts - Fixed with height for all hero sections
 import { SectionType, SectionFieldConfig } from '@/lib/types';
 
 // Common layout fields that all sections can use
@@ -10,17 +10,6 @@ const COMMON_LAYOUT_FIELDS = [
     options: [
       { value: 'contained', label: 'Стандардни (max-width)' },
       { value: 'full-width', label: 'Пуна ширина' }
-    ]
-  },
-  {
-    key: 'height',
-    type: 'select' as const,
-    label: 'Visina',
-    options: [
-      { value: '100%', label: 'Преко целог екрана' },
-      { value: '75%', label: '75% екрана' },
-      { value: '50%', label: '50% екрана' },
-      { value: '25%', label: '25% екрана' },
     ]
   },
   {
@@ -36,6 +25,19 @@ const COMMON_LAYOUT_FIELDS = [
     placeholder: '#000000 ili inherit'
   }
 ];
+
+// Height field for hero sections
+const HEIGHT_FIELD = {
+  key: 'height',
+  type: 'select' as const,
+  label: 'Visina sekcije',
+  options: [
+    { value: '100%', label: 'Преко целог екрана (100vh)' },
+    { value: '75%', label: '75% екрана (75vh)' },
+    { value: '50%', label: '50% екрана (50vh)' },
+    { value: '25%', label: '25% екрана (25vh)' },
+  ]
+};
 
 // Specific fields for each section type (WITHOUT layout fields)
 const BASE_SECTION_CONFIGS: Record<SectionType, Omit<SectionFieldConfig, 'commonFields'>> = {
@@ -293,28 +295,68 @@ const BASE_SECTION_CONFIGS: Record<SectionType, Omit<SectionFieldConfig, 'common
 
 // Special cases for sections that don't need all layout options
 const SECTION_LAYOUT_OVERRIDES: Partial<Record<SectionType, typeof COMMON_LAYOUT_FIELDS>> = {
+  // All hero sections get height + layout + text color
+  [SectionType.HERO_STACK]: [
+    {
+      key: 'layout',
+      type: 'select' as const,
+      label: 'Layout širina',
+      options: [
+        { value: 'contained', label: 'Standardni (max-width)' },
+        { value: 'full-width', label: 'Puna širina' }
+      ]
+    },
+    HEIGHT_FIELD,
+    {
+      key: 'backgroundColor',
+      type: 'text' as const,
+      label: 'Boja pozadine',
+      placeholder: '#f3f4f6 ili transparent'
+    },
+    {
+      key: 'textColor',
+      type: 'text' as const,
+      label: 'Boja teksta',
+      placeholder: '#000000 ili inherit'
+    }
+  ],
+  
+  [SectionType.HERO_LEFT]: [
+    {
+      key: 'layout',
+      type: 'select' as const,
+      label: 'Layout širina',
+      options: [
+        { value: 'contained', label: 'Standardni (max-width)' },
+        { value: 'full-width', label: 'Puna širina' }
+      ]
+    },
+    HEIGHT_FIELD,
+    {
+      key: 'backgroundColor',
+      type: 'text' as const,
+      label: 'Boja pozadine',
+      placeholder: '#f3f4f6 ili transparent'
+    },
+    {
+      key: 'textColor',
+      type: 'text' as const,
+      label: 'Boja teksta',
+      placeholder: '#000000 ili inherit'
+    }
+  ],
+
   [SectionType.HERO_IMAGE]: [
-    // Hero image doesn't need layout, just height
     {
-    key: 'layout',
-    type: 'select' as const,
-    label: 'Layout širina',
-    options: [
-      { value: 'contained', label: 'Standardni (max-width)' },
-      { value: 'full-width', label: 'Puna širina' }
-    ]
+      key: 'layout',
+      type: 'select' as const,
+      label: 'Layout širina',
+      options: [
+        { value: 'contained', label: 'Standardni (max-width)' },
+        { value: 'full-width', label: 'Puna širina' }
+      ]
     },
-    {
-    key: 'height',
-    type: 'select' as const,
-    label: 'Visina',
-    options: [
-      { value: '100%', label: 'Преко целог екрана' },
-      { value: '75%', label: '75% екрана' },
-      { value: '50%', label: '50% екрана' },
-      { value: '25%', label: '25% екрана' },
-    ]
-    },
+    HEIGHT_FIELD,
     {
       key: 'textColor',
       type: 'text' as const,
@@ -322,18 +364,18 @@ const SECTION_LAYOUT_OVERRIDES: Partial<Record<SectionType, typeof COMMON_LAYOUT
       placeholder: 'white (default) ili custom'
     },
   ],
+
   [SectionType.HERO_VIDEO]: [
     {
-    key: 'height',
-    type: 'select' as const,
-    label: 'Visina',
-    options: [
-      { value: '100%', label: 'Преко целог екрана' },
-      { value: '75%', label: '75% екрана' },
-      { value: '50%', label: '50% екрана' },
-      { value: '25%', label: '25% екрана' },
-    ]
+      key: 'layout',
+      type: 'select' as const,
+      label: 'Layout širina',
+      options: [
+        { value: 'contained', label: 'Standardni (max-width)' },
+        { value: 'full-width', label: 'Puna širina' }
+      ]
     },
+    HEIGHT_FIELD,
     {
       key: 'textColor',
       type: 'text' as const,
@@ -341,6 +383,7 @@ const SECTION_LAYOUT_OVERRIDES: Partial<Record<SectionType, typeof COMMON_LAYOUT
       placeholder: 'white (default) ili custom'
     }
   ],
+
   [SectionType.CTA_ONE]: [
     // CTA needs special background handling
     ...COMMON_LAYOUT_FIELDS.filter(field => field.key !== 'backgroundColor'),
@@ -348,7 +391,7 @@ const SECTION_LAYOUT_OVERRIDES: Partial<Record<SectionType, typeof COMMON_LAYOUT
       key: 'backgroundColor',
       type: 'text' as const,
       label: 'Boja pozadine',
-      placeholder: '#f3f4f6 (obavezno za CTA)'
+      placeholder: '#f3f4f6 (preporučeno za CTA)'
     }
   ]
 };

@@ -1015,7 +1015,7 @@ export default function PagesPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className='max-w-4xl'>
           <DialogHeader>
             <DialogTitle>Potvrdi brisanje</DialogTitle>
             <DialogDescription>

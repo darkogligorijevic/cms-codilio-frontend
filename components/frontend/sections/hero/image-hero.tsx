@@ -10,15 +10,24 @@ interface HeroImageSectionProps {
 
 export function HeroImageSection({ data, className }: HeroImageSectionProps) {
   return (
-    <section
+    <div
       className={cn(
-        'relative flex items-center justify-center text-white',
+        `relative w-full flex items-center justify-center text-white`,
         // Use after pseudo-element to ensure it covers padding too
         'after:absolute after:inset-0 after:bg-black after:opacity-60 after:z-0',
+        // Apply height from data or default
+        data.height === '100%' ? 'min-h-screen' :
+        data.height === '75%' ? 'min-h-[75vh]' :
+        data.height === '50%' ? 'min-h-[50vh]' :
+        data.height === '25%' ? 'min-h-[25vh]' :
+        'min-h-[60vh]', // default height
         className
       )}
       style={{
-        backgroundImage: `url(${data.backgroundImage})`,
+        background: `
+          linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+          url(${data.backgroundImage})
+        `,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -69,6 +78,6 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
           <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

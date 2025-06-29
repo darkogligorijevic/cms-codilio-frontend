@@ -193,7 +193,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section with Dynamic Colors */}
       <section 
-        className="text-white py-12 lg:py-16"
+        className="text-white py-24 lg:py-32"
         style={{
           background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.secondary} 100%)`
         }}
