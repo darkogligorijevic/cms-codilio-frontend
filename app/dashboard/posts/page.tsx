@@ -107,7 +107,7 @@ export default function PostsPage() {
       setTotalPosts(response.total);
     } catch (error) {
       console.error('Error fetching posts:', error);
-      toast.error('Greška pri učitavanju objava');
+      toast.error('Грешка при учитавању објава');
     } finally {
       setIsLoading(false);
     }
@@ -127,13 +127,13 @@ export default function PostsPage() {
 
     try {
       await postsApi.delete(selectedPost.id);
-      toast.success('Objava je uspešno obrisana');
+      toast.success('Објава је успешно обрисана');
       fetchPosts();
       setIsDeleteDialogOpen(false);
       setSelectedPost(null);
     } catch (error) {
       console.error('Error deleting post:', error);
-      toast.error('Greška pri brisanju objave');
+      toast.error('Грешка при брисању објаве');
     }
   };
 
@@ -144,11 +144,11 @@ export default function PostsPage() {
         : 'published' as PostStatus;
         
         await postsApi.update(post.id, { status: newStatus });
-        toast.success(`Objava je ${newStatus === 'published' ? 'objavljena' : 'prebačena u draft'}`);
+        toast.success(`Објава је ${newStatus === 'published' ? 'објављена' : 'пребачена у драфт'}`);
         fetchPosts();
     } catch (error) {
         console.error('Error updating post status:', error);
-        toast.error('Greška pri ažuriranju statusa objave');
+        toast.error('Грешка при ажурирању статуса објаве');
     }
     };
 
@@ -156,12 +156,12 @@ export default function PostsPage() {
     return status === 'published' ? (
       <Badge variant="default" className="bg-green-100 text-green-800">
         <Eye className="mr-1 h-3 w-3" />
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
         <FileText className="mr-1 h-3 w-3" />
-        Draft
+        Драфт
       </Badge>
     );
   };
@@ -177,9 +177,9 @@ export default function PostsPage() {
   };
 
   const getCategoryName = (categoryId?: number) => {
-    if (!categoryId) return 'Bez kategorije';
+    if (!categoryId) return 'Без категорије';
     const category = categories.find(cat => cat.id === categoryId);
-    return category?.name || 'Nepoznata kategorija';
+    return category?.name || 'Непозната категорија';
   };
 
   const getTimeAgo = (dateString: string) => {
@@ -187,10 +187,10 @@ export default function PostsPage() {
     const date = new Date(dateString);
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (diffInSeconds < 60) return 'pre nekoliko sekundi';
-    if (diffInSeconds < 3600) return `pre ${Math.floor(diffInSeconds / 60)} min`;
-    if (diffInSeconds < 86400) return `pre ${Math.floor(diffInSeconds / 3600)} h`;
-    if (diffInSeconds < 604800) return `pre ${Math.floor(diffInSeconds / 86400)} dana`;
+    if (diffInSeconds < 60) return 'пре неколико секунди';
+    if (diffInSeconds < 3600) return `пре ${Math.floor(diffInSeconds / 60)} мин`;
+    if (diffInSeconds < 86400) return `пре ${Math.floor(diffInSeconds / 3600)} сати`;
+    if (diffInSeconds < 604800) return `пре ${Math.floor(diffInSeconds / 86400)} дана`;
     return formatDate(dateString);
   };
 
@@ -203,15 +203,15 @@ export default function PostsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Objave</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Објаве</h1>
           <p className="text-muted-foreground">
-            Upravljajte objavama na portalu institucije
+            Управљајте објавама на порталу институције
           </p>
         </div>
         <Button asChild variant={theme === "light" ? "default" : "secondaryDefault"}>
           <Link href="/dashboard/posts/new">
             <Plus className="mr-2 h-4 w-4" />
-            Nova objava
+            Нова објава
           </Link>
         </Button>
       </div>
@@ -221,14 +221,14 @@ export default function PostsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno objava
+              Укупно објава
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalPosts}</div>
             <p className="text-xs text-muted-foreground">
-              Sve objave u sistemu
+              Све објаве у систему
             </p>
           </CardContent>
         </Card>
@@ -236,14 +236,14 @@ export default function PostsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Objavljeno
+              Објављено
             </CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{publishedCount}</div>
             <p className="text-xs text-muted-foreground">
-              Javno dostupno
+              Јавно доступно
             </p>
           </CardContent>
         </Card>
@@ -251,14 +251,14 @@ export default function PostsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Draft
+              Драфт
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{draftCount}</div>
             <p className="text-xs text-muted-foreground">
-              U pripremi
+              У припреми
             </p>
           </CardContent>
         </Card>
@@ -266,7 +266,7 @@ export default function PostsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupni pregledi
+              Укупни прегледи
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -275,7 +275,7 @@ export default function PostsPage() {
               {posts.reduce((sum, post) => sum + post.viewCount, 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              Transparentnost u akciji
+              Транспарентност у акцији
             </p>
           </CardContent>
         </Card>
@@ -284,20 +284,20 @@ export default function PostsPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Pretraga i filteri</CardTitle>
+          <CardTitle>Претрага и филтери</CardTitle>
           <CardDescription>
-            Pronađite objave pomoću pretrage i filtera
+            Пронађите објаве помоћу претраге и филтера
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Pretraga</Label>
+              <Label htmlFor="search">Претрага</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Pretraži objave..."
+                  placeholder="Претражи објаве..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -306,23 +306,23 @@ export default function PostsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>Статус</Label>
               <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi statusi" />
+                  <SelectValue placeholder="Сви статуси" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi statusi</SelectItem>
+                  <SelectItem value="all">Сви статуси</SelectItem>
                   <SelectItem value="published">
                     <div className="flex items-center">
                       <Eye className="mr-2 h-4 w-4" />
-                      Objavljeno
+                      Објављено
                     </div>
                   </SelectItem>
                   <SelectItem value="draft">
                     <div className="flex items-center">
                       <FileText className="mr-2 h-4 w-4" />
-                      Draft
+                      Драфт
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -330,13 +330,13 @@ export default function PostsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Kategorija</Label>
+              <Label>Категорија</Label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sve kategorije" />
+                  <SelectValue placeholder="Све категорије" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Sve kategorije</SelectItem>
+                  <SelectItem value="all">Све категорије</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
                       <div className="flex items-center">
@@ -351,7 +351,7 @@ export default function PostsPage() {
 
             <div className="flex items-end">
               <div className="text-sm text-muted-foreground">
-                Prikazuje se {filteredPostsCount} od {totalPosts} objava
+                Приказује се {filteredPostsCount} од {totalPosts} објава
               </div>
             </div>
           </div>
@@ -363,9 +363,9 @@ export default function PostsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Lista objava</CardTitle>
+              <CardTitle>Листа објава</CardTitle>
               <CardDescription>
-                Ukupno {filteredPostsCount} objava na strani {currentPage}
+                Укупно {filteredPostsCount} објава на страни {currentPage}
               </CardDescription>
             </div>
           </div>
@@ -389,13 +389,13 @@ export default function PostsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Naslov</TableHead>
-                    <TableHead>Kategorija</TableHead>
-                    <TableHead>Autor</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Pregledi</TableHead>
-                    <TableHead>Datum</TableHead>
-                    <TableHead className="text-right">Akcije</TableHead>
+                    <TableHead>Наслов</TableHead>
+                    <TableHead>Категорија</TableHead>
+                    <TableHead>Аутор</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Прегледи</TableHead>
+                    <TableHead>Датум</TableHead>
+                    <TableHead className="text-right">Акције</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -433,7 +433,7 @@ export default function PostsPage() {
                         <button
                           onClick={() => handleToggleStatus(post)}
                           className="hover:opacity-80 transition-opacity"
-                          title={`Promeni status na ${post.status === 'published' ? 'draft' : 'objavljeno'}`}
+                          title={`Промени статус на ${post.status === 'published' ? 'драфт' : 'објављено'}`}
                         >
                           {getStatusBadge(post.status)}
                         </button>
@@ -457,7 +457,7 @@ export default function PostsPage() {
                               variant="ghost"
                               size="sm"
                               asChild
-                              title="Pogledaj na sajtu"
+                              title="Погледај на сајту"
                             >
                               <Link href={`/objave/${post.slug}`} target="_blank">
                                 <ExternalLink className="h-4 w-4" />
@@ -468,7 +468,7 @@ export default function PostsPage() {
                             variant="ghost"
                             size="sm"
                             asChild
-                            title="Uredi objavu"
+                            title="Уреди објаву"
                           >
                             <Link href={`/dashboard/posts/${post.id}`}>
                               <Edit className="h-4 w-4" />
@@ -481,7 +481,7 @@ export default function PostsPage() {
                               setSelectedPost(post);
                               setIsDeleteDialogOpen(true);
                             }}
-                            title="Obriši objavu"
+                            title="Обриши објаву"
                             className="text-red-600 hover:text-red-800 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -497,8 +497,8 @@ export default function PostsPage() {
                           {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all' ? (
                             <>
                               <Search className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                              <h3 className="text-lg font-medium">Nema rezultata</h3>
-                              <p>Nema objava koje odgovaraju filterima</p>
+                              <h3 className="text-lg font-medium">Нема резултата</h3>
+                              <p>Нема објава које одговарају филтерима</p>
                               <Button
                                 variant="outline"
                                 onClick={() => {
@@ -508,18 +508,18 @@ export default function PostsPage() {
                                 }}
                                 className="mt-2"
                               >
-                                Očisti filtere
+                                Очисти филтере
                               </Button>
                             </>
                           ) : (
                             <>
                               <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                              <h3 className="text-lg font-medium">Nema objava</h3>
-                              <p>Počnite kreiranjem prve objave za vašu instituciju</p>
+                              <h3 className="text-lg font-medium">Нема објава</h3>
+                              <p>Почните креирањем прве објаве за вашу институцију</p>
                               <Button className="mt-4" asChild>
                                 <Link href="/dashboard/posts/new">
                                   <Plus className="mr-2 h-4 w-4" />
-                                  Kreiraj prvu objavu
+                                  Креирај прву објаву
                                 </Link>
                               </Button>
                             </>
@@ -535,7 +535,7 @@ export default function PostsPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6 pt-4 border-t">
                   <div className="text-sm text-muted-foreground">
-                    Strana {currentPage} od {totalPages} • Ukupno {totalPosts} objava
+                    Страна {currentPage} од {totalPages} • Укупно {totalPosts} објава
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
@@ -544,7 +544,7 @@ export default function PostsPage() {
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                     >
-                      Prethodna
+                      Претходна
                     </Button>
                     
                     <div className="flex items-center space-x-1">
@@ -580,7 +580,7 @@ export default function PostsPage() {
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                     >
-                      Sledeća
+                      Следећа
                     </Button>
                   </div>
                 </div>
@@ -594,33 +594,33 @@ export default function PostsPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete objavu "{selectedPost?.title}"?
-              Ova akcija se ne može poništiti.
+              Да ли сте сигурни да желите да обришете објаву "{selectedPost?.title}"?
+              Ова акција се не може поништити.
             </DialogDescription>
           </DialogHeader>
           
           {selectedPost && (
             <div className="py-4 space-y-2 text-sm border rounded-lg p-4 bg-gray-50">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Naslov:</span>
+                <span className="text-muted-foreground">Наслов:</span>
                 <span className="font-medium">{selectedPost.title}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
+                <span className="text-muted-foreground">Статус:</span>
                 {getStatusBadge(selectedPost.status)}
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Autor:</span>
+                <span className="text-muted-foreground">Аутор:</span>
                 <span>{selectedPost.author.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Pregledi:</span>
+                <span className="text-muted-foreground">Прегледи:</span>
                 <span>{selectedPost.viewCount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Kreirana:</span>
+                <span className="text-muted-foreground">Креирана:</span>
                 <span>{formatDate(selectedPost.createdAt)}</span>
               </div>
             </div>
@@ -631,13 +631,13 @@ export default function PostsPage() {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeletePost}
             >
-              Obriši objavu
+              Обриши објаву
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -167,7 +167,7 @@ export default function PostEditor({ params }: PostEditorProps) {
         if (selectedFiles && selectedFiles.length > 0) {
           // Uzeti prvi izabrani fajl
           setValue('featuredImage', selectedFiles[0], { shouldDirty: true });
-          toast.success('Slika je uspešno izabrana');
+          toast.success('Слика је успешно изабрана');
         }
       }
     };
@@ -187,7 +187,7 @@ export default function PostEditor({ params }: PostEditorProps) {
           const parsedMedia = JSON.parse(selectedMedia);
           if (parsedMedia && parsedMedia.length > 0) {
             setValue('featuredImage', parsedMedia[0], { shouldDirty: true });
-            toast.success('Slika je uspešno izabrana');
+            toast.success('Слика је успешно изабрана');
             localStorage.removeItem('selectedMedia');
           }
         } catch (error) {
@@ -222,7 +222,7 @@ export default function PostEditor({ params }: PostEditorProps) {
       setFormInitialized(true);
     } catch (error) {
       console.error('Error fetching post:', error);
-      toast.error('Greška pri učitavanju objave');
+      toast.error('Грешка при учитавању објаве');
       router.push('/dashboard/posts');
     } finally {
       setIsLoading(false);
@@ -257,7 +257,7 @@ export default function PostEditor({ params }: PostEditorProps) {
       console.error('Error fetching pages:', error);
       // FIXED: Better fallback handling
       const fallbackPages = [
-        { id: 1, title: 'Početna strana', slug: '', isHomepage: true }
+        { id: 1, title: 'Почетна страна', slug: '', isHomepage: true }
       ];
       setPages(fallbackPages);
       setDefaultPageId(1);
@@ -281,16 +281,16 @@ export default function PostEditor({ params }: PostEditorProps) {
 
       if (isNewPost) {
         const newPost = await postsApi.create(postData as CreatePostDto);
-        toast.success('Objava je uspešno kreirana');
+        toast.success('Објава је успешно креирана');
         router.push(`/dashboard/posts/${newPost.id}`);
       } else {
         await postsApi.update(parseInt(resolvedParams.id), postData as UpdatePostDto);
-        toast.success('Objava je uspešno ažurirana');
+        toast.success('Објава је успешно ажурирана');
         fetchPost();
       }
     } catch (error) {
       console.error('Error saving post:', error);
-      toast.error('Greška pri čuvanju objave');
+      toast.error('Грешка при чувању објаве');
     } finally {
       setSaving(false);
     }
@@ -300,12 +300,12 @@ export default function PostEditor({ params }: PostEditorProps) {
     return status === 'published' ? (
       <Badge className="bg-green-100 text-green-800">
         <Eye className="mr-1 h-3 w-3" />
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
         <FileText className="mr-1 h-3 w-3" />
-        Draft
+        Драфт
       </Badge>
     );
   };
@@ -337,8 +337,8 @@ export default function PostEditor({ params }: PostEditorProps) {
         // FIXED: Use dynamic default page instead of hardcoded 0
         const fallbackPageId = defaultPageId || (pages.length > 0 ? pages[0].id : pageId);
         setValue('pageIds', [fallbackPageId], { shouldDirty: true });
-        const fallbackPageName = pages.find(p => p.id === fallbackPageId)?.title || 'početna strana';
-        toast.info(`Objava mora biti dodeljena barem jednoj stranici. ${fallbackPageName} ostaje izabrana.`);
+        const fallbackPageName = pages.find(p => p.id === fallbackPageId)?.title || 'почетна страна';
+        toast.info(`Објава мора бити додељена барем једној страни. ${fallbackPageName} остаје изабрана.`);
       } else {
         setValue('pageIds', newPageIds, { shouldDirty: true });
       }
@@ -346,16 +346,16 @@ export default function PostEditor({ params }: PostEditorProps) {
   };
 
   const getSelectedPagesText = () => {
-    if (!watchedPageIds || watchedPageIds.length === 0) return 'Nijedna stranica nije izabrana';
+    if (!watchedPageIds || watchedPageIds.length === 0) return 'Ниједна страница није изабрана';
     
     const selectedPages = pages.filter(page => watchedPageIds.includes(page.id));
-    if (selectedPages.length === 0) return 'Nijedna stranica nije izabrana';
+    if (selectedPages.length === 0) return 'Ниједна страница није изабрана';
     
     if (selectedPages.length === 1) {
-      return `Prikazuje se na: ${selectedPages[0].title}`;
+      return `Приказује се на: ${selectedPages[0].title}`;
     }
     
-    return `Prikazuje se na ${selectedPages.length} stranica`;
+    return `Приказује се на ${selectedPages.length} страница`;
   };
 
   // ADDED: Helper function to check if page is homepage
@@ -365,7 +365,7 @@ export default function PostEditor({ params }: PostEditorProps) {
            page.slug === '' || 
            page.slug === 'home' || 
            page.slug === 'pocetna' ||
-           page.title.toLowerCase().includes('početna') ||
+           page.title.toLowerCase().includes('почетна') ||
            page.title.toLowerCase().includes('home');
   };
 
@@ -392,15 +392,15 @@ export default function PostEditor({ params }: PostEditorProps) {
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard/posts">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Nazad na objave
+              Назад на објаве
             </Link>
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              {isNewPost ? 'Nova objava' : 'Uredi objavu'}
+              {isNewPost ? 'Нова објава' : 'Уреди објаву'}
             </h1>
             <p className="text-muted-foreground">
-              {isNewPost ? 'Kreirajte novu objavu za portal' : `Uredite objavu: ${post?.title}`}
+              {isNewPost ? 'Креирајте нову објаву за портал' : `Уредите објаву: ${post?.title}`}
             </p>
           </div>
         </div>
@@ -409,7 +409,7 @@ export default function PostEditor({ params }: PostEditorProps) {
             <Button variant="outline" size="sm" asChild>
               <Link href={`/objave/${post.slug}`} target="_blank">
                 <Eye className="mr-2 h-4 w-4" />
-                Pogledaj
+                Погледај
               </Link>
             </Button>
           )}
@@ -428,18 +428,18 @@ export default function PostEditor({ params }: PostEditorProps) {
             {/* Basic Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Osnovne informacije</CardTitle>
+                <CardTitle>Основне информације</CardTitle>
                 <CardDescription>
-                  Unesite osnovne podatke o objavi
+                  Унесите основне податке о објави
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Naslov objave</Label>
+                  <Label htmlFor="title">Наслов објаве</Label>
                   <Input
                     id="title"
-                    placeholder="Unesite naslov objave..."
-                    {...register('title', { required: 'Naslov je obavezan' })}
+                    placeholder="Унесите наслов објаве..."
+                    {...register('title', { required: 'Наслов је обавезан' })}
                   />
                   {errors.title && (
                     <p className="text-sm text-red-600 flex items-center">
@@ -454,7 +454,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                   <Input
                     id="slug"
                     placeholder="url-slug-objave"
-                    {...register('slug', { required: 'Slug je obavezan' })}
+                    {...register('slug', { required: 'Slug је обавезан' })}
                   />
                   {errors.slug && (
                     <p className="text-sm text-red-600 flex items-center">
@@ -463,21 +463,21 @@ export default function PostEditor({ params }: PostEditorProps) {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    URL adresa objave će biti: /objave/{watch('slug')}
+                    URL адреса објаве ће бити: /objave/{watch('slug')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="excerpt">Kratak opis (opciono)</Label>
+                  <Label htmlFor="excerpt">Кратак опис (опционо)</Label>
                   <textarea
                     id="excerpt"
-                    placeholder="Kratak opis objave koji će se prikazati u pregledu..."
+                    placeholder="Кратак опис објаве који ће се приказати у прегледу..."
                     rows={3}
                     className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     {...register('excerpt')}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Ovaj tekst će se prikazati kao pregled objave na listi
+                    Овај текст ће се приказати као преглед објаве на листи
                   </p>
                 </div>
               </CardContent>
@@ -486,16 +486,16 @@ export default function PostEditor({ params }: PostEditorProps) {
             {/* Rich Text Editor */}
             <Card>
               <CardHeader>
-                <CardTitle>Sadržaj objave</CardTitle>
+                <CardTitle>Садржај објаве</CardTitle>
                 <CardDescription>
-                  Koristite rich text editor za kreiranje profesionalnog sadržaja
+                  Користите rich text editor за креирање професионалног садржаја
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <RichTextEditor
                   content={watchedContent || ''}
                   onChange={(content) => setValue('content', content, { shouldDirty: true })}
-                  placeholder="Napišite sadržaj objave ovde... Koristite toolbar za formatiranje teksta, dodavanje linkova, slika i tabela."
+                  placeholder="Напишите садржај објаве овде... Користите toolbar за форматирање текста, додавање линкова, слика и табела."
                 />
                 {errors.content && (
                   <p className="text-sm text-red-600 flex items-center mt-2">
@@ -512,33 +512,33 @@ export default function PostEditor({ params }: PostEditorProps) {
             {/* Publish Settings */}
             <Card>
               <CardHeader>
-                <CardTitle>Objavi objavu</CardTitle>
+                <CardTitle>Објави објаву</CardTitle>
                 <CardDescription>
-                  Kontrolišite vidljivost objave
+                  Контролишите видљивост објаве
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Status objave</Label>
+                  <Label>Статус објаве</Label>
                   {formInitialized && watchedStatus ? (
                     <Select
                       value={watchedStatus}
                       onValueChange={(value: PostStatus) => setValue('status', value, { shouldDirty: true })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Izaberite status" />
+                        <SelectValue placeholder="Изаберите статус" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="draft">
                           <div className="flex items-center">
                             <FileText className="mr-2 h-4 w-4" />
-                            Draft (nije vidljivo)
+                            Драфт (није видљиво)
                           </div>
                         </SelectItem>
                         <SelectItem value="published">
                           <div className="flex items-center">
                             <Eye className="mr-2 h-4 w-4" />
-                            Objavljeno (javno dostupno)
+                            Објављено (јавно доступно)
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -552,16 +552,16 @@ export default function PostEditor({ params }: PostEditorProps) {
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center">
                       <UserIcon className="mr-2 h-3 w-3" />
-                      Autor: {post.author.name}
+                      Аутор: {post.author.name}
                     </div>
                     <div className="flex items-center">
                       <Calendar className="mr-2 h-3 w-3" />
-                      Kreirana: {new Date(post.createdAt).toLocaleDateString('sr-RS')}
+                      Креирана: {new Date(post.createdAt).toLocaleDateString('sr-RS')}
                     </div>
                     {post.publishedAt && (
                       <div className="flex items-center">
                         <Eye className="mr-2 h-3 w-3" />
-                        Objavljena: {new Date(post.publishedAt).toLocaleDateString('sr-RS')}
+                        Објављена: {new Date(post.publishedAt).toLocaleDateString('sr-RS')}
                       </div>
                     )}
                   </div>
@@ -575,7 +575,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                     variant={theme === "light" ? "default" : "secondaryDefault"}
                   >
                     <Save className="mr-2 h-4 w-4" />
-                    {isSaving ? 'Čuva se...' : (isNewPost ? 'Kreiraj objavu' : 'Sačuvaj izmene')}
+                    {isSaving ? 'Чува се...' : (isNewPost ? 'Креирај објаву' : 'Сачувај измене')}
                   </Button>
                 </div>
               </CardContent>
@@ -584,9 +584,9 @@ export default function PostEditor({ params }: PostEditorProps) {
             {/* Page Assignment */}
             <Card>
               <CardHeader>
-                <CardTitle>Prikaz na stranicama</CardTitle>
+                <CardTitle>Приказ на странама</CardTitle>
                 <CardDescription>
-                  Izaberite na kojim stranicama se objava prikazuje
+                  Изаберите на којим странама се објава приказује
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -599,7 +599,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium">Dostupne stranice:</Label>
+                  <Label className="text-sm font-medium">Доступне странице:</Label>
                   
                   {pages.map((page) => (
                     <div key={page.id} className="flex items-center space-x-3">
@@ -626,7 +626,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                             {/* ADDED: Homepage badge */}
                             {isHomepage(page) && (
                               <Badge variant="secondary" className="text-xs">
-                                Početna
+                                Почетна
                               </Badge>
                             )}
                           </div>
@@ -641,8 +641,8 @@ export default function PostEditor({ params }: PostEditorProps) {
                 </div>
 
                 <div className="text-xs text-muted-foreground p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                  <strong>Napomena:</strong> Objava mora biti dodeljena barem jednoj stranici. 
-                  Ako nije izabrana nijedna stranica, biće automatski dodeljena početnoj strani.
+                  <strong>Напомена:</strong> Објава мора бити додељена барем једној страни. 
+                  Ако није изабрана ниједна страница, биће аутоматски додељена почетној страни.
                 </div>
               </CardContent>
             </Card>
@@ -650,20 +650,20 @@ export default function PostEditor({ params }: PostEditorProps) {
             {/* Category */}
             <Card>
               <CardHeader>
-                <CardTitle>Kategorija</CardTitle>
+                <CardTitle>Категорија</CardTitle>
                 <CardDescription>
-                  Izaberite kategoriju objave
+                  Изаберите категорију објаве
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                <Label>Kategorija</Label>
+                <Label>Категорија</Label>
                 <Select
                     value={watchedCategoryId || ''}
                     onValueChange={(value) => setValue('categoryId', value, { shouldDirty: true })}
                 >
                     <SelectTrigger>
-                      <SelectValue placeholder="Izaberite kategoriju" />
+                      <SelectValue placeholder="Изаберите категорију" />
                     </SelectTrigger>
                     <SelectContent>
                     {categories.map((cat) => (
@@ -686,9 +686,9 @@ export default function PostEditor({ params }: PostEditorProps) {
             {/* Featured Image */}
             <Card>
               <CardHeader>
-                <CardTitle>Glavna slika</CardTitle>
+                <CardTitle>Главна слика</CardTitle>
                 <CardDescription>
-                  Izaberite sliku koja će predstavljati objavu
+                  Изаберите слику која ће представљати објаву
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -708,7 +708,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                         className="flex-1"
                       >
                         <ImageIcon className="mr-2 h-4 w-4" />
-                        Promeni sliku
+                        Промени слику
                       </Button>
                       <Button
                         type="button"
@@ -717,14 +717,14 @@ export default function PostEditor({ params }: PostEditorProps) {
                         onClick={() => setValue('featuredImage', '', { shouldDirty: true })}
                         className="flex-1"
                       >
-                        Ukloni sliku
+                        Уклони слику
                       </Button>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-md">
                     <ImageIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500 mb-4">Nema izabrane slike</p>
+                    <p className="text-sm text-gray-500 mb-4">Нема изабране слике</p>
                     <Button
                       type="button"
                       variant="outline"
@@ -733,9 +733,9 @@ export default function PostEditor({ params }: PostEditorProps) {
                       className="mb-2"
                     >
                       <ImageIcon className="mr-2 h-4 w-4" />
-                      Izaberi sliku
+                      Изабери слику
                     </Button>
-                    <p className="text-xs text-muted-foreground">ili</p>
+                    <p className="text-xs text-muted-foreground">или</p>
                     <Button
                       type="button"
                       variant="link"
@@ -746,7 +746,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                       className="text-xs"
                     >
                       <Upload className="mr-1 h-3 w-3" />
-                      Učitaj novu sliku
+                      Учитај нову слику
                     </Button>
                   </div>
                 )}
@@ -755,7 +755,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                 {media.length > 0 && !watchedFeaturedImage && (
                   <div>
                     <Label className="text-sm font-medium mb-2 block">
-                      Brza selekcija:
+                      Брза селекција:
                     </Label>
                     <div className="grid grid-cols-3 gap-2">
                       {media.slice(0, 6).map((item) => (
@@ -783,7 +783,7 @@ export default function PostEditor({ params }: PostEditorProps) {
                         onClick={openMediaSelector}
                         className="w-full mt-2 text-xs"
                       >
-                        Prikaži sve slike ({media.length})
+                        Прикажи све слике ({media.length})
                       </Button>
                     )}
                   </div>
