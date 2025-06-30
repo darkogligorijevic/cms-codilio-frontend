@@ -494,7 +494,7 @@ export function DashboardHeader() {
         )}
         <div>
           <h1 className="text-lg font-semibold dark:text-white text-gray-900">
-            {settings?.siteName || 'Administracioni panel'}
+            {settings?.siteName || 'Администрациони панел'}
           </h1>
           {settings?.siteTagline && (
             <p className="text-xs text-gray-500">{settings.siteTagline}</p>
@@ -534,7 +534,7 @@ export function DashboardHeader() {
         <Button variant="outline" asChild>
           <Link href="/" target="_blank" className="flex items-center space-x-2">
             <Eye className="h-4 w-4" />
-            <span className="hidden sm:inline">Pogledaj sajt</span>
+            <span className="hidden sm:inline">Погледај сајт</span>
           </Link>
         </Button>
 
@@ -561,21 +561,21 @@ export function DashboardHeader() {
             <DropdownMenuItem asChild>
               <Link href="/dashboard/profile">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profil</span>
+                <span>Профил</span>
               </Link>
             </DropdownMenuItem>
             {user?.role === 'admin' && (
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/settings">
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Podešavanja</span>
+                  <span>Подешавања</span>
                 </Link>
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Odjavite se</span>
+              <span>Одјавите се</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
