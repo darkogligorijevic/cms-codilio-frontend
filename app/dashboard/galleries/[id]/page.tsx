@@ -101,7 +101,7 @@ export default function GalleryViewPage() {
       setImages(imagesData);
     } catch (error) {
       console.error('Error fetching gallery data:', error);
-      toast.error('Greška pri učitavanju galerije');
+      toast.error('Грешка при учитавању галерије');
       router.push('/dashboard/galleries');
     } finally {
       setIsLoading(false);
@@ -122,11 +122,11 @@ export default function GalleryViewPage() {
       
       console.log('Upload response:', uploadedImages);
       
-      toast.success(`Uspešno učitano ${uploadedImages.length} slika`);
+      toast.success(`Успешно учитано ${uploadedImages.length} слика`);
       await fetchGalleryData();
     } catch (error) {
       console.error('Error uploading images:', error);
-      toast.error('Greška pri učitavanju slika');
+      toast.error('Грешка при учитавању слика');
     } finally {
       setIsUploading(false);
       // Reset file input
@@ -163,13 +163,13 @@ export default function GalleryViewPage() {
       
       console.log('Image updated:', updatedImage);
       
-      toast.success('Slika je uspešno ažurirana');
+      toast.success('Слика је успешно ажурирана');
       setIsEditImageDialogOpen(false);
       setSelectedImage(null);
       await fetchGalleryData();
     } catch (error) {
       console.error('Error updating image:', error);
-      toast.error('Greška pri ažuriranju slike');
+      toast.error('Грешка при ажурирању слике');
     }
   };
 
@@ -180,13 +180,13 @@ export default function GalleryViewPage() {
       console.log('Deleting image:', imageToDelete.id);
       
       await galleryApi.deleteImage(galleryId, imageToDelete.id);
-      toast.success('Slika je uspešno obrisana');
+      toast.success('Слика је успешно обрисана');
       setIsDeleteImageDialogOpen(false);
       setImageToDelete(null);
       await fetchGalleryData();
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error('Greška pri brisanju slike');
+      toast.error('Грешка при брисању слике');
     }
   };
 
@@ -195,11 +195,11 @@ export default function GalleryViewPage() {
       console.log('Setting cover image:', image.id);
       
       await galleryApi.setCoverImage(galleryId, image.id);
-      toast.success('Slika je postavljena kao naslovna');
+      toast.success('Слика је постављена као насловна');
       await fetchGalleryData();
     } catch (error) {
       console.error('Error setting cover image:', error);
-      toast.error('Greška pri postavljanju naslovne slike');
+      toast.error('Грешка при постављању насловне слике');
     }
   };
 
@@ -227,10 +227,10 @@ export default function GalleryViewPage() {
       console.log('Reordering images:', imageOrders);
       
       await galleryApi.reorderImages(galleryId, imageOrders);
-      toast.success('Redosled slika je ažuriran');
+      toast.success('Редослед слика је ажуриран');
     } catch (error) {
       console.error('Error reordering images:', error);
-      toast.error('Greška pri promenama redosleda');
+      toast.error('Грешка при променама редоследа');
       // Revert to original order on error
       await fetchGalleryData();
     }
@@ -240,12 +240,12 @@ export default function GalleryViewPage() {
     return status === GalleryStatus.PUBLISHED ? (
       <Badge variant="default" className="bg-green-100 text-green-800">
         <Eye className="h-3 w-3 mr-1" />
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
         <EyeOff className="h-3 w-3 mr-1" />
-        Draft
+        Нацрт
       </Badge>
     );
   };
@@ -259,9 +259,9 @@ export default function GalleryViewPage() {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return '0 Б';
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -297,9 +297,9 @@ export default function GalleryViewPage() {
   if (!gallery) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold mb-2">Galerija nije pronađena</h1>
+        <h1 className="text-2xl font-bold mb-2">Галерија није пронађена</h1>
         <Button onClick={() => router.push('/dashboard/galleries')}>
-          Nazad na galerije
+          Назад на галерије
         </Button>
       </div>
     );
@@ -319,7 +319,7 @@ export default function GalleryViewPage() {
               {getStatusBadge(gallery.status)}
             </div>
             <p className="text-muted-foreground">
-              {gallery.description || 'Nema opisa'}
+              {gallery.description || 'Нема описа'}
             </p>
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function GalleryViewPage() {
         <div className="flex items-center space-x-2">
           <Button variant="outline" onClick={() => router.push(`/dashboard/galleries/edit/${gallery.id}`)}>
             <Edit className="mr-2 h-4 w-4" />
-            Uredi galeriju
+            Уреди галерију
           </Button>
           <input
             type="file"
@@ -343,7 +343,7 @@ export default function GalleryViewPage() {
             variant={theme === "light" ? "default" : "secondaryDefault"}
           >
             <Upload className="mr-2 h-4 w-4" />
-            {isUploading ? 'Učitava se...' : 'Dodaj slike'}
+            {isUploading ? 'Учитава се...' : 'Додај слике'}
           </Button>
         </div>
       </div>
@@ -353,14 +353,14 @@ export default function GalleryViewPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno slika
+              Укупно слика
             </CardTitle>
             <ImageIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{images.length}</div>
             <p className="text-xs text-muted-foreground">
-              {images.filter(img => img.isVisible).length} vidljivo
+              {images.filter(img => img.isVisible).length} видљиво
             </p>
           </CardContent>
         </Card>
@@ -368,7 +368,7 @@ export default function GalleryViewPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupna veličina
+              Укупна величина
             </CardTitle>
             <Grid3X3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -377,7 +377,7 @@ export default function GalleryViewPage() {
               {formatFileSize(images.reduce((sum, img) => sum + img.size, 0))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Sve slike
+              Све слике
             </p>
           </CardContent>
         </Card>
@@ -385,14 +385,14 @@ export default function GalleryViewPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Broj pregleda
+              Број прегледа
             </CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{gallery.viewCount}</div>
             <p className="text-xs text-muted-foreground">
-              Ukupno pregleda
+              Укупно прегледа
             </p>
           </CardContent>
         </Card>
@@ -400,7 +400,7 @@ export default function GalleryViewPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Kreirana
+              Креирана
             </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -418,14 +418,14 @@ export default function GalleryViewPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Slike u galeriji</CardTitle>
+              <CardTitle>Слике у галерији</CardTitle>
               <CardDescription>
-                Koristite dugmića za pomeranje redosleda. Kliknite za opcije.
+                Користите дугмиће за померање редоследа. Кликните за опције.
               </CardDescription>
             </div>
             <Badge variant="outline">
               <Move className="h-3 w-3 mr-1" />
-              Upravljanje redosledom
+              Управљање редоследом
             </Badge>
           </div>
         </CardHeader>
@@ -465,17 +465,17 @@ export default function GalleryViewPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditImage(image)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Uredi
+                              Уреди
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleSetCoverImage(image)}>
                               <Star className="mr-2 h-4 w-4" />
-                              Postavi kao naslovnu
+                              Постави као насловну
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => window.open(getImageUrl(image), '_blank')}
                             >
                               <Download className="mr-2 h-4 w-4" />
-                              Preuzmi
+                              Преузми
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -483,14 +483,14 @@ export default function GalleryViewPage() {
                               disabled={index === 0}
                             >
                               <ChevronUp className="mr-2 h-4 w-4" />
-                              Pomeri gore
+                              Помери горе
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleMoveImage(image.id, 'down')}
                               disabled={index === images.length - 1}
                             >
                               <ChevronDown className="mr-2 h-4 w-4" />
-                              Pomeri dole
+                              Помери доле
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -501,7 +501,7 @@ export default function GalleryViewPage() {
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Obriši
+                              Обриши
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -513,13 +513,13 @@ export default function GalleryViewPage() {
                       {gallery.coverImage === image.filename && (
                         <Badge variant="default" className="text-xs bg-yellow-600">
                           <Star className="h-3 w-3 mr-1" />
-                          Naslovna
+                          Насловна
                         </Badge>
                       )}
                       {!image.isVisible && (
                         <Badge variant="secondary" className="text-xs">
                           <EyeOff className="h-3 w-3 mr-1" />
-                          Skriveno
+                          Скривено
                         </Badge>
                       )}
                     </div>
@@ -541,7 +541,7 @@ export default function GalleryViewPage() {
                             handleMoveImage(image.id, 'up');
                           }}
                           disabled={index === 0}
-                          title="Pomeri gore"
+                          title="Помери горе"
                         >
                           <ChevronUp className="h-3 w-3" />
                         </Button>
@@ -554,7 +554,7 @@ export default function GalleryViewPage() {
                             handleMoveImage(image.id, 'down');
                           }}
                           disabled={index === images.length - 1}
-                          title="Pomeri dole"
+                          title="Помери доле"
                         >
                           <ChevronDown className="h-3 w-3" />
                         </Button>
@@ -577,9 +577,9 @@ export default function GalleryViewPage() {
           ) : (
             <div className="text-center py-12">
               <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nema slika u galeriji</h3>
+              <h3 className="text-lg font-medium mb-2">Нема слика у галерији</h3>
               <p className="text-muted-foreground mb-4">
-                Dodajte slike da biste kreirali galeriju
+                Додајте слике да бисте креирали галерију
               </p>
               <Button 
                 onClick={() => document.getElementById('upload-images')?.click()}
@@ -587,7 +587,7 @@ export default function GalleryViewPage() {
                 variant={theme === "light" ? "default" : "secondaryDefault"}
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Dodaj prve slike
+                Додај прве слике
               </Button>
             </div>
           )}
@@ -598,9 +598,9 @@ export default function GalleryViewPage() {
       <Dialog open={isEditImageDialogOpen} onOpenChange={setIsEditImageDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Uredi sliku</DialogTitle>
+            <DialogTitle>Уреди слику</DialogTitle>
             <DialogDescription>
-              Ažurirajte informacije o slici
+              Ажурирајте информације о слици
             </DialogDescription>
           </DialogHeader>
 
@@ -617,32 +617,32 @@ export default function GalleryViewPage() {
 
             <div className="grid gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-title">Naslov slike</Label>
+                <Label htmlFor="edit-title">Наслов слике</Label>
                 <Input
                   id="edit-title"
                   value={editingImage.title}
                   onChange={(e) => setEditingImage(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Unesite naslov slike..."
+                  placeholder="Унесите наслов слике..."
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-alt">Alt tekst</Label>
+                <Label htmlFor="edit-alt">Алт текст</Label>
                 <Input
                   id="edit-alt"
                   value={editingImage.alt}
                   onChange={(e) => setEditingImage(prev => ({ ...prev, alt: e.target.value }))}
-                  placeholder="Opisni tekst za pristupačnost..."
+                  placeholder="Описни текст за приступачност..."
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-description">Opis</Label>
+                <Label htmlFor="edit-description">Опис</Label>
                 <Input
                   id="edit-description"
                   value={editingImage.description}
                   onChange={(e) => setEditingImage(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Detaljniji opis slike..."
+                  placeholder="Детаљнији опис слике..."
                 />
               </div>
 
@@ -654,16 +654,16 @@ export default function GalleryViewPage() {
                   onChange={(e) => setEditingImage(prev => ({ ...prev, isVisible: e.target.checked }))}
                   className="rounded"
                 />
-                <Label htmlFor="edit-visible">Slika je vidljiva u galeriji</Label>
+                <Label htmlFor="edit-visible">Слика је видљива у галерији</Label>
               </div>
             </div>
 
             {selectedImage && (
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><strong>Originalno ime:</strong> {selectedImage.originalName}</p>
-                <p><strong>Veličina:</strong> {formatFileSize(selectedImage.size)}</p>
-                <p><strong>Tip:</strong> {selectedImage.mimeType}</p>
-                <p><strong>Učitano:</strong> {formatDate(selectedImage.uploadedAt)}</p>
+                <p><strong>Оригинално име:</strong> {selectedImage.originalName}</p>
+                <p><strong>Величина:</strong> {formatFileSize(selectedImage.size)}</p>
+                <p><strong>Тип:</strong> {selectedImage.mimeType}</p>
+                <p><strong>Учитано:</strong> {formatDate(selectedImage.uploadedAt)}</p>
               </div>
             )}
           </div>
@@ -673,13 +673,13 @@ export default function GalleryViewPage() {
               variant="outline"
               onClick={() => setIsEditImageDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button 
               onClick={handleUpdateImage}
               variant={theme === "light" ? "default" : "secondaryDefault"}
             >
-              Ažuriraj sliku
+              Ажурирај слику
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -689,10 +689,10 @@ export default function GalleryViewPage() {
       <Dialog open={isDeleteImageDialogOpen} onOpenChange={setIsDeleteImageDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje slike</DialogTitle>
+            <DialogTitle>Потврди брисање слике</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete sliku "{imageToDelete?.title || imageToDelete?.originalName}"?
-              Ova akcija se ne može poništiti.
+              Да ли сте сигурни да желите да обришете слику "{imageToDelete?.title || imageToDelete?.originalName}"?
+              Ова акција се не може поништити.
             </DialogDescription>
           </DialogHeader>
 
@@ -711,13 +711,13 @@ export default function GalleryViewPage() {
               variant="outline"
               onClick={() => setIsDeleteImageDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteImage}
             >
-              Obriši sliku
+              Обриши слику
             </Button>
           </DialogFooter>
         </DialogContent>

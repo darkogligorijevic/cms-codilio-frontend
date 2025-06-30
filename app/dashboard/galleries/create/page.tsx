@@ -127,7 +127,7 @@ export default function CreateGalleryPage() {
       setAvailablePages(pagesResponse);
     } catch (error) {
       console.error('Error fetching initial data:', error);
-      toast.error('Greška pri učitavanju podataka');
+      toast.error('Грешка при учитавању података');
     } finally {
       setIsLoading(false);
     }
@@ -159,13 +159,13 @@ export default function CreateGalleryPage() {
     fileArray.forEach(file => {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} nije slika i neće biti dodana`);
+        toast.error(`${file.name} није слика и неће бити додата`);
         return;
       }
 
       // Validate file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} je prevelika (maksimalno 10MB)`);
+        toast.error(`${file.name} је превелика (максимално 10МБ)`);
         return;
       }
 
@@ -175,7 +175,7 @@ export default function CreateGalleryPage() {
       );
 
       if (exists) {
-        toast.warning(`${file.name} je već izabrana`);
+        toast.warning(`${file.name} је већ изабрана`);
         return;
       }
 
@@ -251,7 +251,7 @@ export default function CreateGalleryPage() {
       
       // Validate that we have at least one image
       if (selectedImages.length === 0) {
-        toast.error('Molimo dodajte barem jednu sliku u galeriju');
+        toast.error('Молимо додајте барем једну слику у галерију');
         return;
       }
       
@@ -285,7 +285,7 @@ export default function CreateGalleryPage() {
           console.log(`Uploaded ${newImages.length} new images to gallery`);
         } catch (error) {
           console.error('Error uploading new images:', error);
-          toast.error('Greška pri otpremanju novih slika');
+          toast.error('Грешка при отпремању нових слика');
         }
       }
 
@@ -299,23 +299,23 @@ export default function CreateGalleryPage() {
           console.log(`Added ${filenames.length} existing images to gallery`);
         } catch (error) {
           console.error('Error adding existing media to gallery:', error);
-          toast.warning('Nove slike su otpremljene, ali greška pri dodavanju postojećih slika');
+          toast.warning('Нове слике су отпремљене, али грешка при додавању постојећих слика');
         }
       }
 
       // Show appropriate success message
       if (successCount === totalImages) {
-        toast.success(`Galerija je uspešno kreirana sa ${successCount} slika`);
+        toast.success(`Галерија је успешно креирана са ${successCount} слика`);
       } else if (successCount > 0) {
-        toast.warning(`Galerija je kreirana sa ${successCount} od ${totalImages} slika`);
+        toast.warning(`Галерија је креирана са ${successCount} од ${totalImages} слика`);
       } else {
-        toast.error('Galerija je kreirana, ali nijedna slika nije dodana');
+        toast.error('Галерија је креирана, али ниједна слика није додата');
       }
       
       router.push(`/dashboard/galleries/${gallery.id}`);
     } catch (error: any) {
       console.error('Error creating gallery:', error);
-      toast.error(error.response?.data?.message || 'Greška pri kreiranju galerije');
+      toast.error(error.response?.data?.message || 'Грешка при креирању галерије');
     } finally {
       setIsSubmitting(false);
     }
@@ -359,9 +359,9 @@ export default function CreateGalleryPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Kreiraj novu galeriju</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Креирај нову галерију</h1>
           <p className="text-muted-foreground">
-            Organizujte slike u galerije i predstavite ih publici
+            Организујте слике у галерије и представите их публици
           </p>
         </div>
       </div>
@@ -371,20 +371,20 @@ export default function CreateGalleryPage() {
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Osnovni podaci</CardTitle>
+              <CardTitle>Основни подаци</CardTitle>
               <CardDescription>
-                Unesite osnovne informacije o galeriji
+                Унесите основне информације о галерији
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Naziv galerije *</Label>
+                <Label htmlFor="title">Назив галерије *</Label>
                 <Input
                   id="title"
-                  placeholder="npr. Otvaranje novog parka"
+                  placeholder="нпр. Отварање новог парка"
                   {...form.register('title', { 
-                    required: 'Naziv je obavezan',
-                    minLength: { value: 3, message: 'Naziv mora imati najmanje 3 karaktera' }
+                    required: 'Назив је обавезан',
+                    minLength: { value: 3, message: 'Назив мора имати најмање 3 карактера' }
                   })}
                 />
                 {form.formState.errors.title && (
@@ -393,15 +393,15 @@ export default function CreateGalleryPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">URL skraćenica *</Label>
+                <Label htmlFor="slug">УРЛ скраћеница *</Label>
                 <Input
                   id="slug"
                   placeholder="otvaranje-novog-parka"
                   {...form.register('slug', {
-                    required: 'URL skraćenica je obavezna',
+                    required: 'УРЛ скраћеница је обавезна',
                     pattern: {
                       value: /^[a-z0-9-]+$/,
-                      message: 'Može sadržati samo mala slova, brojeve i crtice'
+                      message: 'Може садржати само мала слова, бројеве и цртице'
                     }
                   })}
                 />
@@ -411,10 +411,10 @@ export default function CreateGalleryPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Opis galerije</Label>
+                <Label htmlFor="description">Опис галерије</Label>
                 <Textarea
                   id="description"
-                  placeholder="Kratki opis galerije..."
+                  placeholder="Кратки опис галерије..."
                   rows={3}
                   {...form.register('description')}
                 />
@@ -425,17 +425,17 @@ export default function CreateGalleryPage() {
           {/* Gallery Settings */}
           <Card>
             <CardHeader>
-              <CardTitle>Podešavanja galerije</CardTitle>
+              <CardTitle>Подешавања галерије</CardTitle>
               <CardDescription>
-                Konfigurisanje tipa i statusa galerije
+                Конфигурисање типа и статуса галерије
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Tip galerije</Label>
+                <Label htmlFor="type">Тип галерије</Label>
                 <Select value={form.watch('type')} onValueChange={(value) => form.setValue('type', value as GalleryType)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Izaberite tip" />
+                    <SelectValue placeholder="Изаберите тип" />
                   </SelectTrigger>
                   <SelectContent>
                     {galleryTypes.map((type) => (
@@ -451,22 +451,22 @@ export default function CreateGalleryPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status">Статус</Label>
                 <Select value={form.watch('status')} onValueChange={(value) => form.setValue('status', value as GalleryStatus)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Izaberite status" />
+                    <SelectValue placeholder="Изаберите статус" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={GalleryStatus.DRAFT}>
                       <div className="flex items-center space-x-2">
                         <EyeOff className="h-4 w-4" />
-                        <span>Draft</span>
+                        <span>Нацрт</span>
                       </div>
                     </SelectItem>
                     <SelectItem value={GalleryStatus.PUBLISHED}>
                       <div className="flex items-center space-x-2">
                         <Eye className="h-4 w-4" />
-                        <span>Objavljeno</span>
+                        <span>Објављено</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -475,7 +475,7 @@ export default function CreateGalleryPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sortOrder">Redosled</Label>
+                  <Label htmlFor="sortOrder">Редослед</Label>
                   <Input
                     id="sortOrder"
                     type="number"
@@ -489,7 +489,7 @@ export default function CreateGalleryPage() {
 
                 {form.watch('type') === GalleryType.EVENT && (
                   <div className="space-y-2">
-                    <Label htmlFor="eventDate">Datum događaja</Label>
+                    <Label htmlFor="eventDate">Датум догађаја</Label>
                     <Input
                       id="eventDate"
                       type="date"
@@ -505,9 +505,9 @@ export default function CreateGalleryPage() {
         {/* Image Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Slike galerije</CardTitle>
+            <CardTitle>Слике галерије</CardTitle>
             <CardDescription>
-              Otpremite nove slike ili izaberite postojeće iz medijske biblioteke
+              Отпремите нове слике или изаберите постојеће из медијске библиотеке
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -525,17 +525,17 @@ export default function CreateGalleryPage() {
               >
                 <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  {draggedOver ? 'Otpustite slike ovde' : 'Otpremite nove slike'}
+                  {draggedOver ? 'Отпустите слике овде' : 'Отпремите нове слике'}
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Prevucite slike ovde ili kliknite da izaberete fajlove
+                  Превуците слике овде или кликните да изаберете фајлове
                 </p>
                 <div className="flex items-center justify-center space-x-4">
                   <label htmlFor="file-upload">
                     <Button type="button" variant="outline" asChild>
                       <span>
                         <Upload className="mr-2 h-4 w-4" />
-                        Izaberi fajlove
+                        Изабери фајлове
                       </span>
                     </Button>
                   </label>
@@ -545,7 +545,7 @@ export default function CreateGalleryPage() {
                     onClick={() => setIsImageSelectorOpen(true)}
                   >
                     <Grid3X3 className="mr-2 h-4 w-4" />
-                    Medijska biblioteka
+                    Медијска библиотека
                   </Button>
                 </div>
                 <input
@@ -557,14 +557,14 @@ export default function CreateGalleryPage() {
                   onChange={handleFileInputChange}
                 />
                 <p className="text-xs text-gray-400 mt-2">
-                  Podržani formati: JPG, PNG, GIF, WebP (maksimalno 10MB po slici)
+                  Подржани формати: JPG, PNG, GIF, WebP (максимално 10МБ по слици)
                 </p>
               </div>
 
               {/* Selected Images Preview */}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Izabrano: {selectedImages.length} slika
+                  Изабрано: {selectedImages.length} слика
                 </p>
                 {selectedImages.length > 0 && (
                   <Button
@@ -581,7 +581,7 @@ export default function CreateGalleryPage() {
                     }}
                   >
                     <X className="mr-2 h-3 w-3" />
-                    Ukloni sve
+                    Уклони све
                   </Button>
                 )}
               </div>
@@ -609,7 +609,7 @@ export default function CreateGalleryPage() {
                         <span className={`text-xs px-1 py-0.5 rounded text-white ${
                           image.type === 'new' ? 'bg-green-600' : 'bg-blue-600'
                         }`}>
-                          {image.type === 'new' ? 'Nova' : 'Postojeća'}
+                          {image.type === 'new' ? 'Нова' : 'Постојећа'}
                         </span>
                       </div>
                     </div>
@@ -620,8 +620,8 @@ export default function CreateGalleryPage() {
               {selectedImages.length === 0 && (
                 <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
                   <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-500 mb-2">Nema izabranih slika</p>
-                  <p className="text-sm text-gray-400">Otpremite nove slike ili izaberite postojeće</p>
+                  <p className="text-gray-500 mb-2">Нема изабраних слика</p>
+                  <p className="text-sm text-gray-400">Отпремите нове слике или изаберите постојеће</p>
                 </div>
               )}
             </div>
@@ -631,9 +631,9 @@ export default function CreateGalleryPage() {
         {/* Page Assignment */}
         <Card>
           <CardHeader>
-            <CardTitle>Dodeli stranicama</CardTitle>
+            <CardTitle>Додели страницама</CardTitle>
             <CardDescription>
-              Izaberite stranice na kojima će se galerija prikazivati
+              Изаберите странице на којима ће се галерија приказивати
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -672,14 +672,14 @@ export default function CreateGalleryPage() {
             onClick={() => router.back()}
             disabled={isSubmitting}
           >
-            Otkaži
+            Откажи
           </Button>
           <Button 
             type="submit" 
             disabled={isSubmitting}
             variant={theme === "light" ? "default" : "secondaryDefault"}
           >
-            {isSubmitting ? 'Kreira se...' : 'Kreiraj galeriju'}
+            {isSubmitting ? 'Креира се...' : 'Креирај галерију'}
             <Save className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -689,9 +689,9 @@ export default function CreateGalleryPage() {
       <Dialog open={isImageSelectorOpen} onOpenChange={setIsImageSelectorOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Izaberi slike iz medijske biblioteke</DialogTitle>
+            <DialogTitle>Изабери слике из медијске библиотеке</DialogTitle>
             <DialogDescription>
-              Kliknite na slike da ih dodate u galeriju
+              Кликните на слике да их додате у галерију
             </DialogDescription>
           </DialogHeader>
 
@@ -700,7 +700,7 @@ export default function CreateGalleryPage() {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Pretraži slike..."
+                placeholder="Претражи слике..."
                 value={imageSearchTerm}
                 onChange={(e) => setImageSearchTerm(e.target.value)}
                 className="pl-9"
@@ -752,7 +752,7 @@ export default function CreateGalleryPage() {
               <div className="text-center py-8">
                 <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-500">
-                  {imageSearchTerm ? 'Nema slika koje odgovaraju pretrazi' : 'Nema dostupnih slika'}
+                  {imageSearchTerm ? 'Нема слика које одговарају претрази' : 'Нема доступних слика'}
                 </p>
               </div>
             )}
@@ -761,11 +761,11 @@ export default function CreateGalleryPage() {
           <DialogFooter>
             <div className="flex items-center justify-between w-full">
               <p className="text-sm text-muted-foreground">
-                Izabrano iz biblioteke: {selectedImages.filter(img => img.type === 'existing').length} slika
+                Изабрано из библиотеке: {selectedImages.filter(img => img.type === 'existing').length} слика
               </p>
               <div className="space-x-2">
                 <Button variant="outline" onClick={() => setIsImageSelectorOpen(false)}>
-                  Zatvori
+                  Затвори
                 </Button>
               </div>
             </div>
