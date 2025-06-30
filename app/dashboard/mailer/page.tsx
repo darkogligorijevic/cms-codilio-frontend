@@ -84,15 +84,15 @@ const TemplateVariableHelper = ({ context = 'both' }: { context?: 'newsletter' |
   const [copiedVariable, setCopiedVariable] = useState<string | null>(null);
 
   const templateVariables = [
-    { variable: '{{firstName}}', description: 'Ime korisnika', example: 'Marko', context: 'both' },
-    { variable: '{{fullName}}', description: 'Puno ime korisnika', example: 'Marko Petrović', context: 'both' },
-    { variable: '{{email}}', description: 'Email adresa', example: 'marko@example.com', context: 'both' },
-    { variable: '{{year}}', description: 'Trenutna godina', example: '2025', context: 'both' },
-    { variable: '{{date}}', description: 'Trenutni datum', example: '13.6.2025.', context: 'both' },
-    { variable: '{{companyName}}', description: 'Naziv kompanije', example: 'CodilioCMS', context: 'both' },
-    { variable: '{{unsubscribeUrl}}', description: 'Link za otkazivanje', example: 'https://...', context: 'newsletter' },
-    { variable: '{{subject}}', description: 'Naslov poruke', example: 'Upit', context: 'contact' },
-    { variable: '{{message}}', description: 'Sadržaj poruke', example: 'Zanima me...', context: 'contact' }
+    { variable: '{{firstName}}', description: 'Име корисника', example: 'Марко', context: 'both' },
+    { variable: '{{fullName}}', description: 'Пуно име корисника', example: 'Марко Петровић', context: 'both' },
+    { variable: '{{email}}', description: 'Емаил адреса', example: 'marko@example.com', context: 'both' },
+    { variable: '{{year}}', description: 'Тренутна година', example: '2025', context: 'both' },
+    { variable: '{{date}}', description: 'Тренутни датум', example: '13.6.2025.', context: 'both' },
+    { variable: '{{companyName}}', description: 'Назив компаније', example: 'CodilioCMS', context: 'both' },
+    { variable: '{{unsubscribeUrl}}', description: 'Линк за отказивање', example: 'https://...', context: 'newsletter' },
+    { variable: '{{subject}}', description: 'Наслов поруке', example: 'Упит', context: 'contact' },
+    { variable: '{{message}}', description: 'Садржај поруке', example: 'Занима ме...', context: 'contact' }
   ];
 
   const filteredVariables = templateVariables.filter(
@@ -114,20 +114,20 @@ const TemplateVariableHelper = ({ context = 'both' }: { context?: 'newsletter' |
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" type="button">
           <Info className="mr-2 h-4 w-4" />
-          Template varijable
+          Темплате варијабле
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Template varijable</DialogTitle>
+          <DialogTitle>Темплате варијабле</DialogTitle>
           <DialogDescription>
-            Koristite ove varijable u vašim email template-ima
+            Користите ове варијабле у вашим емаил темплате-има
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 dark:text-gray-900">
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-            <p><strong>Kako koristiti:</strong> Ukucajte varijablu u template (npr. <code>{'{{firstName}}'}</code>) i biće zamenjena pravom vrednošću.</p>
+            <p><strong>Како користити:</strong> Укуцајте варијаблу у темплате (нпр. <code>{'{{firstName}}'}</code>) и биће замењена правом вредношћу.</p>
           </div>
 
           <div className="grid gap-2">
@@ -246,7 +246,7 @@ export default function MailerPage() {
         newsletterForm.setValue('subject', selectedTemplate.subject);
         newsletterForm.setValue('htmlContent', selectedTemplate.htmlContent);
         newsletterForm.setValue('textContent', selectedTemplate.textContent || '');
-        toast.info(`Template "${selectedTemplate.name}" je učitan. Možete ga urediti pre slanja.`);
+        toast.info(`Темплате "${selectedTemplate.name}" је учитан. Можете га уредити пре слања.`);
       }
     }
   }, [watchedTemplateId, templates, newsletterForm]);
@@ -265,7 +265,7 @@ export default function MailerPage() {
       setTemplates(Array.isArray(templatesData) ? templatesData : []);
     } catch (error) {
       console.error('Error fetching mailer data:', error);
-      toast.error('Greška pri učitavanju podataka');
+      toast.error('Грешка при учитавању података');
       // Set empty arrays as fallback
       setContacts([]);
       setSubscribers([]);
@@ -278,33 +278,33 @@ export default function MailerPage() {
   const handleContactStatusUpdate = async (contactId: number, status: ContactStatus) => {
     try {
       await mailerApi.updateContact(contactId, { status });
-      toast.success('Status kontakta je ažuriran');
+      toast.success('Статус контакта је ажуриран');
       fetchAllData();
     } catch (error) {
       console.error('Error updating contact:', error);
-      toast.error('Greška pri ažuriranju kontakta');
+      toast.error('Грешка при ажурирању контакта');
     }
   };
 
   const handleMarkAsRead = async (contactId: number) => {
     try {
       await mailerApi.markAsRead(contactId);
-      toast.success('Kontakt je označen kao pročitan');
+      toast.success('Контакт је означен као прочитан');
       fetchAllData();
     } catch (error) {
       console.error('Error marking as read:', error);
-      toast.error('Greška pri označavanju kao pročitano');
+      toast.error('Грешка при означавању као прочитано');
     }
   };
 
   const handleDeleteContact = async (contactId: number) => {
     try {
       await mailerApi.deleteContact(contactId);
-      toast.success('Kontakt je obrisan');
+      toast.success('Контакт је обрисан');
       fetchAllData();
     } catch (error) {
       console.error('Error deleting contact:', error);
-      toast.error('Greška pri brisanju kontakta');
+      toast.error('Грешка при брисању контакта');
     }
   };
 
@@ -323,7 +323,7 @@ export default function MailerPage() {
   const handleStartReply = (contact: Contact) => {
     setReplyingToContact(contact);
     replyForm.setValue('subject', `Re: ${contact.subject}`);
-    replyForm.setValue('message', `\n\n---\nOriginal message from ${contact.name} (${contact.email}):\n${contact.message}`);
+    replyForm.setValue('message', `\n\n---\nОригинална порука од ${contact.name} (${contact.email}):\n${contact.message}`);
     setIsEmailViewerOpen(false);
     setIsReplyDialogOpen(true);
   };
@@ -346,14 +346,14 @@ export default function MailerPage() {
       // Update contact status to replied
       await mailerApi.updateContact(replyingToContact.id, { status: 'replied' as ContactStatus });
       
-      toast.success(`Odgovor je poslat na ${replyingToContact.email}`);
+      toast.success(`Одговор је послат на ${replyingToContact.email}`);
       setIsReplyDialogOpen(false);
       setReplyingToContact(null);
       replyForm.reset();
       fetchAllData();
     } catch (error) {
       console.error('Error sending reply:', error);
-      toast.error('Greška pri slanju odgovora');
+      toast.error('Грешка при слању одговора');
     } finally {
       setIsSendingReply(false);
     }
@@ -372,10 +372,10 @@ export default function MailerPage() {
 
       if (selectedTemplate) {
         await mailerApi.updateEmailTemplate(selectedTemplate.id, templateData as UpdateEmailTemplateDto);
-        toast.success('Template je ažuriran');
+        toast.success('Темплате је ажуриран');
       } else {
         await mailerApi.createEmailTemplate(templateData);
-        toast.success('Template je kreiran');
+        toast.success('Темплате је креиран');
       }
 
       // Reset all states
@@ -392,7 +392,7 @@ export default function MailerPage() {
       fetchAllData();
     } catch (error) {
       console.error('Error saving template:', error);
-      toast.error('Greška pri čuvanju template-a');
+      toast.error('Грешка при чувању темплате-а');
     }
   };
 
@@ -407,12 +407,12 @@ export default function MailerPage() {
       };
 
       await mailerApi.sendNewsletter(newsletterData);
-      toast.success('Newsletter je poslat');
+      toast.success('Њузлетер је послат');
       setIsNewsletterDialogOpen(false);
       newsletterForm.reset();
     } catch (error) {
       console.error('Error sending newsletter:', error);
-      toast.error('Greška pri slanju newsletter-a');
+      toast.error('Грешка при слању њузлетера');
     } finally {
       setIsSendingNewsletter(false);
     }
@@ -434,11 +434,11 @@ export default function MailerPage() {
   const handleDeleteTemplate = async (templateId: number) => {
     try {
       await mailerApi.deleteEmailTemplate(templateId);
-      toast.success('Template je obrisan');
+      toast.success('Темплате је обрисан');
       fetchAllData();
     } catch (error) {
       console.error('Error deleting template:', error);
-      toast.error('Greška pri brisanju template-a');
+      toast.error('Грешка при брисању темплате-а');
     }
   };
 
@@ -448,15 +448,15 @@ export default function MailerPage() {
     newsletterForm.setValue('subject', '');
     newsletterForm.setValue('htmlContent', '');
     newsletterForm.setValue('textContent', '');
-    toast.info('Template je uklonjen. Možete napisati newsletter od početka.');
+    toast.info('Темплате је уклоњен. Можете написати њузлетер од почетка.');
   };
 
   const getContactStatusBadge = (status: ContactStatus) => {
     const statusConfig = {
-      'new': { variant: 'default' as const, label: 'Novo', icon: Mail },
-      'read': { variant: 'secondary' as const, label: 'Pročitano', icon: Eye },
-      'replied': { variant: 'default' as const, label: 'Odgovoreno', icon: CheckCircle },
-      'archived': { variant: 'outline' as const, label: 'Arhivirano', icon: Archive }
+      'new': { variant: 'default' as const, label: 'Ново', icon: Mail },
+      'read': { variant: 'secondary' as const, label: 'Прочитано', icon: Eye },
+      'replied': { variant: 'default' as const, label: 'Одговорено', icon: CheckCircle },
+      'archived': { variant: 'outline' as const, label: 'Архивирано', icon: Archive }
     };
 
     const config = statusConfig[status];
@@ -472,8 +472,8 @@ export default function MailerPage() {
 
   const getSubscriberStatusBadge = (status: SubscriberStatus) => {
     const statusConfig = {
-      'active': { variant: 'default' as const, label: 'Aktivan', icon: CheckCircle },
-      'unsubscribed': { variant: 'secondary' as const, label: 'Otkazao', icon: AlertCircle },
+      'active': { variant: 'default' as const, label: 'Активан', icon: CheckCircle },
+      'unsubscribed': { variant: 'secondary' as const, label: 'Отказао', icon: AlertCircle },
       'bounced': { variant: 'destructive' as const, label: 'Bounced', icon: AlertCircle }
     };
 
@@ -542,7 +542,7 @@ export default function MailerPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "preplatnici.csv");
+    link.setAttribute("download", "претплатници.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -553,9 +553,9 @@ export default function MailerPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Mailer</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Мејлер</h1>
           <p className="text-muted-foreground">
-            Upravljajte kontaktima, newsletter pretplatnicima i email template-ima
+            Управљајте контактима, њузлетер претплатницима и емаил темплате-има
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -563,7 +563,7 @@ export default function MailerPage() {
             <DialogTrigger asChild>
               <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
                 <Send className="mr-2 h-4 w-4" />
-                Pošalji Newsletter
+                Пошаљи Њузлетер
               </Button>
             </DialogTrigger>
           </Dialog>
@@ -574,46 +574,46 @@ export default function MailerPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kontakti</CardTitle>
+            <CardTitle className="text-sm font-medium">Контакти</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{contactStats.total}</div>
             <p className="text-xs text-muted-foreground">
-              {contactStats.new} novo, {contactStats.replied} odgovoreno
+              {contactStats.new} ново, {contactStats.replied} одговорено
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pretplatnici</CardTitle>
+            <CardTitle className="text-sm font-medium">Претплатници</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{subscriberStats.total}</div>
             <p className="text-xs text-muted-foreground">
-              {subscriberStats.active} aktivno
+              {subscriberStats.active} активно
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Template-i</CardTitle>
+            <CardTitle className="text-sm font-medium">Темплате-и</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{templates.length}</div>
             <p className="text-xs text-muted-foreground">
-              {templates.filter(t => t.isActive).length} aktivno
+              {templates.filter(t => t.isActive).length} активно
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stopa odgovora</CardTitle>
+            <CardTitle className="text-sm font-medium">Стопа одговора</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -621,7 +621,7 @@ export default function MailerPage() {
               {contactStats.total > 0 ? Math.round((contactStats.replied / contactStats.total) * 100) : 0}%
             </div>
             <p className="text-xs text-muted-foreground">
-              Odgovoreno na kontakte
+              Одговорено на контакте
             </p>
           </CardContent>
         </Card>
@@ -630,9 +630,9 @@ export default function MailerPage() {
       {/* Main Content Tabs */}
       <Tabs defaultValue="contacts" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="contacts">Kontakti</TabsTrigger>
-          <TabsTrigger value="subscribers">Pretplatnici</TabsTrigger>
-          <TabsTrigger value="templates">Template-i</TabsTrigger>
+          <TabsTrigger value="contacts">Контакти</TabsTrigger>
+          <TabsTrigger value="subscribers">Претплатници</TabsTrigger>
+          <TabsTrigger value="templates">Темплате-и</TabsTrigger>
         </TabsList>
 
         {/* Contacts Tab */}
@@ -641,9 +641,9 @@ export default function MailerPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Kontakt poruke</CardTitle>
+                  <CardTitle>Контакт поруке</CardTitle>
                   <CardDescription>
-                    Poruke poslate preko kontakt forme
+                    Поруке послате преко контакт форме
                   </CardDescription>
                 </div>
               </div>
@@ -654,7 +654,7 @@ export default function MailerPage() {
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Pretraži kontakte..."
+                    placeholder="Претражи контакте..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
@@ -662,14 +662,14 @@ export default function MailerPage() {
                 </div>
                 <Select value={contactStatusFilter} onValueChange={(value: any) => setContactStatusFilter(value)}>
                   <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Svi statusi" />
+                    <SelectValue placeholder="Сви статуси" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Svi statusi</SelectItem>
-                    <SelectItem value="new">Novo</SelectItem>
-                    <SelectItem value="read">Pročitano</SelectItem>
-                    <SelectItem value="replied">Odgovoreno</SelectItem>
-                    <SelectItem value="archived">Arhivirano</SelectItem>
+                    <SelectItem value="all">Сви статуси</SelectItem>
+                    <SelectItem value="new">Ново</SelectItem>
+                    <SelectItem value="read">Прочитано</SelectItem>
+                    <SelectItem value="replied">Одговорено</SelectItem>
+                    <SelectItem value="archived">Архивирано</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -689,11 +689,11 @@ export default function MailerPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Pošaljilac</TableHead>
-                      <TableHead>Naslov</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Datum</TableHead>
-                      <TableHead className="text-right">Akcije</TableHead>
+                      <TableHead>Пошаљилац</TableHead>
+                      <TableHead>Наслов</TableHead>
+                      <TableHead>Статус</TableHead>
+                      <TableHead>Датум</TableHead>
+                      <TableHead className="text-right">Акције</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -736,7 +736,7 @@ export default function MailerPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleViewContact(contact)}
-                              title="Pogledaj poruku"
+                              title="Погледај поруку"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -744,7 +744,7 @@ export default function MailerPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleStartReply(contact)}
-                              title="Odgovori na poruku"
+                              title="Одговори на поруку"
                               className="text-blue-600 hover:text-blue-800"
                             >
                               <Reply className="h-4 w-4" />
@@ -757,10 +757,10 @@ export default function MailerPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="new">Novo</SelectItem>
-                                <SelectItem value="read">Pročitano</SelectItem>
-                                <SelectItem value="replied">Odgovoreno</SelectItem>
-                                <SelectItem value="archived">Arhivirano</SelectItem>
+                                <SelectItem value="new">Ново</SelectItem>
+                                <SelectItem value="read">Прочитано</SelectItem>
+                                <SelectItem value="replied">Одговорено</SelectItem>
+                                <SelectItem value="archived">Архивирано</SelectItem>
                               </SelectContent>
                             </Select>
                             <Button
@@ -768,7 +768,7 @@ export default function MailerPage() {
                               size="sm"
                               onClick={() => handleDeleteContact(contact.id)}
                               className="text-red-600 hover:text-red-800"
-                              title="Obriši kontakt"
+                              title="Обриши контакт"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -780,11 +780,11 @@ export default function MailerPage() {
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8">
                           <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Nema kontakt poruka</h3>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Нема контакт порука</h3>
                           <p className="text-gray-500">
                             {searchTerm || contactStatusFilter !== 'all' 
-                              ? 'Nema poruka koje odgovaraju filterima'
-                              : 'Kontakt poruke će se pojaviti ovde kada ih korisnici pošalju'
+                              ? 'Нема порука које одговарају филтерима'
+                              : 'Контакт поруке ће се појавити овде када их корисници пошаљу'
                             }
                           </p>
                         </TableCell>
@@ -803,14 +803,14 @@ export default function MailerPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Newsletter pretplatnici</CardTitle>
+                  <CardTitle>Њузлетер претплатници</CardTitle>
                   <CardDescription>
-                    Korisnici koji su se pretplatili na newsletter
+                    Корисници који су се претплатили на њузлетер
                   </CardDescription>
                 </div>
                 <Button onClick={downloadCSV} className="cursor-pointer" variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
-                  Izvezi CSV
+                  Извези CSV
                 </Button>
               </div>
             </CardHeader>
@@ -820,7 +820,7 @@ export default function MailerPage() {
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Pretraži pretplatnike..."
+                    placeholder="Претражи претплатнике..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
@@ -828,12 +828,12 @@ export default function MailerPage() {
                 </div>
                 <Select value={subscriberStatusFilter} onValueChange={(value: any) => setSubscriberStatusFilter(value)}>
                   <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Svi statusi" />
+                    <SelectValue placeholder="Сви статуси" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Svi statusi</SelectItem>
-                    <SelectItem value="active">Aktivni</SelectItem>
-                    <SelectItem value="unsubscribed">Otkazali</SelectItem>
+                    <SelectItem value="all">Сви статуси</SelectItem>
+                    <SelectItem value="active">Активни</SelectItem>
+                    <SelectItem value="unsubscribed">Отказали</SelectItem>
                     <SelectItem value="bounced">Bounced</SelectItem>
                   </SelectContent>
                 </Select>
@@ -843,11 +843,11 @@ export default function MailerPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Ime</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Pretplaćen</TableHead>
-                    <TableHead>Ažuriran</TableHead>
+                    <TableHead>Емаил</TableHead>
+                    <TableHead>Име</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Претплаћен</TableHead>
+                    <TableHead>Ажуриран</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -878,11 +878,11 @@ export default function MailerPage() {
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8">
                         <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Nema pretplatnika</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Нема претплатника</h3>
                         <p className="text-gray-500">
                           {searchTerm || subscriberStatusFilter !== 'all'
-                            ? 'Nema pretplatnika koji odgovaraju filterima'
-                            : 'Newsletter pretplatnici će se pojaviti ovde'
+                            ? 'Нема претплатника који одговарају филтерима'
+                            : 'Њузлетер претплатници ће се појавити овде'
                           }
                         </p>
                       </TableCell>
@@ -900,9 +900,9 @@ export default function MailerPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Email template-i</CardTitle>
+                  <CardTitle>Емаил темплате-и</CardTitle>
                   <CardDescription>
-                    Upravljajte template-ima za email poruke
+                    Управљајте темплате-има за емаил поруке
                   </CardDescription>
                 </div>
                 <Dialog open={isTemplateDialogOpen} onOpenChange={(open) => {
@@ -927,7 +927,7 @@ export default function MailerPage() {
                       });
                     }}>
                       <Plus className="mr-2 h-4 w-4" />
-                      Novi Template
+                      Нови Темплате
                     </Button>
                   </DialogTrigger>
                 </Dialog>
@@ -938,12 +938,12 @@ export default function MailerPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Naziv</TableHead>
-                    <TableHead>Tip</TableHead>
-                    <TableHead>Naslov</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Kreiran</TableHead>
-                    <TableHead className="text-right">Akcije</TableHead>
+                    <TableHead>Назив</TableHead>
+                    <TableHead>Тип</TableHead>
+                    <TableHead>Наслов</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Креиран</TableHead>
+                    <TableHead className="text-right">Акције</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -960,7 +960,7 @@ export default function MailerPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                          {template.isActive ? 'Aktivan' : 'Neaktivan'}
+                          {template.isActive ? 'Активан' : 'Неактиван'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -993,13 +993,13 @@ export default function MailerPage() {
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8">
                         <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Nema template-a</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Нема темплате-а</h3>
                         <p className="text-gray-500 mb-4">
-                          Kreirajte prvi email template za automatske poruke
+                          Креирајте први емаил темплате за аутоматске поруке
                         </p>
                         <Button onClick={() => setIsTemplateDialogOpen(true)}>
                           <Plus className="mr-2 h-4 w-4" />
-                          Kreiraj Template
+                          Креирај Темплате
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -1017,21 +1017,21 @@ export default function MailerPage() {
           <form onSubmit={templateForm.handleSubmit(handleCreateTemplate)}>
             <DialogHeader>
               <DialogTitle>
-                {selectedTemplate ? 'Uredi Template' : 'Novi Template'}
+                {selectedTemplate ? 'Уреди Темплате' : 'Нови Темплате'}
               </DialogTitle>
               <DialogDescription>
-                Kreirajte ili uredite email template
+                Креирајте или уредите емаил темплате
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="template-name">Naziv template-a</Label>
+                  <Label htmlFor="template-name">Назив темплате-а</Label>
                   <Input
                     id="template-name"
-                    placeholder="Naziv template-a"
-                    {...templateForm.register('name', { required: 'Naziv je obavezan' })}
+                    placeholder="Назив темплате-а"
+                    {...templateForm.register('name', { required: 'Назив је обавезан' })}
                   />
                   {templateForm.formState.errors.name && (
                     <p className="text-sm text-red-600">
@@ -1041,7 +1041,7 @@ export default function MailerPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Tip template-a</Label>
+                  <Label>Тип темплате-а</Label>
                   <Select
                     value={templateForm.watch('type')}
                     onValueChange={(value: TemplateType) => templateForm.setValue('type', value)}
@@ -1051,42 +1051,42 @@ export default function MailerPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="custom">Custom</SelectItem>
-                      <SelectItem value="contact_confirmation">Potvrda kontakta</SelectItem>
-                      <SelectItem value="contact_notification">Obaveštenje o kontaktu</SelectItem>
-                      <SelectItem value="newsletter_welcome">Dobrodošlica newsletter</SelectItem>
-                      <SelectItem value="newsletter_unsubscribe">Odjava newsletter</SelectItem>
+                      <SelectItem value="contact_confirmation">Потврда контакта</SelectItem>
+                      <SelectItem value="contact_notification">Обавештење о контакту</SelectItem>
+                      <SelectItem value="newsletter_welcome">Добродошлица њузлетер</SelectItem>
+                      <SelectItem value="newsletter_unsubscribe">Одјава њузлетер</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="template-subject">Naslov email-a</Label>
+                <Label htmlFor="template-subject">Наслов емаил-а</Label>
                 <Input
                   id="template-subject"
-                  placeholder="Naslov email poruke"
-                  {...templateForm.register('subject', { required: 'Naslov je obavezan' })}
+                  placeholder="Наслов емаил поруке"
+                  {...templateForm.register('subject', { required: 'Наслов је обавезан' })}
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="template-html">HTML sadržaj</Label>
+                  <Label htmlFor="template-html">HTML садржај</Label>
                   <TemplateVariableHelper />
                 </div>
                 <Textarea
                   id="template-html"
-                  placeholder="HTML sadržaj email-a"
+                  placeholder="HTML садржај емаил-а"
                   rows={6}
-                  {...templateForm.register('htmlContent', { required: 'HTML sadržaj je obavezan' })}
+                  {...templateForm.register('htmlContent', { required: 'HTML садржај је обавезан' })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="template-text">Tekstualni sadržaj</Label>
+                <Label htmlFor="template-text">Текстуални садржај</Label>
                 <Textarea
                   id="template-text"
-                  placeholder="Tekstualna verzija email-a"
+                  placeholder="Текстуална верзија емаил-а"
                   rows={4}
                   {...templateForm.register('textContent')}
                 />
@@ -1099,7 +1099,7 @@ export default function MailerPage() {
                   {...templateForm.register('isActive')}
                   className="rounded"
                 />
-                <Label htmlFor="template-active">Template je aktivan</Label>
+                <Label htmlFor="template-active">Темплате је активан</Label>
               </div>
             </div>
 
@@ -1113,10 +1113,10 @@ export default function MailerPage() {
                   templateForm.reset();
                 }}
               >
-                Otkaži
+                Откажи
               </Button>
               <Button type="submit">
-                {selectedTemplate ? 'Ažuriraj Template' : 'Kreiraj Template'}
+                {selectedTemplate ? 'Ажурирај Темплате' : 'Креирај Темплате'}
               </Button>
             </DialogFooter>
           </form>
@@ -1128,26 +1128,26 @@ export default function MailerPage() {
         <DialogContent className="sm:max-w-2xl">
           <form onSubmit={newsletterForm.handleSubmit(handleSendNewsletter)}>
             <DialogHeader>
-              <DialogTitle>Pošalji Newsletter</DialogTitle>
+              <DialogTitle>Пошаљи Њузлетер</DialogTitle>
               <DialogDescription>
-                Kreirajte i pošaljite newsletter svim aktivnim pretplatnicima
+                Креирајте и пошаљите њузлетер свим активним претплатницима
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               {/* Template Selection - FIXED */}
               <div className="space-y-2">
-                <Label>Izaberi template (opciono)</Label>
+                <Label>Изабери темплате (опционо)</Label>
                 <div className="flex items-center space-x-2">
                   <Select 
                     value={newsletterForm.watch('templateId') || 'none'} 
                     onValueChange={(value) => newsletterForm.setValue('templateId', value === 'none' ? '' : value)}
                   >
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Izaberi postojeći template ili napiši od početka" />
+                      <SelectValue placeholder="Изабери постојећи темплате или напиши од почетка" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Bez template-a (piši od početka)</SelectItem>
+                      <SelectItem value="none">Без темплате-а (пиши од почетка)</SelectItem>
                       {templates.filter(t => t.isActive).map((template) => (
                         <SelectItem key={template.id} value={template.id.toString()}>
                           <div className="flex items-center justify-between w-full">
@@ -1166,7 +1166,7 @@ export default function MailerPage() {
                       variant="outline"
                       size="sm"
                       onClick={handleClearTemplate}
-                      title="Ukloni template"
+                      title="Уклони темплате"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -1177,8 +1177,8 @@ export default function MailerPage() {
                     <div className="flex items-center space-x-2 text-sm">
                       <FileText className="h-4 w-4 text-primary-dynamic" />
                       <span className="text-primary-dynamic">
-                        Template "{templates.find(t => t.id.toString() === watchedTemplateId)?.name}" je učitan. 
-                        Možete urediti sadržaj pre slanja.
+                        Темплате "{templates.find(t => t.id.toString() === watchedTemplateId)?.name}" је учитан. 
+                        Можете уредити садржај пре слања.
                       </span>
                     </div>
                   </div>
@@ -1186,46 +1186,46 @@ export default function MailerPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newsletter-subject">Naslov</Label>
+                <Label htmlFor="newsletter-subject">Наслов</Label>
                 <Input
                   id="newsletter-subject"
-                  placeholder="Naslov newsletter-a"
-                  {...newsletterForm.register('subject', { required: 'Naslov je obavezan' })}
+                  placeholder="Наслов њузлетера"
+                  {...newsletterForm.register('subject', { required: 'Наслов је обавезан' })}
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="newsletter-html">HTML sadržaj</Label>
+                  <Label htmlFor="newsletter-html">HTML садржај</Label>
                   <TemplateVariableHelper context="newsletter" />
                 </div>
                 <Textarea
                   id="newsletter-html"
-                  placeholder="HTML sadržaj newsletter-a"
+                  placeholder="HTML садржај њузлетера"
                   rows={8}
-                  {...newsletterForm.register('htmlContent', { required: 'HTML sadržaj je obavezan' })}
+                  {...newsletterForm.register('htmlContent', { required: 'HTML садржај је обавезан' })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="newsletter-text">Tekstualni sadržaj</Label>
+                <Label htmlFor="newsletter-text">Текстуални садржај</Label>
                 <Textarea
                   id="newsletter-text"
-                  placeholder="Tekstualna verzija newsletter-a"
+                  placeholder="Текстуална верзија њузлетера"
                   rows={4}
                   {...newsletterForm.register('textContent')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="test-emails">Test email adrese (opciono)</Label>
+                <Label htmlFor="test-emails">Тест емаил адресе (опционо)</Label>
                 <Input
                   id="test-emails"
                   placeholder="test1@example.com, test2@example.com"
                   {...newsletterForm.register('testEmails')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Odvojite email adrese zarezom za test slanje
+                  Одвојите емаил адресе зарезом за тест слање
                 </p>
               </div>
 
@@ -1233,7 +1233,7 @@ export default function MailerPage() {
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4 text-primary-dynamic" />
                   <span className="text-sm font-medium text-primary-dynamic">
-                    Biće poslato na {subscriberStats.active} aktivnih pretplatnika
+                    Биће послато на {subscriberStats.active} активних претплатника
                   </span>
                 </div>
               </div>
@@ -1248,18 +1248,18 @@ export default function MailerPage() {
                   newsletterForm.reset();
                 }}
               >
-                Otkaži
+                Откажи
               </Button>
               <Button type="submit" disabled={isSendingNewsletter} variant={theme === "light" ? "default" : "secondaryDefault"}>
                 {isSendingNewsletter ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Šalje se...
+                    Шаље се...
                   </>
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Pošalji Newsletter
+                    Пошаљи Њузлетер
                   </>
                 )}
               </Button>
@@ -1274,7 +1274,7 @@ export default function MailerPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Mail className="h-5 w-5" />
-              <span>Poruka od {viewingContact?.name}</span>
+              <span>Порука од {viewingContact?.name}</span>
             </DialogTitle>
             <DialogDescription>
               {viewingContact && formatDate(viewingContact.createdAt)}
@@ -1286,16 +1286,16 @@ export default function MailerPage() {
               {/* Contact Info */}
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Pošaljilac</Label>
+                  <Label className="text-sm font-medium text-gray-600">Пошаљилац</Label>
                   <p className="font-medium">{viewingContact.name}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Email</Label>
+                  <Label className="text-sm font-medium text-gray-600">Емаил</Label>
                   <p className="text-sm">{viewingContact.email}</p>
                 </div>
                 {viewingContact.phone && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Telefon</Label>
+                    <Label className="text-sm font-medium text-gray-600">Телефон</Label>
                     <p className="text-sm flex items-center">
                       <Phone className="h-3 w-3 mr-1" />
                       {viewingContact.phone}
@@ -1303,7 +1303,7 @@ export default function MailerPage() {
                   </div>
                 )}
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Status</Label>
+                  <Label className="text-sm font-medium text-gray-600">Статус</Label>
                   <div className="mt-1">
                     {getContactStatusBadge(viewingContact.status)}
                   </div>
@@ -1312,13 +1312,13 @@ export default function MailerPage() {
 
               {/* Subject */}
               <div>
-                <Label className="text-sm font-medium text-gray-600">Naslov</Label>
+                <Label className="text-sm font-medium text-gray-600">Наслов</Label>
                 <p className="text-lg font-medium mt-1">{viewingContact.subject}</p>
               </div>
 
               {/* Message */}
               <div>
-                <Label className="text-sm font-medium text-gray-600">Poruka</Label>
+                <Label className="text-sm font-medium text-gray-600">Порука</Label>
                 <div className="mt-2 p-4 bg-white border rounded-lg">
                   <p className="whitespace-pre-wrap">{viewingContact.message}</p>
                 </div>
@@ -1331,14 +1331,14 @@ export default function MailerPage() {
               variant="outline"
               onClick={() => setIsEmailViewerOpen(false)}
             >
-              Zatvori
+              Затвори
             </Button>
             <Button
               onClick={() => viewingContact && handleStartReply(viewingContact)}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Reply className="mr-2 h-4 w-4" />
-              Odgovori
+              Одговори
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1351,10 +1351,10 @@ export default function MailerPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2">
                 <Reply className="h-5 w-5" />
-                <span>Odgovori na poruku</span>
+                <span>Одговори на поруку</span>
               </DialogTitle>
               <DialogDescription>
-                Odgovor će biti poslat na {replyingToContact?.email}
+                Одговор ће бити послат на {replyingToContact?.email}
               </DialogDescription>
             </DialogHeader>
 
@@ -1363,30 +1363,30 @@ export default function MailerPage() {
               {replyingToContact && (
                 <div className="p-3 bg-gray-50 border-l-4 border-blue-500 rounded">
                   <div className="text-sm text-gray-600">
-                    <strong>Originalna poruka od:</strong> {replyingToContact.name} ({replyingToContact.email})
+                    <strong>Оригинална порука од:</strong> {replyingToContact.name} ({replyingToContact.email})
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
-                    <strong>Naslov:</strong> {replyingToContact.subject}
+                    <strong>Наслов:</strong> {replyingToContact.subject}
                   </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="reply-subject">Naslov odgovora</Label>
+                <Label htmlFor="reply-subject">Наслов одговора</Label>
                 <Input
                   id="reply-subject"
                   placeholder="Re: ..."
-                  {...replyForm.register('subject', { required: 'Naslov je obavezan' })}
+                  {...replyForm.register('subject', { required: 'Наслов је обавезан' })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="reply-message">Vaš odgovor</Label>
+                <Label htmlFor="reply-message">Ваш одговор</Label>
                 <Textarea
                   id="reply-message"
-                  placeholder="Napišite vaš odgovor ovde..."
+                  placeholder="Напишите ваш одговор овде..."
                   rows={8}
-                  {...replyForm.register('message', { required: 'Poruka je obavezna' })}
+                  {...replyForm.register('message', { required: 'Порука је обавезна' })}
                 />
               </div>
             </div>
@@ -1401,18 +1401,18 @@ export default function MailerPage() {
                   replyForm.reset();
                 }}
               >
-                Otkaži
+                Откажи
               </Button>
               <Button type="submit" disabled={isSendingReply}>
                 {isSendingReply ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Šalje se...
+                    Шаље се...
                   </>
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Pošalji odgovor
+                    Пошаљи одговор
                   </>
                 )}
               </Button>
