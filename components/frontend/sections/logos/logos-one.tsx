@@ -30,7 +30,7 @@ export function LogosOneSection({ data, className }: LogosOneSectionProps) {
 
         {/* Logos Grid */}
         {data.logos && data.logos.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8 items-center">
+          <div className={`grid grid-cols-1 md:grid-cols-${data.logos.length < 5 ? data.logos.length : '4'} lg:grid-cols-${data.logos.length < 7 ? data.logos.length : '6'} xl:grid-cols-${data.logos.length < 9 ? data.logos.length : '8'} gap-8 items-center`}>
             {data.logos.map((logo, index) => (
               <div key={index} className="flex items-center justify-center">
                 {logo.link ? (
