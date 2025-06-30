@@ -129,7 +129,7 @@ export default function MediaPage() {
       setCategories(categoriesResponse);
     } catch (error) {
       console.error('Error fetching media:', error);
-      toast.error('Greška pri učitavanju medijskih fajlova');
+      toast.error('Грешка при учитавању медијских фајлова');
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +159,7 @@ export default function MediaPage() {
       setMedia(response);
     } catch (error) {
       console.error('Error fetching filtered media:', error);
-      toast.error('Greška pri filtriranju medijskih fajlova');
+      toast.error('Грешка при филтрирању медијских фајлова');
     } finally {
       setIsLoading(false);
     }
@@ -190,12 +190,12 @@ export default function MediaPage() {
       const response = await mediaApi.upload(file, uploadData);
       console.log('Upload response:', response);
 
-      toast.success(`Fajl "${file.name}" je uspešno učitan`);
+      toast.success(`Фајл "${file.name}" је успешно учитан`);
       await fetchFilteredMedia();
 
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error(`Greška pri učitavanju fajla "${file.name}"`);
+      toast.error(`Грешка при учитавању фајла "${file.name}"`);
       throw error;
     } finally {
       setIsUploading(false);
@@ -208,14 +208,14 @@ export default function MediaPage() {
     try {
       await mediaApi.updateMetadata(selectedMedia.id, data);
       
-      toast.success('Medijski fajl je uspešno ažuriran');
+      toast.success('Медијски фајл је успешно ажуриран');
       await fetchFilteredMedia();
       setIsEditDialogOpen(false);
       setSelectedMedia(null);
       reset();
     } catch (error) {
       console.error('Error updating media:', error);
-      toast.error('Greška pri ažuriranju medijskog fajla');
+      toast.error('Грешка при ажурирању медијског фајла');
     }
   };
 
@@ -234,19 +234,19 @@ export default function MediaPage() {
 
     try {
       await mediaApi.delete(selectedMedia.id);
-      toast.success('Medijski fajl je uspešno obrisan');
+      toast.success('Медијски фајл је успешно обрисан');
       await fetchFilteredMedia();
       setIsDeleteDialogOpen(false);
       setSelectedMedia(null);
     } catch (error) {
       console.error('Error deleting media:', error);
-      toast.error('Greška pri brisanju medijskog fajla');
+      toast.error('Грешка при брисању медијског фајла');
     }
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('URL je kopiran u clipboard');
+    toast.success('УРЛ је копиран у клипборд');
   };
 
   const toggleSelection = (filename: any) => {
@@ -285,16 +285,16 @@ export default function MediaPage() {
   };
 
   const getFileTypeLabel = (mimeType: string) => {
-    if (mimeType?.startsWith('image/')) return 'Slika';
-    if (mimeType?.includes('pdf')) return 'PDF';
-    if (mimeType?.includes('document')) return 'Dokument';
-    if (mimeType?.includes('spreadsheet')) return 'Tabela';
-    return 'Fajl';
+    if (mimeType?.startsWith('image/')) return 'Слика';
+    if (mimeType?.includes('pdf')) return 'ПДФ';
+    if (mimeType?.includes('document')) return 'Документ';
+    if (mimeType?.includes('spreadsheet')) return 'Табела';
+    return 'Фајл';
   };
 
   const getCategoryLabel = (category: MediaCategory) => {
     const categoryInfo = categories.find(cat => cat.value === category);
-    return categoryInfo?.label || 'Ostalo';
+    return categoryInfo?.label || 'Остало';
   };
 
   const getCategoryIcon = (category: MediaCategory) => {
@@ -315,9 +315,9 @@ export default function MediaPage() {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return '0 Б';
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -341,9 +341,9 @@ export default function MediaPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Medijski fajlovi</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Медијски фајлови</h1>
           <p className="text-muted-foreground">
-            Upravljajte dokumentima, slikama i ostalim fajlovima po kategorijama
+            Управљајте документима, сликама и осталим фајловима по категоријама
           </p>
         </div>
       </div>
@@ -355,7 +355,7 @@ export default function MediaPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <p className="text-sm font-medium text-blue-800">
-                  Režim selekcije - Izabrano: {selectedItems.length}
+                  Режим селекције - Изабрано: {selectedItems.length}
                 </p>
                 <Button
                   variant="outline"
@@ -363,7 +363,7 @@ export default function MediaPage() {
                   onClick={() => setSelectedItems([])}
                   disabled={selectedItems.length === 0}
                 >
-                  Poništi selekciju
+                  Поништи селекцију
                 </Button>
               </div>
               <div className="flex items-center space-x-2">
@@ -375,14 +375,14 @@ export default function MediaPage() {
                     setSelectedItems([]);
                   }}
                 >
-                  Otkaži
+                  Откажи
                 </Button>
                 <Button
                   size="sm"
                   onClick={confirmSelection}
                   disabled={selectedItems.length === 0}
                 >
-                  Potvrdi selekciju ({selectedItems.length})
+                  Потврди селекцију ({selectedItems.length})
                 </Button>
               </div>
             </div>
@@ -404,20 +404,20 @@ export default function MediaPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Pretraga i filteri</CardTitle>
+          <CardTitle>Претрага и филтери</CardTitle>
           <CardDescription>
-            Pronađite fajlove pomoću pretrage i filtera po kategorijama
+            Пронађите фајлове помоћу претраге и филтера по категоријама
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Pretraga</Label>
+              <Label htmlFor="search">Претрага</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Pretraži fajlove..."
+                  placeholder="Претражи фајлове..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -426,13 +426,13 @@ export default function MediaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Kategorija</Label>
+              <Label>Категорија</Label>
               <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as MediaCategory | 'all')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sve kategorije" />
+                  <SelectValue placeholder="Све категорије" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Sve kategorije</SelectItem>
+                  <SelectItem value="all">Све категорије</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       <div className="flex items-center space-x-2">
@@ -446,23 +446,23 @@ export default function MediaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Dostupnost</Label>
+              <Label>Доступност</Label>
               <Select value={publicFilter} onValueChange={(value) => setPublicFilter(value as any)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sve" />
+                  <SelectValue placeholder="Све" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Sve</SelectItem>
+                  <SelectItem value="all">Све</SelectItem>
                   <SelectItem value="public">
                     <div className="flex items-center space-x-2">
                       <Eye className="h-4 w-4" />
-                      <span>Javno dostupno</span>
+                      <span>Јавно доступно</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="private">
                     <div className="flex items-center space-x-2">
                       <EyeOff className="h-4 w-4" />
-                      <span>Interno</span>
+                      <span>Интерно</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -473,14 +473,14 @@ export default function MediaPage() {
               {(searchTerm || categoryFilter !== 'all' || publicFilter !== 'all') && (
                 <Button variant="outline" onClick={clearFilters} className="w-full">
                   <X className="mr-2 h-4 w-4" />
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               )}
             </div>
           </div>
           
           <div className="mt-4 text-sm text-muted-foreground">
-            Prikazuje se {media.length} fajlova
+            Приказује се {media.length} фајлова
           </div>
         </CardContent>
       </Card>
@@ -490,9 +490,9 @@ export default function MediaPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Lista fajlova</CardTitle>
+              <CardTitle>Листа фајлова</CardTitle>
               <CardDescription>
-                Ukupno {media.length} fajlova
+                Укупно {media.length} фајлова
               </CardDescription>
             </div>
           </div>
@@ -529,7 +529,7 @@ export default function MediaPage() {
                           if (item.mimeType.startsWith('image/')) {
                             toggleSelection(item.filename);
                           } else {
-                            toast.error("Možete izabrati samo slike!")
+                            toast.error("Можете изабрати само слике!")
                           }
                         }
                       }}
@@ -577,12 +577,12 @@ export default function MediaPage() {
                           {item.isPublic ? (
                             <Badge variant="default" className="text-xs bg-green-600">
                               <Eye className="h-3 w-3 mr-1" />
-                              Javno
+                              Јавно
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="text-xs">
                               <EyeOff className="h-3 w-3 mr-1" />
-                              Interno
+                              Интерно
                             </Badge>
                           )}
                         </div>
@@ -597,7 +597,7 @@ export default function MediaPage() {
                                 e.stopPropagation();
                                 window.open(mediaApi.getFileUrl(item.filename), '_blank');
                               }}
-                              title="Otvori fajl"
+                              title="Отвори фајл"
                             >
                               <ExternalLink className="h-4 w-4" />
                             </Button>
@@ -608,7 +608,7 @@ export default function MediaPage() {
                                 e.stopPropagation();
                                 copyToClipboard(mediaApi.getFileUrl(item.filename));
                               }}
-                              title="Kopiraj URL"
+                              title="Копирај УРЛ"
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
@@ -619,7 +619,7 @@ export default function MediaPage() {
                                 e.stopPropagation();
                                 handleEditMedia(item);
                               }}
-                              title="Uredi"
+                              title="Уреди"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -631,7 +631,7 @@ export default function MediaPage() {
                                 setSelectedMedia(item);
                                 setIsDeleteDialogOpen(true);
                               }}
-                              title="Obriši"
+                              title="Обриши"
                               className="text-red-600 hover:text-red-800"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -654,7 +654,7 @@ export default function MediaPage() {
                           
                           {item.alt && (
                             <p className="text-xs text-muted-foreground truncate" title={item.alt}>
-                              Alt: {item.alt}
+                              Алт: {item.alt}
                             </p>
                           )}
                           
@@ -682,25 +682,25 @@ export default function MediaPage() {
                     {searchTerm || categoryFilter !== 'all' || publicFilter !== 'all' ? (
                       <>
                         <Search className="mx-auto h-12 w-12 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Nema rezultata</h3>
-                        <p>Nema fajlova koji odgovaraju filterima</p>
+                        <h3 className="text-lg font-medium mb-2">Нема резултата</h3>
+                        <p>Нема фајлова који одговарају филтерима</p>
                         <Button
                           variant="outline"
                           className="mt-4"
                           onClick={clearFilters}
                         >
-                          Očisti filtere
+                          Очисти филтере
                         </Button>
                       </>
                     ) : (
                       <>
                         <ImageIcon className="mx-auto h-12 w-12 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Nema fajlova</h3>
-                        <p className="mb-4">Počnite učitavanjem prvog fajla</p>
+                        <h3 className="text-lg font-medium mb-2">Нема фајлова</h3>
+                        <p className="mb-4">Почните учитавањем првог фајла</p>
                         {!selectionMode && (
                           <div className="mt-4">
                             <p className="text-sm text-gray-500 mb-4">
-                              Prevucite fajlove ovde ili koristite dugme za učitavanje
+                              Превуците фајлове овде или користите дугме за учитавање
                             </p>
                           </div>
                         )}
@@ -732,7 +732,7 @@ export default function MediaPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setCategoryFilter(category.value)}
-                    title={`Prikaži samo ${category.label}`}
+                    title={`Прикажи само ${category.label}`}
                   >
                     <Filter className="h-4 w-4" />
                   </Button>
@@ -745,8 +745,8 @@ export default function MediaPage() {
                   
                   {categoryMedia.length > 0 && (
                     <div className="mt-2 text-xs text-muted-foreground">
-                      Javno: {categoryMedia.filter(item => item.isPublic).length} • 
-                      Interno: {categoryMedia.filter(item => !item.isPublic).length}
+                      Јавно: {categoryMedia.filter(item => item.isPublic).length} • 
+                      Интерно: {categoryMedia.filter(item => !item.isPublic).length}
                     </div>
                   )}
                 </CardContent>
@@ -761,18 +761,18 @@ export default function MediaPage() {
         <DialogContent className="sm:max-w-md">
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Uredi medijski fajl</DialogTitle>
+              <DialogTitle>Уреди медијски фајл</DialogTitle>
               <DialogDescription>
-                Uredite informacije o fajlu "{selectedMedia?.originalName}"
+                Уредите информације о фајлу "{selectedMedia?.originalName}"
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Kategorija *</Label>
+                <Label htmlFor="category">Категорија *</Label>
                 <Select value={watchedCategory} onValueChange={(value) => setValue('category', value as MediaCategory)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Izaberite kategoriju" />
+                    <SelectValue placeholder="Изаберите категорију" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
@@ -791,10 +791,10 @@ export default function MediaPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Opis dokumenta</Label>
+                <Label htmlFor="description">Опис документа</Label>
                 <Textarea
                   id="description"
-                  placeholder="Detaljan opis dokumenta..."
+                  placeholder="Детаљан опис документа..."
                   rows={3}
                   {...register('description')}
                 />
@@ -808,52 +808,52 @@ export default function MediaPage() {
                 />
                 <Label htmlFor="isPublic" className="flex items-center space-x-2">
                   {watchedIsPublic ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  <span>Javno dostupan dokument</span>
+                  <span>Јавно доступан документ</span>
                 </Label>
               </div>
 
               {selectedMedia?.mimeType?.startsWith('image/') && (
                 <div className="space-y-2">
-                  <Label htmlFor="alt">Alt tekst (za slike)</Label>
+                  <Label htmlFor="alt">Алт текст (за слике)</Label>
                   <Input
                     id="alt"
-                    placeholder="Opisni tekst slike..."
+                    placeholder="Описни текст слике..."
                     {...register('alt')}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Koristi se za accessibility i SEO
+                    Користи се за приступачност и СЕО
                   </p>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="caption">Naslov/Potpis</Label>
+                <Label htmlFor="caption">Наслов/Потпис</Label>
                 <Input
                   id="caption"
-                  placeholder="Kratki naslov ili potpis..."
+                  placeholder="Кратки наслов или потпис..."
                   {...register('caption')}
                 />
               </div>
 
               <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex justify-between">
-                  <span>Ime fajla:</span>
+                  <span>Име фајла:</span>
                   <span className="font-mono">{selectedMedia?.filename}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Originalno ime:</span>
+                  <span>Оригинално име:</span>
                   <span>{selectedMedia?.originalName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tip:</span>
+                  <span>Тип:</span>
                   <span>{selectedMedia?.mimeType}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Veličina:</span>
+                  <span>Величина:</span>
                   <span>{selectedMedia ? formatFileSize(selectedMedia.size) : ''}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Datum:</span>
+                  <span>Датум:</span>
                   <span>{selectedMedia ? formatDate(selectedMedia.createdAt) : ''}</span>
                 </div>
               </div>
@@ -869,14 +869,14 @@ export default function MediaPage() {
                   reset();
                 }}
               >
-                Otkaži
+                Откажи
               </Button>
               <Button 
                 type="submit" 
                 variant={theme === "light" ? "default" : "secondaryDefault"}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Čuva se...' : 'Sačuvaj izmene'}
+                {isSubmitting ? 'Чува се...' : 'Сачувај измене'}
               </Button>
             </DialogFooter>
           </form>
@@ -887,10 +887,10 @@ export default function MediaPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete fajl "{selectedMedia?.originalName}"?
-              Ova akcija se ne može poništiti i fajl će biti uklonjen sa servera.
+              Да ли сте сигурни да желите да обришете фајл "{selectedMedia?.originalName}"?
+              Ова акција се не може поништити и фајл ће бити уклоњен са сервера.
             </DialogDescription>
           </DialogHeader>
           
@@ -913,13 +913,13 @@ export default function MediaPage() {
                 setSelectedMedia(null);
               }}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteMedia}
             >
-              Obriši fajl
+              Обриши фајл
             </Button>
           </DialogFooter>
         </DialogContent>
