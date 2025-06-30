@@ -70,7 +70,7 @@ export function Footer({ pages }: FooterProps) {
                   className="h-14 w-14 object-cover filter dark:brightness-0 dark:invert"
                 />
               ) : (
-                <div>
+                <div className='flex items-center gap-3'>
                 <Building className="h-6 w-6" />
                 <span 
                   className="text-lg font-bold"

@@ -37,7 +37,7 @@ export function CTAOneSection({ data, className }: CTAOneSectionProps) {
                 size="lg"
                 variant={data.buttonStyle === 'secondary' ? 'secondary' : 
                         data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-shadow text-black"
+                className="text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-200 text-black"
               >
                 <a href={data.buttonLink}>
                   {data.buttonText}

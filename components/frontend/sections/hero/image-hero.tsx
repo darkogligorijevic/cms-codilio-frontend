@@ -37,7 +37,7 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
       <div className="relative z-10 text-center max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className='space-y-6'>
           {data.title && (
-            <h1 className="text-6xl sm:text-5xl lg:text-6xl font-black tracking-tight text-primary-dynamic drop-shadow-lg">
+            <h1 className="text-6xl sm:text-5xl lg:text-6xl font-black tracking-tight text-secondary-static drop-shadow-lg">
               {data.title}
             </h1>
           )}
@@ -61,7 +61,7 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
                 size="lg"
                 variant={data.buttonStyle === 'secondary' ? 'secondary' : 
                         data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="text-black font-black text-md md:text-lg shadow-lg dark:border-white dark:text-white"
+                className="text-black font-black text-md md:text-lg shadow-lg"
               >
                 <a href={data.buttonLink}>
                   {data.buttonText}

@@ -1,3 +1,4 @@
+// components/setup-wizard-enhanced.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
   CheckCircle, 
   ArrowRight, 
@@ -44,33 +46,46 @@ import {
   Users,
   FileText,
   Share2,
-  BarChart3
+  BarChart3,
+  School,
+  Library,
+  Home,
+  Layout
 } from 'lucide-react';
 import { CompleteSetupDto } from '@/lib/types';
+import { InstitutionType, getAllInstitutionTypes, getInstitutionTemplate } from '@/lib/institution-templates';
 import { toast } from 'sonner';
 import { settingsApi, setupApi } from '@/lib/api';
 
 const STEPS = [
   {
     id: 'welcome',
-    title: 'Dobrodošli',
-    subtitle: 'Konfigurišimo vaš CMS',
-    description: 'Kreiraćemo vaš profesionalni portal u 5 minuta',
+    title: 'Добродошли',
+    subtitle: 'Konfigurişimo vaş CMS',
+    description: 'Kreiraćemo vaş profesionalni portal u 5 minuta',
     icon: Sparkles,
     color: 'from-violet-500 to-purple-600'
+  },
+  {
+    id: 'institution-type', // NEW STEP
+    title: 'Тип установе',
+    subtitle: 'Изаберите врсту институције',
+    description: 'Ово ће одредити почетни дизајн и садржај',
+    icon: Building,
+    color: 'from-emerald-500 to-teal-600'
   },
   {
     id: 'site',
     title: 'Osnove sajta',
     subtitle: 'Identitet vaše institucije',
     description: 'Naziv, logo i osnovne informacije',
-    icon: Building,
+    icon: Globe,
     color: 'from-blue-500 to-cyan-600'
   },
   {
     id: 'admin',
     title: 'Administrator',
-    subtitle: 'Vaš admin nalog',
+    subtitle: 'Vaş admin nalog',
     description: 'Kreiranje sigurnog pristupa',
     icon: Shield,
     color: 'from-emerald-500 to-teal-600'
@@ -84,25 +99,9 @@ const STEPS = [
     color: 'from-orange-500 to-red-600'
   },
   {
-    id: 'appearance',
-    title: 'Izgled',
-    subtitle: 'Personalizujte dizajn',
-    description: 'Boje, fontovi i stil',
-    icon: Palette,
-    color: 'from-pink-500 to-rose-600'
-  },
-  {
-    id: 'features',
-    title: 'Funkcionalnosti',
-    subtitle: 'Šta želite da omogućite',
-    description: 'Email, komentari, analitika',
-    icon: Target,
-    color: 'from-indigo-500 to-purple-600'
-  },
-  {
     id: 'complete',
     title: 'Gotovo!',
-    subtitle: 'Vaš CMS je spreman',
+    subtitle: 'Vaş CMS je spreman',
     description: 'Možete početi da koristite sistem',
     icon: Rocket,
     color: 'from-green-500 to-emerald-600'
@@ -110,38 +109,18 @@ const STEPS = [
 ];
 
 interface EnhancedSetupFormData extends CompleteSetupDto {
-  // Appearance
-  primaryColor: string;
-  secondaryColor: string;
-  fontFamily: string;
-  darkMode: boolean;
-  
+  institutionType: InstitutionType;
   // Contact details
   phone?: string;
   address?: string;
   workingHours?: string;
-  
-  // Features
-  enableComments: boolean;
-  enableNewsletter: boolean;
-  enableAnalytics: boolean;
-  maintenanceMode: boolean;
-  
-  // Social media
-  facebook?: string;
-  twitter?: string;
-  instagram?: string;
-  
-  // Email settings
-  smtpHost?: string;
-  smtpPort?: string;
-  smtpUser?: string;
 }
 
-export function SetupWizard() {
+export function EnhancedSetupWizard() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [selectedInstitutionType, setSelectedInstitutionType] = useState<InstitutionType>(InstitutionType.MUNICIPALITY);
 
   const {
     register,
@@ -153,40 +132,35 @@ export function SetupWizard() {
     getValues
   } = useForm<EnhancedSetupFormData>({
     defaultValues: {
-      primaryColor: '#3B82F6',
-      secondaryColor: '#10B981',
-      fontFamily: 'Inter',
-      darkMode: false,
-      enableComments: false,
-      enableNewsletter: true,
-      enableAnalytics: false,
-      maintenanceMode: false,
+      institutionType: InstitutionType.MUNICIPALITY,
       workingHours: 'Ponedeljak - Petak: 08:00 - 16:00'
     }
   });
 
   const currentStepData = STEPS[currentStep];
   const watchedValues = watch();
+  const institutionTypes = getAllInstitutionTypes();
 
-  // Mark step as completed when moving forward
+  // Get template for selected institution type
+  const selectedTemplate = getInstitutionTemplate(selectedInstitutionType);
+
   const nextStep = async () => {
     console.log('🚀 nextStep called, currentStep:', currentStep);
     
     let fieldsToValidate: (keyof EnhancedSetupFormData)[] = [];
     
     switch (currentStep) {
-      case 1: // Site info
+      case 1: // Institution type
+        fieldsToValidate = ['institutionType'];
+        break;
+      case 2: // Site info
         fieldsToValidate = ['siteName', 'siteTagline'];
         break;
-      case 2: // Admin
+      case 3: // Admin
         fieldsToValidate = ['adminName', 'adminEmail', 'adminPassword'];
         break;
-      case 3: // Contact
+      case 4: // Contact
         fieldsToValidate = ['contactEmail'];
-        break;
-      case 4: // Appearance - optional
-      case 5: // Features - optional
-        console.log('📝 Optional step, no validation needed');
         break;
     }
 
@@ -207,17 +181,15 @@ export function SetupWizard() {
       setCompletedSteps(prev => [...prev, currentStep]);
     }
 
-    // KRITIČNA IZMENA: Eksplicitno zaustavi napredovanje na koraku 5
-    if (currentStep >= 5) {
-      console.log('🛑 Reached step 5 or higher, stopping auto-advance');
+    if (currentStep >= 4) {
+      console.log('🛑 Reached step 4 or higher, stopping auto-advance');
       return;
     }
 
-    // Samo za korake 0-4, dozvoli automatsko napredovanje
     const nextStepIndex = currentStep + 1;
     console.log('🎯 Next step would be:', nextStepIndex);
 
-    if (nextStepIndex <= 5) { // Maksimalno idi do koraka 5
+    if (nextStepIndex <= 4) {
       console.log('➡️ Advancing to step:', nextStepIndex);
       setCurrentStep(nextStepIndex);
     } else {
@@ -225,14 +197,6 @@ export function SetupWizard() {
     }
   };
 
-  // I dodaj ovu funkciju za lakše testiranje
-  const debugCurrentState = () => {
-    console.log('🐛 DEBUG STATE:');
-    console.log('Current step:', currentStep);
-    console.log('Completed steps:', completedSteps);
-    console.log('Total steps:', STEPS.length);
-    console.log('Current step data:', STEPS[currentStep]);
-  };
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -243,10 +207,6 @@ export function SetupWizard() {
     console.log(`🎯 goToStep called with stepIndex: ${stepIndex}`);
     console.log(`📊 Current completed steps: [${completedSteps.join(', ')}]`);
     
-    // Allow access to:
-    // 1. Completed steps
-    // 2. Next step after completed steps  
-    // 3. Always allow going back to previous steps
     const maxCompletedStep = Math.max(...completedSteps, -1);
     const maxAccessibleStep = maxCompletedStep + 1;
     
@@ -287,74 +247,47 @@ export function SetupWizard() {
         localStorage.setItem('access_token', result.access_token);
       }
       
-      // Ažuriraj dodatna podešavanja ako su potrebna
-      if (data.primaryColor || data.secondaryColor || data.fontFamily) {
-        const additionalSettings = [];
-        
-        if (data.primaryColor) {
-          additionalSettings.push({ key: 'theme_primary_color', value: data.primaryColor });
-        }
-        if (data.secondaryColor) {
-          additionalSettings.push({ key: 'theme_secondary_color', value: data.secondaryColor });
-        }
-        if (data.fontFamily) {
-          additionalSettings.push({ key: 'theme_font_family', value: data.fontFamily });
-        }
-        if (data.phone) {
-          additionalSettings.push({ key: 'contact_phone', value: data.phone });
-        }
-        if (data.address) {
-          additionalSettings.push({ key: 'contact_address', value: data.address });
-        }
-        if (data.workingHours) {
-          additionalSettings.push({ key: 'contact_working_hours', value: data.workingHours });
-        }
-        
-        // Dodaj email podešavanja ako su uneta
-        if (data.smtpHost) {
-          additionalSettings.push({ key: 'email_smtp_host', value: data.smtpHost });
-        }
-        if (data.smtpPort) {
-          additionalSettings.push({ key: 'email_smtp_port', value: data.smtpPort });
-        }
-        if (data.smtpUser) {
-          additionalSettings.push({ key: 'email_smtp_user', value: data.smtpUser });
-        }
-        
-        // Dodaj social media linkove
-        if (data.facebook) {
-          additionalSettings.push({ key: 'social_facebook', value: data.facebook });
-        }
-        if (data.twitter) {
-          additionalSettings.push({ key: 'social_twitter', value: data.twitter });
-        }
-        if (data.instagram) {
-          additionalSettings.push({ key: 'social_instagram', value: data.instagram });
-        }
-        
-        // Funkcionalnosti
-        additionalSettings.push({ key: 'allow_comments', value: data.enableComments.toString() });
-        additionalSettings.push({ key: 'theme_dark_mode', value: data.darkMode.toString() });
-        
-        // Pošalji dodatna podešavanja
-        if (additionalSettings.length > 0) {
-          try {
-            await settingsApi.updateMultiple({ settings: additionalSettings });
-          } catch (settingsError) {
-            console.warn('Failed to update additional settings:', settingsError);
-            // Ne prekidaj setup zbog toga
-          }
-        }
+      // Apply institution template settings
+      const template = getInstitutionTemplate(data.institutionType);
+      const templateSettings = [
+        { key: 'institution_type', value: data.institutionType },
+        { key: 'theme_primary_color', value: template.primaryColor },
+        { key: 'theme_secondary_color', value: template.secondaryColor },
+        { key: 'theme_font_family', value: template.fontFamily }
+      ];
+
+      // Add additional contact settings
+      if (data.phone) {
+        templateSettings.push({ key: 'contact_phone', value: data.phone });
+      }
+      if (data.address) {
+        templateSettings.push({ key: 'contact_address', value: data.address });
+      }
+      if (data.workingHours) {
+        templateSettings.push({ key: 'contact_working_hours', value: data.workingHours });
       }
       
+      // Update settings
+      if (templateSettings.length > 0) {
+        try {
+          await settingsApi.updateMultiple({ settings: templateSettings });
+        } catch (settingsError) {
+          console.warn('Failed to update template settings:', settingsError);
+        }
+      }
+
+      // TODO: Create predefined page sections based on template
+      // This would be implemented in a separate API call
+      await createPredefinedHomepageSections(data.institutionType);
+      
       setCompletedSteps(prev => [...prev, currentStep]);
-      setCurrentStep(6); // Idi na completion step
+      setCurrentStep(5); // Go to completion step
       toast.success('Setup je uspešno završen! Dobrodošli u CodilioCMS.');
       
       // Refresh setup status
       setTimeout(() => {
         window.location.reload();
-      }, 20000);
+      }, 3000);
       
     } catch (error: any) {
       console.error('Setup error:', error);
@@ -364,7 +297,24 @@ export function SetupWizard() {
     }
   };
 
-  // Zameni getStepIcon funkciju u setup-wizard.tsx
+  // Function to create predefined homepage sections
+  const createPredefinedHomepageSections = async (institutionType: InstitutionType) => {
+    try {
+      const template = getInstitutionTemplate(institutionType);
+      
+      console.log('Creating predefined sections for:', institutionType);
+      console.log('Template:', template);
+      
+      // Call API to create homepage template with predefined sections
+      await setupApi.createHomepageTemplate(institutionType);
+      
+      console.log('✅ Successfully created homepage template with', template.predefinedSections.length, 'sections');
+      
+    } catch (error) {
+      console.error('Error creating predefined sections:', error);
+      // Don't throw error, just log it - setup can continue without sections
+    }
+  };
 
   const getStepIcon = (stepIndex: number) => {
     const StepIcon = STEPS[stepIndex].icon;
@@ -372,14 +322,9 @@ export function SetupWizard() {
     const isCurrent = stepIndex === currentStep;
     const isAccessible = stepIndex <= Math.max(...completedSteps, 0) + 1;
 
-    console.log(`🎯 Step ${stepIndex}: completed=${isCompleted}, current=${isCurrent}, accessible=${isAccessible}`);
-
     return (
       <div
-        onClick={() => {
-          console.log(`🖱️ Clicked step ${stepIndex}`);
-          goToStep(stepIndex);
-        }}
+        onClick={() => goToStep(stepIndex)}
         className={`
           relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group
           ${isCompleted 
@@ -412,6 +357,18 @@ export function SetupWizard() {
     );
   };
 
+  const getInstitutionIcon = (type: InstitutionType) => {
+    const iconMap = {
+      [InstitutionType.MUSEUM]: Building,
+      [InstitutionType.MUNICIPALITY]: Building,
+      [InstitutionType.SCHOOL]: School,
+      [InstitutionType.CULTURAL_CENTER]: Star,
+      [InstitutionType.HOSPITAL]: Heart,
+      [InstitutionType.LIBRARY]: Library
+    };
+    return iconMap[type] || Building;
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Welcome
@@ -431,7 +388,7 @@ export function SetupWizard() {
                 Dobrodošli u CodilioCMS
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Kreiraćemo profesionalni portal vaše lokalne institucije u svega nekoliko koraka. 
+                Kreiraćemo profesionalni portal vaše institucije u svega nekoliko koraka. 
                 Proces je brz, siguran i potpuno prilagođen vašim potrebama.
               </p>
             </div>
@@ -450,600 +407,316 @@ export function SetupWizard() {
                 </div>
               ))}
             </div>
-
-            <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-100">
-              <div className="flex items-center justify-center space-x-2 mb-4">
-                <Lightbulb className="h-5 w-5 text-violet-600" />
-                <span className="text-sm font-medium text-violet-800">Pro tip</span>
-              </div>
-              <p className="text-violet-700 text-sm">
-                Pripremite logo vaše institucije (PNG ili JPG format) i osnovne kontakt informacije 
-                da biste ubrzali proces konfiguracije.
-              </p>
-            </div>
           </div>
         );
 
-      case 1: // Site Information
+      case 1: // NEW: Institution Type Selection
+        return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <div className="mx-auto w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mb-6 shadow-xl">
+                <Building className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Изаберите тип установе</h2>
+              <p className="text-gray-600">Ово ће одредити почетни дизајн и садржај вашег портала</p>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <RadioGroup 
+                value={selectedInstitutionType} 
+                onValueChange={(value: InstitutionType) => {
+                  setSelectedInstitutionType(value);
+                  setValue('institutionType', value);
+                }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                {institutionTypes.map((type) => {
+                  const IconComponent = getInstitutionIcon(type.value);
+                  const template = getInstitutionTemplate(type.value);
+                  
+                  return (
+                    <div key={type.value} className="relative">
+                      <RadioGroupItem 
+                        value={type.value} 
+                        id={type.value} 
+                        className="peer sr-only" 
+                      />
+                      <Label
+                        htmlFor={type.value}
+                        className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
+                      >
+                        <div 
+                          className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors"
+                          style={{ backgroundColor: `${template.primaryColor}20` }}
+                        >
+                          <IconComponent 
+                            className="h-8 w-8" 
+                            style={{ color: template.primaryColor }}
+                          />
+                        </div>
+                        <h3 className="font-semibold text-center">{type.label}</h3>
+                        <p className="text-sm text-muted-foreground text-center mt-2">
+                          {type.description}
+                        </p>
+                        
+                        {/* Template preview colors */}
+                        <div className="flex items-center space-x-2 mt-3">
+                          <div 
+                            className="w-4 h-4 rounded-full border"
+                            style={{ backgroundColor: template.primaryColor }}
+                            title="Primarna boja"
+                          />
+                          <div 
+                            className="w-4 h-4 rounded-full border"
+                            style={{ backgroundColor: template.secondaryColor }}
+                            title="Sekundarna boja"
+                          />
+                          <span className="text-xs text-muted-foreground" style={{ fontFamily: template.fontFamily }}>
+                            {template.fontFamily}
+                          </span>
+                        </div>
+                      </Label>
+                    </div>
+                  );
+                })}
+              </RadioGroup>
+            </div>
+
+            {/* Preview selected template */}
+            {selectedInstitutionType && (
+              <div className="max-w-2xl mx-auto mt-8">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border-2 border-dashed border-gray-200">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <Eye className="mr-2 h-4 w-4" />
+                    Pregled odabranog template-a
+                  </h4>
+                  
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Тип:</span>
+                      <span className="font-medium">{selectedTemplate.name}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Примарна боја:</span>
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-4 h-4 rounded border"
+                          style={{ backgroundColor: selectedTemplate.primaryColor }}
+                        />
+                        <span className="font-mono text-xs">{selectedTemplate.primaryColor}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Секундарна боја:</span>
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-4 h-4 rounded border"
+                          style={{ backgroundColor: selectedTemplate.secondaryColor }}
+                        />
+                        <span className="font-mono text-xs">{selectedTemplate.secondaryColor}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Фонт:</span>
+                      <span className="font-medium" style={{ fontFamily: selectedTemplate.fontFamily }}>
+                        {selectedTemplate.fontFamily}
+                      </span>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-gray-200">
+                      <span className="text-gray-600 dark:text-gray-400">Предефинисане секције:</span>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {selectedTemplate.predefinedSections.map((section, index) => (
+                          <span 
+                            key={index}
+                            className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          >
+                            {section.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 2: // Site Information
         return (
           <div className="space-y-8">
             <div className="text-center">
               <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full flex items-center justify-center mb-6 shadow-xl">
-                <Building className="h-10 w-10 text-white" />
+                <Globe className="h-10 w-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Identitet vaše institucije</h2>
-              <p className="text-gray-600">Osnovne informacije koje će se prikazivati na vašem portalu</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Основне информације о сајту</h2>
+              <p className="text-gray-600">Унесите основне податке о вашој институцији</p>
             </div>
 
             <div className="grid gap-6 max-w-2xl mx-auto">
               <div className="space-y-2">
-                <Label htmlFor="siteName" className="flex items-center space-x-2">
-                  <Building className="w-4 h-4 text-blue-600" />
-                  <span>Naziv institucije *</span>
-                </Label>
+                <Label htmlFor="siteName">Назив сајта *</Label>
                 <Input
                   id="siteName"
-                  {...register('siteName', { 
-                    required: 'Naziv je obavezan',
-                    maxLength: { value: 100, message: 'Maksimalno 100 karaktera' }
-                  })}
-                  placeholder="npr. Opština Mladenovac"
-                  className={`h-12 ${errors.siteName ? 'border-red-500 focus:border-red-500' : 'focus:border-blue-500'}`}
+                  {...register('siteName', { required: 'Назив је обавезан' })}
+                  placeholder="нпр. Народни музеј"
+                  className={errors.siteName ? 'border-red-500' : ''}
                 />
                 {errors.siteName && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <X className="w-4 h-4" />
-                    <span>{errors.siteName.message}</span>
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.siteName.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="siteTagline" className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                  <span>Slogan/Opis *</span>
-                </Label>
+                <Label htmlFor="siteTagline">Слоган/Опис *</Label>
                 <Textarea
                   id="siteTagline"
-                  {...register('siteTagline', { 
-                    required: 'Opis je obavezan',
-                    maxLength: { value: 200, message: 'Maksimalno 200 karaktera' }
-                  })}
-                  placeholder="npr. Transparentnost i dostupnost u službi građana"
+                  {...register('siteTagline', { required: 'Опис је обавезан' })}
+                  placeholder="нпр. Чувари културног наслеђа"
                   rows={3}
-                  className={errors.siteTagline ? 'border-red-500 focus:border-red-500' : 'focus:border-blue-500'}
+                  className={errors.siteTagline ? 'border-red-500' : ''}
                 />
                 {errors.siteTagline && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <X className="w-4 h-4" />
-                    <span>{errors.siteTagline.message}</span>
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.siteTagline.message}</p>
                 )}
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <div className="flex space-x-3">
-                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-medium text-blue-900 mb-1">💡 Saveti za dobar naziv</h4>
-                    <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• Koristite zvanični naziv vaše institucije</li>
-                      <li>• Kratko i jasno - lakše za pamćenje</li>
-                      <li>• Izbegavajte skraćenice koje nisu opšte poznate</li>
-                    </ul>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         );
 
-      case 2: // Admin User
+      case 3: // Admin User
         return (
           <div className="space-y-8">
             <div className="text-center">
               <div className="mx-auto w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mb-6 shadow-xl">
                 <Shield className="h-10 w-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Vaš administrator nalog</h2>
-              <p className="text-gray-600">Kreiraćemo siguran pristup za upravljanje portalom</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Администраторски налог</h2>
+              <p className="text-gray-600">Креирајте сигуран приступ за управљање порталом</p>
             </div>
 
             <div className="grid gap-6 max-w-2xl mx-auto">
               <div className="space-y-2">
-                <Label htmlFor="adminName" className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-emerald-600" />
-                  <span>Puno ime *</span>
-                </Label>
+                <Label htmlFor="adminName">Пуно име *</Label>
                 <Input
                   id="adminName"
-                  {...register('adminName', { 
-                    required: 'Ime je obavezno',
-                    maxLength: { value: 100, message: 'Maksimalno 100 karaktera' }
-                  })}
-                  placeholder="Marko Petrović"
-                  className={`h-12 ${errors.adminName ? 'border-red-500' : 'focus:border-emerald-500'}`}
+                  {...register('adminName', { required: 'Име је обавезно' })}
+                  placeholder="Марко Петровић"
+                  className={errors.adminName ? 'border-red-500' : ''}
                 />
                 {errors.adminName && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <X className="w-4 h-4" />
-                    <span>{errors.adminName.message}</span>
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.adminName.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adminEmail" className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 text-emerald-600" />
-                  <span>Email adresa *</span>
-                </Label>
+                <Label htmlFor="adminEmail">Email адреса *</Label>
                 <Input
                   id="adminEmail"
                   type="email"
                   {...register('adminEmail', { 
-                    required: 'Email je obavezan',
+                    required: 'Email је обавезан',
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: 'Neispravna email adresa'
+                      message: 'Неисправна email адреса'
                     }
                   })}
-                  placeholder="admin@mojainstitucija.rs"
-                  className={`h-12 ${errors.adminEmail ? 'border-red-500' : 'focus:border-emerald-500'}`}
+                  placeholder="admin@muzej.rs"
+                  className={errors.adminEmail ? 'border-red-500' : ''}
                 />
                 {errors.adminEmail && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <X className="w-4 h-4" />
-                    <span>{errors.adminEmail.message}</span>
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.adminEmail.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adminPassword" className="flex items-center space-x-2">
-                  <Lock className="w-4 h-4 text-emerald-600" />
-                  <span>Lozinka *</span>
-                </Label>
+                <Label htmlFor="adminPassword">Лозинка *</Label>
                 <Input
                   id="adminPassword"
                   type="password"
                   {...register('adminPassword', { 
-                    required: 'Lozinka je obavezna',
-                    minLength: { value: 6, message: 'Minimum 6 karaktera' },
-                    maxLength: { value: 50, message: 'Maksimalno 50 karaktera' }
+                    required: 'Лозинка је обавезна',
+                    minLength: { value: 6, message: 'Минимум 6 карактера' }
                   })}
                   placeholder="••••••••"
-                  className={`h-12 ${errors.adminPassword ? 'border-red-500' : 'focus:border-emerald-500'}`}
+                  className={errors.adminPassword ? 'border-red-500' : ''}
                 />
                 {errors.adminPassword && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <X className="w-4 h-4" />
-                    <span>{errors.adminPassword.message}</span>
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.adminPassword.message}</p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
-                  Koristićete ove podatke za prijavljivanje u admin panel
-                </p>
-              </div>
-
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                <div className="flex space-x-3">
-                  <Shield className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-medium text-emerald-900 mb-1">🔒 Sigurnost na prvom mestu</h4>
-                    <ul className="text-sm text-emerald-700 space-y-1">
-                      <li>• Koristite jaku lozinku (najmanje 8 karaktera)</li>
-                      <li>• Kombinujte slova, brojeve i simbole</li>
-                      <li>• Nikad ne delite pristupne podatke</li>
-                    </ul>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         );
 
-      case 3: // Contact
+      case 4: // Contact
         return (
           <div className="space-y-8">
             <div className="text-center">
               <div className="mx-auto w-20 h-20 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-6 shadow-xl">
                 <Phone className="h-10 w-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Kontakt informacije</h2>
-              <p className="text-gray-600">Kako vas građani mogu kontaktirati</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Контакт информације</h2>
+              <p className="text-gray-600">Како вас посетиоци могу контактирати</p>
             </div>
 
             <div className="grid gap-6 max-w-2xl mx-auto">
               <div className="space-y-2">
-                <Label htmlFor="contactEmail" className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 text-orange-600" />
-                  <span>Glavni email *</span>
-                </Label>
+                <Label htmlFor="contactEmail">Главни email *</Label>
                 <Input
                   id="contactEmail"
                   type="email"
                   {...register('contactEmail', { 
-                    required: 'Email je obavezan',
+                    required: 'Email је обавезан',
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: 'Neispravna email adresa'
+                      message: 'Неисправна email адреса'
                     }
                   })}
-                  placeholder="info@mojainstitucija.rs"
-                  className={`h-12 ${errors.contactEmail ? 'border-red-500' : 'focus:border-orange-500'}`}
+                  placeholder="info@muzej.rs"
+                  className={errors.contactEmail ? 'border-red-500' : ''}
                 />
                 {errors.contactEmail && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <X className="w-4 h-4" />
-                    <span>{errors.contactEmail.message}</span>
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.contactEmail.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4 text-orange-600" />
-                  <span>Telefon</span>
-                </Label>
+                <Label htmlFor="phone">Телефон</Label>
                 <Input
                   id="phone"
                   {...register('phone')}
                   placeholder="+381 11 123 4567"
-                  className="h-12 focus:border-orange-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address" className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-orange-600" />
-                  <span>Adresa</span>
-                </Label>
+                <Label htmlFor="address">Адреса</Label>
                 <Textarea
                   id="address"
                   {...register('address')}
-                  placeholder="Trg Republike 1, 11000 Beograd"
+                  placeholder="Музејска улица 1, 11000 Београд"
                   rows={2}
-                  className="focus:border-orange-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="workingHours" className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4 text-orange-600" />
-                  <span>Radno vreme</span>
-                </Label>
+                <Label htmlFor="workingHours">Радно време</Label>
                 <Input
                   id="workingHours"
                   {...register('workingHours')}
-                  placeholder="Ponedeljak - Petak: 08:00 - 16:00"
-                  className="h-12 focus:border-orange-500"
+                  placeholder="Понедељак - Петак: 10:00 - 18:00"
                 />
               </div>
-
-              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <div className="flex space-x-3">
-                  <Bell className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-medium text-orange-900 mb-1">📧 Napomena</h4>
-                    <p className="text-sm text-orange-700">
-                      Na glavni email će stizati sve poruke sa kontakt forme. 
-                      Ostale informacije su opcione i možete ih dodati kasnije.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         );
 
-      case 4: // Appearance
-        return (
-          <div className="space-y-8">
-            <div className="text-center">
-              <div className="mx-auto w-20 h-20 bg-gradient-to-r from-pink-500 to-rose-600 rounded-full flex items-center justify-center mb-6 shadow-xl">
-                <Palette className="h-10 w-10 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Vizuelni identitet</h2>
-              <p className="text-gray-600">Prilagodite boje i stil portala</p>
-            </div>
-
-            <div className="grid gap-8 max-w-2xl mx-auto">
-              {/* Color Scheme */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <Palette className="w-5 h-5 text-pink-600" />
-                  <span>Paleta boja</span>
-                </h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Primarna boja</Label>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        id="primaryColor"
-                        type="color"
-                        {...register('primaryColor')}
-                        className="w-12 h-12 rounded-lg border-2 border-gray-200 cursor-pointer"
-                      />
-                      <Input
-                        value={watchedValues.primaryColor}
-                        onChange={(e) => setValue('primaryColor', e.target.value)}
-                        placeholder="#3B82F6"
-                        className="flex-1 h-12"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryColor">Sekundarna boja</Label>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        id="secondaryColor"
-                        type="color"
-                        {...register('secondaryColor')}
-                        className="w-12 h-12 rounded-lg border-2 border-gray-200 cursor-pointer"
-                      />
-                      <Input
-                        value={watchedValues.secondaryColor}
-                        onChange={(e) => setValue('secondaryColor', e.target.value)}
-                        placeholder="#10B981"
-                        className="flex-1 h-12"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Color Preview */}
-                <div className="bg-gray-50 rounded-xl p-4 border-2 border-dashed border-gray-200">
-                  <h4 className="text-sm font-medium mb-3">Pregled boja</h4>
-                  <div className="flex space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <div 
-                        className="w-8 h-8 rounded-lg border"
-                        style={{ backgroundColor: watchedValues.primaryColor }}
-                      />
-                      <span className="text-sm">Primarna</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div 
-                        className="w-8 h-8 rounded-lg border"
-                        style={{ backgroundColor: watchedValues.secondaryColor }}
-                      />
-                      <span className="text-sm">Sekundarna</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Font Selection */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <span className="text-xl">Aa</span>
-                  <span>Tipografija</span>
-                </h3>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  {['Inter', 'Roboto', 'Open Sans', 'Lato'].map((font) => (
-                    <label key={font} className="cursor-pointer">
-                      <input
-                        type="radio"
-                        value={font}
-                        {...register('fontFamily')}
-                        className="sr-only"
-                      />
-                      <div className={`
-                        p-4 rounded-lg border-2 transition-all text-center
-                        ${watchedValues.fontFamily === font 
-                          ? 'border-pink-500 bg-pink-50' 
-                          : 'border-gray-200 hover:border-gray-300'
-                        }
-                      `}>
-                        <span style={{ fontFamily: font }} className="text-lg font-medium">
-                          {font}
-                        </span>
-                        <p style={{ fontFamily: font }} className="text-sm text-gray-500 mt-1">
-                          Brzo smeđe lisice skoče
-                        </p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dark Mode Toggle */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <div className="flex items-center space-x-1">
-                    <Sun className="w-4 h-4" />
-                    <Moon className="w-4 h-4" />
-                  </div>
-                  <span>Tema</span>
-                </h3>
-                
-                <label className="flex items-center justify-between p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-300">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-900 rounded-lg">
-                      <Moon className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Omogući tamnu temu</h4>
-                      <p className="text-sm text-gray-500">Korisnici mogu birati između svetle i tamne teme</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    {...register('darkMode')}
-                    className="sr-only"
-                  />
-                  <div className={`
-                    w-12 h-6 rounded-full transition-colors relative
-                    ${watchedValues.darkMode ? 'bg-pink-500' : 'bg-gray-200'}
-                  `}>
-                    <div className={`
-                      w-5 h-5 bg-white rounded-full shadow-sm transition-transform absolute top-0.5
-                      ${watchedValues.darkMode ? 'translate-x-6' : 'translate-x-0.5'}
-                    `} />
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 5: // Features
-        return (
-          <div className="space-y-8">
-            <div className="text-center">
-              <div className="mx-auto w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-xl">
-                <Target className="h-10 w-10 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Funkcionalnosti</h2>
-              <p className="text-gray-600">Izaberite šta želite da omogućite na portalu</p>
-            </div>
-
-            <div className="grid gap-6 max-w-2xl mx-auto">
-              {/* Core Features */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <Zap className="w-5 h-5 text-indigo-600" />
-                  <span>Osnovne funkcije</span>
-                </h3>
-                
-                <div className="space-y-3">
-                  {[
-                    {
-                      key: 'enableNewsletter' as keyof EnhancedSetupFormData,
-                      icon: Mail,
-                      title: 'Newsletter sistem',
-                      description: 'Omogućite građanima da se pretplate na novosti',
-                      recommended: true
-                    },
-                    {
-                      key: 'enableComments' as keyof EnhancedSetupFormData,
-                      icon: Bell,
-                      title: 'Komentari na objave',
-                      description: 'Dozvolite komentrisanje objava',
-                      recommended: false
-                    },
-                    {
-                      key: 'enableAnalytics' as keyof EnhancedSetupFormData,
-                      icon: BarChart3,
-                      title: 'Google Analytics',
-                      description: 'Pratite statistike poseta sajta',
-                      recommended: true
-                    }
-                  ].map((feature) => (
-                    <label key={feature.key} className="flex items-center justify-between p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition-all">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${
-                          watchedValues[feature.key] ? 'bg-indigo-100' : 'bg-gray-100'
-                        }`}>
-                          <feature.icon className={`w-5 h-5 ${
-                            watchedValues[feature.key] ? 'text-indigo-600' : 'text-gray-500'
-                          }`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h4 className="font-medium">{feature.title}</h4>
-                            {feature.recommended && (
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                                Preporučeno
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-500">{feature.description}</p>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        {...register(feature.key)}
-                        className="sr-only"
-                      />
-                      <div className={`
-                        w-12 h-6 rounded-full transition-colors relative
-                        ${watchedValues[feature.key] ? 'bg-indigo-500' : 'bg-gray-200'}
-                      `}>
-                        <div className={`
-                          w-5 h-5 bg-white rounded-full shadow-sm transition-transform absolute top-0.5
-                          ${watchedValues[feature.key] ? 'translate-x-6' : 'translate-x-0.5'}
-                        `} />
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Social Media */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <Share2 className="w-5 h-5 text-indigo-600" />
-                  <span>Društvene mreže</span>
-                </h3>
-                
-                <div className="grid gap-3">
-                  <Input
-                    {...register('facebook')}
-                    placeholder="Facebook stranica (opciono)"
-                    className="h-12 focus:border-indigo-500"
-                  />
-                  <Input
-                    {...register('twitter')}
-                    placeholder="Twitter/X profil (opciono)"
-                    className="h-12 focus:border-indigo-500"
-                  />
-                  <Input
-                    {...register('instagram')}
-                    placeholder="Instagram profil (opciono)"
-                    className="h-12 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              {/* Email Configuration */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <Wifi className="w-5 h-5 text-indigo-600" />
-                  <span>Email podešavanja (opciono)</span>
-                </h3>
-                
-                <div className="grid gap-3">
-                  <Input
-                    {...register('smtpHost')}
-                    placeholder="SMTP host (npr. smtp.gmail.com)"
-                    className="h-12 focus:border-indigo-500"
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      {...register('smtpPort')}
-                      placeholder="Port (587)"
-                      className="h-12 focus:border-indigo-500"
-                    />
-                    <Input
-                      {...register('smtpUser')}
-                      placeholder="Korisničko ime"
-                      className="h-12 focus:border-indigo-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-                  <div className="flex space-x-3">
-                    <Info className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-indigo-900 mb-1">📧 Email konfiguracija</h4>
-                      <p className="text-sm text-indigo-700">
-                        Ova podešavanja možete promeniti kasnije u admin panelu. 
-                        Bez njih će sistem koristiti osnovnu konfiguraciju.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 6: // Complete
+      case 5: // Complete
         return (
           <div className="text-center space-y-8">
             <div className="relative">
@@ -1057,11 +730,11 @@ export function SetupWizard() {
             
             <div className="space-y-4">
               <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                Čestitamo! 🎉
+                Честитамо! 🎉
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Vaš CodilioCMS portal je uspešno konfigurisan i spreman za korišćenje. 
-                Automatski ste prijavljeni kao administrator.
+                Ваш CodilioCMS портал је успешно конфигурисан са {selectedTemplate.name} темплејтом. 
+                Почетне секције су аутоматски креиране и можете их даље прилагодити у Page Builder-у.
               </p>
             </div>
 
@@ -1069,27 +742,27 @@ export function SetupWizard() {
               <Card className="p-6 border-green-200 bg-green-50">
                 <CardHeader className="p-0 mb-4">
                   <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Lightbulb className="w-6 h-6 text-white" />
+                    <Layout className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-center text-green-900">Sledeći koraci</CardTitle>
+                  <CardTitle className="text-center text-green-900">Ваш темплејт</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <ul className="text-sm text-green-800 space-y-2">
                     <li className="flex items-center space-x-2">
                       <Check className="w-4 h-4 text-green-600" />
-                      <span>Dodajte prve objave i stranice</span>
+                      <span>Тип: {selectedTemplate.name}</span>
                     </li>
                     <li className="flex items-center space-x-2">
                       <Check className="w-4 h-4 text-green-600" />
-                      <span>Postavite logo i favicon</span>
+                      <span>{selectedTemplate.predefinedSections.length} предефинисаних секција</span>
                     </li>
                     <li className="flex items-center space-x-2">
                       <Check className="w-4 h-4 text-green-600" />
-                      <span>Konfigurišite dodatna podešavanja</span>
+                      <span>Прилагођене боје и фонтови</span>
                     </li>
                     <li className="flex items-center space-x-2">
                       <Check className="w-4 h-4 text-green-600" />
-                      <span>Pozovite tim da koristi CMS</span>
+                      <span>Спремно за даље уређивање</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -1098,27 +771,27 @@ export function SetupWizard() {
               <Card className="p-6 border-blue-200 bg-blue-50">
                 <CardHeader className="p-0 mb-4">
                   <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Heart className="w-6 h-6 text-white" />
+                    <Lightbulb className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-center text-blue-900">Podrška i resursi</CardTitle>
+                  <CardTitle className="text-center text-blue-900">Следећи кораци</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <ul className="text-sm text-blue-800 space-y-2">
                     <li className="flex items-center space-x-2">
-                      <FileText className="w-4 h-4 text-blue-600" />
-                      <span>Dokumentacija za korisnike</span>
+                      <ArrowRight className="w-4 h-4 text-blue-600" />
+                      <span>Идите у Page Builder за уређивање</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-blue-600" />
-                      <span>Email podrška 24/7</span>
+                      <ArrowRight className="w-4 h-4 text-blue-600" />
+                      <span>Додајте своје слике и садржај</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-blue-600" />
-                      <span>Zajednica korisnika</span>
+                      <ArrowRight className="w-4 h-4 text-blue-600" />
+                      <span>Креирајте објаве и галерије</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <Database className="w-4 h-4 text-blue-600" />
-                      <span>Redovni backup i ažuriranja</span>
+                      <ArrowRight className="w-4 h-4 text-blue-600" />
+                      <span>Прилагодите подешавања</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -1128,11 +801,11 @@ export function SetupWizard() {
             <div className="space-y-4">
               <Button 
                 size="lg"
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => window.location.href = '/dashboard/pages'}
                 className="h-14 px-8 text-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
               >
-                <Shield className="mr-3 h-6 w-6" />
-                Idite u admin panel
+                <Layout className="mr-3 h-6 w-6" />
+                Отвори Page Builder
               </Button>
               
               <Button 
@@ -1142,18 +815,18 @@ export function SetupWizard() {
                 className="h-14 px-8 text-lg ml-4"
               >
                 <Eye className="mr-3 h-6 w-6" />
-                Pogledajte sajt
+                Погледај сајт
               </Button>
             </div>
 
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
               <div className="flex items-center justify-center space-x-2 mb-3">
-                <Star className="h-5 w-5 text-green-600" />
-                <span className="text-sm font-medium text-green-800">Hvala vam!</span>
+                <Info className="h-5 w-5 text-green-600" />
+                <span className="text-sm font-medium text-green-800">Напомена</span>
               </div>
               <p className="text-green-700 text-sm">
-                Hvala što ste izabrali CodilioCMS. Vaš feedback nam pomaže da poboljšavamo sistem. 
-                Ukoliko imate pitanja, slobodno nas kontaktirajte.
+                Креиране су следеће секције на почетној страници: {selectedTemplate.predefinedSections.map(s => s.name).join(', ')}. 
+                Можете их уредити или додати нове секције у Page Builder-у.
               </p>
             </div>
           </div>
@@ -1210,7 +883,7 @@ export function SetupWizard() {
           
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Korak {currentStep + 1} od {STEPS.length} • {Math.round((currentStep / (STEPS.length - 1)) * 100)}% završeno
+              Корак {currentStep + 1} од {STEPS.length} • {Math.round((currentStep / (STEPS.length - 1)) * 100)}% завршено
             </p>
           </div>
         </div>
@@ -1236,7 +909,7 @@ export function SetupWizard() {
               </div>
 
               {/* Navigation Buttons */}
-              {currentStep < 6 && (
+              {currentStep < 5 && (
                 <div className="flex justify-between mt-12 pt-8 border-t border-gray-100">
                   <Button
                     type="button"
@@ -1246,25 +919,25 @@ export function SetupWizard() {
                     className="h-12 px-6"
                   >
                     <ArrowLeft className="mr-2 h-5 w-5" />
-                    Nazad
+                    Назад
                   </Button>
 
-                  {currentStep === 5 ? (
+                  {currentStep === 4 ? (
                     <Button 
-                      type="button"  // KRITIČNO: Promenio sa "submit" na "button"
-                      onClick={handleSubmit(onSubmit)}  // KRITIČNO: Eksplicitno pozovi submit
+                      type="button"
+                      onClick={handleSubmit(onSubmit)}
                       disabled={isSubmitting}
                       className={`h-12 px-8 bg-gradient-to-r ${currentStepData.color} hover:opacity-90 transition-all`}
                     >
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Završavam setup...
+                          Креирам портал...
                         </>
                       ) : (
                         <>
                           <Rocket className="mr-2 h-5 w-5" />
-                          Završi konfiguraciju
+                          Заврши конфигурацију
                         </>
                       )}
                     </Button>
@@ -1272,13 +945,12 @@ export function SetupWizard() {
                     <Button 
                       type="button" 
                       onClick={(e) => {
-                        e.preventDefault(); // KRITIČNO: Zaustavi default form behavior
-                        console.log('🖱️ Dalje button clicked');
+                        e.preventDefault();
                         nextStep();
                       }}
                       className={`h-12 px-6 bg-gradient-to-r ${currentStepData.color} hover:opacity-90 transition-all`}
                     >
-                      Dalje
+                      Даље
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   )}
@@ -1291,7 +963,7 @@ export function SetupWizard() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            CodilioCMS &copy; 2025 - Profesionalni CMS za lokalne institucije
+            CodilioCMS &copy; 2025 - Професионални CMS за локалне институције
           </p>
         </div>
       </div>
