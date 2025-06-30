@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'dark-mode-darko-dev', 
+                git branch: 'dev', 
                     url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git'
             }
         }
@@ -71,16 +71,18 @@ pipeline {
                         if [ -f "docker-compose.yml" ]; then
                             echo "✅ Using docker-compose for deployment"
                             
-                            # Stop and remove old frontend container if exists
-                            docker-compose stop frontend || true
-                            docker-compose rm -f frontend || true
+                            # ⚠️ NOVA METODA: Kompletno restartovanje da se izbegne ContainerConfig greška
+                            echo "🛑 Stopping all services to prevent ContainerConfig errors..."
+                            docker-compose down --remove-orphans || true
                             
-                            # Pull latest and start
-                            docker-compose pull frontend
-                            docker-compose up -d frontend
+                            echo "🧹 Cleaning up old containers..."
+                            docker container prune -f || true
                             
-                            echo "⏳ Waiting for frontend to start..."
-                            sleep 25
+                            echo "🚀 Starting services with force recreate..."
+                            docker-compose up -d --force-recreate
+                            
+                            echo "⏳ Waiting for services to start..."
+                            sleep 30
                         else
                             echo "❌ docker-compose.yml not found in ${DEPLOY_PATH}"
                             echo "Please create the docker-compose.yml file first"
