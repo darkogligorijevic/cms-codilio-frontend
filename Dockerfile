@@ -1,6 +1,5 @@
 # 1. Build stage
 FROM node:18-alpine AS builder
-
 WORKDIR /app
 
 # Copy package files
@@ -18,8 +17,8 @@ RUN npm run build
 # 2. Production stage
 FROM node:18-alpine AS production
 
-# Install dumb-init
-RUN apk add --no-cache dumb-init
+# Install dumb-init and wget for healthcheck
+RUN apk add --no-cache dumb-init wget
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs \
@@ -27,16 +26,20 @@ RUN addgroup -g 1001 -S nodejs \
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY --from=builder /app/package*.json ./
+# ⚠️ KRITIČNA IZMENA: Ne instaliraj production dependencies
+# Next.js standalone uključuje sve potrebne dependencies
 
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy built application
+# Copy the standalone output FIRST
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+
+# Copy static assets
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy public directory
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# ⚠️ NOVA LINIJA: Copy original package.json for proper server startup
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 # Switch to non-root user
 USER nextjs
@@ -44,6 +47,7 @@ USER nextjs
 # Set environment
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Expose port
 EXPOSE 3000
