@@ -43,22 +43,22 @@ interface FormData extends CreateOrganizationalUnitDto {
 }
 
 const unitTypeOptions = [
-  { value: UnitType.DEPARTMENT, label: 'Odsek' },
-  { value: UnitType.DIVISION, label: 'Odeljenje' },
-  { value: UnitType.SECTOR, label: 'Sektor' },
-  { value: UnitType.SERVICE, label: 'Služba' },
-  { value: UnitType.OFFICE, label: 'Kancelarija' },
-  { value: UnitType.COMMITTEE, label: 'Komisija' },
-  { value: UnitType.OTHER, label: 'Ostalo' }
+  { value: UnitType.DEPARTMENT, label: 'Одсек' },
+  { value: UnitType.DIVISION, label: 'Одељење' },
+  { value: UnitType.SECTOR, label: 'Сектор' },
+  { value: UnitType.SERVICE, label: 'Служба' },
+  { value: UnitType.OFFICE, label: 'Канцеларија' },
+  { value: UnitType.COMMITTEE, label: 'Комисија' },
+  { value: UnitType.OTHER, label: 'Остало' }
 ];
 
 const contactTypeOptions = [
-  { value: ContactType.MANAGER, label: 'Menadžer' },
-  { value: ContactType.DEPUTY, label: 'Zamenik' },
-  { value: ContactType.SECRETARY, label: 'Sekretar' },
-  { value: ContactType.COORDINATOR, label: 'Koordinator' },
-  { value: ContactType.SPECIALIST, label: 'Stručnjak' },
-  { value: ContactType.OTHER, label: 'Ostalo' }
+  { value: ContactType.MANAGER, label: 'Менаџер' },
+  { value: ContactType.DEPUTY, label: 'Заменик' },
+  { value: ContactType.SECRETARY, label: 'Секретар' },
+  { value: ContactType.COORDINATOR, label: 'Координатор' },
+  { value: ContactType.SPECIALIST, label: 'Стручњак' },
+  { value: ContactType.OTHER, label: 'Остало' }
 ];
 
 export function OrganizationalUnitForm({ 
@@ -122,16 +122,16 @@ export function OrganizationalUnitForm({
       
       if (unit) {
         await organizationalApi.update(unit.id, data);
-        toast.success('Organizaciona jedinica je uspešno ažurirana');
+        toast.success('Организациона јединица је успешно ажурирана');
       } else {
         await organizationalApi.create(data);
-        toast.success('Organizaciona jedinica je uspešno kreirana');
+        toast.success('Организациона јединица је успешно креирана');
       }
       
       onSubmit();
     } catch (error: any) {
       console.error('Error saving unit:', error);
-      toast.error(error.response?.data?.message || 'Greška pri čuvanju organizacione jedinice');
+      toast.error(error.response?.data?.message || 'Грешка при чувању организационе јединице');
     } finally {
       setIsSubmitting(false);
     }
@@ -152,7 +152,7 @@ export function OrganizationalUnitForm({
                   : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
-              Osnovni podaci
+              Основни подаци
             </button>
             <button
               type="button"
@@ -163,7 +163,7 @@ export function OrganizationalUnitForm({
                   : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
-              Detalji
+              Детаљи
             </button>
             <button
               type="button"
@@ -174,7 +174,7 @@ export function OrganizationalUnitForm({
                   : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
-              Kontakti
+              Контакти
             </button>
           </div>
         </div>
@@ -188,22 +188,22 @@ export function OrganizationalUnitForm({
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Building className="h-5 w-5" />
-                    <span>Osnovne informacije</span>
+                    <span>Основне информације</span>
                   </CardTitle>
                   <CardDescription>
-                    Unesite osnovne podatke o organizacionoj jedinici
+                    Унесите основне податке о организационој јединици
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Naziv jedinice *</Label>
+                      <Label htmlFor="name">Назив јединице *</Label>
                       <Input
                         id="name"
-                        placeholder="npr. Odsek za javne nabavke"
+                        placeholder="нпр. Одсек за јавне набавке"
                         {...form.register('name', { 
-                          required: 'Naziv je obavezan',
-                          minLength: { value: 2, message: 'Naziv mora imati najmanje 2 karaktera' }
+                          required: 'Назив је обавезан',
+                          minLength: { value: 2, message: 'Назив мора имати најмање 2 карактера' }
                         })}
                       />
                       {form.formState.errors.name && (
@@ -212,20 +212,20 @@ export function OrganizationalUnitForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="code">Kod jedinice *</Label>
+                      <Label htmlFor="code">Код јединице *</Label>
                       <Input
                         id="code"
-                        placeholder="npr. OJN-001"
+                        placeholder="нпр. ОЈН-001"
                         {...form.register('code', {
-                          required: 'Kod je obavezan',
+                          required: 'Код је обавезан',
                           pattern: {
                             value: /^[A-Za-z0-9-_]+$/,
-                            message: 'Kod može sadržati samo slova, brojeve, crtice i podvlake'
+                            message: 'Код може садржати само слова, бројеве, цртице и подвлаке'
                           }
                         })}
                       />
                       <p className="text-xs text-gray-500">
-                        Jedinstveni kod za identifikaciju (samo slova, brojevi i crtice)
+                        Јединствени код за идентификацију (само слова, бројеви и цртице)
                       </p>
                       {form.formState.errors.code && (
                         <p className="text-sm text-red-600">{form.formState.errors.code.message}</p>
@@ -235,7 +235,7 @@ export function OrganizationalUnitForm({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="type">Tip jedinice</Label>
+                      <Label htmlFor="type">Тип јединице</Label>
                       <select
                         id="type"
                         {...form.register('type')}
@@ -250,7 +250,7 @@ export function OrganizationalUnitForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="parentId">Nadređena jedinica</Label>
+                      <Label htmlFor="parentId">Надређена јединица</Label>
                       <select
                         id="parentId"
                         {...form.register('parentId', {
@@ -258,7 +258,7 @@ export function OrganizationalUnitForm({
                         })}
                         className="flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-gray-900 px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <option value="">Nema nadređene (koren)</option>
+                        <option value="">Нема надређене (корен)</option>
                         {parentOptions.map(parent => (
                           <option key={parent.id} value={parent.id.toString()}>
                             {parent.name} ({parent.code})
@@ -269,10 +269,10 @@ export function OrganizationalUnitForm({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description">Opis</Label>
+                    <Label htmlFor="description">Опис</Label>
                     <Textarea
                       id="description"
-                      placeholder="Kratki opis nadležnosti i aktivnosti..."
+                      placeholder="Кратак опис надлежности и активности..."
                       rows={3}
                       {...form.register('description')}
                     />
@@ -290,30 +290,30 @@ export function OrganizationalUnitForm({
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <User className="h-5 w-5" />
-                      <span>Rukovodstvo</span>
+                      <span>Руководство</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="managerName">Ime rukovodioca</Label>
+                      <Label htmlFor="managerName">Име руководиоца</Label>
                       <Input
                         id="managerName"
-                        placeholder="npr. Marko Petrović"
+                        placeholder="нпр. Марко Петровић"
                         {...form.register('managerName')}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="managerTitle">Funkcija rukovodioca</Label>
+                      <Label htmlFor="managerTitle">Функција руководиоца</Label>
                       <Input
                         id="managerTitle"
-                        placeholder="npr. Načelnik odseka"
+                        placeholder="нпр. Начелник одсека"
                         {...form.register('managerTitle')}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="employeeCount">Broj zaposlenih</Label>
+                      <Label htmlFor="employeeCount">Број запослених</Label>
                       <Input
                         id="employeeCount"
                         type="number"
@@ -331,12 +331,12 @@ export function OrganizationalUnitForm({
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Phone className="h-5 w-5" />
-                      <span>Kontakt informacije</span>
+                      <span>Контакт информације</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Telefon</Label>
+                      <Label htmlFor="phone">Телефон</Label>
                       <Input
                         id="phone"
                         placeholder="+381 11 123 4567"
@@ -345,20 +345,20 @@ export function OrganizationalUnitForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email adresa</Label>
+                      <Label htmlFor="email">Email адреса</Label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder="odsek@institucija.rs"
+                        placeholder="одсек@институција.рс"
                         {...form.register('email')}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="location">Lokacija</Label>
+                      <Label htmlFor="location">Локација</Label>
                       <Input
                         id="location"
-                        placeholder="Zgrada A, I sprat, kancelarija 101"
+                        placeholder="Зграда А, I спрат, канцеларија 101"
                         {...form.register('location')}
                       />
                     </div>
@@ -377,15 +377,15 @@ export function OrganizationalUnitForm({
                     <div>
                       <CardTitle className="flex items-center space-x-2">
                         <Users className="h-5 w-5" />
-                        <span>Lista kontakata</span>
+                        <span>Листа контаката</span>
                       </CardTitle>
                       <CardDescription>
-                        Dodajte kontakt osobe za ovu organizacionu jedinicu
+                        Додајте контакт особе за ову организациону јединицу
                       </CardDescription>
                     </div>
                     <Button type="button" variant={theme === "light" ? "default" : "secondaryDefault"} onClick={addContact} size="sm">
                       <Plus className="mr-2 h-4 w-4" />
-                      Dodaj kontakt
+                      Додај контакт
                     </Button>
                   </div>
                 </CardHeader>
@@ -393,8 +393,8 @@ export function OrganizationalUnitForm({
                   {fields.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       <Users className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                      <p>Nema dodanih kontakata</p>
-                      <p className="text-sm">Kliknite "Dodaj kontakt" da dodate prvi kontakt</p>
+                      <p>Нема додатих контаката</p>
+                      <p className="text-sm">Кликните "Додај контакт" да додате први контакт</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -403,7 +403,7 @@ export function OrganizationalUnitForm({
                           <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                               <Badge variant="outline">
-                                Kontakt {index + 1}
+                                Контакт {index + 1}
                               </Badge>
                               <Button
                                 type="button"
@@ -419,10 +419,10 @@ export function OrganizationalUnitForm({
                           <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <Label>Ime i prezime *</Label>
+                                <Label>Име и презиме *</Label>
                                 <Input
-                                  placeholder="Ana Marić"
-                                  {...form.register(`contacts.${index}.name`, { required: 'Ime je obavezno' })}
+                                  placeholder="Ана Марић"
+                                  {...form.register(`contacts.${index}.name`, { required: 'Име је обавезно' })}
                                 />
                                 {form.formState.errors.contacts?.[index]?.name && (
                                   <p className="text-sm text-red-600">
@@ -432,10 +432,10 @@ export function OrganizationalUnitForm({
                               </div>
 
                               <div className="space-y-2">
-                                <Label>Funkcija *</Label>
+                                <Label>Функција *</Label>
                                 <Input
-                                  placeholder="Referent za..."
-                                  {...form.register(`contacts.${index}.title`, { required: 'Funkcija je obavezna' })}
+                                  placeholder="Референт за..."
+                                  {...form.register(`contacts.${index}.title`, { required: 'Функција је обавезна' })}
                                 />
                                 {form.formState.errors.contacts?.[index]?.title && (
                                   <p className="text-sm text-red-600">
@@ -447,7 +447,7 @@ export function OrganizationalUnitForm({
 
                             <div className="grid grid-cols-3 gap-4">
                               <div className="space-y-2">
-                                <Label>Tip kontakta</Label>
+                                <Label>Тип контакта</Label>
                                 <select
                                   {...form.register(`contacts.${index}.type`)}
                                   className="flex h-9 w-full rounded-md border border-input bg-transparent dark:bg-gray-900 px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -461,7 +461,7 @@ export function OrganizationalUnitForm({
                               </div>
 
                               <div className="space-y-2">
-                                <Label>Telefon</Label>
+                                <Label>Телефон</Label>
                                 <Input
                                   placeholder="+381 11..."
                                   {...form.register(`contacts.${index}.phone`)}
@@ -469,7 +469,7 @@ export function OrganizationalUnitForm({
                               </div>
 
                               <div className="space-y-2">
-                                <Label>Kancelarija</Label>
+                                <Label>Канцеларија</Label>
                                 <Input
                                   placeholder="101"
                                   {...form.register(`contacts.${index}.office`)}
@@ -478,10 +478,10 @@ export function OrganizationalUnitForm({
                             </div>
 
                             <div className="space-y-2">
-                              <Label>Email adresa</Label>
+                              <Label>Email адреса</Label>
                               <Input
                                 type="email"
-                                placeholder="ana.maric@institucija.rs"
+                                placeholder="ана.марић@институција.рс"
                                 {...form.register(`contacts.${index}.email`)}
                               />
                             </div>
@@ -504,7 +504,7 @@ export function OrganizationalUnitForm({
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            Otkaži
+            Откажи
           </Button>
           <Button 
             type="submit" 
@@ -512,7 +512,7 @@ export function OrganizationalUnitForm({
             variant={theme === "light" ? "default" : "secondaryDefault"}
             className="min-w-[100px]"
           >
-            {isSubmitting ? 'Čuva se...' : unit ? 'Ažuriraj' : 'Kreiraj'}
+            {isSubmitting ? 'Чува се...' : unit ? 'Ажурирај' : 'Креирај'}
           </Button>
         </div>
       </form>
