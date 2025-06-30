@@ -726,7 +726,7 @@ export default function DirectorsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className='max-w-xl'>
           <DialogHeader>
             <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>

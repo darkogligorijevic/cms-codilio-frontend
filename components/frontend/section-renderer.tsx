@@ -28,11 +28,19 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     return null;
   }
 
+  // Check if this is a hero section that handles its own spacing
+  const isFullHeightSection = [
+    SectionType.HERO_IMAGE,
+    SectionType.HERO_VIDEO,
+    SectionType.HERO_STACK,
+    SectionType.HERO_LEFT
+  ].includes(section.type);
+
   // Get layout classes based on section data
   const getLayoutClasses = () => {
     const classes = [];
     
-    // Layout
+    // Layout width
     switch (section.data.layout) {
       case 'full-width':
         classes.push('w-full');
@@ -43,33 +51,30 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
         break;
     }
 
-    switch (section.data.height) {
-      case '100%':
-        classes.push('min-h-screen');
-        break;
-      case '75%':
-        classes.push('min-h-[75vh]');
-        break;
-      case '50%':
-        classes.push('min-h-[50vh]');
-        break;
-      case '25%':
-        classes.push('min-h-[25vh]');
-        break;
-      default:
-        classes.push('min-h-screen');
-        break;
+    // Height - only apply to hero sections
+    if (isFullHeightSection && section.data.height) {
+      switch (section.data.height) {
+        case '100%':
+          classes.push('min-h-screen');
+          break;
+        case '75%':
+          classes.push('min-h-[75vh]');
+          break;
+        case '50%':
+          classes.push('min-h-[50vh]');
+          break;
+        case '25%':
+          classes.push('min-h-[25vh]');
+          break;
+        default:
+          // Default height for hero sections if no height specified
+          classes.push('min-h-[60vh]');
+          break;
+      }
     }
     
     return classes.join(' ');
   };
-
-  const isFullHeightSection = [
-    SectionType.HERO_IMAGE,
-    SectionType.HERO_VIDEO,
-    SectionType.HERO_STACK,
-    SectionType.HERO_LEFT
-  ].includes(section.type);
 
   const getInlineStyles = () => {
     const styles: React.CSSProperties = {};
@@ -141,6 +146,7 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
     <section
       className={cn(
         'relative',
+        // Only apply py-16 to non-hero sections
         !isFullHeightSection && 'py-12 lg:py-16',
         getLayoutClasses(),
         section.cssClasses,

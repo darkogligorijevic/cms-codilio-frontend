@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, MessageCircle, X, Minimize2, AlertTriangle, RefreshCw, Settings } from 'lucide-react';
+import { Send, Bot, User, Loader2, MessageCircle, X, Minimize2, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -17,8 +17,8 @@ interface FloatingChatWidgetProps {
 }
 
 const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({ 
-  context = 'Ти си AI асистент за dashboard. Помажеш корисницима да користе систем. Одговарај на српском језику.',
-  apiUrl = 'http://31.97.47.83:5001'
+  context = 'Ti si AI asistent za dashboard. Pomažeš korisnicima da koriste sistem. Odgovaraj na srpskom jeziku.',
+  apiUrl = 'http://localhost:3001/api'
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -29,9 +29,6 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const [error, setError] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [currentModel, setCurrentModel] = useState<string>('llama3.2');
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [showModelSelect, setShowModelSelect] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,56 +50,40 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
     }
   }, [isOpen]);
 
-  const initializeChat = async () => {
-    addSystemMessage('🚀 Покретање AI асистента...');
-    
-    // Create new session
-    await createNewSession();
-    
-    // Check server health
-    await checkServerHealth();
-    
-    // Load available models
-    await loadModels();
-    
-    addSystemMessage('✅ AI асистент је спреман за коришћење!');
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   };
 
-  const createNewSession = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/api/session/new`, {
-        method: 'POST',
-        signal: AbortSignal.timeout(10000)
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setSessionId(data.session_id);
-          return true;
-        }
-      }
-    } catch (error) {
-      console.error('Error creating session:', error);
-    }
-    
-    // Fallback: generate local session ID
-    const fallbackId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setSessionId(fallbackId);
-    return false;
+  const initializeChat = async () => {
+    addSystemMessage('🚀 Pokretanje AI asistenta...');
+    createNewSession();
+    await checkServerHealth();
+    addSystemMessage('✅ AI asistent je spreman za korišćenje!');
+  };
+
+  const createNewSession = () => {
+    const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setSessionId(newSessionId);
+    return true;
   };
 
   const checkServerHealth = async () => {
     try {
       setConnectionStatus('checking');
-      const response = await fetch(`${apiUrl}/api/health`, {
+      const token = getAuthToken();
+      
+      const response = await fetch(`${apiUrl}/ai-agent/health`, {
         method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         signal: AbortSignal.timeout(5000)
       });
       
       if (response.ok) {
         const data = await response.json();
-        if (data.ollama_available) {
+        if (data.status === 'healthy') {
           setConnectionStatus('connected');
         } else {
           setConnectionStatus('disconnected');
@@ -116,37 +97,18 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
     }
   };
 
-  const loadModels = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/api/models`, {
-        signal: AbortSignal.timeout(10000)
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.models.length > 0) {
-          setAvailableModels(data.models);
-          
-          if (data.default && data.models.includes(data.default)) {
-            setCurrentModel(data.default);
-          } else {
-            setCurrentModel(data.models[0]);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading models:', error);
-      addSystemMessage('❌ Грешка учитавања модела');
-    }
-  };
-
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!inputValue.trim() || isLoading) return;
 
     if (connectionStatus === 'disconnected') {
-      addErrorMessage('❌ Сервер није доступан!');
+      addErrorMessage('❌ AI asistent trenutno nije dostupan!');
+      return;
+    }
+
+    if (!sessionId) {
+      addErrorMessage('❌ Nema aktivne sesije!');
       return;
     }
 
@@ -165,18 +127,20 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
     setMessageCount(prev => prev + 1);
 
     try {
+      const token = getAuthToken();
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-      const response = await fetch(`${apiUrl}/api/chat`, {
+      const response = await fetch(`${apiUrl}/ai-agent/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
         },
         body: JSON.stringify({
           message: messageText,
-          model: currentModel,
-          session_id: sessionId,
+          sessionId: sessionId,
+          useContext: true
         }),
         signal: controller.signal,
       });
@@ -184,52 +148,55 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        if (response.status === 401) {
+          throw new Error('Nemate dozvolu za pristup AI asistentu');
+        } else if (response.status === 403) {
+          throw new Error('Pristup odbačen');
+        } else {
+          throw new Error(`Server greška: ${response.status}`);
+        }
       }
 
       const data = await response.json();
       
-      if (data.success) {
-        // Update session ID if changed
-        if (data.session_id) {
-          setSessionId(data.session_id);
-        }
-        
+      if (data.response) {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: data.response || 'Извињавам се, нисам могао да генеришем одговор.',
+          content: data.response,
           timestamp: new Date(),
         };
 
         setMessages(prev => [...prev, aiMessage]);
         setMessageCount(prev => prev + 1);
         
-        // If chat is closed/minimized, show unread indicator
         if (!isOpen || isMinimized) {
           setUnreadCount(prev => prev + 1);
         }
 
-        // Update connection status on successful response
         if (connectionStatus !== 'connected') {
           setConnectionStatus('connected');
         }
       } else {
-        throw new Error(data.error || 'Unknown server error');
+        throw new Error('Prazan odgovor od servera');
       }
 
     } catch (error: any) {
       console.error('Chat error:', error);
       
-      let errorMessage = 'Извињавам се, догодила се грешка. Молим покушајте поново.';
+      let errorMessage = 'Izvinjavam se, dogodila se greška. Molim pokušajte ponovo.';
       
       if (error.name === 'AbortError') {
-        errorMessage = 'Захтев је истекао. Молим покушајте поново.';
-      } else if (error.message.includes('Server error: 500')) {
-        errorMessage = 'Сервер грешка. Молим контактирајте администратора.';
+        errorMessage = 'Zahtev je istekao. Molim pokušajte ponovo.';
+      } else if (error.message.includes('401') || error.message.includes('403')) {
+        errorMessage = 'Nemate dozvolu za korišćenje AI asistenta. Molim prijavite se ponovo.';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Server greška. Molim kontaktirajte administratora.';
       } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
-        errorMessage = 'Грешка у конекцији. Проверите интернетску везу.';
+        errorMessage = 'Greška u konekciji. Proverite internetsku vezu.';
         setConnectionStatus('disconnected');
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       addErrorMessage(errorMessage);
@@ -263,19 +230,23 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
   const clearChat = async () => {
     try {
       if (sessionId) {
-        await fetch(`${apiUrl}/api/session/${sessionId}/clear`, {
-          method: 'DELETE'
+        const token = getAuthToken();
+        await fetch(`${apiUrl}/ai-agent/sessions/${sessionId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
         });
       }
     } catch (error) {
       console.error('Clear session error:', error);
     }
     
-    // Clear chat area and create new session
     setMessages([]);
     setMessageCount(0);
-    await createNewSession();
-    addSystemMessage('🗑️ Чет је обрисан! Нова сесија је креирана.');
+    createNewSession();
+    addSystemMessage('🗑️ Chat je obrisan! Nova sesija je kreirana.');
   };
 
   const toggleChat = () => {
@@ -294,7 +265,6 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
 
   const retryConnection = () => {
     checkServerHealth();
-    loadModels();
   };
 
   const ConnectionIndicator = () => {
@@ -309,10 +279,10 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
 
     const getIndicatorText = () => {
       switch (connectionStatus) {
-        case 'connected': return 'Повезано';
-        case 'disconnected': return 'Није повезано';
-        case 'checking': return 'Проверава...';
-        default: return 'Непознато';
+        case 'connected': return 'Povezano';
+        case 'disconnected': return 'Nije povezano';
+        case 'checking': return 'Proverava...';
+        default: return 'Nepoznato';
       }
     };
 
@@ -320,42 +290,10 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
       <div className="flex items-center space-x-2 text-xs">
         <div className={`w-2 h-2 rounded-full ${getIndicatorColor()}`} />
         <span className="text-white opacity-75">{getIndicatorText()}</span>
-        <span className="text-white opacity-50">({currentModel})</span>
       </div>
     );
   };
 
-  const ModelSelector = () => {
-    if (!showModelSelect) return null;
-
-    return (
-      <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 min-w-[200px]">
-        <div className="p-2 border-b">
-          <h4 className="font-medium text-sm text-gray-700">Изабери модел</h4>
-        </div>
-        <div className="max-h-48 overflow-y-auto">
-          {availableModels.map((model) => (
-            <button
-              key={model}
-              onClick={() => {
-                setCurrentModel(model);
-                setShowModelSelect(false);
-                addSystemMessage(`🔄 Модел промењен на: ${model}`);
-              }}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 ${
-                model === currentModel ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
-              }`}
-            >
-              {model}
-              {model === currentModel && <span className="ml-2">✓</span>}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Auto health check every 30 seconds
   useEffect(() => {
     const interval = setInterval(checkServerHealth, 30000);
     return () => clearInterval(interval);
@@ -363,17 +301,14 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
 
   return (
     <>
-      {/* Chat Widget Container */}
       <div className="fixed bottom-4 right-4 z-50">
-        {/* Chat Window */}
         {isOpen && !isMinimized && (
           <div className="mb-4 bg-white rounded-lg shadow-2xl border w-80 h-96 flex flex-col animate-in slide-in-from-bottom-2 duration-300">
-            {/* Header */}
             <div className="flex items-center justify-between p-3 border-b bg-blue-600 text-white rounded-t-lg">
               <div className="flex items-center space-x-2">
                 <Bot className="w-5 h-5" />
                 <div>
-                  <h3 className="font-medium text-sm">AI Асистент</h3>
+                  <h3 className="font-medium text-sm">AI Asistent</h3>
                   <ConnectionIndicator />
                 </div>
               </div>
@@ -382,67 +317,53 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
                   <button
                     onClick={retryConnection}
                     className="p-1 hover:bg-blue-700 rounded text-xs"
-                    title="Поново покушај конекцију"
+                    title="Ponovo pokušaj konekciju"
                   >
                     <RefreshCw className="w-3 h-3" />
                   </button>
                 )}
-                {availableModels.length > 0 && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowModelSelect(!showModelSelect)}
-                      className="p-1 hover:bg-blue-700 rounded text-xs"
-                      title="Промени модел"
-                    >
-                      <Settings className="w-3 h-3" />
-                    </button>
-                    <ModelSelector />
-                  </div>
-                )}
                 <button
                   onClick={clearChat}
                   className="p-1 hover:bg-blue-700 rounded text-xs"
-                  title="Очисти чет"
+                  title="Očisti chat"
                 >
                   🗑️
                 </button>
                 <button
                   onClick={minimizeChat}
                   className="p-1 hover:bg-blue-700 rounded"
-                  title="Умањи"
+                  title="Umanji"
                 >
                   <Minimize2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={closeChat}
                   className="p-1 hover:bg-blue-700 rounded"
-                  title="Затвори"
+                  title="Zatvori"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Connection Error Banner */}
             {connectionStatus === 'disconnected' && (
               <div className="bg-red-50 border-l-4 border-red-400 p-2">
                 <div className="flex items-center">
                   <AlertTriangle className="w-4 h-4 text-red-400 mr-2" />
                   <p className="text-sm text-red-700">
-                    AI асистент није доступан. <button onClick={retryConnection} className="underline">Покушај поново</button>
+                    AI asistent nije dostupan. <button onClick={retryConnection} className="underline">Pokušaj ponovo</button>
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
               {messages.length === 0 && (
                 <div className="text-center text-gray-500 text-sm mt-4">
                   <Bot className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p>Здраво! Како могу да вам помогнем данас?</p>
+                  <p>Zdravo! Kako mogu da vam pomognem danas?</p>
                   <p className="text-xs text-gray-400 mt-2">
-                    Питајте ме о било чему што вас занима.
+                    Pitate me o bilo čemu što vas zanima vezano za CMS.
                   </p>
                 </div>
               )}
@@ -508,7 +429,7 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
                     <div className="bg-white p-2 rounded-lg shadow-sm">
                       <div className="flex items-center space-x-2">
                         <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
-                        <span className="text-sm text-gray-600">Куцам одговор...</span>
+                        <span className="text-sm text-gray-600">Kucam odgovor...</span>
                       </div>
                     </div>
                   </div>
@@ -518,14 +439,13 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <form onSubmit={sendMessage} className="p-3 border-t bg-white rounded-b-lg">
               <div className="flex space-x-2">
                 <input
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Укуцајте поруку..."
+                  placeholder="Ukucajte poruku..."
                   className="flex-1 p-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                   disabled={isLoading || connectionStatus === 'disconnected'}
                   maxLength={500}
@@ -534,7 +454,7 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
                   type="submit"
                   disabled={isLoading || !inputValue.trim() || connectionStatus === 'disconnected'}
                   className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  title="Пошаљи поруку"
+                  title="Pošalji poruku"
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -545,25 +465,24 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
               </div>
               {connectionStatus === 'disconnected' && (
                 <p className="text-xs text-red-500 mt-1">
-                  AI асистент тренутно није доступан
+                  AI asistent trenutno nije dostupan
                 </p>
               )}
               {messageCount > 0 && (
                 <p className="text-xs text-gray-400 mt-1">
-                  Поруке у сесији: {messageCount}
+                  Poruke u sesiji: {messageCount}
                 </p>
               )}
             </form>
           </div>
         )}
 
-        {/* Minimized State */}
         {isOpen && isMinimized && (
           <div className="mb-4 bg-blue-600 text-white p-3 rounded-lg shadow-lg cursor-pointer hover:bg-blue-700 transition-colors"
                onClick={() => setIsMinimized(false)}>
             <div className="flex items-center space-x-2">
               <Bot className="w-5 h-5" />
-              <span className="text-sm font-medium">AI Асистент</span>
+              <span className="text-sm font-medium">AI Asistent</span>
               {unreadCount > 0 && (
                 <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
                   {unreadCount}
@@ -576,13 +495,12 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
           </div>
         )}
 
-        {/* Chat Toggle Button */}
         <button
           onClick={toggleChat}
           className={`relative bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 ${
             isOpen ? 'scale-90' : 'scale-100 hover:scale-105'
           }`}
-          title="AI Асистент"
+          title="AI Asistent"
         >
           <MessageCircle className="w-6 h-6" />
           {!isOpen && unreadCount > 0 && (
@@ -596,7 +514,6 @@ const FloatingChatWidget: React.FC<FloatingChatWidgetProps> = ({
         </button>
       </div>
 
-      {/* Backdrop for mobile */}
       {isOpen && !isMinimized && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-20 z-40 md:hidden"

@@ -80,6 +80,7 @@ import {
   UpdatePageBuilderDto,
   UpdatePageSectionDto
 } from './types';
+import { InstitutionType } from './institution-templates';
 
 export const API_BASE_URL = 'http://localhost:3001/api';
 
@@ -699,6 +700,17 @@ export const setupApi = {
 
   checkAdminExists: async (): Promise<{ exists: boolean }> => {
     const response: AxiosResponse<{ exists: boolean }> = await api.get('/setup/check-admin');
+    return response.data;
+  },
+  createHomepageTemplate: async (institutionType: InstitutionType): Promise<{ 
+    success: boolean; 
+    pageId: number;
+    sectionsCreated: number;
+    message: string;
+  }> => {
+    const response = await api.post('/setup/create-homepage-template', {
+      institutionType
+    });
     return response.data;
   },
 };

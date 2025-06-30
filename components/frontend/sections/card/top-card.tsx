@@ -50,10 +50,10 @@ export function CardTopSection({ data, className }: CardTopSectionProps) {
                     />
                   </div>
                 )}
-                <CardContent className="flex-1 flex flex-col text-center gap-2">
-                  <CardHeader>
+                <CardContent className="flex-1 flex flex-col text-center md:text-left gap-2">
+                  <h3 className='mb-3'>
                     <CardTitle className='text-xl'>{card.title}</CardTitle>
-                  </CardHeader>
+                  </h3>
                   <CardDescription className="text-base flex-1">
                     {card.description}
                   </CardDescription>

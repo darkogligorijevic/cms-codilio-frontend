@@ -1,9 +1,8 @@
-// components/frontend/sections/hero/video-hero.tsx
+// components/frontend/sections/hero/video-hero.tsx - Updated with better video handling and loading optimization
 import { SectionData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { Play, Pause } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 interface HeroVideoSectionProps {
   data: SectionData;
@@ -11,8 +10,10 @@ interface HeroVideoSectionProps {
 }
 
 export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   // Extract video ID from various YouTube URL formats
   const getYouTubeId = (url: string) => {
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -20,100 +21,170 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
     return (match && match[7].length === 11) ? match[7] : null;
   };
 
+  // Check if it's a direct video file URL
+  const isDirectVideoUrl = (url: string) => {
+    return url.match(/\.(mp4|webm|ogg)$/i);
+  };
+
   const videoId = data.videoUrl ? getYouTubeId(data.videoUrl) : null;
-  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}&rel=0&showinfo=0` : null;
+  const isDirectVideo = data.videoUrl ? isDirectVideoUrl(data.videoUrl) : false;
+
+  // Handle video loading events
+  useEffect(() => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      
+      const handleLoadedData = () => {
+        setIsVideoLoaded(true);
+        setIsVideoReady(true);
+      };
+
+      const handleCanPlay = () => {
+        setIsVideoReady(true);
+        // Ensure video starts playing
+        video.play().catch(console.error);
+      };
+
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('canplay', handleCanPlay);
+
+      return () => {
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplay', handleCanPlay);
+      };
+    }
+  }, []);
+
+  // Handle iframe load for YouTube videos
+  useEffect(() => {
+    if (iframeRef.current && videoId) {
+      const timer = setTimeout(() => {
+        setIsVideoLoaded(true);
+        setIsVideoReady(true);
+      }, 1500); // Give YouTube time to load
+
+      return () => clearTimeout(timer);
+    }
+  }, [videoId]);
 
   return (
-    <section className={cn('relative flex items-center justify-center', className)}>
-      {/* Video Background */}
-      {embedUrl && (
-        <div className="absolute inset-0 w-full h-full">
+    <div
+      className={cn(
+        `relative w-full flex items-center justify-center text-white overflow-hidden`,
+        // Apply height from data or default
+        data.height === '100%' ? 'min-h-screen' :
+        data.height === '75%' ? 'min-h-[75vh]' :
+        data.height === '50%' ? 'min-h-[50vh]' :
+        data.height === '25%' ? 'min-h-[25vh]' :
+        'min-h-[60vh]', // default height
+        className
+      )}
+    >
+      {/* Loading State - Show while video is loading */}
+      {!isVideoReady && (videoId || isDirectVideo) && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center z-5">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-gray-300">Учитава се видео...</p>
+          </div>
+        </div>
+      )}
+
+      {/* YouTube Video Background */}
+      {videoId && (
+        <div className={cn(
+          "absolute inset-0 w-full h-full transition-opacity duration-1000",
+          isVideoReady ? "opacity-100" : "opacity-0"
+        )}>
           <iframe
-            src={embedUrl}
+            ref={iframeRef}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0&cc_load_policy=0&playsinline=1&autohide=1&start=0`}
             title="Background Video"
-            className="w-full h-full object-cover"
+            className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-opacity-50"></div>
+        </div>
+      )}
+
+      {/* Direct Video File Background */}
+      {isDirectVideo && data.videoUrl && (
+        <div className={cn(
+          "absolute inset-0 w-full h-full transition-opacity duration-1000",
+          isVideoReady ? "opacity-100" : "opacity-0"
+        )}>
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none"
+          >
+            <source src={data.videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
       )}
 
       {/* Fallback background if no video */}
-      {!embedUrl && (
+      {!videoId && !isDirectVideo && (
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700"></div>
       )}
+
+      {/* Dark Overlay - Only show when video is ready */}
+      <div className={cn(
+        "absolute inset-0 bg-black opacity-60 z-0 transition-opacity duration-1000",
+        isVideoReady || (!videoId && !isDirectVideo) ? "opacity-60" : "opacity-0"
+      )}></div>
       
       {/* Content */}
-      <div className="relative z-10 text-center max-w-4xl px-4 sm:px-6 lg:px-8 text-white">
+      <div className="relative z-10 text-center max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
           {data.title && (
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight drop-shadow-lg">
+            <h1 className="text-6xl sm:text-5xl lg:text-6xl font-black tracking-tight text-primary-dynamic drop-shadow-lg">
               {data.title}
             </h1>
           )}
           
           {data.subtitle && (
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-100 drop-shadow-md">
+            <p className="text-md sm:text-lg lg:text-xl font-medium text-gray-400 drop-shadow-md">
               {data.subtitle}
-            </h2>
+            </p>
           )}
           
           {data.description && (
-            <p className="text-lg text-gray-200 max-w-2xl mx-auto drop-shadow-md">
+            <p className="text-md text-gray-200 max-w-2xl mx-auto drop-shadow-md">
               {data.description}
             </p>
           )}
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            {/* Video Play/Pause Button */}
-            {videoId && (
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
-              >
-                {isPlaying ? (
-                  <>
-                    <Pause className="mr-2 h-5 w-5" />
-                    Паузирај видео
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 h-5 w-5" />
-                    Пусти видео
-                  </>
-                )}
-              </Button>
-            )}
-
-            {/* CTA Button */}
-            {data.buttonText && data.buttonLink && (
+          {data.buttonText && data.buttonLink && (
+            <div>
               <Button 
                 asChild
                 size="lg"
                 variant={data.buttonStyle === 'secondary' ? 'secondary' : 
                         data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="shadow-lg"
+                className="text-black font-black text-md md:text-lg shadow-lg dark:border-white dark:text-white"
               >
                 <a href={data.buttonLink}>
                   {data.buttonText}
                 </a>
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+        <div className="w-6 h-10 border-2 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-white dark:bg-white rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

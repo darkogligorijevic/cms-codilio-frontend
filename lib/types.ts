@@ -1,4 +1,6 @@
 // lib/types.ts - Updated with page assignment support
+import { InstitutionType } from './institution-templates';
+
 export enum PostStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published'

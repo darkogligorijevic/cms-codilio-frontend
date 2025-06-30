@@ -32,6 +32,7 @@ export function CardLeftSection({ data, className }: CardLeftSectionProps) {
                 {data.description}
               </p>
             )}
+            
           </div>
         )}
 
