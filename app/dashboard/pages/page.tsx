@@ -76,14 +76,14 @@ interface PageFormData {
 }
 
 const PAGE_TEMPLATES = [
-  { value: 'default', label: 'Standardna stranica', description: 'Obična stranica sa sadržajem' },
-  { value: 'contact', label: 'Kontakt stranica', description: 'Stranica sa kontakt informacijama' },
-  { value: 'about', label: 'O nama', description: 'Stranica o instituciji' },
-  { value: 'services', label: 'Usluge', description: 'Lista usluga institucije' },
-  { value: 'organizationalStructure', label: 'Organizaciona struktura', description: "Stablo organizacione strukture"},
-  { value: 'transparency', label: 'Transparentnost', description: 'Dokumenti i transparentnost' },
-  { value: 'directors', label: 'Direktori', description: 'Cela dokumentacija i biografija direktora'},
-  { value: 'gallery', label: 'Galerija', description: 'Prikaz svih galerija sa mogucnoscu pretrage, filtriranja i pregleda pojedinacnih galerija' },
+  { value: 'default', label: 'Стандардна страница', description: 'Обична страница са садржајем' },
+  { value: 'contact', label: 'Контакт страница', description: 'Страница са контакт информацијама' },
+  { value: 'about', label: 'О нама', description: 'Страница о институцији' },
+  { value: 'services', label: 'Услуге', description: 'Листа услуга институције' },
+  { value: 'organizationalStructure', label: 'Организациона структура', description: "Стабло организационе структуре"},
+  { value: 'transparency', label: 'Транспарентност', description: 'Документи и транспарентност' },
+  { value: 'directors', label: 'Директори', description: 'Цела документација и биографија директора'},
+  { value: 'gallery', label: 'Галерија', description: 'Приказ свих галерија са могућношћу претраге, филтрирања и прегледа појединачних галерија' },
 ];
 
 export default function PagesPage() {
@@ -177,7 +177,7 @@ export default function PagesPage() {
       setPages(hierarchicallyOrderedPages);
     } catch (error) {
       console.error('Error fetching pages:', error);
-      toast.error('Greška pri učitavanju stranica');
+      toast.error('Грешка при учитавању страница');
     } finally {
       setIsLoading(false);
     }
@@ -189,7 +189,7 @@ export default function PagesPage() {
       setAvailableParents(response);
     } catch (error) {
       console.error('Error fetching available parents:', error);
-      toast.error('Greška pri učitavanju dostupnih stranica');
+      toast.error('Грешка при учитавању доступних страница');
     }
   };
 
@@ -210,17 +210,17 @@ export default function PagesPage() {
 
       if (editingPage) {
         await pagesApi.update(editingPage.id, pageData);
-        toast.success('Stranica je uspešno ažurirana');
+        toast.success('Страница је успешно ажурирана');
       } else {
         await pagesApi.create(pageData);
-        toast.success('Stranica je uspešno kreirana');
+        toast.success('Страница је успешно креирана');
       }
 
       fetchPages();
       handleCloseDialog();
     } catch (error) {
       console.error('Error saving page:', error);
-      toast.error('Greška pri čuvanju stranice');
+      toast.error('Грешка при чувању странице');
     }
   };
 
@@ -243,16 +243,16 @@ export default function PagesPage() {
 
     try {
       await pagesApi.delete(pageToDelete.id);
-      toast.success('Stranica je uspešno obrisana');
+      toast.success('Страница је успешно обрисана');
       fetchPages();
       setIsDeleteDialogOpen(false);
       setPageToDelete(null);
     } catch (error: any) {
       console.error('Error deleting page:', error);
       if (error.response?.status === 400) {
-        toast.error('Ne možete obrisati stranicu koja ima podstranice. Prvo obrišite ili premestite podstranice.');
+        toast.error('Не можете обрисати страницу која има подстранице. Прво обришите или преместите подстранице.');
       } else {
-        toast.error('Greška pri brisanju stranice');
+        toast.error('Грешка при брисању странице');
       }
     }
   };
@@ -261,11 +261,11 @@ export default function PagesPage() {
     try {
       const newStatus: PageStatus = page.status === 'published' ? 'draft' as PageStatus : 'published' as PageStatus;
       await pagesApi.update(page.id, { status: newStatus });
-      toast.success(`Stranica je ${newStatus === 'published' ? 'objavljena' : 'prebačena u draft'}`);
+      toast.success(`Страница је ${newStatus === 'published' ? 'објављена' : 'пребачена у нацрт'}`);
       fetchPages();
     } catch (error) {
       console.error('Error updating page status:', error);
-      toast.error('Greška pri ažuriranju statusa stranice');
+      toast.error('Грешка при ажурирању статуса странице');
     }
   };
 
@@ -277,11 +277,11 @@ export default function PagesPage() {
       };
       
       await pagesApi.updatePageBuilder(page.id, updateData);
-      toast.success(`Page Builder je ${!page.usePageBuilder ? 'uključen' : 'isključen'}`);
+      toast.success(`Page Builder је ${!page.usePageBuilder ? 'укључен' : 'искључен'}`);
       fetchPages();
     } catch (error) {
       console.error('Error toggling page builder:', error);
-      toast.error('Greška pri prebacivanju Page Builder-a');
+      toast.error('Грешка при пребацивању Page Builder-а');
     }
   };
 
@@ -314,12 +314,12 @@ export default function PagesPage() {
     return status === 'published' ? (
       <Badge className="bg-green-100 text-green-800">
         <Eye className="mr-1 h-3 w-3" />
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
         <FileText className="mr-1 h-3 w-3" />
-        Draft
+        Нацрт
       </Badge>
     );
   };
@@ -349,10 +349,10 @@ export default function PagesPage() {
     const date = new Date(dateString);
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
-    if (diffInSeconds < 60) return 'pre nekoliko sekundi';
-    if (diffInSeconds < 3600) return `pre ${Math.floor(diffInSeconds / 60)} min`;
-    if (diffInSeconds < 86400) return `pre ${Math.floor(diffInSeconds / 3600)} h`;
-    if (diffInSeconds < 604800) return `pre ${Math.floor(diffInSeconds / 86400)} dana`;
+    if (diffInSeconds < 60) return 'пре неколико секунди';
+    if (diffInSeconds < 3600) return `пре ${Math.floor(diffInSeconds / 60)} мин`;
+    if (diffInSeconds < 86400) return `пре ${Math.floor(diffInSeconds / 3600)} х`;
+    if (diffInSeconds < 604800) return `пре ${Math.floor(diffInSeconds / 86400)} дана`;
     return formatDate(dateString);
   };
 
@@ -391,9 +391,9 @@ export default function PagesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Stranice</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Странице</h1>
           <p className="text-muted-foreground">
-            Upravljajte statičkim stranicama vašeg portala
+            Управљајте статичким страницама вашег портала
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -403,19 +403,19 @@ export default function PagesPage() {
               onClick={handleOpenDialog}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Nova stranica
+              Нова страница
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-2xl">
             <form onSubmit={handleSubmit(onSubmit)}>
               <DialogHeader>
                 <DialogTitle>
-                  {editingPage ? 'Uredi stranicu' : 'Nova stranica'}
+                  {editingPage ? 'Уреди страницу' : 'Нова страница'}
                 </DialogTitle>
                 <DialogDescription>
                   {editingPage 
-                    ? 'Uredite informacije o stranici' 
-                    : 'Kreirajte novu statičku stranicu'
+                    ? 'Уредите информације о страници' 
+                    : 'Креирајте нову статичку страницу'
                   }
                 </DialogDescription>
               </DialogHeader>
@@ -423,11 +423,11 @@ export default function PagesPage() {
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Naslov stranice</Label>
+                    <Label htmlFor="title">Наслов странице</Label>
                     <Input
                       id="title"
-                      placeholder="O našoj instituciji"
-                      {...register('title', { required: 'Naslov je obavezan' })}
+                      placeholder="О нашој институцији"
+                      {...register('title', { required: 'Наслов је обавезан' })}
                     />
                     {errors.title && (
                       <p className="text-sm text-red-600 flex items-center">
@@ -438,11 +438,11 @@ export default function PagesPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="slug">URL slug</Label>
+                    <Label htmlFor="slug">URL слаг</Label>
                     <Input
                       id="slug"
                       placeholder="o-nama"
-                      {...register('slug', { required: 'URL slug je obavezan' })}
+                      {...register('slug', { required: 'URL слаг је обавезан' })}
                     />
                     {errors.slug && (
                       <p className="text-sm text-red-600 flex items-center">
@@ -454,19 +454,19 @@ export default function PagesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Nadređena stranica (opciono)</Label>
+                  <Label>Надређена страница (опционо)</Label>
                   <Select 
                     value={watch('parentId')?.toString() || 'none'} 
                     onValueChange={(value) => setValue('parentId', value === 'none' ? undefined : parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Bez nadređene stranice - glavna stranica" />
+                      <SelectValue placeholder="Без надређене странице - главна страница" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">
                         <div className="flex items-center">
                           <Folder className="mr-2 h-4 w-4" />
-                          Bez nadređene stranice - glavna stranica
+                          Без надређене странице - главна страница
                         </div>
                       </SelectItem>
                       {availableParents.map((page) => (
@@ -481,13 +481,13 @@ export default function PagesPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Izaberite nadređenu stranicu da kreirate podstranicu
+                    Изаберите надређену страницу да креирате подстраницу
                   </p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Status</Label>
+                    <Label>Статус</Label>
                     <Select 
                       value={watch('status')} 
                       onValueChange={(value: PageStatus) => setValue('status', value)}
@@ -496,14 +496,14 @@ export default function PagesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="published">Objavljeno</SelectItem>
+                        <SelectItem value="draft">Нацрт</SelectItem>
+                        <SelectItem value="published">Објављено</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Template</Label>
+                    <Label>Темплате</Label>
                     <Select 
                       value={watch('template')} 
                       onValueChange={(value) => setValue('template', value)}
@@ -522,14 +522,14 @@ export default function PagesPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="sortOrder">Redosled</Label>
+                    <Label htmlFor="sortOrder">Редослед</Label>
                     <Input
                       id="sortOrder"
                       type="number"
                       placeholder="0"
                       {...register('sortOrder', { 
-                        required: 'Redosled je obavezan',
-                        min: { value: 0, message: 'Redosled mora biti pozitivan broj' },
+                        required: 'Редослед је обавезан',
+                        min: { value: 0, message: 'Редослед мора бити позитиван број' },
                         valueAsNumber: true
                       })}
                     />
@@ -551,10 +551,10 @@ export default function PagesPage() {
                   />
                   <div>
                     <Label htmlFor="usePageBuilder" className="font-medium">
-                      Koristi Page Builder
+                      Користи Page Builder
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      Omogućava vizuelno uređivanje stranice pomoću sekcija
+                      Омогућава визуелно уређивање странице помоћу секција
                     </p>
                   </div>
                 </div>
@@ -562,10 +562,10 @@ export default function PagesPage() {
                 {/* Content field - only show if page builder is not enabled */}
                 {!watchUsePageBuilder && (
                   <div className="space-y-2">
-                    <Label htmlFor="content">Sadržaj stranice</Label>
+                    <Label htmlFor="content">Садржај странице</Label>
                     <Textarea
                       id="content"
-                      placeholder="Napišite sadržaj stranice..."
+                      placeholder="Напишите садржај странице..."
                       rows={8}
                       {...register('content')}
                     />
@@ -583,11 +583,11 @@ export default function PagesPage() {
                     <div className="flex items-center space-x-2">
                       <Layout className="h-4 w-4 text-blue-600" />
                       <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                        Page Builder je uključen
+                        Page Builder је укључен
                       </span>
                     </div>
                     <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                      Sadržaj stranice ćete urediti preko Page Builder-a nakon što sačuvate stranicu.
+                      Садржај странице ћете уредити преко Page Builder-а након што сачувате страницу.
                     </p>
                   </div>
                 )}
@@ -595,10 +595,10 @@ export default function PagesPage() {
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                  Otkaži
+                  Откажи
                 </Button>
                 <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
-                  {isSubmitting ? 'Čuva se...' : (editingPage ? 'Sačuvaj izmene' : 'Kreiraj stranicu')}
+                  {isSubmitting ? 'Чува се...' : (editingPage ? 'Сачувај измене' : 'Креирај страницу')}
                 </Button>
               </DialogFooter>
             </form>
@@ -611,14 +611,14 @@ export default function PagesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno stranica
+              Укупно страница
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pages.length}</div>
             <p className="text-xs text-muted-foreground">
-              {parentPagesCount} glavnih, {subPagesCount} podstranica
+              {parentPagesCount} главних, {subPagesCount} подстраница
             </p>
           </CardContent>
         </Card>
@@ -626,14 +626,14 @@ export default function PagesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Objavljeno
+              Објављено
             </CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{publishedCount}</div>
             <p className="text-xs text-muted-foreground">
-              Javno dostupno
+              Јавно доступно
             </p>
           </CardContent>
         </Card>
@@ -641,14 +641,14 @@ export default function PagesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Draft
+              Нацрт
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{draftCount}</div>
             <p className="text-xs text-muted-foreground">
-              U pripremi
+              У припреми
             </p>
           </CardContent>
         </Card>
@@ -663,7 +663,7 @@ export default function PagesPage() {
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{pageBuilderCount}</div>
             <p className="text-xs text-muted-foreground">
-              Koristi sekcije
+              Користи секције
             </p>
           </CardContent>
         </Card>
@@ -671,14 +671,14 @@ export default function PagesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Template tipovi
+              Темплате типови
             </CardTitle>
             <Layout className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{PAGE_TEMPLATES.length}</div>
             <p className="text-xs text-muted-foreground">
-              Dostupni templati
+              Доступни темплати
             </p>
           </CardContent>
         </Card>
@@ -687,20 +687,20 @@ export default function PagesPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Pretraga i filteri</CardTitle>
+          <CardTitle>Претрага и филтери</CardTitle>
           <CardDescription>
-            Pronađite stranice pomoću pretrage i filtera
+            Пронађите странице помоћу претраге и филтера
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Pretraga</Label>
+              <Label htmlFor="search">Претрага</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Pretraži stranice..."
+                  placeholder="Претражи странице..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -709,27 +709,27 @@ export default function PagesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>Статус</Label>
               <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi statusi" />
+                  <SelectValue placeholder="Сви статуси" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi statusi</SelectItem>
-                  <SelectItem value="published">Objavljeno</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="all">Сви статуси</SelectItem>
+                  <SelectItem value="published">Објављено</SelectItem>
+                  <SelectItem value="draft">Нацрт</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Template</Label>
+              <Label>Темплате</Label>
               <Select value={templateFilter} onValueChange={setTemplateFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi templati" />
+                  <SelectValue placeholder="Сви темплати" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi templati</SelectItem>
+                  <SelectItem value="all">Сви темплати</SelectItem>
                   {PAGE_TEMPLATES.map((template) => (
                     <SelectItem key={template.value} value={template.value}>
                       {template.label}
@@ -741,7 +741,7 @@ export default function PagesPage() {
 
             <div className="flex items-end">
               <div className="text-sm text-muted-foreground">
-                Prikazuje se {filteredPages.length} od {pages.length} stranica
+                Приказује се {filteredPages.length} од {pages.length} страница
               </div>
             </div>
           </div>
@@ -753,9 +753,9 @@ export default function PagesPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Lista stranica</CardTitle>
+              <CardTitle>Листа страница</CardTitle>
               <CardDescription>
-                Ukupno {filteredPages.length} stranica
+                Укупно {filteredPages.length} страница
               </CardDescription>
             </div>
           </div>
@@ -778,14 +778,14 @@ export default function PagesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Stranica</TableHead>
-                  <TableHead>Template</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Страница</TableHead>
+                  <TableHead>Темплате</TableHead>
+                  <TableHead>Статус</TableHead>
                   <TableHead>Builder</TableHead>
-                  <TableHead>Autor</TableHead>
-                  <TableHead>Redosled</TableHead>
-                  <TableHead>Datum</TableHead>
-                  <TableHead className="text-right">Akcije</TableHead>
+                  <TableHead>Аутор</TableHead>
+                  <TableHead>Редослед</TableHead>
+                  <TableHead>Датум</TableHead>
+                  <TableHead className="text-right">Акције</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -805,7 +805,7 @@ export default function PagesPage() {
                           </span>
                           {page.children && page.children.length > 0 && (
                             <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              {page.children.length} podstranica
+                              {page.children.length} подстраница
                             </span>
                           )}
                         </div>
@@ -815,7 +815,7 @@ export default function PagesPage() {
                           {page.parent && (
                             <>
                               <span className="mx-2">•</span>
-                              <span>Pod: {page.parent.title}</span>
+                              <span>Под: {page.parent.title}</span>
                             </>
                           )}
                         </div>
@@ -828,7 +828,7 @@ export default function PagesPage() {
                       <button
                         onClick={() => handleToggleStatus(page)}
                         className="hover:opacity-80 transition-opacity"
-                        title={`Promeni status na ${page.status === 'published' ? 'draft' : 'objavljeno'}`}
+                        title={`Промени статус на ${page.status === 'published' ? 'нацрт' : 'објављено'}`}
                       >
                         {getStatusBadge(page.status)}
                       </button>
@@ -837,7 +837,7 @@ export default function PagesPage() {
                       <button
                         onClick={() => handleTogglePageBuilder(page)}
                         className="hover:opacity-80 transition-opacity"
-                        title={`${page.usePageBuilder ? 'Isključi' : 'Uključi'} Page Builder`}
+                        title={`${page.usePageBuilder ? 'Искључи' : 'Укључи'} Page Builder`}
                       >
                         <Badge 
                           variant={page.usePageBuilder ? "default" : "secondary"}
@@ -846,12 +846,12 @@ export default function PagesPage() {
                           {page.usePageBuilder ? (
                             <>
                               <Layout className="mr-1 h-3 w-3" />
-                              Uključen
+                              Укључен
                             </>
                           ) : (
                             <>
                               <Code className="mr-1 h-3 w-3" />
-                              Isključen
+                              Искључен
                             </>
                           )}
                         </Badge>
@@ -882,7 +882,7 @@ export default function PagesPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenPageBuilder(page)}
-                            title="Otvori Page Builder"
+                            title="Отвори Page Builder"
                           >
                             <Layout className="h-4 w-4" />
                           </Button>
@@ -892,7 +892,7 @@ export default function PagesPage() {
                             variant="ghost"
                             size="sm"
                             asChild
-                            title="Pogledaj na sajtu"
+                            title="Погледај на сајту"
                           >
                             <Link href={`/${page.slug}`} target="_blank">
                               <ExternalLink className="h-4 w-4" />
@@ -903,7 +903,7 @@ export default function PagesPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditPage(page)}
-                          title="Uredi stranicu"
+                          title="Уреди страницу"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -914,7 +914,7 @@ export default function PagesPage() {
                             setPageToDelete(page);
                             setIsDeleteDialogOpen(true);
                           }}
-                          title="Obriši stranicu"
+                          title="Обриши страницу"
                           className="text-red-600 hover:text-red-800 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -930,8 +930,8 @@ export default function PagesPage() {
                         {searchTerm || statusFilter !== 'all' || templateFilter !== 'all' ? (
                           <>
                             <Search className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                            <h3 className="text-lg font-medium">Nema rezultata</h3>
-                            <p>Nema stranica koje odgovaraju filterima</p>
+                            <h3 className="text-lg font-medium">Нема резултата</h3>
+                            <p>Нема страница које одговарају филтерима</p>
                             <Button
                               variant="outline"
                               onClick={() => {
@@ -941,19 +941,19 @@ export default function PagesPage() {
                               }}
                               className="mt-2"
                             >
-                              Očisti filtere
+                              Очисти филтере
                             </Button>
                           </>
                         ) : (
                           <>
                             <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                            <h3 className="text-lg font-medium">Nema stranica</h3>
-                            <p>Počnite kreiranjem prve stranice za vašu instituciju</p>
+                            <h3 className="text-lg font-medium">Нема страница</h3>
+                            <p>Почните креирањем прве странице за вашу институцију</p>
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button className="mt-4" onClick={handleOpenDialog}>
                                   <Plus className="mr-2 h-4 w-4" />
-                                  Kreiraj prvu stranicu
+                                  Креирај прву страницу
                                 </Button>
                               </DialogTrigger>
                             </Dialog>
@@ -978,7 +978,7 @@ export default function PagesPage() {
               <span>Page Builder - {selectedPageForBuilder?.title}</span>
             </DialogTitle>
             <DialogDescription>
-              Dodajte i uredite sekcije na vašoj stranici pomoću drag & drop funkcionalnosti
+              Додајте и уредите секције на вашој страници помоћу drag & drop функционалности
             </DialogDescription>
           </DialogHeader>
           
@@ -996,7 +996,7 @@ export default function PagesPage() {
               variant="outline" 
               onClick={() => setIsPageBuilderOpen(false)}
             >
-              Zatvori
+              Затвори
             </Button>
             {selectedPageForBuilder?.status === 'published' && (
               <Button asChild>
@@ -1005,7 +1005,7 @@ export default function PagesPage() {
                   target="_blank"
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Pregledaj stranicu
+                  Прегледај страницу
                 </Link>
               </Button>
             )}
@@ -1017,51 +1017,51 @@ export default function PagesPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className='max-w-4xl'>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete stranicu "{pageToDelete?.title}"?
-              Ova akcija se ne može poništiti.
+              Да ли сте сигурни да желите да обришете страницу "{pageToDelete?.title}"?
+              Ова акција се не може поништити.
             </DialogDescription>
           </DialogHeader>
           
           {pageToDelete && (
             <div className="py-4 space-y-2 text-sm border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Naslov:</span>
+                <span className="text-muted-foreground">Наслов:</span>
                 <span className="font-medium">{pageToDelete.title}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
+                <span className="text-muted-foreground">Статус:</span>
                 {getStatusBadge(pageToDelete.status)}
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Template:</span>
+                <span className="text-muted-foreground">Темплате:</span>
                 {getTemplateBadge(pageToDelete.template)}
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Page Builder:</span>
                 <Badge variant={pageToDelete.usePageBuilder ? "default" : "secondary"}>
-                  {pageToDelete.usePageBuilder ? 'Uključen' : 'Isključen'}
+                  {pageToDelete.usePageBuilder ? 'Укључен' : 'Искључен'}
                 </Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Redosled:</span>
+                <span className="text-muted-foreground">Редослед:</span>
                 <span>{pageToDelete.sortOrder}</span>
               </div>
               {pageToDelete.parentId && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tip:</span>
-                  <Badge variant="outline">Podstranica</Badge>
+                  <span className="text-muted-foreground">Тип:</span>
+                  <Badge variant="outline">Подстраница</Badge>
                 </div>
               )}
               {pageToDelete.children && pageToDelete.children.length > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Podstranice:</span>
-                  <Badge variant="destructive">{pageToDelete.children.length} podstranica</Badge>
+                  <span className="text-muted-foreground">Подстранице:</span>
+                  <Badge variant="destructive">{pageToDelete.children.length} подстраница</Badge>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Kreirana:</span>
+                <span className="text-muted-foreground">Креирана:</span>
                 <span>{formatDate(pageToDelete.createdAt)}</span>
               </div>
             </div>
@@ -1071,11 +1071,11 @@ export default function PagesPage() {
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <div className="flex items-center space-x-2 text-red-800 dark:text-red-300">
                 <AlertCircle className="h-4 w-4" />
-                <span className="font-medium">Upozorenje</span>
+                <span className="font-medium">Упозорење</span>
               </div>
               <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                Ova stranica ima {pageToDelete.children.length} podstranica. 
-                Prvo morate obrisati ili premestiti sve podstranice.
+                Ова страница има {pageToDelete.children.length} подстраница. 
+                Прво морате обрисати или преместити све подстранице.
               </p>
             </div>
           )}
@@ -1085,7 +1085,7 @@ export default function PagesPage() {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
@@ -1093,8 +1093,8 @@ export default function PagesPage() {
               disabled={pageToDelete?.children && pageToDelete.children.length > 0}
             >
               {pageToDelete?.children && pageToDelete.children.length > 0 
-                ? 'Ne može se obrisati' 
-                : 'Obriši stranicu'
+                ? 'Не може се обрисати' 
+                : 'Обриши страницу'
               }
             </Button>
           </DialogFooter>
