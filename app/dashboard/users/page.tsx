@@ -145,7 +145,7 @@ export default function UsersPage() {
       
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Greška pri učitavanju korisnika');
+      toast.error('Грешка при учитавању корисника');
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +155,7 @@ export default function UsersPage() {
     setIsRefreshing(true);
     await fetchUsers();
     setIsRefreshing(false);
-    toast.success('Podaci su osveženi');
+    toast.success('Подаци су освежени');
   };
 
   const onSubmit = async (data: UserFormData) => {
@@ -183,7 +183,7 @@ export default function UsersPage() {
             : u
         ));
         
-        toast.success('Korisnik je uspešno ažuriran');
+        toast.success('Корисник је успешно ажуриран');
       } else {
         // Create new user
         const createData: CreateUserDto = {
@@ -213,14 +213,14 @@ export default function UsersPage() {
           [newUser.role === 'admin' ? 'admins' : 'authors']: prev[newUser.role === 'admin' ? 'admins' : 'authors'] + 1
         }));
         
-        toast.success('Korisnik je uspešno kreiran');
+        toast.success('Корисник је успешно креиран');
       }
 
       handleCloseDialog();
     } catch (error: any) {
       console.error('Error saving user:', error);
       
-      const errorMessage = error.response?.data?.message || 'Greška pri čuvanju korisnika';
+      const errorMessage = error.response?.data?.message || 'Грешка при чувању корисника';
       toast.error(errorMessage);
     }
   };
@@ -252,13 +252,13 @@ export default function UsersPage() {
         totalPosts: prev.totalPosts - userToDelete.postsCount
       }));
       
-      toast.success('Korisnik je uspešno obrisan');
+      toast.success('Корисник је успешно обрисан');
       setIsDeleteDialogOpen(false);
       setUserToDelete(null);
     } catch (error: any) {
       console.error('Error deleting user:', error);
       
-      const errorMessage = error.response?.data?.message || 'Greška pri brisanju korisnika';
+      const errorMessage = error.response?.data?.message || 'Грешка при брисању корисника';
       toast.error(errorMessage);
     }
   };
@@ -282,11 +282,11 @@ export default function UsersPage() {
         activeUsers: updatedUser.isActive ? prev.activeUsers + 1 : prev.activeUsers - 1
       }));
       
-      toast.success(`Korisnik je ${updatedUser.isActive ? 'aktiviran' : 'deaktiviran'}`);
+      toast.success(`Корисник је ${updatedUser.isActive ? 'активиран' : 'деактивиран'}`);
     } catch (error: any) {
       console.error('Error updating user status:', error);
       
-      const errorMessage = error.response?.data?.message || 'Greška pri ažuriranju statusa';
+      const errorMessage = error.response?.data?.message || 'Грешка при ажурирању статуса';
       toast.error(errorMessage);
     }
   };
@@ -302,12 +302,12 @@ export default function UsersPage() {
     return role === 'admin' ? (
       <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
         <Shield className="mr-1 h-3 w-3" />
-        Administrator
+        Администратор
       </Badge>
     ) : (
       <Badge variant="secondary">
         <UserIcon className="mr-1 h-3 w-3" />
-        Autor
+        Аутор
       </Badge>
     );
   };
@@ -316,12 +316,12 @@ export default function UsersPage() {
     return isActive ? (
       <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
         <UserCheckIcon className="mr-1 h-3 w-3" />
-        Aktivan
+        Активан
       </Badge>
     ) : (
       <Badge variant="destructive">
         <UserXIcon className="mr-1 h-3 w-3" />
-        Neaktivan
+        Неактиван
       </Badge>
     );
   };
@@ -375,9 +375,9 @@ export default function UsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Korisnici</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Корисници</h1>
           <p className="text-muted-foreground">
-            Upravljajte korisnicima koji imaju pristup CMS-u
+            Управљајте корисницима који имају приступ ЦМС-у
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -387,37 +387,37 @@ export default function UsersPage() {
             disabled={isRefreshing}
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Osveži
+            Освежи
           </Button>
           {currentUser?.role === 'admin' && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Novi korisnik
+                  Нови корисник
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingUser ? 'Uredi korisnika' : 'Novi korisnik'}
+                      {editingUser ? 'Уреди корисника' : 'Нови корисник'}
                     </DialogTitle>
                     <DialogDescription>
                       {editingUser 
-                        ? 'Uredite informacije o korisniku' 
-                        : 'Kreirajte novi korisnički nalog'
+                        ? 'Уредите информације о кориснику' 
+                        : 'Креирајте нови кориснички налог'
                       }
                     </DialogDescription>
                   </DialogHeader>
 
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Ime i prezime</Label>
+                      <Label htmlFor="name">Име и презиме</Label>
                       <Input
                         id="name"
-                        placeholder="Marko Petrović"
-                        {...register('name', { required: 'Ime je obavezno' })}
+                        placeholder="Марко Петровић"
+                        {...register('name', { required: 'Име је обавезно' })}
                       />
                       {errors.name && (
                         <p className="text-sm text-red-600 flex items-center">
@@ -428,16 +428,16 @@ export default function UsersPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email adresa</Label>
+                      <Label htmlFor="email">Имејл адреса</Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="marko.petrovic@opstina.rs"
                         {...register('email', { 
-                          required: 'Email je obavezan',
+                          required: 'Имејл је обавезан',
                           pattern: {
                             value: /^\S+@\S+$/,
-                            message: 'Neispravna email adresa'
+                            message: 'Неисправна имејл адреса'
                           }
                         })}
                       />
@@ -451,7 +451,7 @@ export default function UsersPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="password">
-                        {editingUser ? 'Nova lozinka (ostavi prazno da ne menjamo)' : 'Lozinka'}
+                        {editingUser ? 'Нова лозинка (остави празно да не мењамо)' : 'Лозинка'}
                       </Label>
                       <div className="relative">
                         <Input
@@ -459,10 +459,10 @@ export default function UsersPage() {
                           type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
                           {...register('password', { 
-                            required: editingUser ? false : 'Lozinka je obavezna',
+                            required: editingUser ? false : 'Лозинка је обавезна',
                             minLength: {
                               value: 6,
-                              message: 'Lozinka mora imati najmanje 6 karaktera'
+                              message: 'Лозинка мора имати најмање 6 карактера'
                             }
                           })}
                         />
@@ -489,7 +489,7 @@ export default function UsersPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Uloga</Label>
+                      <Label>Улога</Label>
                       <Select 
                         value={watch('role')} 
                         onValueChange={(value: UserRole) => setValue('role', value)}
@@ -501,13 +501,13 @@ export default function UsersPage() {
                           <SelectItem value="author">
                             <div className="flex items-center">
                               <UserIcon className="mr-2 h-4 w-4" />
-                              Autor (može kreirati objave)
+                              Аутор (може креирати објаве)
                             </div>
                           </SelectItem>
                           <SelectItem value="admin">
                             <div className="flex items-center">
                               <Shield className="mr-2 h-4 w-4" />
-                              Administrator (pun pristup)
+                              Администратор (пун приступ)
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -517,10 +517,10 @@ export default function UsersPage() {
 
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                      Otkaži
+                      Откажи
                     </Button>
                     <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
-                      {isSubmitting ? 'Čuva se...' : (editingUser ? 'Sačuvaj izmene' : 'Kreiraj korisnika')}
+                      {isSubmitting ? 'Чува се...' : (editingUser ? 'Сачувај измене' : 'Креирај корисника')}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -535,14 +535,14 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno korisnika
+              Укупно корисника
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{userStats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              {userStats.activeUsers} aktivnih
+              {userStats.activeUsers} активних
             </p>
           </CardContent>
         </Card>
@@ -550,14 +550,14 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Administratori
+              Администратори
             </CardTitle>
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{userStats.admins}</div>
             <p className="text-xs text-muted-foreground">
-              Imaju pun pristup
+              Имају пун приступ
             </p>
           </CardContent>
         </Card>
@@ -565,14 +565,14 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Autori
+              Аутори
             </CardTitle>
             <UserIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{userStats.authors}</div>
             <p className="text-xs text-muted-foreground">
-              Mogu kreirati objave
+              Могу креирати објаве
             </p>
           </CardContent>
         </Card>
@@ -580,14 +580,14 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno objava
+              Укупно објава
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{userStats.totalPosts}</div>
             <p className="text-xs text-muted-foreground">
-              +{userStats.postsLastMonth} ovaj mesec
+              +{userStats.postsLastMonth} овај месец
             </p>
           </CardContent>
         </Card>
@@ -598,14 +598,14 @@ export default function UsersPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Pretraga i filteri</CardTitle>
+              <CardTitle>Претрага и филтери</CardTitle>
               <CardDescription>
-                Pronađite korisnike pomoću pretrage i filtera
+                Пронађите кориснике помоћу претраге и филтера
               </CardDescription>
             </div>
             {(searchTerm || roleFilter !== 'all' || statusFilter !== 'all') && (
               <Button variant="outline" onClick={clearFilters}>
-                Očisti filtere
+                Очисти филтере
               </Button>
             )}
           </div>
@@ -613,12 +613,12 @@ export default function UsersPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Pretraga</Label>
+              <Label htmlFor="search">Претрага</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Pretraži po imenu ili email-u..."
+                  placeholder="Претражи по имену или имејлу..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -627,36 +627,36 @@ export default function UsersPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Uloga</Label>
+              <Label>Улога</Label>
               <Select value={roleFilter} onValueChange={(value: any) => setRoleFilter(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sve uloge" />
+                  <SelectValue placeholder="Све улоге" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Sve uloge</SelectItem>
-                  <SelectItem value="admin">Administrator</SelectItem>
-                  <SelectItem value="author">Autor</SelectItem>
+                  <SelectItem value="all">Све улоге</SelectItem>
+                  <SelectItem value="admin">Администратор</SelectItem>
+                  <SelectItem value="author">Аутор</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>Статус</Label>
               <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi statusi" />
+                  <SelectValue placeholder="Сви статуси" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi statusi</SelectItem>
-                  <SelectItem value="active">Aktivni</SelectItem>
-                  <SelectItem value="inactive">Neaktivni</SelectItem>
+                  <SelectItem value="all">Сви статуси</SelectItem>
+                  <SelectItem value="active">Активни</SelectItem>
+                  <SelectItem value="inactive">Неактивни</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-end">
               <div className="text-sm text-muted-foreground">
-                Prikazuje se <strong>{filteredUsers.length}</strong> od <strong>{users.length}</strong> korisnika
+                Приказује се <strong>{filteredUsers.length}</strong> од <strong>{users.length}</strong> корисника
               </div>
             </div>
           </div>
@@ -668,9 +668,9 @@ export default function UsersPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Lista korisnika</CardTitle>
+              <CardTitle>Листа корисника</CardTitle>
               <CardDescription>
-                Pregled svih korisnika i njihovih osnovnih informacija
+                Преглед свих корисника и њихових основних информација
               </CardDescription>
             </div>
           </div>
@@ -694,14 +694,14 @@ export default function UsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Korisnik</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Uloga</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Objave</TableHead>
-                    <TableHead>Poslednje objave</TableHead>
-                    <TableHead>Kreiran</TableHead>
-                    <TableHead className="text-right">Akcije</TableHead>
+                    <TableHead>Корисник</TableHead>
+                    <TableHead>Имејл</TableHead>
+                    <TableHead>Улога</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Објаве</TableHead>
+                    <TableHead>Последње објаве</TableHead>
+                    <TableHead>Креиран</TableHead>
+                    <TableHead className="text-right">Акције</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -713,12 +713,12 @@ export default function UsersPage() {
                             {user.name}
                             {currentUser?.id === user.id && (
                               <Badge variant="outline" className="ml-2 text-xs">
-                                Vi
+                                Ви
                               </Badge>
                             )}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            ID: {user.id}
+                            ИД: {user.id}
                           </div>
                         </div>
                       </TableCell>
@@ -737,9 +737,9 @@ export default function UsersPage() {
                       <TableCell>
                         <div className="text-sm font-medium">{user.postsCount}</div>
                         <div className="text-xs text-muted-foreground">
-                          {user.postsCount === 0 ? 'Nema objava' : 
-                           user.postsCount === 1 ? '1 objava' : 
-                           `${user.postsCount} objav${user.postsCount < 5 ? 'e' : 'a'}`}
+                          {user.postsCount === 0 ? 'Нема објава' : 
+                           user.postsCount === 1 ? '1 објава' : 
+                           `${user.postsCount} објав${user.postsCount < 5 ? 'е' : 'а'}`}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -757,12 +757,12 @@ export default function UsersPage() {
                             ))}
                             {user.recentPosts.length > 2 && (
                               <div className="text-xs text-muted-foreground">
-                                +{user.recentPosts.length - 2} više
+                                +{user.recentPosts.length - 2} више
                               </div>
                             )}
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground">Nema objava</span>
+                          <span className="text-xs text-muted-foreground">Нема објава</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -779,7 +779,7 @@ export default function UsersPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => toggleUserStatus(user)}
-                                title={user.isActive ? 'Deaktiviraj korisnika' : 'Aktiviraj korisnika'}
+                                title={user.isActive ? 'Деактивирај корисника' : 'Активирај корисника'}
                                 className={user.isActive ? 'text-orange-600 hover:text-orange-800' : 'text-green-600 hover:text-green-800'}
                               >
                                 {user.isActive ? <UserXIcon className="h-4 w-4" /> : <UserCheckIcon className="h-4 w-4" />}
@@ -788,7 +788,7 @@ export default function UsersPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleEditUser(user)}
-                                title="Uredi korisnika"
+                                title="Уреди корисника"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -802,7 +802,7 @@ export default function UsersPage() {
                                 setUserToDelete(user);
                                 setIsDeleteDialogOpen(true);
                               }}
-                              title="Obriši korisnika"
+                              title="Обриши корисника"
                               className="text-red-600 hover:text-red-800"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -810,7 +810,7 @@ export default function UsersPage() {
                           )}
                           {!canEditUser(user) && !canDeleteUser(user) && (
                             <span className="text-xs text-muted-foreground">
-                              Nema dozvoljenih akcija
+                              Нема дозвољених акција
                             </span>
                           )}
                         </div>
@@ -824,19 +824,19 @@ export default function UsersPage() {
                           {searchTerm || roleFilter !== 'all' || statusFilter !== 'all' ? (
                             <>
                               <Search className="mx-auto h-8 w-8 mb-2" />
-                              <p>Nema korisnika koji odgovaraju filterima</p>
+                              <p>Нема корисника који одговарају филтерима</p>
                               <Button
                                 variant="outline"
                                 onClick={clearFilters}
                                 className="mt-2"
                               >
-                                Očisti filtere
+                                Очисти филтере
                               </Button>
                             </>
                           ) : (
                             <>
                               <UserIcon className="mx-auto h-8 w-8 mb-2" />
-                              <p>Nema korisnika za prikaz</p>
+                              <p>Нема корисника за приказ</p>
                             </>
                           )}
                         </div>
@@ -854,9 +854,9 @@ export default function UsersPage() {
       {users.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Najaktivniji korisnici</CardTitle>
+            <CardTitle>Најактивнији корисници</CardTitle>
             <CardDescription>
-              Korisnici sa najviše objava
+              Корисници са највише објава
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -879,7 +879,7 @@ export default function UsersPage() {
                     <div className="text-right">
                       <div className="font-bold text-lg">{user.postsCount}</div>
                       <div className="text-sm text-muted-foreground">
-                        {user.postsCount === 1 ? 'objava' : 'objav' + (user.postsCount < 5 ? 'e' : 'a')}
+                        {user.postsCount === 1 ? 'објава' : 'објав' + (user.postsCount < 5 ? 'е' : 'а')}
                       </div>
                     </div>
                   </div>
@@ -887,7 +887,7 @@ export default function UsersPage() {
               {users.filter(u => u.postsCount > 0).length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="mx-auto h-8 w-8 mb-2" />
-                  <p>Još uvek nema objava</p>
+                  <p>Још увек нема објава</p>
                 </div>
               )}
             </div>
@@ -899,16 +899,16 @@ export default function UsersPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
               <DialogDescription>
-                Da li si siguran da želiš da obrišeš korisnika {userToDelete?.name}?
+                Да ли си сигуран да желиш да обришеш корисника {userToDelete?.name}?
               </DialogDescription>
 
               {userToDelete && userToDelete.postsCount > 0 && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
                   <AlertCircle className="inline h-4 w-4 mr-1 text-yellow-600" />
                   <span className="text-sm text-yellow-800">
-                    Ovaj korisnik je kreirao {userToDelete.postsCount} objav(a). One će ostati na sistemu, ali bez vlasnika.
+                    Овај корисник је креирао {userToDelete.postsCount} објав(а). Оне ће остати на систему, али без власника.
                   </span>
                 </div>
               )}
@@ -917,27 +917,27 @@ export default function UsersPage() {
           {userToDelete && (
             <div className="py-4 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Ime:</span>
+                <span className="text-muted-foreground">Име:</span>
                 <span>{userToDelete.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Email:</span>
+                <span className="text-muted-foreground">Имејл:</span>
                 <span>{userToDelete.email}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Uloga:</span>
+                <span className="text-muted-foreground">Улога:</span>
                 {getRoleBadge(userToDelete.role)}
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
+                <span className="text-muted-foreground">Статус:</span>
                 {getStatusBadge(Boolean(userToDelete.isActive))}
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Objave:</span>
+                <span className="text-muted-foreground">Објаве:</span>
                 <span>{userToDelete.postsCount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Kreiran:</span>
+                <span className="text-muted-foreground">Креиран:</span>
                 <span>{formatDate(userToDelete.createdAt)}</span>
               </div>
             </div>
@@ -951,13 +951,13 @@ export default function UsersPage() {
                 setUserToDelete(null);
               }}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteUser}
             >
-              Obriši korisnika
+              Обриши корисника
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -971,11 +971,11 @@ export default function UsersPage() {
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
                 <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  Ograničen pristup
+                  Ограничен приступ
                 </h3>
                 <p className="text-sm text-blue-700 dark:text-blue-200 mt-1">
-                  Kao autor, možete videti samo listu korisnika. Za upravljanje korisnicima 
-                  kontaktirajte administratora sistema.
+                  Као аутор, можете видети само листу корисника. За управљање корисницима 
+                  контактирајте администратора система.
                 </p>
               </div>
             </div>

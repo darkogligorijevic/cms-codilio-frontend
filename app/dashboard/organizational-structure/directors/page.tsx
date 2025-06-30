@@ -82,7 +82,7 @@ export default function DirectorsPage() {
       setCurrentDirector(current);
     } catch (error) {
       console.error('Error fetching directors data:', error);
-      toast.error('Greška pri učitavanju podataka o direktorima');
+      toast.error('Грешка при учитавању података о директорима');
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +114,7 @@ export default function DirectorsPage() {
       await fetchData();
     } catch (error: any) {
       console.error('Error deleting director:', error);
-      toast.error(error.response?.data?.message || 'Greška pri brisању директора');
+      toast.error(error.response?.data?.message || 'Грешка при брисању директора');
     }
   };
 
@@ -125,7 +125,7 @@ export default function DirectorsPage() {
       await fetchData();
     } catch (error: any) {
       console.error('Error setting current director:', error);
-      toast.error(error.response?.data?.message || 'Greška при постављању тренутног директора');
+      toast.error(error.response?.data?.message || 'Грешка при постављању тренутног директора');
     }
   };
 

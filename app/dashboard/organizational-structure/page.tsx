@@ -87,7 +87,7 @@ export default function OrganizationalStructurePage() {
       setStatistics(stats);
     } catch (error) {
       console.error('Error fetching organizational data:', error);
-      toast.error('Greška pri učitavanju organizacione strukture');
+      toast.error('Грешка при учитавању организационе структуре');
     } finally {
       setIsLoading(false);
     }
@@ -113,13 +113,13 @@ export default function OrganizationalStructurePage() {
 
     try {
       await organizationalApi.delete(unitToDelete.id);
-      toast.success('Organizaciona jedinica je uspešno obrisana');
+      toast.success('Организациона јединица је успешно обрисана');
       await fetchData();
       setIsDeleteDialogOpen(false);
       setUnitToDelete(null);
     } catch (error: any) {
       console.error('Error deleting unit:', error);
-      toast.error(error.response?.data?.message || 'Greška pri brisanju organizacione jedinice');
+      toast.error(error.response?.data?.message || 'Грешка при брисању организационе јединице');
     }
   };
 
@@ -148,22 +148,22 @@ export default function OrganizationalStructurePage() {
       a.download = 'organizaciona-struktura.json';
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Eksport je uspešno kreiran');
+      toast.success('Експорт је успешно креиран');
     } catch (error) {
       console.error('Error exporting data:', error);
-      toast.error('Greška pri eksportu podataka');
+      toast.error('Грешка при експорту података');
     }
   };
 
   const getUnitTypeLabel = (type: UnitType): string => {
     const labels = {
-      [UnitType.DEPARTMENT]: 'Odsek',
-      [UnitType.DIVISION]: 'Odeljenje',
-      [UnitType.SECTOR]: 'Sektor',
-      [UnitType.SERVICE]: 'Služba',
-      [UnitType.OFFICE]: 'Kancelarija',
-      [UnitType.COMMITTEE]: 'Komisija',
-      [UnitType.OTHER]: 'Ostalo'
+      [UnitType.DEPARTMENT]: 'Одсек',
+      [UnitType.DIVISION]: 'Одељење',
+      [UnitType.SECTOR]: 'Сектор',
+      [UnitType.SERVICE]: 'Служба',
+      [UnitType.OFFICE]: 'Канцеларија',
+      [UnitType.COMMITTEE]: 'Комисија',
+      [UnitType.OTHER]: 'Остало'
     };
     return labels[type] || type;
   };
@@ -238,7 +238,7 @@ export default function OrganizationalStructurePage() {
               )}
               <span className="flex items-center space-x-1">
                 <Users className="h-3 w-3" />
-                <span>{unit.employeeCount} zaposlenih</span>
+                <span>{unit.employeeCount} запослених</span>
               </span>
             </div>
           </div>
@@ -252,11 +252,11 @@ export default function OrganizationalStructurePage() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleEditUnit(unit)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Uredi
+                Уреди
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleCreateUnit()}>
                 <Plus className="mr-2 h-4 w-4" />
-                Dodaj podjedinicu
+                Додај подјединицу
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -264,7 +264,7 @@ export default function OrganizationalStructurePage() {
                 className="text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Obriši
+                Обриши
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -301,11 +301,11 @@ export default function OrganizationalStructurePage() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleEditUnit(unit)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Uredi
+                Уреди
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleDeleteUnit(unit)}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Obriši
+                Обриши
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -328,7 +328,7 @@ export default function OrganizationalStructurePage() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-gray-500" />
-            <span>{unit.employeeCount} zaposlenih</span>
+            <span>{unit.employeeCount} запослених</span>
           </div>
           
           {unit.phone && (
@@ -355,7 +355,7 @@ export default function OrganizationalStructurePage() {
 
         {unit.contacts && unit.contacts.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-400">Kontakti:</h4>
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-400">Контакти:</h4>
             <div className="space-y-1">
               {unit.contacts.slice(0, 2).map(contact => (
                 <div key={contact.id} className="text-sm text-gray-600">
@@ -365,7 +365,7 @@ export default function OrganizationalStructurePage() {
               ))}
               {unit.contacts.length > 2 && (
                 <div className="text-xs text-gray-500">
-                  +{unit.contacts.length - 2} više kontakata
+                  +{unit.contacts.length - 2} више контаката
                 </div>
               )}
             </div>
@@ -383,9 +383,9 @@ export default function OrganizationalStructurePage() {
         
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Organizaciona struktura</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Организациона структура</h1>
             <p className="text-muted-foreground">
-              Upravljanje organizacionim jedinicama i kontaktima
+              Управљање организационим јединицама и контактима
             </p>
           </div>
         </div>
@@ -415,19 +415,19 @@ export default function OrganizationalStructurePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Organizaciona struktura</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Организациона структура</h1>
           <p className="text-muted-foreground">
-            Upravljanje organizacionim jedinicama i kontaktima
+            Управљање организационим јединицама и контактима
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" onClick={handleExport}>
             <Download className="mr-2 h-4 w-4" />
-            Eksport
+            Експорт
           </Button>
           <Button onClick={handleCreateUnit} variant={theme === "light" ? "default" : "secondaryDefault"}>
             <Plus className="mr-2 h-4 w-4" />
-            Nova jedinica
+            Нова јединица
           </Button>
         </div>
       </div>
@@ -438,14 +438,14 @@ export default function OrganizationalStructurePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Ukupno jedinica
+                Укупно јединица
               </CardTitle>
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalUnits}</div>
               <p className="text-xs text-muted-foreground">
-                {statistics.activeUnits} aktivnih
+                {statistics.activeUnits} активних
               </p>
             </CardContent>
           </Card>
@@ -453,14 +453,14 @@ export default function OrganizationalStructurePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Ukupno zaposlenih
+                Укупно запослених
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalEmployees}</div>
               <p className="text-xs text-muted-foreground">
-                Registrovano u sistemu
+                Регистровано у систему
               </p>
             </CardContent>
           </Card>
@@ -468,14 +468,14 @@ export default function OrganizationalStructurePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Tipovi jedinica
+                Типови јединица
               </CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.unitsByType.length}</div>
               <p className="text-xs text-muted-foreground">
-                Različitih tipova
+                Различитих типова
               </p>
             </CardContent>
           </Card>
@@ -483,7 +483,7 @@ export default function OrganizationalStructurePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Prosek zaposlenih
+                Просек запослених
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -496,7 +496,7 @@ export default function OrganizationalStructurePage() {
                 }
               </div>
               <p className="text-xs text-muted-foreground">
-                Po jedinici
+                По јединици
               </p>
             </CardContent>
           </Card>
@@ -509,7 +509,7 @@ export default function OrganizationalStructurePage() {
         <div className={`relative max-w-sm ${hideSearch ? "invisible" : ""}`}>
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Pretraži jedinice..."
+            placeholder="Претражи јединице..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -533,7 +533,7 @@ export default function OrganizationalStructurePage() {
             }
           >
             <TreePine className="mr-2 h-4 w-4" />
-            Hijerarhija
+            Хијерархија
           </Button>
           <Button
             variant={
@@ -549,7 +549,7 @@ export default function OrganizationalStructurePage() {
             }
           >
             <Grid3X3 className="mr-2 h-4 w-4" />
-            Kartice
+            Картице
           </Button>
           <Button
             variant={
@@ -565,7 +565,7 @@ export default function OrganizationalStructurePage() {
             }
           >
             <BarChart3 className="mr-2 h-4 w-4" />
-            Grafikon
+            Графикон
           </Button>
         </div>
       </div>
@@ -574,9 +574,9 @@ export default function OrganizationalStructurePage() {
       {viewMode === 'tree' && (
         <Card>
           <CardHeader>
-            <CardTitle>Hijerarhijski prikaz</CardTitle>
+            <CardTitle>Хијерархијски приказ</CardTitle>
             <CardDescription>
-              Organizaciona struktura prikazana kao stablo
+              Организациона структура приказана као стабло
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -586,8 +586,8 @@ export default function OrganizationalStructurePage() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Building2 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                  <p>Nema kreiranih organizacionih jedinica</p>
-                  <p className="text-sm">Kliknite "Nova jedinica" da dodate prvu jedinicu</p>
+                  <p>Нема креираних организационих јединица</p>
+                  <p className="text-sm">Кликните "Нова јединица" да додате прву јединицу</p>
                 </div>
               )}
             </div>
@@ -602,9 +602,9 @@ export default function OrganizationalStructurePage() {
           ) : (
             <div className="col-span-full text-center py-8 text-gray-500">
               <Building2 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <p>Nema organizacionih jedinica</p>
+              <p>Нема организационих јединица</p>
               <p className="text-sm">
-                {searchTerm ? 'Nema rezultata za pretragu' : 'Kliknite "Nova jedinica" da dodate prvu jedinicu'}
+                {searchTerm ? 'Нема резултата за претрагу' : 'Кликните "Нова јединица" да додате прву јединицу'}
               </p>
             </div>
           )}
@@ -614,9 +614,9 @@ export default function OrganizationalStructurePage() {
       {viewMode === 'chart' && (
         <Card>
           <CardHeader>
-            <CardTitle>Grafički prikaz</CardTitle>
+            <CardTitle>Графички приказ</CardTitle>
             <CardDescription>
-              Interaktivna organizaciona šema
+              Интерактивна организациона шема
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -625,8 +625,8 @@ export default function OrganizationalStructurePage() {
             ) : (
               <div className="text-center py-12 text-gray-500">
                 <Building2 className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                <p className="text-lg font-medium">Nema podataka za prikaz</p>
-                <p className="text-sm">Dodajte organizacione jedinice da biste videli grafikon</p>
+                <p className="text-lg font-medium">Нема података за приказ</p>
+                <p className="text-sm">Додајте организационе јединице да бисте видели графикон</p>
               </div>
             )}
           </CardContent>
@@ -648,12 +648,12 @@ export default function OrganizationalStructurePage() {
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h2 className="text-lg font-semibold">
-                  {selectedUnit ? 'Uredi organizacionu jedinicu' : 'Nova organizaciona jedinica'}
+                  {selectedUnit ? 'Уреди организациону јединицу' : 'Нова организациона јединица'}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
                   {selectedUnit
-                    ? 'Ažurirajte informacije o organizacionoj jedinici'
-                    : 'Dodajte novu organizacionu jedinicu u strukturu'
+                    ? 'Ажурирајте информације о организационој јединици'
+                    : 'Додајте нову организациону јединицу у структуру'
                   }
                 </p>
               </div>
@@ -682,10 +682,10 @@ export default function OrganizationalStructurePage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete organizacionu jedinicu{' '}
-              <strong>{unitToDelete?.name}</strong>? Ova akcija se ne može poništiti.
+              Да ли сте сигурни да желите да обришете организациону јединицу{' '}
+              <strong>{unitToDelete?.name}</strong>? Ова акција се не може поништити.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -693,13 +693,13 @@ export default function OrganizationalStructurePage() {
               variant="outline" 
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button 
               variant="destructive" 
               onClick={confirmDelete}
             >
-              Obriši
+              Обриши
             </Button>
           </DialogFooter>
         </DialogContent>
