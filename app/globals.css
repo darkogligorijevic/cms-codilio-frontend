@@ -86,7 +86,7 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --color-footer: hsl(var(--footer))
+  --color-footer: hsl(var(--footer));
   
   /* VAŠE CUSTOM DYNAMIC COLORS */
   --color-primary-dynamic: hsl(var(--primary-dynamic));
