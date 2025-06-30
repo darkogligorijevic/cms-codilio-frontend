@@ -87,7 +87,7 @@ export default function GalleriesPage() {
       setGalleryTypes(typesResponse);
     } catch (error) {
       console.error('Error fetching galleries:', error);
-      toast.error('Greška pri učitavanju galerija');
+      toast.error('Грешка при учитавању галерија');
     } finally {
       setIsLoading(false);
     }
@@ -98,13 +98,13 @@ export default function GalleriesPage() {
 
     try {
       await galleryApi.delete(galleryToDelete.id);
-      toast.success('Galerija je uspešno obrisana');
+      toast.success('Галерија је успешно обрисана');
       setIsDeleteDialogOpen(false);
       setGalleryToDelete(null);
       await fetchData();
     } catch (error) {
       console.error('Error deleting gallery:', error);
-      toast.error('Greška pri brisanju galerije');
+      toast.error('Грешка при брисању галерије');
     }
   };
 
@@ -112,11 +112,11 @@ export default function GalleriesPage() {
     return status === GalleryStatus.PUBLISHED ? (
       <Badge variant="default" className="bg-green-100 text-green-800">
         <Eye className="h-3 w-3 mr-1" />
-        Objavljeno
+        Објављено
       </Badge>
     ) : (
       <Badge variant="secondary">
-        Draft
+        Нацрт
       </Badge>
     );
   };
@@ -149,9 +149,9 @@ export default function GalleriesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Galerije</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Галерије</h1>
           <p className="text-muted-foreground">
-            Upravljajte galerije slika i organizujte ih po kategorijama
+            Управљајте галерије слика и организујте их по категоријама
           </p>
         </div>
         <Button 
@@ -159,7 +159,7 @@ export default function GalleriesPage() {
           variant={theme === "light" ? "default" : "secondaryDefault"}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Nova galerija
+          Нова галерија
         </Button>
       </div>
 
@@ -169,14 +169,14 @@ export default function GalleriesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Ukupno galerija
+                Укупно галерија
               </CardTitle>
               <Grid3X3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalGalleries}</div>
               <p className="text-xs text-muted-foreground">
-                {statistics.publishedGalleries} objavljeno
+                {statistics.publishedGalleries} објављено
               </p>
             </CardContent>
           </Card>
@@ -184,14 +184,14 @@ export default function GalleriesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Ukupno slika
+                Укупно слика
               </CardTitle>
               <ImageIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{statistics.totalImages}</div>
               <p className="text-xs text-muted-foreground">
-                Sve slike u galerijama
+                Све слике у галеријама
               </p>
             </CardContent>
           </Card>
@@ -199,16 +199,16 @@ export default function GalleriesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Najpopularnija
+                Најпопуларнија
               </CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-lg font-bold">
-                {statistics.topGalleries[0]?.title || 'Nema podataka'}
+                {statistics.topGalleries[0]?.title || 'Нема података'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {statistics.topGalleries[0]?.viewCount || 0} pregleda
+                {statistics.topGalleries[0]?.viewCount || 0} прегледа
               </p>
             </CardContent>
           </Card>
@@ -216,7 +216,7 @@ export default function GalleriesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Po tipovima
+                По типовима
               </CardTitle>
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -237,20 +237,20 @@ export default function GalleriesPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Pretraga i filteri</CardTitle>
+          <CardTitle>Претрага и филтери</CardTitle>
           <CardDescription>
-            Pronađite galerije pomoću pretrage i filtera
+            Пронађите галерије помоћу претраге и филтера
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <label htmlFor="search">Pretraga</label>
+              <label htmlFor="search">Претрага</label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Pretraži galerije..."
+                  placeholder="Претражи галерије..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -259,27 +259,27 @@ export default function GalleriesPage() {
             </div>
 
             <div className="space-y-2">
-              <label>Status</label>
+              <label>Статус</label>
               <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as GalleryStatus | 'all')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi statusi" />
+                  <SelectValue placeholder="Сви статуси" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi statusi</SelectItem>
-                  <SelectItem value={GalleryStatus.PUBLISHED}>Objavljeno</SelectItem>
-                  <SelectItem value={GalleryStatus.DRAFT}>Draft</SelectItem>
+                  <SelectItem value="all">Сви статуси</SelectItem>
+                  <SelectItem value={GalleryStatus.PUBLISHED}>Објављено</SelectItem>
+                  <SelectItem value={GalleryStatus.DRAFT}>Нацрт</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label>Tip</label>
+              <label>Тип</label>
               <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as GalleryType | 'all')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Svi tipovi" />
+                  <SelectValue placeholder="Сви типови" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Svi tipovi</SelectItem>
+                  <SelectItem value="all">Сви типови</SelectItem>
                   {galleryTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
@@ -293,14 +293,14 @@ export default function GalleriesPage() {
               {(searchTerm || statusFilter !== 'all' || typeFilter !== 'all') && (
                 <Button variant="outline" onClick={clearFilters} className="w-full">
                   <X className="mr-2 h-4 w-4" />
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               )}
             </div>
           </div>
           
           <div className="mt-4 text-sm text-muted-foreground">
-            Prikazuje se {galleries.length} galerija
+            Приказује се {galleries.length} галерија
           </div>
         </CardContent>
       </Card>
@@ -308,9 +308,9 @@ export default function GalleriesPage() {
       {/* Galleries Grid */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista galerija</CardTitle>
+          <CardTitle>Листа галерија</CardTitle>
           <CardDescription>
-            Sve galerije i njihovi osnovni podaci
+            Све галерије и њихови основни подаци
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -364,11 +364,11 @@ export default function GalleriesPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => router.push(`/dashboard/galleries/${gallery.id}`)}>
                             <Eye className="mr-2 h-4 w-4" />
-                            Prikaži
+                            Прикажи
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => router.push(`/dashboard/galleries/edit/${gallery.id}`)}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Uredi
+                            Уреди
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -379,7 +379,7 @@ export default function GalleriesPage() {
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Obriši
+                            Обриши
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -421,7 +421,7 @@ export default function GalleriesPage() {
                       {gallery.eventDate && (
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3 mr-1" />
-                          Događaj: {formatDate(gallery.eventDate)}
+                          Догађај: {formatDate(gallery.eventDate)}
                         </div>
                       )}
                     </div>
@@ -432,16 +432,16 @@ export default function GalleriesPage() {
           ) : (
             <div className="text-center py-12">
               <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nema galerija</h3>
+              <h3 className="text-lg font-medium mb-2">Нема галерија</h3>
               <p className="text-muted-foreground mb-4">
                 {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' 
-                  ? 'Nema galerija koje odgovaraju filterima'
-                  : 'Kreirajte prvu galeriju da biste počeli'
+                  ? 'Нема галерија које одговарају филтерима'
+                  : 'Креирајте прву галерију да бисте почели'
                 }
               </p>
               {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' ? (
                 <Button variant="outline" onClick={clearFilters}>
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               ) : (
                 <Button 
@@ -449,7 +449,7 @@ export default function GalleriesPage() {
                   variant={theme === "light" ? "default" : "secondaryDefault"}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Kreiraj galeriju
+                  Креирај галерију
                 </Button>
               )}
             </div>
@@ -461,10 +461,10 @@ export default function GalleriesPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete galeriju "{galleryToDelete?.title}"?
-              Ova akcija će takođe obrisati sve slike u galeriji i ne može se poništiti.
+              Да ли сте сигурни да желите да обришете галерију "{galleryToDelete?.title}"?
+              Ова акција ће такође обрисати све слике у галерији и не може се поништити.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -472,13 +472,13 @@ export default function GalleriesPage() {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteGallery}
             >
-              Obriši galeriju
+              Обриши галерију
             </Button>
           </DialogFooter>
         </DialogContent>
