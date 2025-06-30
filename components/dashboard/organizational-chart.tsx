@@ -62,8 +62,8 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
       <div className="relative w-full h-[600px] bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
         <div className="text-center text-gray-500">
           <Building2 className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-          <p className="text-lg font-medium">Nema podataka za prikaz</p>
-          <p className="text-sm">Dodajte organizacione jedinice da biste videli grafikon</p>
+          <p className="text-lg font-medium">Нема података за приказ</p>
+          <p className="text-sm">Додајте организационе јединице да бисте видели графикон</p>
         </div>
       </div>
     );
@@ -84,13 +84,13 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
 
   const getUnitTypeLabel = (type: UnitType): string => {
     const labels = {
-      [UnitType.DEPARTMENT]: 'Odsek',
-      [UnitType.DIVISION]: 'Odeljenje',
-      [UnitType.SECTOR]: 'Sektor',
-      [UnitType.SERVICE]: 'Služba',
-      [UnitType.OFFICE]: 'Kancelarija',
-      [UnitType.COMMITTEE]: 'Komisija',
-      [UnitType.OTHER]: 'Ostalo'
+      [UnitType.DEPARTMENT]: 'Одсек',
+      [UnitType.DIVISION]: 'Одељење',
+      [UnitType.SECTOR]: 'Сектор',
+      [UnitType.SERVICE]: 'Служба',
+      [UnitType.OFFICE]: 'Канцеларија',
+      [UnitType.COMMITTEE]: 'Комисија',
+      [UnitType.OTHER]: 'Остало'
     };
     return labels[type] || type;
   };
@@ -506,7 +506,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
               fontSize="11"
               className="pointer-events-none"
             >
-              👥 {node.unit.employeeCount} zaposlenih
+              👥 {node.unit.employeeCount} запослених
             </text>
 
             {/* Contact info */}
@@ -567,7 +567,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
           className="bg-white"
         >
           <Maximize2 className="mr-2 h-4 w-4" />
-          Prilagodi
+          Прилагоди
         </Button>
         
         <Button
@@ -685,7 +685,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
 
                 <div className="flex items-center space-x-2">
                   <Users className="h-4 w-4 text-gray-500" />
-                  <span>{selectedUnit.employeeCount} zaposlenih</span>
+                  <span>{selectedUnit.employeeCount} запослених</span>
                 </div>
 
                 {selectedUnit.phone && (
@@ -712,7 +712,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
 
               {selectedUnit.contacts && selectedUnit.contacts.length > 0 && (
                 <div className="mt-4 pt-3 border-t">
-                  <h4 className="text-sm font-medium mb-2">Kontakti:</h4>
+                  <h4 className="text-sm font-medium mb-2">Контакти:</h4>
                   <div className="space-y-1">
                     {selectedUnit.contacts.slice(0, 3).map(contact => (
                       <div key={contact.id} className="text-xs text-gray-600">
@@ -722,7 +722,7 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
                     ))}
                     {selectedUnit.contacts.length > 3 && (
                       <div className="text-xs text-gray-500">
-                        +{selectedUnit.contacts.length - 3} više kontakata
+                        +{selectedUnit.contacts.length - 3} више контаката
                       </div>
                     )}
                   </div>
@@ -738,10 +738,10 @@ export function OrganizationalChart({ data, onUnitClick }: OrganizationalChartPr
         <Card className="bg-white/90 dark:bg-card backdrop-blur-sm">
           <CardContent className="p-3">
             <div className="text-xs text-gray-600 dark:text-gray-200 space-y-1">
-              <p>• Kliknite na jedinicu za detalje</p>
-              <p>• Prevucite jedinice za reorganizaciju</p>
-              <p>• Skrolujte za zoom (samo nad grafikonom)</p>
-              <p>• Prevlačite pozadinu za pomeranje</p>
+              <p>• Кликните на јединицу за детаље</p>
+              <p>• Превуците јединице за реорганизацију</p>
+              <p>• Скролујте за зум (само над графиконом)</p>
+              <p>• Превлачите позадину за померање</p>
             </div>
           </CardContent>
         </Card>
