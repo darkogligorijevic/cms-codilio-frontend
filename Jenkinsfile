@@ -27,6 +27,39 @@ pipeline {
             }
         }
 
+        stage('Fix API URLs in Source Code') {
+            steps {
+                script {
+                    echo "🔧 Fixing API URLs in source code..."
+                    echo "Target API URL: ${NEXT_PUBLIC_API_URL}"
+                    
+                    // Fix hardcoded localhost URLs in lib/api.ts
+                    sh """
+                        echo "📝 Updating lib/api.ts with correct API URL..."
+                        
+                        # Replace localhost URLs with production URL
+                        if [ -f "lib/api.ts" ]; then
+                            sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g' lib/api.ts
+                            sed -i "s|'http://localhost:3001/api'|'${NEXT_PUBLIC_API_URL}'|g" lib/api.ts
+                            sed -i 's|"http://localhost:3001/api"|"${NEXT_PUBLIC_API_URL}"|g' lib/api.ts
+                            
+                            echo "✅ Updated lib/api.ts"
+                        else
+                            echo "⚠️ lib/api.ts not found, will rely on environment variables"
+                        fi
+                        
+                        # Also check for any other config files
+                        find . -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" | \
+                        xargs grep -l "localhost:3001" | \
+                        xargs sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g'
+                        
+                        echo "🔍 Checking for remaining localhost references..."
+                        grep -r "localhost:3001" . --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" || echo "✅ No localhost:3001 references found"
+                    """
+                }
+            }
+        }
+
         stage('Build Docker Image with Environment') {
             steps {
                 script {
@@ -43,6 +76,30 @@ pipeline {
                     env.DOCKER_IMAGE = "${IMAGE_NAME}:${BUILD_NUMBER}"
                     
                     echo "✅ Docker image built successfully with API URL: ${NEXT_PUBLIC_API_URL}"
+                }
+            }
+        }
+
+        stage('Verify Build Contents') {
+            steps {
+                script {
+                    echo "🔍 Verifying Docker image contents..."
+                    
+                    sh """
+                        echo "🧪 Testing built image for API URL configuration..."
+                        
+                        # Create temporary container to inspect contents
+                        TEMP_CONTAINER=\$(docker create ${IMAGE_NAME}:${BUILD_NUMBER})
+                        
+                        # Check compiled JavaScript for localhost references
+                        echo "🔍 Checking for localhost:3001 in compiled JavaScript..."
+                        docker run --rm ${IMAGE_NAME}:${BUILD_NUMBER} find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; || echo "✅ No localhost:3001 found in compiled JS"
+                        
+                        # Cleanup
+                        docker rm \$TEMP_CONTAINER || true
+                        
+                        echo "✅ Build verification completed"
+                    """
                 }
             }
         }
@@ -128,6 +185,16 @@ pipeline {
                                 # Test API connectivity from frontend container
                                 echo "🔗 Testing API connectivity from frontend container..."
                                 docker exec codilio-frontend wget --timeout=10 -q -O /dev/null ${NEXT_PUBLIC_API_URL} && echo "✅ API reachable from frontend" || echo "⚠️ API not reachable from frontend"
+                                
+                                # 🆕 CRITICAL: Check for localhost:3001 in running container
+                                echo "🕵️ Verifying no localhost:3001 in running container..."
+                                LOCALHOST_COUNT=\$(docker exec codilio-frontend find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | wc -l)
+                                if [ "\$LOCALHOST_COUNT" -eq 0 ]; then
+                                    echo "✅ No localhost:3001 references found in running container"
+                                else
+                                    echo "⚠️ Found \$LOCALHOST_COUNT files with localhost:3001 references"
+                                    docker exec codilio-frontend find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | head -3
+                                fi
                                 
                                 response_content=\$(curl -s http://localhost:3000/ 2>/dev/null | head -200)
                                 if echo "\$response_content" | grep -q "html\\|DOCTYPE\\|codilio\\|next" > /dev/null; then
