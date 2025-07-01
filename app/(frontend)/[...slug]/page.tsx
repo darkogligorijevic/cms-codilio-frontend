@@ -1,4 +1,4 @@
-// app/(frontend)/[...slug]/page.tsx - Updated to handle kategorije/[slug] and objave/[slug]
+// app/(frontend)/[...slug]/page.tsx - Updated to handle kategorije/[slug] and objave/[slug] with single post template
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -15,6 +15,8 @@ import { type Page, type Post, type Gallery, Service, PageSection, Category } fr
 import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
 import { SingleServiceTemplate } from '@/templates/services/single-service-template';
+import { SinglePostTemplate } from '@/templates/posts/single-post-template'; // ADDED: Import single post template
+import { CategoryArchiveTemplate } from '@/templates/categories/category-archive-template'; // ADDED: Import category archive template
 import { PageBuilderRenderer } from '@/components/frontend/section-renderer';
 
 interface DynamicPageProps {
@@ -30,7 +32,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [gallery, setGallery] = useState<Gallery | null>(null);
   const [service, setService] = useState<Service | null>(null);
   const [category, setCategory] = useState<Category | null>(null);
-  const [singlePost, setSinglePost] = useState<Post | null>(null);
+  const [singlePost, setSinglePost] = useState<Post | null>(null); // ADDED: Single post state
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +67,19 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       setIsLoading(true);
       setError(null);
       
+      // Handle objave/[post-slug] routes (ADDED: Handle single post routes)
+      if (parentSlug === 'objave' && childSlug) {
+        try {
+          const postData = await postsApi.getBySlug(childSlug);
+          setSinglePost(postData);
+          return;
+        } catch (error) {
+          console.error('Post not found:', error);
+          setError('Објава није пронађена');
+          return;
+        }
+      }
+      
       // Handle kategorije/[category-slug] routes
       if (parentSlug === 'kategorije' && childSlug) {
         try {
@@ -74,19 +89,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         } catch (error) {
           console.error('Category not found:', error);
           setError('Категорија није пронађена');
-          return;
-        }
-      }
-      
-      // Handle objave/[post-slug] routes
-      if (parentSlug === 'objave' && childSlug) {
-        try {
-          const postData = await postsApi.getBySlug(childSlug);
-          setSinglePost(postData);
-          return;
-        } catch (error) {
-          console.error('Post not found:', error);
-          setError('Објава није пронађена');
           return;
         }
       }
@@ -187,58 +189,25 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  // If category found, render category archive template
-  if (category) {
-    // We'll create a Category Archive template similar to your existing kategorije/[slug]/page.tsx
+  // ADDED: If single post found, render single post template
+  if (singlePost) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Import and use your existing category archive component logic here */}
-        <div className="text-center py-16">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Категорија: {category.name}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {category.description || 'Објаве из ове категорије'}
-          </p>
-          <p className="text-sm text-gray-500">
-            Укупно {category.posts?.filter(post => post.status === "published").length || 0} објава
-          </p>
-          <div className="mt-6">
-            <Button variant="outline" asChild>
-              <Link href="/kategorije">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Назад на категорије
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <SinglePostTemplate 
+        post={singlePost} 
+        institutionData={institutionData}
+        settings={settings}
+      />
     );
   }
 
-  // If single post found, render single post template
-  if (singlePost) {
-    // We'll create a Single Post template similar to your existing objave/[slug]/page.tsx
+  // If category found, render category archive template
+  if (category) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Import and use your existing single post component logic here */}
-        <div className="text-center py-16">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {singlePost.title}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Аутор: {singlePost.author.name}
-          </p>
-          <div className="mt-6">
-            <Button variant="outline" asChild>
-              <Link href="/objave">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Назад на објаве
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <CategoryArchiveTemplate 
+        category={category}
+        institutionData={institutionData}
+        settings={settings}
+      />
     );
   }
 

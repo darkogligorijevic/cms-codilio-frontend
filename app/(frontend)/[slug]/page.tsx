@@ -1,4 +1,4 @@
-// app/(frontend)/[slug]/page.tsx - Updated to support kategorije and objave templates
+// app/(frontend)/[slug]/page.tsx - Complete implementation with single post and category archive support
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -15,6 +15,8 @@ import { type Page, type Post, type Gallery, Service, PageSection, Category } fr
 import { getTemplate, type TemplateProps } from '@/templates/template-registry';
 import { SingleGalleryTemplate } from '@/templates/gallery/single-gallery-template';
 import { SingleServiceTemplate } from '@/templates/services/single-service-template';
+import { SinglePostTemplate } from '@/templates/posts/single-post-template';
+import { CategoryArchiveTemplate } from '@/templates/categories/category-archive-template';
 import { PageBuilderRenderer } from '@/components/frontend/section-renderer';
 
 interface DynamicPageProps {
@@ -30,6 +32,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const [gallery, setGallery] = useState<Gallery | null>(null);
   const [service, setService] = useState<Service | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [singlePost, setSinglePost] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,16 +56,34 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
   useEffect(() => {
     if (pageSlug) {
-      fetchPages();
+      fetchContent();
     }
   }, [pageSlug]);
 
-  const fetchPages = async () => {
+  const fetchContent = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // First, try to get a regular page
+      // FIRST: Try to get a single post by slug
+      try {
+        const postData = await postsApi.getBySlug(pageSlug);
+        setSinglePost(postData);
+        return; // Exit early if post found
+      } catch (postError) {
+        console.log('Post not found, checking for category...');
+      }
+      
+      // SECOND: Try to get a category by slug
+      try {
+        const categoryData = await categoriesApi.getBySlug(pageSlug);
+        setCategory(categoryData);
+        return; // Exit early if category found
+      } catch (categoryError) {
+        console.log('Category not found, checking for page...');
+      }
+      
+      // THIRD: Try to get a regular page
       try {
         const pageData = await pagesApi.getBySlug(pageSlug);
         setPage(pageData);
@@ -106,7 +128,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       } catch (pageError) {
         console.log('Page not found, checking for gallery or service...');
         
-        // If page not found, try to find a gallery with this slug
+        // FOURTH: Try to find a gallery with this slug
         try {
           const galleryData = await galleryApi.getBySlug(pageSlug);
           setGallery(galleryData);
@@ -115,14 +137,14 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         } catch (galleryError) {
           console.log('Gallery not found, checking for service...');
           
-          // If gallery not found, try to find a service with this slug
+          // FIFTH: Try to find a service with this slug
           try {
             const serviceData = await servicesApi.getBySlug(pageSlug);
             setService(serviceData);
             return; // Exit early if service found
             
           } catch (serviceError) {
-            console.error('Neither page, gallery, nor service found for slug:', pageSlug);
+            console.error('Nothing found for slug:', pageSlug);
             setError('Страница није пронађена');
           }
         }
@@ -174,6 +196,28 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
+  // If single post found, render single post template
+  if (singlePost) {
+    return (
+      <SinglePostTemplate 
+        post={singlePost} 
+        institutionData={institutionData}
+        settings={settings}
+      />
+    );
+  }
+
+  // If category found, render category archive template
+  if (category) {
+    return (
+      <CategoryArchiveTemplate 
+        category={category}
+        institutionData={institutionData}
+        settings={settings}
+      />
+    );
+  }
+
   // If gallery found, render gallery template
   if (gallery) {
     return (
@@ -181,7 +225,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         gallery={gallery} 
         institutionData={institutionData}
         settings={settings}
-        parentPageSlug="galerija" // Assuming the parent gallery page slug
+        parentPageSlug="galerija"
       />
     );
   }
@@ -193,13 +237,13 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         service={service}
         institutionData={institutionData}
         settings={settings}
-        parentPageSlug="usluge" // Assuming the parent services page slug
+        parentPageSlug="usluge"
       />
     );
   }
 
-  // If error or neither page nor gallery nor service found
-  if (error || (!page && !gallery && !service)) {
+  // If error or nothing found
+  if (error || (!page && !gallery && !service && !singlePost && !category)) {
     return (
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm border-b">
@@ -247,7 +291,6 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   if (page) {
     return (
       <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${!page.usePageBuilder && 'py-16'}`}>
-
         {/* Main Content */}
         <main className={page.usePageBuilder ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"}>
           {page.usePageBuilder ? (
@@ -259,10 +302,16 @@ export default function DynamicPage({ params }: DynamicPageProps) {
               const TemplateComponent = getTemplate(page.template);
               const templateProps: TemplateProps = {
                 page,
-                posts,
+                posts: page.template === 'categories' ? [] : posts,
                 institutionData,
                 settings
               };
+              
+              // For categories template, pass categories instead of posts
+              if (page.template === 'categories') {
+                return <TemplateComponent {...templateProps} />;
+              }
+              
               return <TemplateComponent {...templateProps} />;
             })()
           )}

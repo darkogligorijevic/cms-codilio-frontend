@@ -1,4 +1,4 @@
-// templates/template-registry.tsx - Updated with Categories and Posts Templates
+// templates/template-registry.tsx - Updated with CategoryArchiveTemplate
 import { Page, Post } from '@/lib/types';
 
 // Import all templates
