@@ -1,7 +1,7 @@
-// components/ui/page-builder.tsx - Complete enhanced version with tabs
+// components/ui/page-builder.tsx - Enhanced with auto-scroll behavior
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,8 @@ import {
   Settings,
   Layout,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  ScrollText
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { pagesApi } from '@/lib/api';
@@ -74,6 +75,11 @@ export function PageBuilder({ pageId, className }: PageBuilderProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<Partial<PageSection>>({});
 
+  // Refs for scroll behavior
+  const sectionsContainerRef = useRef<HTMLDivElement>(null);
+  const sectionsListRef = useRef<HTMLDivElement>(null);
+  const lastSectionRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     fetchSections();
     fetchSectionTypes();
@@ -100,12 +106,53 @@ export function PageBuilder({ pageId, className }: PageBuilderProps) {
     }
   };
 
+  // Auto-scroll to newly added section
+  const scrollToSection = (sectionId?: number) => {
+    const container = sectionsListRef.current;
+    if (!container) return;
+
+    if (sectionId) {
+      // Scroll to specific section
+      const sectionElement = container.querySelector(`[data-section-id="${sectionId}"]`);
+      if (sectionElement) {
+        sectionElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    } else {
+      // Scroll to bottom (for new sections)
+      if (lastSectionRef.current) {
+        lastSectionRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end' 
+        });
+      }
+    }
+  };
+
+  // Scroll to top of sections list
+  const scrollToTop = () => {
+    const container = sectionsListRef.current;
+    if (container) {
+      container.scrollTo({ 
+        top: 0, 
+        behavior: 'smooth' 
+      });
+    }
+  };
+
   const handleAddSection = async (data: CreatePageSectionDto) => {
     try {
       const newSection = await pagesApi.createSection(pageId, data);
       setSections(prev => [...prev, newSection]);
       setIsAddDialogOpen(false);
       toast.success('Sekcija je uspešno dodana');
+      
+      // Auto-scroll to the new section after a brief delay
+      setTimeout(() => {
+        scrollToSection(newSection.id);
+      }, 100);
     } catch (error) {
       console.error('Error adding section:', error);
       toast.error('Greška pri dodavanju sekcije');
@@ -119,6 +166,11 @@ export function PageBuilder({ pageId, className }: PageBuilderProps) {
       setIsEditDialogOpen(false);
       setSelectedSection(null);
       toast.success('Sekcija je uspešno ažurirana');
+      
+      // Scroll to updated section
+      setTimeout(() => {
+        scrollToSection(sectionId);
+      }, 100);
     } catch (error) {
       console.error('Error updating section:', error);
       toast.error('Greška pri ažuriranju sekcije');
@@ -143,6 +195,11 @@ export function PageBuilder({ pageId, className }: PageBuilderProps) {
       const duplicatedSection = await pagesApi.duplicateSection(sectionId);
       setSections(prev => [...prev, duplicatedSection]);
       toast.success('Sekcija je uspešno duplikovana');
+      
+      // Auto-scroll to duplicated section
+      setTimeout(() => {
+        scrollToSection(duplicatedSection.id);
+      }, 100);
     } catch (error) {
       console.error('Error duplicating section:', error);
       toast.error('Greška pri dupliranju sekcije');
@@ -219,76 +276,160 @@ export function PageBuilder({ pageId, className }: PageBuilderProps) {
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Page Builder</h3>
-          <p className="text-sm text-muted-foreground">
-            Dodajte i uredite sekcije na vašoj stranici
-          </p>
-        </div>
-        <Button onClick={openAddDialog}>
-          <Plus className="mr-2 h-4 w-4" />
-          Dodaj sekciju
-        </Button>
-      </div>
-
-      {/* Sections List */}
-      {sections.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Layout className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Nema sekcija
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Počnite dodavanjem prve sekcije na vašu stranicu
+    <div className={cn("flex flex-col h-full", className)} ref={sectionsContainerRef}>
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 pb-4 border-b bg-white dark:bg-gray-900 sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="text-lg font-semibold">Page Builder</h3>
+            <p className="text-sm text-muted-foreground">
+              Dodajte i uredite sekcije na vašoj stranici
             </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            {sections.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={scrollToTop}
+                title="Idi na vrh"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+            )}
             <Button onClick={openAddDialog}>
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj prvu sekciju
+              Dodaj sekciju
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="sections">
-            {(provided: any) => (
-              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                {sections.map((section, index) => (
-                  <Draggable 
-                    key={section.id} 
-                    draggableId={section.id.toString()} 
-                    index={index}
-                  >
-                    {(provided: any, snapshot: any) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={cn(
-                          "transition-all",
-                          snapshot.isDragging && "rotate-3 shadow-lg"
-                        )}
-                      >
-                        <SectionCard
-                          section={section}
-                          dragHandleProps={provided.dragHandleProps}
-                          onEdit={() => handleEditSection(section)}
-                          onDelete={() => handleDeleteSection(section.id)}
-                          onDuplicate={() => handleDuplicateSection(section.id)}
-                          onToggleVisibility={() => handleToggleVisibility(section.id)}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
+          </div>
+        </div>
+
+        {/* Sections counter and status */}
+        {sections.length > 0 && (
+          <div className="flex items-center justify-between text-sm text-muted-foreground bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg">
+            <span>
+              Ukupno sekcija: {sections.length} | 
+              Prikazano: {sections.filter(s => s.isVisible).length} | 
+              Sakriveno: {sections.filter(s => !s.isVisible).length}
+            </span>
+            <span className="flex items-center">
+              <ScrollText className="mr-1 h-3 w-3" />
+              Skrolujte za više sekcija
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Scrollable Sections List */}
+      <div 
+        ref={sectionsListRef}
+        className="flex-1 overflow-y-auto pr-2 py-4"
+        style={{ maxHeight: 'calc(100vh - 200px)' }}
+      >
+        {sections.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Layout className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nema sekcija
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Počnite dodavanjem prve sekcije na vašu stranicu
+              </p>
+              <Button onClick={openAddDialog}>
+                <Plus className="mr-2 h-4 w-4" />
+                Dodaj prvu sekciju
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="sections">
+              {(provided: any) => (
+                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 pb-8">
+                  {sections.map((section, index) => (
+                    <Draggable 
+                      key={section.id} 
+                      draggableId={section.id.toString()} 
+                      index={index}
+                    >
+                      {(provided: any, snapshot: any) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={cn(
+                            "transition-all",
+                            snapshot.isDragging && "rotate-3 shadow-lg"
+                          )}
+                          data-section-id={section.id}
+                        >
+                          <SectionCard
+                            section={section}
+                            index={index}
+                            total={sections.length}
+                            dragHandleProps={provided.dragHandleProps}
+                            onEdit={() => handleEditSection(section)}
+                            onDelete={() => handleDeleteSection(section.id)}
+                            onDuplicate={() => handleDuplicateSection(section.id)}
+                            onToggleVisibility={() => handleToggleVisibility(section.id)}
+                            onScrollTo={() => scrollToSection(section.id)}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                  
+                  {/* Bottom spacer with ref for scrolling */}
+                  <div ref={lastSectionRef} className="h-16 flex items-center justify-center">
+                    <div className="text-xs text-gray-400 flex items-center">
+                      <ArrowUp className="mr-1 h-3 w-3" />
+                      Kraj liste - ukupno {sections.length} sekcija
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
+      </div>
+
+      {/* Fixed Footer with Quick Actions */}
+      <div className="flex-shrink-0 pt-4 border-t bg-white dark:bg-gray-900">
+        <div className="flex justify-between items-center">
+          <div className="text-xs text-gray-500">
+            {sections.length > 0 && `Poslednja sekcija: ${sections[sections.length - 1]?.name}`}
+          </div>
+          <div className="flex space-x-2">
+            {sections.length > 3 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (lastSectionRef.current) {
+                    lastSectionRef.current.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'end' 
+                    });
+                  }
+                }}
+                className="text-xs"
+              >
+                <ArrowDown className="mr-1 h-3 w-3" />
+                Idi na dno
+              </Button>
             )}
-          </Droppable>
-        </DragDropContext>
-      )}
+            <Button
+              size="sm"
+              onClick={openAddDialog}
+              className="text-xs"
+            >
+              <Plus className="mr-1 h-3 w-3" />
+              Nova sekcija
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Add Section Dialog */}
       <AddSectionDialog
@@ -312,23 +453,29 @@ export function PageBuilder({ pageId, className }: PageBuilderProps) {
   );
 }
 
-// Section Card Component
+// Enhanced Section Card Component
 interface SectionCardProps {
   section: PageSection;
+  index: number;
+  total: number;
   dragHandleProps: any;
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onToggleVisibility: () => void;
+  onScrollTo: () => void;
 }
 
 function SectionCard({ 
   section, 
+  index,
+  total,
   dragHandleProps, 
   onEdit, 
   onDelete, 
   onDuplicate, 
-  onToggleVisibility 
+  onToggleVisibility,
+  onScrollTo
 }: SectionCardProps) {
   const getSectionTypeLabel = (type: SectionType) => {
     const typeMap = {
@@ -345,6 +492,7 @@ function SectionCard({
       [SectionType.CTA_ONE]: 'Call to Action',
       [SectionType.LOGOS_ONE]: 'Logos',
       [SectionType.TEAM_ONE]: 'Team',
+      [SectionType.POSTS_CAROUSEL]: 'Posts Carousel',
       [SectionType.CUSTOM_HTML]: 'Custom HTML',
     };
     return typeMap[type] || type;
@@ -352,7 +500,7 @@ function SectionCard({
 
   return (
     <Card className={cn(
-      "transition-all hover:shadow-md",
+      "transition-all hover:shadow-md group",
       !section.isVisible && "opacity-60"
     )}>
       <CardHeader className="pb-3">
@@ -365,7 +513,12 @@ function SectionCard({
               <GripVertical className="h-4 w-4 text-gray-400" />
             </div>
             <div>
-              <CardTitle className="text-base">{section.name}</CardTitle>
+              <div className="flex items-center space-x-2">
+                <CardTitle className="text-base">{section.name}</CardTitle>
+                <Badge variant="outline" className="text-xs">
+                  #{index + 1}
+                </Badge>
+              </div>
               <div className="flex items-center space-x-2 mt-1">
                 <Badge variant="outline">{getSectionTypeLabel(section.type)}</Badge>
                 {!section.isVisible && (
@@ -375,6 +528,16 @@ function SectionCard({
             </div>
           </div>
           <div className="flex items-center space-x-1">
+            {/* Quick scroll to this section button (visible on hover) */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onScrollTo}
+              title="Fokusiraj ovu sekciju"
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ScrollText className="h-3 w-3" />
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -426,13 +589,21 @@ function SectionCard({
           {section.cssClasses && (
             <p><strong>CSS klase:</strong> {section.cssClasses}</p>
           )}
+          <div className="flex items-center justify-between mt-2 pt-2 border-t">
+            <span className="text-xs text-gray-400">
+              Pozicija: {index + 1} od {total}
+            </span>
+            <span className="text-xs text-gray-400">
+              ID: {section.id}
+            </span>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// Add Section Dialog Component
+// Add Section Dialog Component (unchanged)
 interface AddSectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -537,7 +708,7 @@ function AddSectionDialog({
   );
 }
 
-// Edit Section Dialog Component - WITH TABS
+// Edit Section Dialog Component (unchanged from original)
 interface EditSectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
