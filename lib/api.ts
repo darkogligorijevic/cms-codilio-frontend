@@ -82,7 +82,7 @@ import {
 } from './types';
 import { InstitutionType } from './institution-templates';
 
-export const API_BASE_URL = 'http://localhost:3001/api';
+export const API_BASE_URL = 'https://api-codilio.sbugarin.com/api';
 
 // Create axios instance
 const api = axios.create({
