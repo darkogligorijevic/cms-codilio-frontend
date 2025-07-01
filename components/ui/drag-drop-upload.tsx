@@ -77,39 +77,39 @@ interface DragDropUploadProps {
 const categories = [
   {
     value: MediaCategory.PROCUREMENT,
-    label: 'Javne nabavke',
+    label: 'Јавне набавке',
     icon: Building,
-    description: 'Dokumenti vezani za javne nabavke i tendere'
+    description: 'Документи везани за јавне набавке и тендере'
   },
   {
     value: MediaCategory.FINANCIAL,
-    label: 'Finansijski izvještaji',
+    label: 'Финансијски извештаји',
     icon: DollarSign,
-    description: 'Budžeti, finansijski planovi i izvještaji'
+    description: 'Буџети, финансијски планови и извештаји'
   },
   {
     value: MediaCategory.DECISIONS,
-    label: 'Odluke',
+    label: 'Одлуке',
     icon: FileCheck,
-    description: 'Odluke donesene na sastancima i sednicama'
+    description: 'Одлуке донесене на састанцима и седницама'
   },
   {
     value: MediaCategory.PLANS,
-    label: 'Planovi',
+    label: 'Планови',
     icon: Clipboard,
-    description: 'Godišnji planovi rada i razvoja'
+    description: 'Годишњи планови рада и развоја'
   },
   {
     value: MediaCategory.REPORTS,
-    label: 'Izvještaji',
+    label: 'Извештаји',
     icon: BarChart3,
-    description: 'Izvještaji o radu uprave i drugih organa'
+    description: 'Извештаји о раду управе и других органа'
   },
   {
     value: MediaCategory.OTHER,
-    label: 'Ostalo',
+    label: 'Остало',
     icon: Folder,
-    description: 'Ostali dokumenti i mediji'
+    description: 'Остали документи и медији'
   }
 ];
 
@@ -150,11 +150,11 @@ export function DragDropUpload({
   };
 
   const getFileTypeLabel = (file: File) => {
-    if (file.type.startsWith('image/')) return 'Slika';
+    if (file.type.startsWith('image/')) return 'Слика';
     if (file.type.includes('pdf')) return 'PDF';
-    if (file.type.includes('document')) return 'Dokument';
-    if (file.type.includes('spreadsheet')) return 'Tabela';
-    return 'Fajl';
+    if (file.type.includes('document')) return 'Документ';
+    if (file.type.includes('spreadsheet')) return 'Табела';
+    return 'Фајл';
   };
 
   const getCategoryIcon = (category: MediaCategory) => {
@@ -174,7 +174,7 @@ export function DragDropUpload({
   const validateFile = (file: File): string | null => {
     // Check file size
     if (file.size > maxSize * 1024 * 1024) {
-      return `Fajl je prevelik. Maksimalna veličina je ${maxSize}MB.`;
+      return `Фајл је превелик. Масксимална величина је ${maxSize}MB.`;
     }
 
     // Check file type
@@ -190,7 +190,7 @@ export function DragDropUpload({
     });
 
     if (!isValidType) {
-      return `Nepodržan tip fajla. Dozvoljena su sledeća proširenja: ${accept}`;
+      return `Неподржан тип фајла. Дозвољена су следећа проширења: ${accept}`;
     }
 
     return null;
@@ -302,7 +302,7 @@ export function DragDropUpload({
           ...f, 
           status: 'error', 
           progress: 0,
-          error: error instanceof Error ? error.message : 'Greška pri učitavanju fajla'
+          error: error instanceof Error ? error.message : 'Грешка при учитавању фајла'
         } : f
       ));
     }
@@ -410,26 +410,26 @@ export function DragDropUpload({
 
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-1 dark:text-white">
-              {isDragOver ? 'Otpustite fajlove ovde' : 'Prevucite fajlove ovde'}
+              {isDragOver ? 'Отпустите фајлове овде' : 'Превуците фајлове овде'}
             </h3>
             <p className="text-sm text-gray-500 mb-2">
-              ili kliknite da izaberete fajlove
+              или кликните да изаберете фајлове
             </p>
             <p className="text-xs text-gray-400">
-              Maksimalna veličina: {maxSize}MB • Dozvoljeni tipovi: {accept}
+              Масксимална величина: {maxSize}MB • Дозвољени типови: {accept}
             </p>
           </div>
 
           <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-3 rounded">
             <div className="flex items-center space-x-2 mb-2">
               <ImageIcon className="h-4 w-4" />
-              <span className="font-medium">Slike:</span>
-              <span>Koriste podešavanja odozgo</span>
+              <span className="font-medium">Слике:</span>
+              <span>Користите подешавања одозго</span>
             </div>
             <div className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
-              <span className="font-medium">Dokumenti:</span>
-              <span>Otvaraju dijalog za podešavanje</span>
+              <span className="font-medium">Документи:</span>
+              <span>Отварају дијалог за подешавање</span>
             </div>
           </div>
 
@@ -443,7 +443,7 @@ export function DragDropUpload({
               }}
             >
               <Upload className="mr-2 h-4 w-4" />
-              Izaberi fajlove
+              Изабери фајлове
             </Button>
           )}
         </div>
@@ -457,11 +457,11 @@ export function DragDropUpload({
       }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Podešavanja dokumenta</DialogTitle>
+            <DialogTitle>Подешавања документа</DialogTitle>
             <DialogDescription>
               {metadataDialog.file && (
                 <>
-                  Podešavanja za fajl: <strong>{metadataDialog.file.name}</strong>
+                  Подешавања за фајл: <strong>{metadataDialog.file.name}</strong>
                 </>
               )}
             </DialogDescription>
@@ -469,7 +469,7 @@ export function DragDropUpload({
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Kategorija *</Label>
+              <Label htmlFor="category">Категорија *</Label>
               <Select 
                 value={metadataDialog.metadata.category} 
                 onValueChange={(value) => setMetadataDialog(prev => ({ 
@@ -497,10 +497,10 @@ export function DragDropUpload({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Opis dokumenta</Label>
+              <Label htmlFor="description">Опис документа</Label>
               <Textarea
                 id="description"
-                placeholder="Detaljan opis dokumenta..."
+                placeholder="Детаљан опис документа..."
                 rows={3}
                 value={metadataDialog.metadata.description || ''}
                 onChange={(e) => setMetadataDialog(prev => ({ 
@@ -521,7 +521,7 @@ export function DragDropUpload({
               />
               <Label htmlFor="isPublic" className="flex items-center space-x-2">
                 {metadataDialog.metadata.isPublic ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                <span>Javno dostupan dokument</span>
+                <span>Јавно доступан документ</span>
               </Label>
             </div>
 
@@ -532,7 +532,7 @@ export function DragDropUpload({
                   <span>{getFileTypeLabel(metadataDialog.file)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Veličina:</span>
+                  <span>Величина:</span>
                   <span>{formatFileSize(metadataDialog.file.size)}</span>
                 </div>
               </div>
@@ -545,13 +545,13 @@ export function DragDropUpload({
               variant="outline"
               onClick={() => setMetadataDialog({ isOpen: false, file: null, metadata: { ...globalMetadata } })}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button 
               type="button" 
               onClick={handleMetadataConfirm}
             >
-              Učitaj dokument
+              Учитај документ
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -561,7 +561,7 @@ export function DragDropUpload({
       {uploadFiles.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <h4 className="text-sm font-medium mb-4">Učitavanje fajlova ({uploadFiles.length})</h4>
+            <h4 className="text-sm font-medium mb-4">Учитавање фајлова ({uploadFiles.length})</h4>
             <div className="space-y-3">
               {uploadFiles.map((uploadFile) => (
                 <div key={uploadFile.id} className="flex items-center space-x-3">
@@ -595,12 +595,12 @@ export function DragDropUpload({
                           {uploadFile.metadata.isPublic ? (
                             <>
                               <Eye className="h-3 w-3 mr-1" />
-                              Javno
+                              Јавно
                             </>
                           ) : (
                             <>
                               <EyeOff className="h-3 w-3 mr-1" />
-                              Interno
+                              Интерно
                             </>
                           )}
                         </Badge>
@@ -629,25 +629,25 @@ export function DragDropUpload({
                         {uploadFile.status === 'uploading' && (
                           <>
                             <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
-                            <span className="text-xs text-blue-600">Učitava se... {Math.round(uploadFile.progress)}%</span>
+                            <span className="text-xs text-blue-600">Учитава се... {Math.round(uploadFile.progress)}%</span>
                           </>
                         )}
                         {uploadFile.status === 'success' && (
                           <>
                             <CheckCircle className="h-3 w-3 text-green-600" />
-                            <span className="text-xs text-green-600">Uspešno učitano</span>
+                            <span className="text-xs text-green-600">Успешно учитано</span>
                           </>
                         )}
                         {uploadFile.status === 'error' && (
                           <>
                             <AlertCircle className="h-3 w-3 text-red-600" />
                             <span className="text-xs text-red-600">
-                              {uploadFile.error || 'Greška pri učitavanju'}
+                              {uploadFile.error || 'Грешка при учитавању'}
                             </span>
                           </>
                         )}
                         {uploadFile.status === 'pending' && (
-                          <span className="text-xs text-gray-500">U redu za učitavanje...</span>
+                          <span className="text-xs text-gray-500">У реду за учитавање...</span>
                         )}
                       </div>
 
