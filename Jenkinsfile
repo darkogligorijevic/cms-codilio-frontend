@@ -5,12 +5,13 @@ pipeline {
         IMAGE_NAME = "codilio/codilio-frontend"
         PRODUCTION_SERVER = "localhost"
         DEPLOY_PATH = "/home/codilio/codilio-app"
+        KEEP_VERSIONS = "3"  // Koliko verzija da zadrži
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'dark-mode-darko-dev', 
+                git branch: 'dev', 
                     url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git'
             }
         }
@@ -71,16 +72,18 @@ pipeline {
                         if [ -f "docker-compose.yml" ]; then
                             echo "✅ Using docker-compose for deployment"
                             
-                            # Stop and remove old frontend container if exists
-                            docker-compose stop frontend || true
-                            docker-compose rm -f frontend || true
+                            # ⚠️ NOVA METODA: Kompletno restartovanje da se izbegne ContainerConfig greška
+                            echo "🛑 Stopping all services to prevent ContainerConfig errors..."
+                            docker-compose down --remove-orphans || true
                             
-                            # Pull latest and start
-                            docker-compose pull frontend
-                            docker-compose up -d frontend
+                            echo "🧹 Cleaning up old containers..."
+                            docker container prune -f || true
                             
-                            echo "⏳ Waiting for frontend to start..."
-                            sleep 25
+                            echo "🚀 Starting services with force recreate..."
+                            docker-compose up -d --force-recreate
+                            
+                            echo "⏳ Waiting for services to start..."
+                            sleep 30
                         else
                             echo "❌ docker-compose.yml not found in ${DEPLOY_PATH}"
                             echo "Please create the docker-compose.yml file first"
@@ -181,10 +184,10 @@ pipeline {
                         
                         # Test frontend-backend communication
                         echo "🔗 Testing frontend-backend communication..."
-                        if docker exec codilio-frontend curl -f http://localhost:3001/api > /dev/null 2>&1; then
-                            echo "✅ Frontend can communicate with backend"
+                        if docker exec codilio-frontend curl -f http://backend:3001/api > /dev/null 2>&1; then
+                            echo "✅ Frontend can communicate with backend via Docker network"
                         else
-                            echo "⚠️ Frontend-backend communication issue detected"
+                            echo "⚠️ Frontend-backend Docker network communication issue detected"
                             echo "🔍 Checking network setup..."
                             docker network ls | grep codilio || echo "Codilio network missing"
                             echo "This may not affect browser-based functionality"
@@ -200,12 +203,47 @@ pipeline {
             }
         }
 
-        stage('Cleanup') {
+        stage('Smart Cleanup') {
             steps {
                 script {
-                    sh "docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true"
-                    sh "docker rmi ${IMAGE_NAME}:latest || true"
+                    echo "🧹 Starting smart cleanup process..."
+                    
+                    sh """
+                        echo "🗑️ Cleaning up current build images locally..."
+                        docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true
+                        
+                        echo "🔍 Checking old ${IMAGE_NAME} versions..."
+                        
+                        # Dobij sve tag-ove osim latest, sortirano po brojevima (najnoviji prvi)
+                        OLD_TAGS=\$(docker images ${IMAGE_NAME} --format "{{.Tag}}" | grep -E '^[0-9]+\$' | sort -nr | tail -n +\$((${KEEP_VERSIONS} + 1)))
+                        
+                        if [ ! -z "\$OLD_TAGS" ]; then
+                            echo "🗑️ Removing old ${IMAGE_NAME} versions (keeping latest ${KEEP_VERSIONS}):"
+                            for tag in \$OLD_TAGS; do
+                                echo "  Removing ${IMAGE_NAME}:\$tag"
+                                docker rmi ${IMAGE_NAME}:\$tag || true
+                            done
+                        else
+                            echo "✅ No old versions to remove (found less than ${KEEP_VERSIONS} versions)"
+                        fi
+                        
+                        echo "🧽 General Docker cleanup..."
+                        
+                        # Obriši dangling images
+                        docker image prune -f
+                        
+                        # Obriši nekorišćene kontejnere
+                        docker container prune -f
+                        
+                        # Obriši build cache stariji od 24h
+                        docker builder prune -f --keep-storage 1GB
+                        
+                        echo "📊 Showing remaining ${IMAGE_NAME} images:"
+                        docker images ${IMAGE_NAME} || echo "No ${IMAGE_NAME} images found"
+                    """
+                    
                     sh "docker logout || true"
+                    echo "✅ Smart cleanup completed successfully"
                 }
             }
         }
@@ -234,10 +272,26 @@ pipeline {
             echo "🔧 Management commands:"
             echo "   cd ${DEPLOY_PATH} && docker-compose restart frontend"
             echo "   cd ${DEPLOY_PATH} && docker-compose ps"
+            
+            script {
+                sh """
+                    echo ""
+                    echo "🧹 Post-success cleanup..."
+                    
+                    # Obriši sve nekorišćene image-ove starije od 1 dana
+                    docker image prune -a -f --filter "until=24h"
+                    
+                    echo "📊 Current Docker disk usage:"
+                    docker system df
+                """
+            }
         }
         failure {
             echo "❌ Frontend build or deployment failed! Check the logs above for details."
+            
             script {
+                echo "💾 Keeping images for debugging purposes (no cleanup on failure)"
+                
                 sh """
                     echo ""
                     echo "🔍 Additional debugging information:"
@@ -247,6 +301,12 @@ pipeline {
                     echo ""
                     echo "All running containers:"
                     docker ps -a | head -10
+                    echo ""
+                    echo "Available disk space:"
+                    df -h | head -5
+                    echo ""
+                    echo "Recent images:"
+                    docker images | head -10
                     echo ""
                     echo "Deployment directory check:"
                     ls -la ${DEPLOY_PATH}/ || echo "Deployment directory does not exist or no access"
