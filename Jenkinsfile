@@ -224,7 +224,7 @@ pipeline {
                         docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true
                         
                         echo "🔍 Checking old ${IMAGE_NAME} versions..."
-                        OLD_TAGS=\$(docker images ${IMAGE_NAME} --format "{{.Tag}}" | grep -E '^[0-9]+\ | sort -nr | tail -n +\$((${KEEP_VERSIONS} + 1)))
+                        OLD_TAGS=\$(docker images ${IMAGE_NAME} --format "{{.Tag}}" | grep -E '^[0-9]+\$' | sort -nr | tail -n +4)
                         
                         if [ ! -z "\$OLD_TAGS" ]; then
                             echo "🗑️ Removing old ${IMAGE_NAME} versions:"
