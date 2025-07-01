@@ -1,4 +1,4 @@
-// components/ui/dynamic-field.tsx
+// components/ui/dynamic-field.tsx - FIXED VERSION
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,27 +30,72 @@ interface DynamicFieldProps {
   error?: string;
 }
 
-function CategorySelect({ value, onChange, error }: { value: any; onChange: (value: any) => void; error?: string }) {
+// Separate CategorySelect component to avoid hook issues
+function CategorySelect({ value, onChange, error }: { 
+  value: any; 
+  onChange: (value: any) => void; 
+  error?: string 
+}) {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCategories = async () => {
       try {
-        const data = await categoriesApi.getAll();
-        setCategories(data);
+        console.log('🔄 Fetching categories for selection...');
+        
+        // Try the selection endpoint first
+        let data;
+        try {
+          data = await categoriesApi.getAllForSelection();
+          console.log('✅ Categories for selection:', data);
+        } catch (selectionError) {
+          console.warn('⚠️ Selection endpoint failed, trying fallback:', selectionError);
+          
+          // Fallback to basic categories
+          const basicCategories = await categoriesApi.getAll();
+          data = basicCategories.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug,
+            postsCount: cat.posts?.length || 0
+          }));
+          console.log('✅ Fallback categories:', data);
+        }
+
+        if (isMounted) {
+          setCategories(data || []);
+        }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('❌ Error fetching categories:', error);
+        if (isMounted) {
+          setCategories([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {
-    return <div className="h-10 bg-gray-100 rounded animate-pulse"></div>;
+    return (
+      <div className="space-y-2">
+        <Label>Категорија објава <span className="text-red-500">*</span></Label>
+        <div className="h-10 bg-gray-100 rounded animate-pulse flex items-center px-3">
+          <span className="text-sm text-gray-500">Учитавање категорија...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -61,16 +106,22 @@ function CategorySelect({ value, onChange, error }: { value: any; onChange: (val
           <SelectValue placeholder="Изаберите категорију..." />
         </SelectTrigger>
         <SelectContent>
-          {categories.map((category) => (
-            <SelectItem key={category.id} value={category.id.toString()}>
-              <div className="flex items-center justify-between w-full">
-                <span>{category.name}</span>
-                <span className="text-xs text-muted-foreground ml-2">
-                  ({category.posts?.length || 0} објава)
-                </span>
-              </div>
+          {categories.length === 0 ? (
+            <SelectItem value="" disabled>
+              Нема доступних категорија
             </SelectItem>
-          ))}
+          ) : (
+            categories.map((category) => (
+              <SelectItem key={category.id} value={category.id.toString()}>
+                <div className="flex items-center justify-between w-full">
+                  <span>{category.name}</span>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    ({category.postsCount} објав)
+                  </span>
+                </div>
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -196,6 +247,7 @@ export function DynamicField({ field, value, onChange, error }: DynamicFieldProp
       return <ObjectField field={field as ObjectFieldConfig} value={value || {}} onChange={onChange} error={error} />;
 
     case 'categorySelect':
+      console.log('🎯 Rendering CategorySelect with value:', value);
       return <CategorySelect value={value} onChange={onChange} error={error} />;
 
     default:

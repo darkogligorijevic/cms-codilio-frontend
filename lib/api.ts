@@ -468,6 +468,17 @@ export const categoriesApi = {
     return response.data;
   },
 
+  // NEW: Get categories for Page Builder selection
+  getAllForSelection: async (): Promise<Array<{ 
+    id: number; 
+    name: string; 
+    slug: string; 
+    postsCount: number 
+  }>> => {
+    const response = await api.get('/categories/for-selection');
+    return response.data;
+  },
+
   getById: async (id: number): Promise<Category> => {
     const response: AxiosResponse<Category> = await api.get(`/categories/${id}`);
     return response.data;

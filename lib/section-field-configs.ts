@@ -1,41 +1,50 @@
-// lib/section-field-configs.ts - Fixed with height for all hero sections
+// lib/section-field-configs.ts - CORRECTED Posts Carousel Configuration
 import { SectionType, SectionFieldConfig } from "@/lib/types";
 
-// Common layout fields that all sections can use
-const COMMON_LAYOUT_FIELDS = [
-  {
-    key: "layout",
-    type: "select" as const,
-    label: "Layout širina",
-    options: [
-      { value: "contained", label: "Стандардни (max-width)" },
-      { value: "full-width", label: "Пуна ширина" },
-    ],
-  },
-  {
-    key: "backgroundColor",
-    type: "text" as const,
-    label: "Boja pozadine",
-    placeholder: "#f3f4f6 ili transparent",
-  },
-  {
-    key: "textColor",
-    type: "text" as const,
-    label: "Boja teksta",
-    placeholder: "#000000 ili inherit",
-  },
-];
-
-// Height field for hero sections
-const HEIGHT_FIELD = {
-  key: "height",
-  type: "select" as const,
-  label: "Visina sekcije",
-  options: [
-    { value: "100%", label: "Преко целог екрана (100vh)" },
-    { value: "75%", label: "75% екрана (75vh)" },
-    { value: "50%", label: "50% екрана (50vh)" },
-    { value: "25%", label: "25% екрана (25vh)" },
+// POSTS_CAROUSEL configuration - FIXED
+const POSTS_CAROUSEL_CONFIG = {
+  required: ["title", "categoryId"],
+  fields: [
+    {
+      key: "title",
+      type: "text" as const,
+      label: "Наслов секције",
+      placeholder: "Најновије вести",
+      required: true,
+    },
+    { 
+      key: "description", 
+      type: "textarea" as const, 
+      label: "Опис секције", 
+      rows: 3,
+      placeholder: "Кратак опис секције..."
+    },
+    {
+      key: "categoryId",
+      type: "categorySelect" as const, // THIS IS THE KEY!
+      label: "Категорија објава",
+      required: true,
+    },
+    {
+      key: "postsLimit",
+      type: "select" as const,
+      label: "Број објава за приказ",
+      options: [
+        { value: "3", label: "3 објаве" },
+        { value: "6", label: "6 објава" },
+        { value: "9", label: "9 објава" },
+        { value: "12", label: "12 објава" },
+      ],
+    },
+    {
+      key: "showViewAll",
+      type: "select" as const,
+      label: 'Прикажи "Погледај све" дугме',
+      options: [
+        { value: "true", label: "Да" },
+        { value: "false", label: "Не" },
+      ],
+    },
   ],
 };
 
@@ -44,44 +53,7 @@ const BASE_SECTION_CONFIGS: Record<
   SectionType,
   Omit<SectionFieldConfig, "commonFields">
 > = {
-  [SectionType.POSTS_CAROUSEL]: {
-    required: ["title", "categoryId"],
-    fields: [
-      {
-        key: "title",
-        type: "text",
-        label: "Наслов секције",
-        placeholder: "Најновије вести",
-      },
-      { key: "description", type: "textarea", label: "Опис секције", rows: 3 },
-      {
-        key: "categoryId",
-        type: "select",
-        label: "Категорија објава",
-        options: [], // Ово ће се динамички попунити
-      },
-      {
-        key: "postsLimit",
-        type: "select",
-        label: "Број објава за приказ",
-        options: [
-          { value: "3", label: "3 објаве" },
-          { value: "6", label: "6 објава" },
-          { value: "9", label: "9 објава" },
-          { value: "12", label: "12 објава" },
-        ],
-      },
-      {
-        key: "showViewAll",
-        type: "select",
-        label: 'Прикажи "Погледај све" дугме',
-        options: [
-          { value: "true", label: "Да" },
-          { value: "false", label: "Не" },
-        ],
-      },
-    ],
-  },
+  [SectionType.POSTS_CAROUSEL]: POSTS_CAROUSEL_CONFIG,
 
   [SectionType.HERO_STACK]: {
     required: ["title"],
@@ -528,10 +500,51 @@ const BASE_SECTION_CONFIGS: Record<
   },
 };
 
+// Common layout fields that all sections can use
+const COMMON_LAYOUT_FIELDS = [
+  {
+    key: "layout",
+    type: "select" as const,
+    label: "Layout širina",
+    options: [
+      { value: "contained", label: "Стандардни (max-width)" },
+      { value: "full-width", label: "Пуна ширина" },
+    ],
+  },
+  {
+    key: "backgroundColor",
+    type: "text" as const,
+    label: "Boja pozadine",
+    placeholder: "#f3f4f6 ili transparent",
+  },
+  {
+    key: "textColor",
+    type: "text" as const,
+    label: "Boja teksta",
+    placeholder: "#000000 ili inherit",
+  },
+];
+
+// Height field for hero sections
+const HEIGHT_FIELD = {
+  key: "height",
+  type: "select" as const,
+  label: "Visina sekcije",
+  options: [
+    { value: "100%", label: "Преко целог екрана (100vh)" },
+    { value: "75%", label: "75% екрана (75vh)" },
+    { value: "50%", label: "50% екрана (50vh)" },
+    { value: "25%", label: "25% екрана (25vh)" },
+  ],
+};
+
 // Special cases for sections that don't need all layout options
 const SECTION_LAYOUT_OVERRIDES: Partial<
   Record<SectionType, typeof COMMON_LAYOUT_FIELDS>
 > = {
+  // Posts Carousel gets standard layout options
+  [SectionType.POSTS_CAROUSEL]: COMMON_LAYOUT_FIELDS,
+
   // All hero sections get height + layout + text color
   [SectionType.HERO_STACK]: [
     {
