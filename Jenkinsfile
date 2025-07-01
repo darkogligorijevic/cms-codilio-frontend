@@ -5,7 +5,12 @@ pipeline {
         IMAGE_NAME = "codilio/codilio-frontend"
         PRODUCTION_SERVER = "localhost"
         DEPLOY_PATH = "/home/codilio/codilio-app"
-        KEEP_VERSIONS = "3"  // Koliko verzija da zadrži
+        KEEP_VERSIONS = "3"
+        // Cloudflare domains - mapiraju na portove 3000/3001
+        FRONTEND_URL = "https://codilio2.sbugarin.com"
+        API_URL = "https://api-codilio2.sbugarin.com/api"
+        FRONTEND_URL_ALT = "https://codilio.sbugarin.com"
+        API_URL_ALT = "https://api-codilio.sbugarin.com/api"
     }
 
     stages {
@@ -41,7 +46,7 @@ pipeline {
         stage('Deploy Frontend') {
             steps {
                 script {
-                    echo "🚀 Starting localhost frontend deployment..."
+                    echo "🚀 Starting production frontend deployment..."
                     
                     sh """
                         echo "📍 Checking deployment directory..."
@@ -50,15 +55,6 @@ pipeline {
                             cd ${DEPLOY_PATH}
                         else
                             echo "❌ Deployment directory ${DEPLOY_PATH} not found!"
-                            echo "📁 Current directory: \$(pwd)"
-                            echo ""
-                            echo "🔧 SETUP REQUIRED:"
-                            echo "Please run the following commands on the server as root/sudo:"
-                            echo "  mkdir -p ${DEPLOY_PATH}"
-                            echo "  chown jenkins:jenkins ${DEPLOY_PATH}"
-                            echo "  # Create docker-compose.yml in that directory"
-                            echo "  docker network create codilio-network"
-                            echo ""
                             exit 1
                         fi
                         
@@ -72,7 +68,6 @@ pipeline {
                         if [ -f "docker-compose.yml" ]; then
                             echo "✅ Using docker-compose for deployment"
                             
-                            # ⚠️ NOVA METODA: Kompletno restartovanje da se izbegne ContainerConfig greška
                             echo "🛑 Stopping all services to prevent ContainerConfig errors..."
                             docker-compose down --remove-orphans || true
                             
@@ -102,17 +97,16 @@ pipeline {
                     echo "🔍 Running frontend health check..."
                     
                     sh """
-                        echo "🧪 Testing frontend at http://localhost:3000"
+                        echo "🧪 Testing frontend at http://localhost:3000 (local)"
+                        
                         for i in {1..12}; do
                             if curl -f -s http://localhost:3000/ > /dev/null; then
-                                echo "✅ Frontend is responding successfully!"
+                                echo "✅ Frontend container is responding locally!"
                                 
-                                # Test if it's actually serving the app
                                 response_content=\$(curl -s http://localhost:3000/ 2>/dev/null | head -200)
                                 if echo "\$response_content" | grep -q "html\\|DOCTYPE\\|codilio\\|next" > /dev/null; then
                                     echo "✅ Frontend is serving valid HTML content"
                                     
-                                    # Check for some key indicators
                                     if echo "\$response_content" | grep -q "codilio" > /dev/null; then
                                         echo "✅ Codilio branding detected in content"
                                     fi
@@ -134,21 +128,24 @@ pipeline {
                                 echo ""
                                 echo "📋 Last 30 lines of frontend logs:"
                                 docker logs codilio-frontend --tail 30 || echo "❌ Cannot retrieve frontend logs"
-                                echo ""
-                                echo "🌐 Network connections:"
-                                netstat -tlnp | grep :3000 || echo "❌ Port 3000 not listening"
-                                echo ""
-                                echo "🔗 Testing backend connectivity:"
-                                curl -f http://localhost:3001/api 2>/dev/null && echo "✅ Backend reachable" || echo "❌ Backend not reachable"
-                                echo ""
-                                echo "🐳 All containers:"
-                                docker ps -a
-                                echo ""
-                                echo "🌐 Available networks:"
-                                docker network ls
                                 exit 1
                             fi
                         done
+                        
+                        echo "🌐 Testing production URLs:"
+                        echo "  Primary: ${FRONTEND_URL}"
+                        if curl -f -s ${FRONTEND_URL}/ > /dev/null; then
+                            echo "✅ Primary production URL is accessible!"
+                        else
+                            echo "⚠️ Primary production URL not accessible yet"
+                        fi
+                        
+                        echo "  Alternative: ${FRONTEND_URL_ALT}"
+                        if curl -f -s ${FRONTEND_URL_ALT}/ > /dev/null; then
+                            echo "✅ Alternative production URL is accessible!"
+                        else
+                            echo "⚠️ Alternative production URL not accessible yet"
+                        fi
                         
                         echo "🎉 Frontend health check passed!"
                     """
@@ -164,40 +161,54 @@ pipeline {
                     sh """
                         echo "🧪 Testing full application stack..."
                         
-                        # Test backend API
                         if curl -f -s http://localhost:3001/api > /dev/null; then
-                            echo "✅ Backend API is reachable"
+                            echo "✅ Backend API is reachable locally"
                         else
-                            echo "❌ Backend API is not reachable"
+                            echo "❌ Backend API is not reachable locally"
                             echo "🔧 Checking backend status..."
                             docker ps | grep codilio-backend || echo "Backend container not running"
                             exit 1
                         fi
                         
-                        # Test frontend
-                        if curl -f -s http://localhost:3000/ > /dev/null; then
-                            echo "✅ Frontend is reachable"
+                        echo "🌐 Testing production APIs:"
+                        echo "  Primary API: ${API_URL}"
+                        if curl -f -s ${API_URL} > /dev/null; then
+                            echo "✅ Primary production API is reachable!"
                         else
-                            echo "❌ Frontend is not reachable"
+                            echo "⚠️ Primary production API not accessible yet"
+                        fi
+                        
+                        echo "  Alternative API: ${API_URL_ALT}"
+                        if curl -f -s ${API_URL_ALT} > /dev/null; then
+                            echo "✅ Alternative production API is reachable!"
+                        else
+                            echo "⚠️ Alternative production API not accessible yet"
+                        fi
+                        
+                        if curl -f -s http://localhost:3000/ > /dev/null; then
+                            echo "✅ Frontend is reachable locally"
+                        else
+                            echo "❌ Frontend is not reachable locally"
                             exit 1
                         fi
                         
-                        # Test frontend-backend communication
                         echo "🔗 Testing frontend-backend communication..."
                         if docker exec codilio-frontend curl -f http://backend:3001/api > /dev/null 2>&1; then
                             echo "✅ Frontend can communicate with backend via Docker network"
                         else
                             echo "⚠️ Frontend-backend Docker network communication issue detected"
-                            echo "🔍 Checking network setup..."
-                            docker network ls | grep codilio || echo "Codilio network missing"
                             echo "This may not affect browser-based functionality"
                         fi
                         
                         echo "🎉 Full stack integration test completed!"
                         echo ""
                         echo "🌐 Application URLs:"
-                        echo "   Frontend: http://localhost:3000"
-                        echo "   Backend:  http://localhost:3001/api"
+                        echo "   Frontend (local):     http://localhost:3000"
+                        echo "   Frontend (primary):   ${FRONTEND_URL}"
+                        echo "   Frontend (alt):       ${FRONTEND_URL_ALT}"
+                        echo "   Backend (local):      http://localhost:3001/api"
+                        echo "   Backend (primary):    ${API_URL}"
+                        echo "   Backend (alt):        ${API_URL_ALT}"
                     """
                 }
             }
@@ -213,33 +224,22 @@ pipeline {
                         docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true
                         
                         echo "🔍 Checking old ${IMAGE_NAME} versions..."
-                        
-                        # Dobij sve tag-ove osim latest, sortirano po brojevima (najnoviji prvi)
-                        OLD_TAGS=\$(docker images ${IMAGE_NAME} --format "{{.Tag}}" | grep -E '^[0-9]+\$' | sort -nr | tail -n +\$((${KEEP_VERSIONS} + 1)))
+                        OLD_TAGS=\$(docker images ${IMAGE_NAME} --format "{{.Tag}}" | grep -E '^[0-9]+\ | sort -nr | tail -n +\$((${KEEP_VERSIONS} + 1)))
                         
                         if [ ! -z "\$OLD_TAGS" ]; then
-                            echo "🗑️ Removing old ${IMAGE_NAME} versions (keeping latest ${KEEP_VERSIONS}):"
+                            echo "🗑️ Removing old ${IMAGE_NAME} versions:"
                             for tag in \$OLD_TAGS; do
                                 echo "  Removing ${IMAGE_NAME}:\$tag"
                                 docker rmi ${IMAGE_NAME}:\$tag || true
                             done
                         else
-                            echo "✅ No old versions to remove (found less than ${KEEP_VERSIONS} versions)"
+                            echo "✅ No old versions to remove"
                         fi
                         
                         echo "🧽 General Docker cleanup..."
-                        
-                        # Obriši dangling images
                         docker image prune -f
-                        
-                        # Obriši nekorišćene kontejnere
                         docker container prune -f
-                        
-                        # Obriši build cache stariji od 24h
                         docker builder prune -f --keep-storage 1GB
-                        
-                        echo "📊 Showing remaining ${IMAGE_NAME} images:"
-                        docker images ${IMAGE_NAME} || echo "No ${IMAGE_NAME} images found"
                     """
                     
                     sh "docker logout || true"
@@ -263,8 +263,12 @@ pipeline {
             echo "🎉 Frontend build, push, and deployment completed successfully!"
             echo ""
             echo "🌐 Application is ready:"
-            echo "   Frontend: http://localhost:3000"
-            echo "   Backend:  http://localhost:3001/api"
+            echo "   Frontend (local):     http://localhost:3000"
+            echo "   Frontend (primary):   ${FRONTEND_URL}"
+            echo "   Frontend (alt):       ${FRONTEND_URL_ALT}"
+            echo "   Backend (local):      http://localhost:3001/api"
+            echo "   Backend (primary):    ${API_URL}"
+            echo "   Backend (alt):        ${API_URL_ALT}"
             echo ""
             echo "📊 Deployed frontend image: ${IMAGE_NAME}:${BUILD_NUMBER}"
             echo "🐳 Container: codilio-frontend"
@@ -272,15 +276,18 @@ pipeline {
             echo "🔧 Management commands:"
             echo "   cd ${DEPLOY_PATH} && docker-compose restart frontend"
             echo "   cd ${DEPLOY_PATH} && docker-compose ps"
+            echo ""
+            echo "⚡ Cloudflare Tunnel routes (3000/3001):"
+            echo "   codilio2.sbugarin.com -> http://localhost:3000"
+            echo "   api-codilio2.sbugarin.com -> http://localhost:3001"
+            echo "   codilio.sbugarin.com -> http://localhost:3000"
+            echo "   api-codilio.sbugarin.com -> http://localhost:3001"
             
             script {
                 sh """
                     echo ""
                     echo "🧹 Post-success cleanup..."
-                    
-                    # Obriši sve nekorišćene image-ove starije od 1 dana
                     docker image prune -a -f --filter "until=24h"
-                    
                     echo "📊 Current Docker disk usage:"
                     docker system df
                 """
