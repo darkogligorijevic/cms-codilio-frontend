@@ -1,4 +1,4 @@
-// lib/api.ts - Updated API functions with automatic localhost/remote detection
+// lib/api.ts - Updated API functions
 import axios, { Axios, AxiosResponse } from 'axios';
 import {
   type Post,
@@ -82,28 +82,7 @@ import {
 } from './types';
 import { InstitutionType } from './institution-templates';
 
-// JEDINA IZMENA: Automatska detekcija API base URL-a
-const getApiBaseUrl = (): string => {
-  const localUrl = 'http://localhost:3001/api';  // tvoj localhost port
-  const remoteUrl = 'https://api-codilio.sbugarin.com/api';  // tvoj remote URL
-  
-  if (typeof window !== 'undefined') {
-    // Browser environment - proveri hostname
-    const isLocal = window.location.hostname === 'localhost' || 
-                   window.location.hostname === '127.0.0.1' ||
-                   window.location.hostname === '0.0.0.0';
-    console.log('🌍 Environment detected:', isLocal ? 'LOCAL' : 'REMOTE');
-    console.log('🔗 API Base URL:', isLocal ? localUrl : remoteUrl);
-    return isLocal ? localUrl : remoteUrl;
-  } else {
-    // Node.js environment - proveri NODE_ENV
-    const isDev = process.env.NODE_ENV === 'development';
-    console.log('⚙️ Node.js environment - isDev:', isDev);
-    return isDev ? localUrl : remoteUrl;
-  }
-};
-
-export const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = 'http://localhost:3001/api';
 
 // Create axios instance
 const api = axios.create({
