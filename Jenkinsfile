@@ -6,11 +6,17 @@ pipeline {
         PRODUCTION_SERVER = "localhost"
         DEPLOY_PATH = "/home/codilio/codilio-app"
         KEEP_VERSIONS = "3"
-        // Cloudflare domains - mapiraju na portove 3000/3001
+        
+        // 🌐 ENVIRONMENT DETECTION AND API URLS
         FRONTEND_URL = "https://codilio2.sbugarin.com"
         API_URL = "https://api-codilio2.sbugarin.com/api"
         FRONTEND_URL_ALT = "https://codilio.sbugarin.com"
         API_URL_ALT = "https://api-codilio.sbugarin.com/api"
+        
+        // 🔧 BUILD-TIME ENVIRONMENT VARIABLES - glavna API URL
+        NEXT_PUBLIC_API_URL = "https://api-codilio.sbugarin.com/api"
+        NODE_ENV = "production"
+        NEXT_TELEMETRY_DISABLED = "1"
     }
 
     stages {
@@ -21,11 +27,22 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker Image with Environment') {
             steps {
                 script {
-                    def image = docker.build("${IMAGE_NAME}:${BUILD_NUMBER}")
+                    echo "🔧 Building Docker image with environment variables..."
+                    echo "API URL: ${NEXT_PUBLIC_API_URL}"
+                    
+                    // Build with build args
+                    def image = docker.build("${IMAGE_NAME}:${BUILD_NUMBER}", 
+                        "--build-arg NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} " +
+                        "--build-arg NODE_ENV=${NODE_ENV} " +
+                        "--build-arg NEXT_TELEMETRY_DISABLED=${NEXT_TELEMETRY_DISABLED} " +
+                        "."
+                    )
                     env.DOCKER_IMAGE = "${IMAGE_NAME}:${BUILD_NUMBER}"
+                    
+                    echo "✅ Docker image built successfully with API URL: ${NEXT_PUBLIC_API_URL}"
                 }
             }
         }
@@ -64,20 +81,21 @@ pipeline {
                         echo "🌐 Ensuring Docker network exists..."
                         docker network inspect codilio-network >/dev/null 2>&1 || docker network create codilio-network
                         
-                        echo "🔄 Updating frontend service..."
+                        echo "🔄 Updating frontend service with environment variables..."
                         if [ -f "docker-compose.yml" ]; then
                             echo "✅ Using docker-compose for deployment"
                             
-                            echo "🛑 Stopping all services to prevent ContainerConfig errors..."
-                            docker-compose down --remove-orphans || true
+                            echo "🛑 Stopping frontend service..."
+                            docker-compose stop frontend || true
+                            docker-compose rm -f frontend || true
                             
                             echo "🧹 Cleaning up old containers..."
                             docker container prune -f || true
                             
-                            echo "🚀 Starting services with force recreate..."
-                            docker-compose up -d --force-recreate
+                            echo "🚀 Starting frontend with updated environment..."
+                            docker-compose up -d frontend
                             
-                            echo "⏳ Waiting for services to start..."
+                            echo "⏳ Waiting for frontend to start..."
                             sleep 30
                         else
                             echo "❌ docker-compose.yml not found in ${DEPLOY_PATH}"
@@ -99,9 +117,17 @@ pipeline {
                     sh """
                         echo "🧪 Testing frontend at http://localhost:3000 (local)"
                         
-                        for i in {1..12}; do
+                        for i in {1..15}; do
                             if curl -f -s http://localhost:3000/ > /dev/null; then
                                 echo "✅ Frontend container is responding locally!"
+                                
+                                # Test if the API URL is correctly configured
+                                echo "🔍 Checking API configuration in frontend..."
+                                docker logs codilio-frontend --tail 10 | grep -i "api\\|url\\|config" || true
+                                
+                                # Test API connectivity from frontend container
+                                echo "🔗 Testing API connectivity from frontend container..."
+                                docker exec codilio-frontend wget --timeout=10 -q -O /dev/null ${NEXT_PUBLIC_API_URL} && echo "✅ API reachable from frontend" || echo "⚠️ API not reachable from frontend"
                                 
                                 response_content=\$(curl -s http://localhost:3000/ 2>/dev/null | head -200)
                                 if echo "\$response_content" | grep -q "html\\|DOCTYPE\\|codilio\\|next" > /dev/null; then
@@ -115,12 +141,12 @@ pipeline {
                                 fi
                                 break
                             else
-                                echo "⏳ Health check attempt \$i/12 - waiting for frontend..."
-                                sleep 10
+                                echo "⏳ Health check attempt \$i/15 - waiting for frontend..."
+                                sleep 12
                             fi
                             
-                            if [ \$i -eq 12 ]; then
-                                echo "❌ Frontend health check failed after 2 minutes"
+                            if [ \$i -eq 15 ]; then
+                                echo "❌ Frontend health check failed after 3 minutes"
                                 echo ""
                                 echo "🔍 Debugging information:"
                                 echo "Frontend container status:"
@@ -128,6 +154,9 @@ pipeline {
                                 echo ""
                                 echo "📋 Last 30 lines of frontend logs:"
                                 docker logs codilio-frontend --tail 30 || echo "❌ Cannot retrieve frontend logs"
+                                echo ""
+                                echo "🔧 Environment variables in container:"
+                                docker exec codilio-frontend env | grep -E "NEXT_PUBLIC|NODE_ENV|API" || echo "❌ Cannot retrieve environment variables"
                                 exit 1
                             fi
                         done
@@ -161,6 +190,7 @@ pipeline {
                     sh """
                         echo "🧪 Testing full application stack..."
                         
+                        # Backend API Test
                         if curl -f -s http://localhost:3001/api > /dev/null; then
                             echo "✅ Backend API is reachable locally"
                         else
@@ -168,6 +198,23 @@ pipeline {
                             echo "🔧 Checking backend status..."
                             docker ps | grep codilio-backend || echo "Backend container not running"
                             exit 1
+                        fi
+                        
+                        # Frontend Test
+                        if curl -f -s http://localhost:3000/ > /dev/null; then
+                            echo "✅ Frontend is reachable locally"
+                        else
+                            echo "❌ Frontend is not reachable locally"
+                            exit 1
+                        fi
+                        
+                        # Test API URLs configuration
+                        echo "🌐 Testing API URLs from environment:"
+                        echo "  Configured API URL: ${NEXT_PUBLIC_API_URL}"
+                        if curl -f -s ${NEXT_PUBLIC_API_URL} > /dev/null; then
+                            echo "✅ Configured API URL is accessible!"
+                        else
+                            echo "⚠️ Configured API URL not accessible"
                         fi
                         
                         echo "🌐 Testing production APIs:"
@@ -185,18 +232,11 @@ pipeline {
                             echo "⚠️ Alternative production API not accessible yet"
                         fi
                         
-                        if curl -f -s http://localhost:3000/ > /dev/null; then
-                            echo "✅ Frontend is reachable locally"
-                        else
-                            echo "❌ Frontend is not reachable locally"
-                            exit 1
-                        fi
-                        
                         echo "🔗 Testing frontend-backend communication..."
-                        if docker exec codilio-frontend curl -f http://backend:3001/api > /dev/null 2>&1; then
-                            echo "✅ Frontend can communicate with backend via Docker network"
+                        if docker exec codilio-frontend wget --timeout=5 -q -O /dev/null ${NEXT_PUBLIC_API_URL} 2>/dev/null; then
+                            echo "✅ Frontend can communicate with configured API"
                         else
-                            echo "⚠️ Frontend-backend Docker network communication issue detected"
+                            echo "⚠️ Frontend-API communication issue detected"
                             echo "This may not affect browser-based functionality"
                         fi
                         
@@ -209,6 +249,7 @@ pipeline {
                         echo "   Backend (local):      http://localhost:3001/api"
                         echo "   Backend (primary):    ${API_URL}"
                         echo "   Backend (alt):        ${API_URL_ALT}"
+                        echo "   Configured API:       ${NEXT_PUBLIC_API_URL}"
                     """
                 }
             }
@@ -269,6 +310,7 @@ pipeline {
             echo "   Backend (local):      http://localhost:3001/api"
             echo "   Backend (primary):    ${API_URL}"
             echo "   Backend (alt):        ${API_URL_ALT}"
+            echo "   API Configuration:    ${NEXT_PUBLIC_API_URL}"
             echo ""
             echo "📊 Deployed frontend image: ${IMAGE_NAME}:${BUILD_NUMBER}"
             echo "🐳 Container: codilio-frontend"
@@ -308,6 +350,11 @@ pipeline {
                     echo ""
                     echo "All running containers:"
                     docker ps -a | head -10
+                    echo ""
+                    echo "Environment variables used:"
+                    echo "  NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}"
+                    echo "  NODE_ENV: ${NODE_ENV}"
+                    echo "  NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED}"
                     echo ""
                     echo "Available disk space:"
                     df -h | head -5
