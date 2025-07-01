@@ -17,6 +17,7 @@ import { ContactTwoSection } from '@/components/frontend/sections/contact/contac
 import { CTAOneSection } from '@/components/frontend/sections/cta/cta-one';
 import { LogosOneSection } from '@/components/frontend/sections/logos/logos-one';
 import { TeamOneSection } from '@/components/frontend/sections/team/team-one';
+import { PostsCarouselSection } from '@/components/frontend/sections/posts/posts-carousel';
 
 interface SectionRendererProps {
   section: PageSection;
@@ -133,6 +134,8 @@ export function SectionRenderer({ section, className }: SectionRendererProps) {
         return <LogosOneSection {...commonProps} />;
       case SectionType.TEAM_ONE:
         return <TeamOneSection {...commonProps} />;
+      case SectionType.POSTS_CAROUSEL:
+        return <PostsCarouselSection {...commonProps} />;
       default:
         return (
           <div className="text-center py-8">

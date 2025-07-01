@@ -1,7 +1,7 @@
 // components/ui/dynamic-field.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,12 +21,66 @@ import {
   Trash2 
 } from 'lucide-react';
 import { FieldConfig, ArrayFieldConfig, ObjectFieldConfig, SelectFieldConfig } from '@/lib/types';
+import { categoriesApi } from '@/lib/api';
 
 interface DynamicFieldProps {
   field: FieldConfig;
   value: any;
   onChange: (value: any) => void;
   error?: string;
+}
+
+function CategorySelect({ value, onChange, error }: { value: any; onChange: (value: any) => void; error?: string }) {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesApi.getAll();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  if (isLoading) {
+    return <div className="h-10 bg-gray-100 rounded animate-pulse"></div>;
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label>Категорија објава <span className="text-red-500">*</span></Label>
+      <Select value={value || ''} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Изаберите категорију..." />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((category) => (
+            <SelectItem key={category.id} value={category.id.toString()}>
+              <div className="flex items-center justify-between w-full">
+                <span>{category.name}</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  ({category.posts?.length || 0} објава)
+                </span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      {categories.length === 0 && (
+        <p className="text-xs text-yellow-600">
+          Нема категорија. Прво креирајте категорије у Dashboard → Категорије.
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function DynamicField({ field, value, onChange, error }: DynamicFieldProps) {
@@ -140,6 +194,9 @@ export function DynamicField({ field, value, onChange, error }: DynamicFieldProp
 
     case 'object':
       return <ObjectField field={field as ObjectFieldConfig} value={value || {}} onChange={onChange} error={error} />;
+
+    case 'categorySelect':
+      return <CategorySelect value={value} onChange={onChange} error={error} />;
 
     default:
       return null;

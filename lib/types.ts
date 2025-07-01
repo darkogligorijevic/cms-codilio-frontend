@@ -1046,6 +1046,7 @@ export enum SectionType {
   CTA_ONE = 'cta_one',
   LOGOS_ONE = 'logos_one',
   TEAM_ONE = 'team_one',
+  POSTS_CAROUSEL = 'posts_carousel',
   CUSTOM_HTML = 'custom_html'
 }
 
@@ -1163,7 +1164,7 @@ export interface FieldOption {
 
 export interface BaseFieldConfig {
   key: string;
-  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object' | 'color';
+  type: 'text' | 'email' | 'textarea' | 'select' | 'image' | 'code' | 'array' | 'object' | 'color' | 'categorySelect';
   label: string;
   placeholder?: string;
   required?: boolean;
