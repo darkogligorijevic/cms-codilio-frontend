@@ -3,11 +3,13 @@ import axios, { Axios, AxiosResponse } from 'axios';
 import { AuthResponse, AvailableParentPage, Category, CategorySelectionOption, CompleteSetupDto, CompleteSetupResponse, Contact, CreateCategoryDto, CreateContactDto, CreateEmailTemplateDto, CreateGalleryDto, CreateGalleryImageDto, CreateMediaDto, CreateOrganizationalUnitDto, CreatePageDto, CreatePageSectionDto, CreatePostDto, CreateServiceDocumentDto, CreateServiceDto, CreateUserDto, EmailTemplate, FindMediaOptions, Gallery, GalleryImage, GalleryStatistics, GalleryStatus, GalleryType, ImportSettingsDto, LoginCredentials, Media, MediaCategory, MediaCategoryInfo, MediaCategoryStats, NewsletterSubscribe, OrganizationalStatistics, OrganizationalUnit, Page, PageSection, Post, PostsResponse, ReorderSectionsDto, ReplyToContactDto, SectionTypeInfo, SendNewsletterDto, Service, ServiceDocument, ServiceDocumentTypeInfo, ServicePriority, ServicePriorityInfo, ServicesResponse, ServiceStatistics, ServiceStatus, ServiceType, ServiceTypeInfo, Setting, SettingCategory, SettingType, SetupStatusResponse, SiteSettings, SubscribeToNewsletterDto, UpdateCategoryDto, UpdateContactDto, UpdateEmailTemplateDto, UpdateGalleryDto, UpdateGalleryImageDto, UpdateMediaDto, UpdateMultipleSettingsDto, UpdateOrganizationalUnitDto, UpdatePageBuilderDto, UpdatePageDto, UpdatePageSectionDto, UpdatePostDto, UpdateServiceDocumentDto, UpdateServiceDto, UpdateSettingDto, UpdateUserDto, User, UsersStatistics, UserWithStats } from './types';
 import { InstitutionType } from './institution-templates';
 
-
 const getApiBaseUrl = (): string => {
-  // Server-side rendering (Next.js)
+  // Server-side rendering (Next.js) - koristi environment varijable
   if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'https://api-codilio.sbugarin.com/api';
+    // Prioritet: specifični env -> fallback env -> hardcoded fallback
+    return process.env.API_URL || 
+           process.env.NEXT_PUBLIC_API_URL || 
+           'https://api-codilio.sbugarin.com/api';
   }
 
   // Client-side detection
@@ -15,26 +17,28 @@ const getApiBaseUrl = (): string => {
   
   console.log('🔍 Detecting API URL for hostname:', hostname);
   
-  // Production URLs - api-codilio.sbugarin.com je glavni za sve
+  // Production URLs - glavna logika
   if (hostname === 'codilio2.sbugarin.com' || hostname === 'codilio.sbugarin.com') {
-    console.log('✅ Detected production domain - using api-codilio (main API)');
-    return 'https://api-codilio.sbugarin.com/api';
+    const apiUrl = 'https://api-codilio.sbugarin.com/api';
+    console.log('✅ Detected production domain - using main API:', apiUrl);
+    return apiUrl;
   }
 
   // Local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    console.log('✅ Detected localhost - using local API');
-    return 'http://localhost:3001/api';
+    const localApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    console.log('✅ Detected localhost - using API URL:', localApiUrl);
+    return localApiUrl;
   }
 
-  // Docker container internal communication
-  if (hostname.includes('codilio-frontend') || process.env.NODE_ENV === 'production') {
-    const dockerApiUrl = 'http://backend:3001/api';
-    console.log('🐳 Docker environment detected - using internal API:', dockerApiUrl);
+  // Docker container environment - koristi env varijable
+  if (process.env.NODE_ENV === 'production') {
+    const dockerApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-codilio.sbugarin.com/api';
+    console.log('🐳 Docker production environment - using API URL:', dockerApiUrl);
     return dockerApiUrl;
   }
 
-  // Fallback - prioritize environment variables
+  // Fallback - prioritizuj environment varijable
   const fallbackUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-codilio.sbugarin.com/api';
   console.log('⚠️ Using fallback API URL:', fallbackUrl);
   return fallbackUrl;
@@ -73,12 +77,14 @@ api.interceptors.response.use(
       console.error('🚨 Network error detected, checking alternative URLs...');
       
       // Try alternative API URL if primary fails
-      if (API_BASE_URL.includes('backend:3001') && typeof window !== 'undefined') {
-        console.log('🔄 Switching to external API URL...');
-        const externalApiUrl = 'https://api-codilio.sbugarin.com/api';
+      const currentUrl = api.defaults.baseURL;
+      const fallbackUrl = process.env.NEXT_PUBLIC_API_URL_FALLBACK || 'https://api-codilio2.sbugarin.com/api';
+      
+      if (currentUrl !== fallbackUrl && typeof window !== 'undefined') {
+        console.log('🔄 Switching to fallback API URL:', fallbackUrl);
         
         // Update base URL and retry
-        api.defaults.baseURL = externalApiUrl;
+        api.defaults.baseURL = fallbackUrl;
         return api.request(error.config);
       }
     }
