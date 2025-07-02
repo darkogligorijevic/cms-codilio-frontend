@@ -234,29 +234,59 @@ pipeline {
                         echo "🌐 Ensuring Docker network exists..."
                         docker network inspect codilio-network >/dev/null 2>&1 || docker network create codilio-network
                         
-                        echo "🔄 Updating frontend service with environment variables..."
+                        echo "🛑 ENHANCED: Complete frontend cleanup..."
+                        
+                        # 1. Stop docker-compose services gracefully
+                        docker-compose stop frontend 2>/dev/null || echo "Frontend service was not running"
+                        
+                        # 2. KRITIČNO: Force remove containers by name
+                        echo "🗑️ Removing containers by name..."
+                        docker rm -f codilio-frontend 2>/dev/null || echo "No codilio-frontend container found"
+                        
+                        # 3. Remove any containers using the frontend image
+                        echo "🗑️ Removing containers using frontend image..."
+                        FRONTEND_CONTAINERS=\$(docker ps -aq --filter "ancestor=${IMAGE_NAME}:latest" 2>/dev/null)
+                        if [ ! -z "\$FRONTEND_CONTAINERS" ]; then
+                            echo "Found containers using frontend image, removing..."
+                            docker rm -f \$FRONTEND_CONTAINERS || true
+                        fi
+                        
+                        # 4. Cleanup any orphaned containers
+                        docker container prune -f 2>/dev/null || true
+                        
+                        # 5. Wait a moment for Docker to clean up
+                        echo "⏳ Waiting for cleanup to complete..."
+                        sleep 5
+                        
+                        echo "✅ Cleanup completed - no conflicts should remain"
+                        
+                        echo "🔄 Starting fresh frontend service..."
                         if [ -f "docker-compose.yml" ]; then
                             echo "✅ Using docker-compose for deployment"
                             
-                            echo "🛑 Stopping frontend service..."
-                            docker-compose stop frontend || true
-                            docker-compose rm -f frontend || true
+                            # Start with fresh containers
+                            docker-compose up -d --force-recreate --renew-anon-volumes frontend
                             
-                            echo "🧹 Cleaning up old containers..."
-                            docker container prune -f || true
-                            
-                            echo "🚀 Starting frontend with updated environment..."
-                            docker-compose up -d frontend
-                            
-                            echo "⏳ Waiting for frontend to start..."
+                            echo "⏳ Waiting for frontend to initialize..."
                             sleep 30
+                            
+                            # Verify container is running
+                            if docker ps | grep -q "codilio-frontend"; then
+                                echo "✅ Frontend container is running"
+                            else
+                                echo "❌ Frontend container failed to start"
+                                echo "📋 Container status:"
+                                docker ps -a | grep codilio-frontend || echo "No frontend container found"
+                                echo "📋 Recent logs:"
+                                docker logs codilio-frontend --tail 20 2>/dev/null || echo "Cannot retrieve logs"
+                                exit 1
+                            fi
                         else
                             echo "❌ docker-compose.yml not found in ${DEPLOY_PATH}"
-                            echo "Please create the docker-compose.yml file first"
                             exit 1
                         fi
                         
-                        echo "✅ Frontend deployment stage completed"
+                        echo "✅ Frontend deployment stage completed successfully"
                     """
                 }
             }
