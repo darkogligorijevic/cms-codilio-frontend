@@ -27,34 +27,126 @@ pipeline {
             }
         }
 
-        stage('Fix API URLs in Source Code') {
+        stage('Enhanced API URLs Fixing') {
             steps {
                 script {
-                    echo "🔧 Fixing API URLs in source code..."
+                    echo "🔧 Enhanced API URLs fixing in source code..."
                     echo "Target API URL: ${NEXT_PUBLIC_API_URL}"
                     
-                    // Fix hardcoded localhost URLs in lib/api.ts
                     sh """
-                        echo "📝 Updating lib/api.ts with correct API URL..."
+                        echo "📝 Comprehensive API URL replacement..."
                         
-                        # Replace localhost URLs with production URL
+                        # 1. PRIMARY: Fix lib/api.ts (main API configuration)
                         if [ -f "lib/api.ts" ]; then
+                            echo "✅ Updating lib/api.ts with production API URL..."
+                            
+                            # Replace all localhost:3001 references with production API
                             sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g' lib/api.ts
                             sed -i "s|'http://localhost:3001/api'|'${NEXT_PUBLIC_API_URL}'|g" lib/api.ts
                             sed -i 's|"http://localhost:3001/api"|"${NEXT_PUBLIC_API_URL}"|g' lib/api.ts
                             
-                            echo "✅ Updated lib/api.ts"
+                            # Replace any remaining localhost:3001 references
+                            sed -i 's|localhost:3001|api-codilio.sbugarin.com|g' lib/api.ts
+                            
+                            echo "✅ lib/api.ts updated successfully"
                         else
-                            echo "⚠️ lib/api.ts not found, will rely on environment variables"
+                            echo "⚠️ lib/api.ts not found"
                         fi
                         
-                        # Also check for any other config files
-                        find . -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" | \
-                        xargs grep -l "localhost:3001" | \
-                        xargs sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g'
+                        # 2. Fix use-activity-tracker.ts (WebSocket connections)
+                        if [ -f "lib/use-activity-tracker.ts" ]; then
+                            echo "✅ Updating WebSocket URLs in use-activity-tracker.ts..."
+                            
+                            # Replace localhost WebSocket URLs
+                            sed -i 's|http://localhost:3001|https://api-codilio.sbugarin.com|g' lib/use-activity-tracker.ts
+                            sed -i 's|ws://localhost:3001|wss://api-codilio.sbugarin.com|g' lib/use-activity-tracker.ts
+                            
+                            echo "✅ WebSocket URLs updated"
+                        else
+                            echo "⚠️ use-activity-tracker.ts not found"
+                        fi
                         
-                        echo "🔍 Checking for remaining localhost references..."
-                        grep -r "localhost:3001" . --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" || echo "✅ No localhost:3001 references found"
+                        # 3. Fix all React components that might have hardcoded URLs
+                        echo "🔍 Fixing React components..."
+                        find . -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" -o -name "*.js" | \
+                        grep -E "(app/|components/|lib/)" | \
+                        while read file; do
+                            if grep -q "localhost:3001" "\$file" 2>/dev/null; then
+                                echo "  📝 Fixing \$file"
+                                sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g' "\$file"
+                                sed -i 's|http://localhost:3001|https://api-codilio.sbugarin.com|g' "\$file"
+                                sed -i 's|ws://localhost:3001|wss://api-codilio.sbugarin.com|g' "\$file"
+                                sed -i "s|'http://localhost:3001/api'|'${NEXT_PUBLIC_API_URL}'|g" "\$file"
+                                sed -i 's|"http://localhost:3001/api"|"${NEXT_PUBLIC_API_URL}"|g' "\$file"
+                            fi
+                        done
+                        
+                        # 4. Check specific known problematic files
+                        echo "🎯 Checking specific files for Relof Index and Settings..."
+                        
+                        # Relof Index related files
+                        for file in app/dashboard/relof-index/*.tsx app/dashboard/relof-index/**/*.tsx; do
+                            if [ -f "\$file" ] && grep -q "localhost:3001" "\$file" 2>/dev/null; then
+                                echo "  📊 Fixing Relof Index file: \$file"
+                                sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g' "\$file"
+                                sed -i 's|localhost:3001|api-codilio.sbugarin.com|g' "\$file"
+                            fi
+                        done
+                        
+                        # Settings related files
+                        for file in app/dashboard/settings/*.tsx lib/settings-*.tsx lib/settings-*.ts; do
+                            if [ -f "\$file" ] && grep -q "localhost:3001" "\$file" 2>/dev/null; then
+                                echo "  ⚙️ Fixing Settings file: \$file"
+                                sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g' "\$file"
+                                sed -i 's|localhost:3001|api-codilio.sbugarin.com|g' "\$file"
+                            fi
+                        done
+                        
+                        # 5. Fix any remaining localhost references in source code
+                        echo "🧹 Final cleanup of remaining localhost references..."
+                        find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
+                        grep -v node_modules | \
+                        xargs grep -l "localhost:3001" 2>/dev/null | \
+                        while read file; do
+                            echo "  🔧 Final fix: \$file"
+                            sed -i 's|http://localhost:3001/api|${NEXT_PUBLIC_API_URL}|g' "\$file"
+                            sed -i 's|http://localhost:3001|https://api-codilio.sbugarin.com|g' "\$file"
+                            sed -i 's|ws://localhost:3001|wss://api-codilio.sbugarin.com|g' "\$file"
+                            sed -i 's|localhost:3001|api-codilio.sbugarin.com|g' "\$file"
+                        done
+                        
+                        # 6. Verification - check if any localhost:3001 references remain
+                        echo "🔍 Verification - checking for remaining localhost:3001 references..."
+                        REMAINING_LOCALHOST=\$(find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
+                            grep -v node_modules | \
+                            xargs grep -l "localhost:3001" 2>/dev/null | wc -l)
+                        
+                        if [ "\$REMAINING_LOCALHOST" -eq 0 ]; then
+                            echo "✅ SUCCESS: No localhost:3001 references found in source code"
+                        else
+                            echo "⚠️ WARNING: Found \$REMAINING_LOCALHOST files still containing localhost:3001"
+                            find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
+                                grep -v node_modules | \
+                                xargs grep -l "localhost:3001" 2>/dev/null | head -5
+                        fi
+                        
+                        # 7. Show sample of what we've configured
+                        echo "📋 Configuration summary:"
+                        echo "  Production API URL: ${NEXT_PUBLIC_API_URL}"
+                        echo "  Frontend URL: ${FRONTEND_URL}"
+                        echo "  Node Environment: ${NODE_ENV}"
+                        
+                        # 8. Special check for lib/api.ts content
+                        if [ -f "lib/api.ts" ]; then
+                            echo "🔍 Verifying lib/api.ts configuration..."
+                            if grep -q "${NEXT_PUBLIC_API_URL}" lib/api.ts; then
+                                echo "✅ lib/api.ts contains correct production URL"
+                            else
+                                echo "❌ lib/api.ts may not be properly configured"
+                                echo "First 20 lines of getApiBaseUrl function:"
+                                grep -A 20 "getApiBaseUrl" lib/api.ts || echo "Function not found"
+                            fi
+                        fi
                     """
                 }
             }
@@ -93,7 +185,11 @@ pipeline {
                         
                         # Check compiled JavaScript for localhost references
                         echo "🔍 Checking for localhost:3001 in compiled JavaScript..."
-                        docker run --rm ${IMAGE_NAME}:${BUILD_NUMBER} find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; || echo "✅ No localhost:3001 found in compiled JS"
+                        docker run --rm ${IMAGE_NAME}:${BUILD_NUMBER} find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | head -5 || echo "✅ No localhost:3001 found in compiled JS"
+                        
+                        # Check for correct API URL in compiled code
+                        echo "🔍 Checking for production API URL in compiled code..."
+                        docker run --rm ${IMAGE_NAME}:${BUILD_NUMBER} find /app -name "*.js" -exec grep -l "api-codilio.sbugarin.com" {} \\; 2>/dev/null | head -3 || echo "⚠️ Production API URL not found in compiled JS"
                         
                         # Cleanup
                         docker rm \$TEMP_CONTAINER || true
@@ -166,10 +262,10 @@ pipeline {
             }
         }
 
-        stage('Frontend Health Check') {
+        stage('Enhanced Frontend Health Check') {
             steps {
                 script {
-                    echo "🔍 Running frontend health check..."
+                    echo "🔍 Running enhanced frontend health check..."
                     
                     sh """
                         echo "🧪 Testing frontend at http://localhost:3000 (local)"
@@ -186,16 +282,40 @@ pipeline {
                                 echo "🔗 Testing API connectivity from frontend container..."
                                 docker exec codilio-frontend wget --timeout=10 -q -O /dev/null ${NEXT_PUBLIC_API_URL} && echo "✅ API reachable from frontend" || echo "⚠️ API not reachable from frontend"
                                 
-                                # 🆕 CRITICAL: Check for localhost:3001 in running container
-                                echo "🕵️ Verifying no localhost:3001 in running container..."
-                                LOCALHOST_COUNT=\$(docker exec codilio-frontend find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | wc -l)
-                                if [ "\$LOCALHOST_COUNT" -eq 0 ]; then
-                                    echo "✅ No localhost:3001 references found in running container"
+                                # 🆕 CRITICAL: Enhanced localhost detection in running container
+                                echo "🕵️ Comprehensive localhost:3001 verification in running container..."
+                                
+                                # Check JavaScript files in .next directory
+                                LOCALHOST_JS_COUNT=\$(docker exec codilio-frontend find /app/.next -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | wc -l)
+                                echo "  JavaScript files with localhost:3001: \$LOCALHOST_JS_COUNT"
+                                
+                                # Check all files for localhost references
+                                TOTAL_LOCALHOST_COUNT=\$(docker exec codilio-frontend find /app -type f -exec grep -l "localhost:3001" {} \\; 2>/dev/null | wc -l)
+                                echo "  Total files with localhost:3001: \$TOTAL_LOCALHOST_COUNT"
+                                
+                                if [ "\$TOTAL_LOCALHOST_COUNT" -eq 0 ]; then
+                                    echo "✅ PERFECT: No localhost:3001 references found in running container"
                                 else
-                                    echo "⚠️ Found \$LOCALHOST_COUNT files with localhost:3001 references"
-                                    docker exec codilio-frontend find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | head -3
+                                    echo "⚠️ Found \$TOTAL_LOCALHOST_COUNT files with localhost:3001 references"
+                                    echo "  First few problematic files:"
+                                    docker exec codilio-frontend find /app -type f -exec grep -l "localhost:3001" {} \\; 2>/dev/null | head -3
+                                    
+                                    # Show sample content to debug
+                                    echo "  Sample problematic content:"
+                                    docker exec codilio-frontend find /app -name "*.js" -exec grep -n "localhost:3001" {} \\; 2>/dev/null | head -2
                                 fi
                                 
+                                # Test if production API URL is present
+                                PRODUCTION_API_COUNT=\$(docker exec codilio-frontend find /app -type f -exec grep -l "api-codilio.sbugarin.com" {} \\; 2>/dev/null | wc -l)
+                                echo "  Files with production API URL: \$PRODUCTION_API_COUNT"
+                                
+                                if [ "\$PRODUCTION_API_COUNT" -gt 0 ]; then
+                                    echo "✅ Production API URL found in container"
+                                else
+                                    echo "⚠️ Production API URL not found - this may cause issues"
+                                fi
+                                
+                                # Test actual frontend response content
                                 response_content=\$(curl -s http://localhost:3000/ 2>/dev/null | head -200)
                                 if echo "\$response_content" | grep -q "html\\|DOCTYPE\\|codilio\\|next" > /dev/null; then
                                     echo "✅ Frontend is serving valid HTML content"
@@ -224,6 +344,9 @@ pipeline {
                                 echo ""
                                 echo "🔧 Environment variables in container:"
                                 docker exec codilio-frontend env | grep -E "NEXT_PUBLIC|NODE_ENV|API" || echo "❌ Cannot retrieve environment variables"
+                                echo ""
+                                echo "🕵️ Container localhost check:"
+                                docker exec codilio-frontend find /app -name "*.js" -exec grep -l "localhost:3001" {} \\; 2>/dev/null | head -5 || echo "No localhost references found"
                                 exit 1
                             fi
                         done
@@ -243,7 +366,7 @@ pipeline {
                             echo "⚠️ Alternative production URL not accessible yet"
                         fi
                         
-                        echo "🎉 Frontend health check passed!"
+                        echo "🎉 Enhanced frontend health check passed!"
                     """
                 }
             }
@@ -420,19 +543,4 @@ pipeline {
                     echo ""
                     echo "Environment variables used:"
                     echo "  NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}"
-                    echo "  NODE_ENV: ${NODE_ENV}"
-                    echo "  NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED}"
-                    echo ""
-                    echo "Available disk space:"
-                    df -h | head -5
-                    echo ""
-                    echo "Recent images:"
-                    docker images | head -10
-                    echo ""
-                    echo "Deployment directory check:"
-                    ls -la ${DEPLOY_PATH}/ || echo "Deployment directory does not exist or no access"
-                """
-            }
-        }
-    }
-}
+                    echo "  NODE_ENV: ${NODE_
