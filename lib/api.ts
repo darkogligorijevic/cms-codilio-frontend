@@ -720,10 +720,13 @@ export const setupApi = {
     const response: AxiosResponse<{ exists: boolean }> = await api.get('/setup/check-admin');
     return response.data;
   },
+  
   createHomepageTemplate: async (institutionType: InstitutionType): Promise<{ 
     success: boolean; 
     pageId: number;
     sectionsCreated: number;
+    aboutPageId: number;
+    aboutSectionsCreated: number;
     message: string;
   }> => {
     const response = await api.post('/setup/create-homepage-template', {
@@ -732,6 +735,16 @@ export const setupApi = {
     return response.data;
   },
 };
+
+// Updated interface for the response
+export interface CreateHomepageTemplateResponse {
+  success: boolean;
+  pageId: number;
+  sectionsCreated: number;
+  aboutPageId: number;
+  aboutSectionsCreated: number;
+  message: string;
+}
 
 export const organizationalApi = {
   // Get all units
