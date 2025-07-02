@@ -30,8 +30,19 @@ ENV NEXT_TELEMETRY_DISABLED=$NEXT_TELEMETRY_DISABLED
 RUN echo "🔧 Building with API URL: $NEXT_PUBLIC_API_URL"
 RUN echo "🔧 Node environment: $NODE_ENV"
 
+# 🔍 ENHANCED: Pre-build verification of source files
+RUN echo "🕵️ Pre-build verification - checking for localhost references in source..."
+RUN find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
+    grep -v node_modules | \
+    xargs grep -l "localhost:3001" 2>/dev/null | head -5 || echo "✅ No localhost:3001 references found in source"
+
 # Build the application
 RUN npm run build
+
+# 🔍 ENHANCED: Post-build verification
+RUN echo "🕵️ Post-build verification - checking compiled JavaScript..."
+RUN find /app/.next -name "*.js" -exec grep -l "localhost:3001" {} \; 2>/dev/null | head -3 || echo "✅ No localhost:3001 in compiled JS"
+RUN find /app/.next -name "*.js" -exec grep -l "api-codilio.sbugarin.com" {} \; 2>/dev/null | head -1 && echo "✅ Production API URL found in compiled JS" || echo "⚠️ Production API URL not found"
 
 # Production image, copy all files and run next
 FROM base AS runner
@@ -73,13 +84,17 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Startup script to log configuration
+# 🚀 ENHANCED: Startup script with comprehensive logging and verification
 RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'echo "🚀 Starting Codilio Frontend"' >> /app/startup.sh && \
     echo 'echo "🔗 API URL: $NEXT_PUBLIC_API_URL"' >> /app/startup.sh && \
     echo 'echo "🔗 Internal API: $API_URL"' >> /app/startup.sh && \
     echo 'echo "🌐 Environment: $NODE_ENV"' >> /app/startup.sh && \
     echo 'echo "🔧 Port: $PORT"' >> /app/startup.sh && \
+    echo 'echo "🕵️ Final localhost verification..."' >> /app/startup.sh && \
+    echo 'find /app -name "*.js" -exec grep -l "localhost:3001" {} \; 2>/dev/null | head -3 || echo "✅ No localhost:3001 in runtime files"' >> /app/startup.sh && \
+    echo 'find /app -name "*.js" -exec grep -l "api-codilio.sbugarin.com" {} \; 2>/dev/null | head -1 >/dev/null && echo "✅ Production API URL present" || echo "⚠️ Production API URL check failed"' >> /app/startup.sh && \
+    echo 'echo "🚀 Starting Next.js server..."' >> /app/startup.sh && \
     echo 'exec node server.js' >> /app/startup.sh && \
     chmod +x /app/startup.sh
 
