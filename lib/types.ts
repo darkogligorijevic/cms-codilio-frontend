@@ -1,6 +1,27 @@
 // lib/types.ts - Updated with page assignment support
 import { InstitutionType } from './institution-templates';
 
+export interface CategorySelectionOption {
+  id: number | string; 
+  name: string;
+  slug: string;
+  postsCount: number;
+}
+
+
+export interface CategoriesApiExtended {
+
+  getAll(): Promise<Category[]>;
+  getById(id: number): Promise<Category>;
+  getBySlug(slug: string): Promise<Category>;
+  create(data: CreateCategoryDto): Promise<Category>;
+  update(id: number, data: UpdateCategoryDto): Promise<Category>;
+  delete(id: number): Promise<void>;
+  
+
+  getAllForSelection(): Promise<CategorySelectionOption[]>;
+}
+
 export enum PostStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published'

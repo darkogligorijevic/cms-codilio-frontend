@@ -1,7 +1,7 @@
 // templates/posts/single-post-template.tsx - Enhanced version with sidebar and hero section
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,10 +34,14 @@ export function SinglePostTemplate({ post, institutionData, settings }: SinglePo
   const [isLoading, setIsLoading] = useState(true);
   const { theme } = useTheme();
   const themeColors = useThemeColors();
+  const hasIncrementedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    fetchSidebarPosts();
-    incrementViewCount();
+    if (post.slug && hasIncrementedRef.current !== post.slug) {
+      fetchSidebarPosts();
+      incrementViewCount();
+      hasIncrementedRef.current = post.slug;
+    }
   }, [post.slug]);
 
   const fetchSidebarPosts = async () => {
@@ -204,9 +208,10 @@ export function SinglePostTemplate({ post, institutionData, settings }: SinglePo
               {/* Content */}
               <div className="p-8 lg:p-12">
                 <div
-                  className="prose prose-lg prose-gray max-w-none dark:prose-invert"
+                  className="[&>p]:mb-6 [&>h2]:mt-10 [&>h2]:mb-4 [&>ul]:ml-5 [&>ul]:list-disc dark:[&>code]:bg-muted prose-dynamic [&>h1]:my-6 [&>h2]:my-5 [&>h3]:my-"
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
+
 
                 {/* Share Section */}
                 <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">

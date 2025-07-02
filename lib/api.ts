@@ -1,6 +1,6 @@
 // lib/api.ts - Updated API functions with docker-compose compatible URLs
 import axios, { Axios, AxiosResponse } from 'axios';
-import { AuthResponse, AvailableParentPage, Category, CompleteSetupDto, CompleteSetupResponse, Contact, CreateCategoryDto, CreateContactDto, CreateEmailTemplateDto, CreateGalleryDto, CreateGalleryImageDto, CreateMediaDto, CreateOrganizationalUnitDto, CreatePageDto, CreatePageSectionDto, CreatePostDto, CreateServiceDocumentDto, CreateServiceDto, CreateUserDto, EmailTemplate, FindMediaOptions, Gallery, GalleryImage, GalleryStatistics, GalleryStatus, GalleryType, ImportSettingsDto, LoginCredentials, Media, MediaCategory, MediaCategoryInfo, MediaCategoryStats, NewsletterSubscribe, OrganizationalStatistics, OrganizationalUnit, Page, PageSection, Post, PostsResponse, ReorderSectionsDto, ReplyToContactDto, SectionTypeInfo, SendNewsletterDto, Service, ServiceDocument, ServiceDocumentTypeInfo, ServicePriority, ServicePriorityInfo, ServicesResponse, ServiceStatistics, ServiceStatus, ServiceType, ServiceTypeInfo, Setting, SettingCategory, SettingType, SetupStatusResponse, SiteSettings, SubscribeToNewsletterDto, UpdateCategoryDto, UpdateContactDto, UpdateEmailTemplateDto, UpdateGalleryDto, UpdateGalleryImageDto, UpdateMediaDto, UpdateMultipleSettingsDto, UpdateOrganizationalUnitDto, UpdatePageBuilderDto, UpdatePageDto, UpdatePageSectionDto, UpdatePostDto, UpdateServiceDocumentDto, UpdateServiceDto, UpdateSettingDto, UpdateUserDto, User, UsersStatistics, UserWithStats } from './types';
+import { AuthResponse, AvailableParentPage, Category, CategorySelectionOption, CompleteSetupDto, CompleteSetupResponse, Contact, CreateCategoryDto, CreateContactDto, CreateEmailTemplateDto, CreateGalleryDto, CreateGalleryImageDto, CreateMediaDto, CreateOrganizationalUnitDto, CreatePageDto, CreatePageSectionDto, CreatePostDto, CreateServiceDocumentDto, CreateServiceDto, CreateUserDto, EmailTemplate, FindMediaOptions, Gallery, GalleryImage, GalleryStatistics, GalleryStatus, GalleryType, ImportSettingsDto, LoginCredentials, Media, MediaCategory, MediaCategoryInfo, MediaCategoryStats, NewsletterSubscribe, OrganizationalStatistics, OrganizationalUnit, Page, PageSection, Post, PostsResponse, ReorderSectionsDto, ReplyToContactDto, SectionTypeInfo, SendNewsletterDto, Service, ServiceDocument, ServiceDocumentTypeInfo, ServicePriority, ServicePriorityInfo, ServicesResponse, ServiceStatistics, ServiceStatus, ServiceType, ServiceTypeInfo, Setting, SettingCategory, SettingType, SetupStatusResponse, SiteSettings, SubscribeToNewsletterDto, UpdateCategoryDto, UpdateContactDto, UpdateEmailTemplateDto, UpdateGalleryDto, UpdateGalleryImageDto, UpdateMediaDto, UpdateMultipleSettingsDto, UpdateOrganizationalUnitDto, UpdatePageBuilderDto, UpdatePageDto, UpdatePageSectionDto, UpdatePostDto, UpdateServiceDocumentDto, UpdateServiceDto, UpdateSettingDto, UpdateUserDto, User, UsersStatistics, UserWithStats } from './types';
 import { InstitutionType } from './institution-templates';
 
 
@@ -239,6 +239,18 @@ export const postsApi = {
     return response.data;
   },
 
+  // АЖУРИРАНО: Подршка за "all" категорију за Page Builder
+  getByCategoryId: async (categoryId: number | string, limit = 6): Promise<Post[]> => {
+    console.log('🔗 API call for category:', categoryId, 'limit:', limit);
+    
+    // ВАЖНО: Не конвертуј у број ако је "all"
+    const categoryParam = categoryId === 'all' ? 'all' : categoryId;
+    
+    const response: AxiosResponse<Post[]> = await api.get(`/posts/by-category-id/${categoryParam}?limit=${limit}`);
+    console.log('✅ API response:', response.data.length, 'posts');
+    return response.data;
+  },
+
   create: async (data: CreatePostDto): Promise<Post> => {
     const response: AxiosResponse<Post> = await api.post('/posts', data);
     return response.data;
@@ -468,13 +480,8 @@ export const categoriesApi = {
     return response.data;
   },
 
-  // NEW: Get categories for Page Builder selection
-  getAllForSelection: async (): Promise<Array<{ 
-    id: number; 
-    name: string; 
-    slug: string; 
-    postsCount: number 
-  }>> => {
+  // АЖУРИРАНО: Сада враћа CategorySelectionOption[] уместо неправилног типа
+  getAllForSelection: async (): Promise<CategorySelectionOption[]> => {
     const response = await api.get('/categories/for-selection');
     return response.data;
   },

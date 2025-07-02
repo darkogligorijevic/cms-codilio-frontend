@@ -1,9 +1,9 @@
-// components/frontend/sections/posts/posts-carousel.tsx
+// components/frontend/sections/posts/posts-carousel.tsx - UPDATED sa podrškom za "Sve kategorije"
 import { SectionData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Calendar, User, Eye, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, User, Eye, ArrowRight, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { categoriesApi, postsApi, mediaApi } from '@/lib/api';
@@ -19,6 +19,7 @@ export function PostsCarouselSection({ data, className }: PostsCarouselSectionPr
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [category, setCategory] = useState<any>(null);
+  const [isAllCategories, setIsAllCategories] = useState(false);
 
   // Responsive slides per view
   const [slidesPerView, setSlidesPerView] = useState(3);
@@ -41,22 +42,27 @@ export function PostsCarouselSection({ data, className }: PostsCarouselSectionPr
 
   useEffect(() => {
     const fetchPosts = async () => {
-      if (!data.categoryId) return;
-      
       try {
         setIsLoading(true);
-        
-        // Fetch category details
-        const categoryData = await categoriesApi.getById(Number(data.categoryId));
-        setCategory(categoryData);
-        
-        // Fetch posts from this category
-        const postsResponse = await postsApi.getPublished(1, data.postsLimit || 6);
-        const filteredPosts = postsResponse.posts.filter(
-          post => post.categoryId === Number(data.categoryId)
-        );
-        
-        setPosts(filteredPosts);
+        const categoryValue = data.categoryId;
+      
+        if (categoryValue === 'all' || !categoryValue) {
+          setIsAllCategories(true);
+          setCategory(null);
+          
+          const posts = await postsApi.getByCategoryId('all', data.postsLimit || 6);
+          setPosts(posts);
+          
+        } else {
+          setIsAllCategories(false);
+          
+          const categoryData = await categoriesApi.getById(Number(categoryValue));
+          setCategory(categoryData);
+          
+          const posts = await postsApi.getByCategoryId(Number(categoryValue), data.postsLimit || 6);
+          setPosts(posts);
+          
+        }
       } catch (error) {
         console.error('Error fetching posts:', error);
       } finally {
@@ -129,10 +135,16 @@ export function PostsCarouselSection({ data, className }: PostsCarouselSectionPr
       <section className={cn('py-16 text-center', className)}>
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            Нема објава у категорији "{category?.name}"
+            {isAllCategories 
+              ? "Тренутно нема објављених објава"
+              : `Нема објава у категорији "${category?.name}"`
+            }
           </h3>
           <p className="text-gray-600 dark:text-gray-300">
-            Објаве ће се приказати када буду додане у ову категорију.
+            {isAllCategories
+              ? "Објаве ће се приказати када буду објављене."
+              : "Објаве ће се приказати када буду додане у ову категорију."
+            }
           </p>
         </div>
       </section>
@@ -156,7 +168,17 @@ export function PostsCarouselSection({ data, className }: PostsCarouselSectionPr
             </p>
           )}
 
-          {category && (
+          {isAllCategories ? (
+            <div className="flex items-center justify-center space-x-2">
+              <Badge className="bg-primary/10 text-primary border-primary/20">
+                <Globe className="mr-1 h-3 w-3" />
+                Све категорије
+              </Badge>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {posts.length} {posts.length === 1 ? 'објава' : 'објава'}
+              </span>
+            </div>
+          ) : category && (
             <div className="flex items-center justify-center space-x-2">
               <Badge className="bg-primary/10 text-primary border-primary/20">
                 {category.name}
@@ -211,7 +233,7 @@ export function PostsCarouselSection({ data, className }: PostsCarouselSectionPr
                 )}
 
                 <CardContent className="p-6">
-                  {/* Category Badge */}
+                  {/* Category Badge - АЖУРИРАНО: Показује категорију објаве када су све категорије изабране */}
                   {post.category && (
                     <Badge variant="secondary" className="mb-3 text-xs">
                       {post.category.name}
@@ -286,14 +308,21 @@ export function PostsCarouselSection({ data, className }: PostsCarouselSectionPr
           )}
         </div>
 
-        {/* View All Button */}
-        {data.showViewAll && category && (
+        {/* View All Button - АЖУРИРАНО: Прилагођава се за све категорије */}
+        {data.showViewAll && (
           <div className="text-center">
             <Button variant="outline" asChild>
-              <Link href={`/kategorije/${category.slug}`}>
-                Погледај све у категорији "{category.name}"
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              {isAllCategories ? (
+                <Link href="/objave">
+                  Погледај све објаве
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              ) : (
+                <Link href={`/kategorije/${category?.slug}`}>
+                  Погледај све у категорији "{category?.name}"
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              )}
             </Button>
           </div>
         )}

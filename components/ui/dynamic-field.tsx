@@ -1,4 +1,4 @@
-// components/ui/dynamic-field.tsx - FIXED VERSION
+// components/ui/dynamic-field.tsx - FIXED VERSION без дуплих ключева
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -18,9 +18,11 @@ import {
   ImageIcon, 
   X, 
   Plus, 
-  Trash2 
+  Trash2,
+  Globe,
+  Tag
 } from 'lucide-react';
-import { FieldConfig, ArrayFieldConfig, ObjectFieldConfig, SelectFieldConfig } from '@/lib/types';
+import { FieldConfig, ArrayFieldConfig, ObjectFieldConfig, SelectFieldConfig, CategorySelectionOption } from '@/lib/types';
 import { categoriesApi } from '@/lib/api';
 
 interface DynamicFieldProps {
@@ -30,13 +32,13 @@ interface DynamicFieldProps {
   error?: string;
 }
 
-// Separate CategorySelect component to avoid hook issues
+// Separate CategorySelect component са "Све категорије" опцијом
 function CategorySelect({ value, onChange, error }: { 
   value: any; 
   onChange: (value: any) => void; 
   error?: string 
 }) {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<CategorySelectionOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ function CategorySelect({ value, onChange, error }: {
         console.log('🔄 Fetching categories for selection...');
         
         // Try the selection endpoint first
-        let data;
+        let data: CategorySelectionOption[];
         try {
           data = await categoriesApi.getAllForSelection();
           console.log('✅ Categories for selection:', data);
@@ -62,7 +64,17 @@ function CategorySelect({ value, onChange, error }: {
             slug: cat.slug,
             postsCount: cat.posts?.length || 0
           }));
-          console.log('✅ Fallback categories:', data);
+          
+          // ДОДАЈ "Све категорије" у fallback случају
+          const totalPosts = data.reduce((sum, cat) => sum + cat.postsCount, 0);
+          data.unshift({
+            id: 'all',
+            name: 'Све категорије',
+            slug: 'all',
+            postsCount: totalPosts
+          });
+          
+          console.log('✅ Fallback categories with "all" option:', data);
         }
 
         if (isMounted) {
@@ -71,7 +83,12 @@ function CategorySelect({ value, onChange, error }: {
       } catch (error) {
         console.error('❌ Error fetching categories:', error);
         if (isMounted) {
-          setCategories([]);
+          setCategories([{
+            id: 'all',
+            name: 'Све категорије',
+            slug: 'all',
+            postsCount: 0
+          }]);
         }
       } finally {
         if (isMounted) {
@@ -112,12 +129,19 @@ function CategorySelect({ value, onChange, error }: {
             </SelectItem>
           ) : (
             categories.map((category) => (
-              <SelectItem key={category.id} value={category.id.toString()}>
-                <div className="flex items-center justify-between w-full">
-                  <span>{category.name}</span>
-                  <span className="text-xs text-muted-foreground ml-2">
-                    ({category.postsCount} објав)
-                  </span>
+              <SelectItem key={`category-${category.id}`} value={category.id.toString()}>
+                <div className="flex items-center">
+                  {category.id === 'all' ? (
+                    <Globe className="mr-2 h-4 w-4 text-blue-600" />
+                  ) : (
+                    <Tag className="mr-2 h-4 w-4 text-gray-500" />
+                  )}
+                  <div>
+                    <div className="font-medium">{category.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {category.postsCount} објав{category.id === 'all' ? ' укупно' : ''}
+                    </div>
+                  </div>
                 </div>
               </SelectItem>
             ))
@@ -125,7 +149,7 @@ function CategorySelect({ value, onChange, error }: {
         </SelectContent>
       </Select>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {categories.length === 0 && (
+      {categories.length <= 1 && (
         <p className="text-xs text-yellow-600">
           Нема категорија. Прво креирајте категорије у Dashboard → Категорије.
         </p>
