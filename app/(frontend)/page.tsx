@@ -1,29 +1,27 @@
-// app/(frontend)/page.tsx - FINALNA VERZIJA SA SVETLOM TEMOM
+// app/(frontend)/page.tsx - UPDATED VERSION using SearchComponent
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useSettings } from '@/lib/settings-context';
 import { useDynamicStyles, useThemeColors } from '@/lib/theme-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-  Calendar,
-  Eye,
-  Search,
   FileText,
   Download,
   ChevronRight,
   TrendingUp,
   Users,
   Building,
-  X,
-  User
+  User,
+  Calendar,
+  Eye
 } from 'lucide-react';
 import Link from 'next/link';
 import { postsApi, pagesApi, categoriesApi, mediaApi } from '@/lib/api';
 import type { Post, Page, Category } from '@/lib/types';
+import { SearchComponent } from '@/components/frontend/search/search-component'; // NEW IMPORT
 
 export default function HomePage() {
   const { settings, isLoading: settingsLoading } = useSettings();
@@ -34,11 +32,6 @@ export default function HomePage() {
   const [pages, setPages] = useState<Page[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<{ posts: Post[], pages: Page[] }>({ posts: [], pages: [] });
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
 
   // Use settings for institution data
   const institutionData = {
@@ -51,31 +44,6 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchHomeData();
-  }, []);
-
-  useEffect(() => {
-    if (searchTerm.length > 2) {
-      const timeoutId = setTimeout(() => {
-        performSearch(searchTerm);
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    } else {
-      setShowSearchResults(false);
-      setSearchResults({ posts: [], pages: [] });
-    }
-  }, [searchTerm]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSearchResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, []);
 
   const fetchHomeData = async () => {
@@ -98,69 +66,6 @@ export default function HomePage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const performSearch = async (query: string) => {
-    if (!query.trim() || query.length < 3) return;
-
-    try {
-      setIsSearching(true);
-      const [postsResponse, pagesResponse] = await Promise.all([
-        postsApi.getPublished(1, 20),
-        pagesApi.getPublished()
-      ]);
-
-      const searchLower = query.toLowerCase();
-      const filteredPosts = postsResponse.posts.filter(post =>
-        post.title.toLowerCase().includes(searchLower) ||
-        post.excerpt?.toLowerCase().includes(searchLower) ||
-        post.content.toLowerCase().includes(searchLower) ||
-        post.category?.name.toLowerCase().includes(searchLower)
-      ).slice(0, 5);
-
-      const filteredPages = pagesResponse.filter(page =>
-        page.title.toLowerCase().includes(searchLower) ||
-        String(page.content).toLowerCase().includes(searchLower)
-      ).slice(0, 3);
-
-      setSearchResults({
-        posts: filteredPosts,
-        pages: filteredPages
-      });
-
-      setShowSearchResults(true);
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchResults({ posts: [], pages: [] });
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      performSearch(searchTerm);
-    }
-  };
-
-  const clearSearch = () => {
-    setSearchTerm('');
-    setSearchResults({ posts: [], pages: [] });
-    setShowSearchResults(false);
-  };
-
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    const regex = new RegExp(`(${query})`, 'gi');
-    const parts = text.split(regex);
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
-          {part}
-        </span>
-      ) : part
-    );
   };
 
   const formatDate = (dateString: string) => {
@@ -227,174 +132,19 @@ export default function HomePage() {
             </div>
 
             <div>
-              {/* Search Card */}
-              <Card className="bg-white/10 backdrop-blur-sm border-none">
-                <CardHeader>
-                  <CardTitle className="text-white">Претражи садржај</CardTitle>
-                  <CardDescription className="text-blue-100">
-                    Пронађите објаве, документе и информације
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div ref={searchRef}>
-                    <form onSubmit={handleSearchSubmit} className="space-y-3">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          placeholder="Унесите кључне речи..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-9 bg-white/90 text-gray-500 dark:bg-gray-800/90 focus-primary-dynamic"
-                          autoComplete="off"
-                        />
-                        {searchTerm && (
-                          <button
-                            type="button"
-                            onClick={clearSearch}
-                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        )}
-
-                        {/* Search Results Dropdown */}
-                        {showSearchResults && (searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-600 z-50 max-h-96 overflow-y-auto">
-                            {/* Posts Results */}
-                            {searchResults.posts.length > 0 && (
-                              <div className="p-3">
-                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                                  <FileText className="mr-2 h-4 w-4 text-primary-dynamic" />
-                                  Објаве ({searchResults.posts.length})
-                                </h4>
-                                <div className="space-y-2">
-                                  {searchResults.posts.map((post) => (
-                                    <Link
-                                      key={post.id}
-                                      href={`/objave/${post.slug}`}
-                                      onClick={clearSearch}
-                                      className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
-                                    >
-                                      <div className="flex items-start space-x-3">
-                                        {post.featuredImage && (
-                                          <img
-                                            src={mediaApi.getFileUrl(post.featuredImage)}
-                                            alt=""
-                                            className="w-12 h-8 object-cover rounded flex-shrink-0"
-                                          />
-                                        )}
-                                        <div className="flex-1 min-w-0">
-                                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
-                                            {highlightText(post.title, searchTerm)}
-                                          </div>
-                                          {post.excerpt && (
-                                            <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                                              {highlightText(post.excerpt.substring(0, 100), searchTerm)}
-                                            </div>
-                                          )}
-                                          <div className="flex items-center space-x-2 mt-1">
-                                            {post.category && (
-                                              <Badge variant="secondary" className="text-xs badge-primary-dynamic">
-                                                {post.category.name}
-                                              </Badge>
-                                            )}
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                                              {getTimeAgo(post.publishedAt || post.createdAt)}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </Link>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Pages Results */}
-                            {searchResults.pages.length > 0 && (
-                              <div className="p-3 border-t dark:border-gray-600">
-                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                                  <Building className="mr-2 h-4 w-4 text-secondary-dynamic" />
-                                  Странице ({searchResults.pages.length})
-                                </h4>
-                                <div className="space-y-2">
-                                  {searchResults.pages.map((page) => (
-                                    <Link
-                                      key={page.id}
-                                      href={`/${page.slug}`}
-                                      onClick={clearSearch}
-                                      className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
-                                    >
-                                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {highlightText(page.title, searchTerm)}
-                                      </div>
-                                      <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                                        {highlightText(
-                                          String(page.content).replace(/<[^>]*>/g, '').substring(0, 100),
-                                          searchTerm
-                                        )}
-                                      </div>
-                                    </Link>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* No Results */}
-                            {searchResults.posts.length === 0 && searchResults.pages.length === 0 && !isSearching && (
-                              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                <Search className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-600 mb-2" />
-                                <p className="text-sm">Нема резултата за "{searchTerm}"</p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                  Покушајте са другим кључним речима
-                                </p>
-                              </div>
-                            )}
-
-                            {/* Loading */}
-                            {isSearching && (
-                              <div className="p-4 text-center">
-                                <div 
-                                  className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto"
-                                  style={{ borderColor: themeColors.primary }}
-                                ></div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Претражује се...</p>
-                              </div>
-                            )}
-
-                            {/* Show more results link */}
-                            {(searchResults.posts.length > 0 || searchResults.pages.length > 0) && (
-                              <div className="p-3 border-t dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
-                                <Link
-                                  href={`/pretraga?q=${encodeURIComponent(searchTerm)}`}
-                                  onClick={clearSearch}
-                                  className="text-sm font-medium flex items-center justify-center text-primary-dynamic hover:text-primary-dynamic/80 transition-colors"
-                                >
-                                  Прикажи све резултате
-                                  <ChevronRight className="ml-1 h-4 w-4" />
-                                </Link>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        type="submit"
-                        className="w-full bg-white hover:bg-blue-50 text-primary-dynamic dark:bg-gray-800 dark:hover:bg-gray-700"
-                      >
-                        <Search className="mr-2 h-4 w-4" />
-                        Претражи
-                      </Button>
-                    </form>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* UPDATED: Use SearchComponent instead of inline search */}
+              <SearchComponent
+                placeholder="Унесите кључне речи..."
+                buttonText="Претражи"
+                showDescription={true}
+                variant="default"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Content - SVETLA POZADINA */}
+      {/* Main Content - СВЕТЛА ПОЗАДИНА */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 bg-white dark:bg-gray-900">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 

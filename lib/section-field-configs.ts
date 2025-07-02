@@ -156,28 +156,6 @@ const BASE_SECTION_CONFIGS: Record<
       },
       { key: "description", type: "textarea", label: "Opis", rows: 3 },
       { key: "backgroundImage", type: "image", label: "Pozadinska slika" },
-      {
-        key: "buttonText",
-        type: "text",
-        label: "Tekst dugmeta",
-        placeholder: "Saznaj više",
-      },
-      {
-        key: "buttonLink",
-        type: "text",
-        label: "Link dugmeta",
-        placeholder: "/o-nama",
-      },
-      {
-        key: "buttonStyle",
-        type: "select",
-        label: "Stil dugmeta",
-        options: [
-          { value: "primary", label: "Glavni" },
-          { value: "secondary", label: "Sekundarni" },
-          { value: "outline", label: "Obrub" },
-        ],
-      },
     ],
   },
 

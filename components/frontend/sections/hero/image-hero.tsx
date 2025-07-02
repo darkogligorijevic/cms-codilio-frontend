@@ -2,6 +2,7 @@
 import { SectionData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { SearchComponent } from '../../search/search-component';
 
 interface HeroImageSectionProps {
   data: SectionData;
@@ -54,21 +55,8 @@ export function HeroImageSection({ data, className }: HeroImageSectionProps) {
             </p>
           )}
 
-          {data.buttonText && data.buttonLink && (
-            <div>
-              <Button 
-                asChild
-                size="lg"
-                variant={data.buttonStyle === 'secondary' ? 'secondary' : 
-                        data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="text-black font-black text-md md:text-lg shadow-lg"
-              >
-                <a href={data.buttonLink}>
-                  {data.buttonText}
-                </a>
-              </Button>
-            </div>
-          )}
+          <SearchComponent className='text-left'/>
+
         </div>
       </div>
 
