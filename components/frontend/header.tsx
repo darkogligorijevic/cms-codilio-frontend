@@ -1,4 +1,4 @@
-// components/frontend/header.tsx - Transparent header with scroll background
+// components/frontend/header.tsx - Updated with structured navigation
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,18 +16,75 @@ interface HeaderProps {
   pages: Page[];
 }
 
+// Define the navigation structure we want
+const NAVIGATION_STRUCTURE = [
+  {
+    id: 'pocetna',
+    title: 'Почетна',
+    slug: 'pocetna',
+    type: 'page',
+    sortOrder: 0
+  },
+  {
+    id: 'o-nama',
+    title: 'О нама',
+    slug: 'o-nama',
+    type: 'page',
+    sortOrder: 1,
+    children: [
+      { slug: 'direktori', title: 'Директори' },
+      { slug: 'organizaciona-struktura', title: 'Организациона структура' }
+    ]
+  },
+  {
+    id: 'usluge',
+    title: 'Услуге',
+    slug: 'usluge',
+    type: 'page',
+    sortOrder: 2,
+    // Auto-populated from subpages of 'usluge'
+    hasAutoSubpages: true
+  },
+  {
+    id: 'dokumentacija',
+    title: 'Документација',
+    slug: 'dokumentacija',
+    type: 'page',
+    sortOrder: 3,
+    // Auto-populated from subpages of 'dokumentacija'
+    hasAutoSubpages: true
+  },
+  {
+    id: 'objave',
+    title: 'Објаве',
+    slug: 'objave',
+    type: 'page',
+    sortOrder: 4,
+    // Just link directly to posts page - categories are handled within the posts page
+  },
+  {
+    id: 'galerija',
+    title: 'Галерија',
+    slug: 'galerija',
+    type: 'page',
+    sortOrder: 5,
+    // Auto-populated from subpages of 'galerija'
+    hasAutoSubpages: true
+  }
+];
+
 export function Header({ pages }: HeaderProps) {
   const { settings } = useSettings();
   const context = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [hoveredDropdown, setHoveredDropdown] = useState<number | null>(null);
+  const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 10); // Change background after 10px scroll
+      setIsScrolled(scrollTop > 10);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -39,206 +96,202 @@ export function Header({ pages }: HeaderProps) {
     description: settings?.siteTagline || "Службени портал локалне самоуправе",
   };
 
-  // Helper function to check if a page has children
-  const hasChildren = (page: Page): boolean => {
-    return !!(page.children && page.children.length > 0);
+  // Helper function to find a page by slug
+  const findPageBySlug = (slug: string): Page | undefined => {
+    return pages.find(page => page.slug === slug);
   };
 
-  const getRootPages = (pageList: Page[]): Page[] => {
-    return pageList
-      .filter((page) => !page.parentId)
-      .filter((page) => page.status === "published")
+  // Helper function to get subpages for a parent page
+  const getSubpages = (parentSlug: string): Page[] => {
+    const parentPage = findPageBySlug(parentSlug);
+    if (!parentPage) return [];
+    
+    return pages.filter(page => page.parentId === parentPage.id)
       .sort((a, b) => a.sortOrder - b.sortOrder);
   };
 
-  // Custom Hover Dropdown Component
-  const HoverDropdown = ({
-    page,
-    isMobile = false,
-  }: {
-    page: Page;
-    isMobile?: boolean;
-  }) => {
-    const pageHasChildren = hasChildren(page);
+  // Build navigation items based on our structure
+  const buildNavigationItems = () => {
+    return NAVIGATION_STRUCTURE.map(navItem => {
+      let children: Page[] = [];
 
-    if (pageHasChildren) {
+      if (navItem.hasAutoSubpages) {
+        // Get auto-generated subpages
+        children = getSubpages(navItem.slug);
+      } else if (navItem.children) {
+        // Use predefined children, but check if pages exist
+        children = navItem.children
+          .map(child => findPageBySlug(child.slug))
+          .filter((page): page is Page => page !== undefined);
+      }
+
+      return {
+        ...navItem,
+        page: findPageBySlug(navItem.slug),
+        children
+      };
+    }).filter(item => {
+      // Only include items that have a corresponding page
+      return item.page;
+    });
+  };
+
+  const navigationItems = buildNavigationItems();
+
+  // Desktop Navigation Item Component
+  const DesktopNavigationItem = ({ item }: { item: any }) => {
+    const hasChildren = item.children && item.children.length > 0;
+
+    if (!hasChildren) {
+      // Simple link
+      const href = `/${item.slug}`;
       return (
-        <div
-          className="relative group"
-          onMouseEnter={() => !isMobile && setHoveredDropdown(page.id)}
-          onMouseLeave={() => !isMobile && setHoveredDropdown(null)}
+        <Link
+          href={href}
+          className={cn(
+            "px-3 py-2 transition-colors duration-200",
+            isScrolled
+              ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic"
+              : "text-white hover:text-gray-200"
+          )}
         >
+          {item.title}
+        </Link>
+      );
+    }
+
+    // Dropdown with children
+    return (
+      <div
+        className="relative group"
+        onMouseEnter={() => setHoveredDropdown(item.id)}
+        onMouseLeave={() => setHoveredDropdown(null)}
+      >
+        <Link
+          href={`/${item.slug}`}
+          className={cn(
+            "flex items-center space-x-1 px-3 py-2 transition-colors duration-200 font-medium",
+            isScrolled
+              ? "text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+              : "text-white hover:text-blue-200 drop-shadow-sm"
+          )}
+        >
+          <span>{item.title}</span>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${
+              hoveredDropdown === item.id ? "rotate-180" : ""
+            }`}
+          />
+        </Link>
+
+        {/* Desktop Dropdown */}
+        <div
+          className={`
+            absolute top-full left-0 min-w-[250px] bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden z-50
+            transition-all duration-300 ease-out
+            ${
+              hoveredDropdown === item.id
+                ? "opacity-100 visible transform translate-y-0"
+                : "opacity-0 invisible transform -translate-y-2"
+            }
+          `}
+        >
+          {/* Parent Page Link */}
           <Link
-            href={`/${page.slug}`}
-            className={cn(
-              "flex items-center space-x-1 transition-colors duration-200",
-              isMobile
-                ? "w-full px-3 py-2 text-left hover:bg-white/10 rounded-md"
-                : "px-3 py-2",
-              // Dynamic text colors based on scroll state
-              isScrolled || isMobile
-                ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic"
-                : "text-white hover:text-gray-200"
-            )}
-            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+            href={`/${item.slug}`}
+            className="block px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 border-b border-gray-100 dark:border-gray-600 font-semibold"
           >
-            <span>{page.title}</span>
-            <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${
-                hoveredDropdown === page.id || isMobile ? "rotate-180" : ""
-              }`}
-            />
+            <div className="flex items-center">{item.title}</div>
           </Link>
 
-          {/* Desktop Hover Dropdown */}
-          {!isMobile && (
-            <div
-              className={`
-              absolute top-full left-0 min-w-[250px] bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden z-50
-              transition-all duration-300 ease-out
-              ${
-                hoveredDropdown === page.id
-                  ? "opacity-100 visible transform translate-y-0"
-                  : "opacity-0 invisible transform -translate-y-2"
-              }
-            `}
-            >
-              {/* Parent Page Link */}
+          {/* Children Pages */}
+          <div className="py-2">
+            {item.children.map((child: Page) => (
               <Link
-                href={`/${page.slug}`}
-                className="block px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 border-b border-gray-100 dark:border-gray-600 font-medium"
+                key={child.id}
+                href={`/${child.slug}`}
+                className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-150"
               >
-                <div className="flex items-center">{page.title}</div>
+                <span className="w-6 h-4 flex items-center justify-start text-gray-400 mr-2">
+                  └─
+                </span>
+                <span>{child.title}</span>
               </Link>
-
-              {/* Children Pages */}
-              <div className="py-2">
-                {page.children?.map((child, index) => (
-                  <Link
-                    key={`${page.id}-child-${child.id}-${index}`}
-                    href={`/${child.slug}`}
-                    className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-dynamic transition-colors duration-150"
-                  >
-                    <span className="w-6 h-4 flex items-center justify-start text-gray-400 mr-2">
-                      └─
-                    </span>
-                    <span>{child.title}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Mobile Dropdown */}
-          {isMobile && hoveredDropdown === page.id && (
-            <div className="ml-4 mt-2 space-y-1">
-              {page.children?.map((child, index) => (
-                <Link
-                  key={`mobile-${page.id}-child-${child.id}-${index}`}
-                  href={`/${child.slug}`}
-                  className="flex items-center px-3 py-2 text-white/80 hover:bg-white/10 rounded-md text-sm"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span className="text-white/60 mr-2">└─</span>
-                  {child.title}
-                </Link>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-      );
-    }
-
-    // Simple link for pages without children
-    return (
-      <Link
-        href={`/${page.slug}`}
-        className={cn(
-          "transition-colors duration-200",
-          isMobile
-            ? "block px-3 py-2 hover:bg-white/10 rounded-md"
-            : "px-3 py-2",
-          // Dynamic text colors based on scroll state
-          isScrolled || isMobile
-            ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic"
-            : "text-white hover:text-gray-200"
-        )}
-        onClick={() => isMobile && setIsMobileMenuOpen(false)}
-      >
-        {page.title}
-      </Link>
+      </div>
     );
   };
 
-  // Mobile Navigation Item with Click Toggle
-  const MobileNavigationItem = ({ page }: { page: Page }) => {
-    const pageHasChildren = hasChildren(page);
+  // Mobile Navigation Item Component
+  const MobileNavigationItem = ({ item }: { item: any }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const hasChildren = item.children && item.children.length > 0;
 
-    if (pageHasChildren) {
+    if (!hasChildren) {
+      const href = `/${item.slug}`;
       return (
-        <div>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between px-3 py-2 text-white hover:bg-white/10 rounded-md"
-          >
-            <span>{page.title}</span>
-            <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
+        <Link
+          href={href}
+          className="block px-3 py-3 text-white hover:bg-gray-800/50 rounded-lg transition-colors duration-200 font-medium"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          {item.title}
+        </Link>
+      );
+    }
 
-          {isOpen && (
-            <div className="ml-4 mt-2 space-y-1">
+    return (
+      <div>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between px-3 py-3 text-white hover:bg-gray-800/50 rounded-lg transition-colors duration-200 font-medium"
+        >
+          <span>{item.title}</span>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {isOpen && (
+          <div className="ml-3 mt-1 space-y-1 border-l-2 border-gray-700/50 pl-3">
+            {/* Parent link */}
+            <Link
+              href={`/${item.slug}`}
+              className="block px-3 py-2 text-gray-300 hover:bg-gray-800/50 hover:text-white rounded-md text-sm font-medium transition-colors duration-200"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {item.title}
+            </Link>
+            
+            {/* Children links */}
+            {item.children.map((child: Page) => (
               <Link
-                href={`/${page.slug}`}
-                className="block px-3 py-2 text-white hover:bg-white/10 rounded-md text-sm font-medium"
+                key={child.id}
+                href={`/${child.slug}`}
+                className="flex items-center px-3 py-2 text-gray-300 hover:bg-gray-800/50 hover:text-white rounded-md text-sm transition-colors duration-200"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="flex items-center">{page.title}</div>
+                <span className="text-gray-500 mr-2">└─</span>
+                {child.title}
               </Link>
-              {page.children?.map((child, index) => (
-                <Link
-                  key={`mobile-nav-${page.id}-child-${child.id}-${index}`}
-                  href={`/${child.slug}`}
-                  className="flex items-center px-3 py-2 text-white/80 hover:bg-white/10 rounded-md text-sm"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span className="text-white/60 mr-2">└─</span>
-                  {child.title}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <Link
-        href={`/${page.slug}`}
-        className="block px-3 py-2 text-white hover:bg-white/10 rounded-md"
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        {page.title}
-      </Link>
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
-
-  // Get root pages and limit for display
-  const rootPages = getRootPages(pages);
-  const desktopPages = rootPages; 
-  const mobilePages = rootPages;
 
   return (
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
         isScrolled
-          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg "
-          : "bg-black/15 backdrop-blur-sm "
+          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-lg border-b border-gray-200/20 dark:border-gray-700/50"
+          : "bg-gradient-to-r from-black/60 via-black/40 to-black/60 backdrop-blur-md shadow-lg"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -256,14 +309,13 @@ export function Header({ pages }: HeaderProps) {
                 <Building
                   className={cn(
                     "h-8 w-8 transition-colors duration-200",
-                    isScrolled ? "text-primary-dynamic" : "text-white"
+                    isScrolled ? "text-blue-600 dark:text-blue-400" : "text-white drop-shadow-sm"
                   )}
                 />
-
                 <h1
                   className={cn(
                     "text-lg font-bold transition-colors duration-200",
-                    isScrolled ? "text-gray-900 dark:text-white" : "text-white"
+                    isScrolled ? "text-gray-900 dark:text-white" : "text-white drop-shadow-sm"
                   )}
                   style={{ fontFamily: settings?.themeFontFamily || "Inter" }}
                 >
@@ -275,9 +327,8 @@ export function Header({ pages }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2">
-            {/* Dynamic pages navigation */}
-            {desktopPages.map((page, index) => (
-              <HoverDropdown key={`desktop-${page.id}-${index}`} page={page} />
+            {navigationItems.map((item) => (
+              <DesktopNavigationItem key={item.id} item={item} />
             ))}
 
             <div className="flex items-center space-x-4 ml-4">
@@ -309,10 +360,10 @@ export function Header({ pages }: HeaderProps) {
             {/* Mobile menu button */}
             <button
               className={cn(
-                "md:hidden p-2 transition-colors duration-200",
+                "md:hidden p-2 transition-colors duration-200 rounded-md",
                 isScrolled
-                  ? "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  : "text-white hover:text-gray-200"
+                  ? "text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                  : "text-white hover:text-blue-200 hover:bg-white/10 drop-shadow-sm"
               )}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -327,30 +378,24 @@ export function Header({ pages }: HeaderProps) {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-white/30 bg-black/70 backdrop-blur-lg rounded-b-lg mx-4">
-            <div className="space-y-2">
-              {/* Dynamic pages navigation for mobile */}
-              {mobilePages.map((page, index) => (
-                <MobileNavigationItem
-                  key={`mobile-main-${page.id}-${index}`}
-                  page={page}
-                />
+          <div className="md:hidden absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-t border-gray-700/50">
+            <div className="px-4 py-4 space-y-1">
+              {navigationItems.map((item) => (
+                <MobileNavigationItem key={item.id} item={item} />
               ))}
-              <Link
-                href="/objave"
-                className="block px-3 py-2 text-white hover:bg-white/10 rounded-md"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Објаве
-              </Link>
 
-              <Link
-                href="/dashboard"
-                className="block px-3 py-2 text-blue-300 hover:bg-white/10 rounded-md"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                CMS пријава
-              </Link>
+              {context?.isAuthenticated && (
+                <div className="pt-3 border-t border-gray-700/50 mt-3">
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center px-3 py-2 text-blue-400 hover:bg-gray-800/50 rounded-md font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    CMS пријава
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
