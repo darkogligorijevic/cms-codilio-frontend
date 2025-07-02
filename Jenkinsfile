@@ -543,4 +543,24 @@ pipeline {
                     echo ""
                     echo "Environment variables used:"
                     echo "  NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}"
-                    echo "  NODE_ENV: ${NODE_
+                    echo "  NODE_ENV: ${NODE_ENV}"
+                    echo "  NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED}"
+                    echo ""
+                    echo "Available disk space:"
+                    df -h | head -5
+                    echo ""
+                    echo "Recent images:"
+                    docker images | head -10
+                    echo ""
+                    echo "Deployment directory check:"
+                    ls -la ${DEPLOY_PATH}/ || echo "Deployment directory does not exist or no access"
+                    echo ""
+                    echo "🕵️ Final localhost check in failed deployment:"
+                    find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
+                        grep -v node_modules | \
+                        xargs grep -l "localhost:3001" 2>/dev/null | head -5 || echo "No localhost references found in source"
+                """
+            }
+        }
+    }
+}
