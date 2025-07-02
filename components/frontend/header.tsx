@@ -19,13 +19,6 @@ interface HeaderProps {
 // Define the navigation structure we want
 const NAVIGATION_STRUCTURE = [
   {
-    id: 'pocetna',
-    title: 'Почетна',
-    slug: 'pocetna',
-    type: 'page',
-    sortOrder: 0
-  },
-  {
     id: 'o-nama',
     title: 'О нама',
     slug: 'o-nama',
