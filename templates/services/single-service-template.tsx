@@ -1,12 +1,18 @@
 // templates/services/single-service-template.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
   ArrowLeft,
   Clock,
   MapPin,
@@ -30,11 +36,11 @@ import {
   Zap,
   Shield,
   Award,
-  X
-} from 'lucide-react';
-import Link from 'next/link';
-import { Service, ServiceDocument } from '@/lib/types';
-import { servicesApi } from '@/lib/api';
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { Service, ServiceDocument } from "@/lib/types";
+import { servicesApi } from "@/lib/api";
 
 interface SingleServiceTemplateProps {
   service: Service;
@@ -43,20 +49,29 @@ interface SingleServiceTemplateProps {
   parentPageSlug: string;
 }
 
-export function SingleServiceTemplate({ 
-  service, 
-  institutionData, 
+export function SingleServiceTemplate({
+  service,
+  institutionData,
   settings,
-  parentPageSlug 
+  parentPageSlug,
 }: SingleServiceTemplateProps) {
   const [documents, setDocuments] = useState<ServiceDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchDocuments();
-    // Increment view count
-    servicesApi.incrementRequestCount(service.slug);
-  }, [service.id]);
+    if (!service.slug) return;
+
+    const viewedKey = `viewed_service_${service.slug}`;
+    const hasViewed = sessionStorage.getItem(viewedKey);
+
+    if (!hasViewed) {
+      fetchDocuments();
+      servicesApi.incrementRequestCount(service.slug);
+      sessionStorage.setItem(viewedKey, "true");
+    } else {
+      fetchDocuments(); 
+    }
+  }, [service.slug]);
 
   const fetchDocuments = async () => {
     try {
@@ -64,39 +79,39 @@ export function SingleServiceTemplate({
       const serviceDocuments = await servicesApi.getPublicDocuments(service.id);
       setDocuments(serviceDocuments);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error("Error fetching documents:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const formatPrice = (price: number, currency: string = 'RSD') => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
+  const formatPrice = (price: number, currency: string = "RSD") => {
+    return new Intl.NumberFormat("sr-RS", {
+      style: "currency",
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(price);
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const getDocumentTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      'form': 'Образац/Формулар',
-      'regulation': 'Правилник',
-      'instruction': 'Упутство',
-      'example': 'Пример',
-      'requirement': 'Услов/Захтев',
-      'price_list': 'Ценовник',
-      'template': 'Шаблон',
-      'other': 'Остало'
+      form: "Образац/Формулар",
+      regulation: "Правилник",
+      instruction: "Упутство",
+      example: "Пример",
+      requirement: "Услов/Захтев",
+      price_list: "Ценовник",
+      template: "Шаблон",
+      other: "Остало",
     };
     return labels[type] || type;
   };
@@ -114,7 +129,7 @@ export function SingleServiceTemplate({
           url: window.location.href,
         });
       } catch (error) {
-        console.log('Error sharing:', error);
+        console.log("Error sharing:", error);
       }
     } else {
       // Fallback: copy to clipboard
@@ -124,29 +139,29 @@ export function SingleServiceTemplate({
   };
 
   const priorityColors = {
-    low: 'bg-gray-100 text-gray-800',
-    medium: 'bg-blue-100 text-blue-800',
-    high: 'bg-orange-100 text-orange-800',
-    urgent: 'bg-red-100 text-red-800'
+    low: "bg-gray-100 text-gray-800",
+    medium: "bg-blue-100 text-blue-800",
+    high: "bg-orange-100 text-orange-800",
+    urgent: "bg-red-100 text-red-800",
   };
 
   const priorityLabels = {
-    low: 'Низак приоритет',
-    medium: 'Средњи приоритет',
-    high: 'Висок приоритет',
-    urgent: 'Хитне услуге'
+    low: "Низак приоритет",
+    medium: "Средњи приоритет",
+    high: "Висок приоритет",
+    urgent: "Хитне услуге",
   };
 
   const typeLabels = {
-    administrative: 'Административне услуге',
-    consulting: 'Саветодавне услуге',
-    technical: 'Техничке услуге',
-    legal: 'Правне услуге',
-    educational: 'Образовне услуге',
-    health: 'Здравствене услуге',
-    social: 'Социјалне услуге',
-    cultural: 'Културне услуге',
-    other: 'Остало'
+    administrative: "Административне услуге",
+    consulting: "Саветодавне услуге",
+    technical: "Техничке услуге",
+    legal: "Правне услуге",
+    educational: "Образовне услуге",
+    health: "Здравствене услуге",
+    social: "Социјалне услуге",
+    cultural: "Културне услуге",
+    other: "Остало",
   };
 
   return (
@@ -154,15 +169,18 @@ export function SingleServiceTemplate({
       {/* Header */}
       <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 dark:from-blue-800 dark:via-blue-900 dark:to-indigo-900 text-white">
         <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="flex items-center justify-between mb-6">
             <Link href={`/${parentPageSlug}`}>
-              <Button variant="secondary" className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30">
+              <Button
+                variant="secondary"
+                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
+              >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Назад на услуге
               </Button>
             </Link>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="secondary"
@@ -185,10 +203,21 @@ export function SingleServiceTemplate({
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center gap-3 mb-4">
-                <Badge className={`${priorityColors[service.priority]} text-sm font-medium`}>
-                  {priorityLabels[service.priority as keyof typeof priorityLabels]}
+                <Badge
+                  className={`${
+                    priorityColors[service.priority]
+                  } text-sm font-medium`}
+                >
+                  {
+                    priorityLabels[
+                      service.priority as keyof typeof priorityLabels
+                    ]
+                  }
                 </Badge>
-                <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                <Badge
+                  variant="secondary"
+                  className="bg-white/20 text-white border-white/30"
+                >
                   {typeLabels[service.type as keyof typeof typeLabels]}
                 </Badge>
                 {service.isOnline && (
@@ -208,7 +237,7 @@ export function SingleServiceTemplate({
               <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
                 {service.name}
               </h1>
-              
+
               {service.shortDescription && (
                 <p className="text-xl text-blue-100 mb-6 leading-relaxed">
                   {service.shortDescription}
@@ -219,10 +248,6 @@ export function SingleServiceTemplate({
                 <div className="flex items-center">
                   <Users className="h-5 w-5 mr-2" />
                   <span>{service.requestCount} захтева</span>
-                </div>
-                <div className="flex items-center">
-                  <Eye className="h-5 w-5 mr-2" />
-                  <span>{service.viewCount} прегледа</span>
                 </div>
                 {documents.length > 0 && (
                   <div className="flex items-center">
@@ -237,14 +262,18 @@ export function SingleServiceTemplate({
             <div className="lg:col-span-1">
               <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
                 <CardHeader>
-                  <CardTitle className="text-white">Кључне информације</CardTitle>
+                  <CardTitle className="text-white">
+                    Кључне информације
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {service.duration && (
                     <div className="flex items-center">
                       <Clock className="h-5 w-5 mr-3 text-blue-200" />
                       <div>
-                        <div className="text-sm text-blue-200">Време реализације</div>
+                        <div className="text-sm text-blue-200">
+                          Време реализације
+                        </div>
                         <div className="font-medium">{service.duration}</div>
                       </div>
                     </div>
@@ -266,8 +295,12 @@ export function SingleServiceTemplate({
                     <div className="flex items-center">
                       <Building className="h-5 w-5 mr-3 text-blue-200" />
                       <div>
-                        <div className="text-sm text-blue-200">Надлежно одељење</div>
-                        <div className="font-medium">{service.responsibleDepartment}</div>
+                        <div className="text-sm text-blue-200">
+                          Надлежно одељење
+                        </div>
+                        <div className="font-medium">
+                          {service.responsibleDepartment}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -295,10 +328,18 @@ export function SingleServiceTemplate({
           <div className="lg:col-span-2">
             <Tabs defaultValue="description" className="space-y-8">
               <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-gray-800 shadow-lg rounded-xl p-1">
-                <TabsTrigger value="description" className="rounded-lg">Опис</TabsTrigger>
-                <TabsTrigger value="requirements" className="rounded-lg">Услови</TabsTrigger>
-                <TabsTrigger value="process" className="rounded-lg">Поступак</TabsTrigger>
-                <TabsTrigger value="documents" className="rounded-lg">Документи</TabsTrigger>
+                <TabsTrigger value="description" className="rounded-lg">
+                  Опис
+                </TabsTrigger>
+                <TabsTrigger value="requirements" className="rounded-lg">
+                  Услови
+                </TabsTrigger>
+                <TabsTrigger value="process" className="rounded-lg">
+                  Поступак
+                </TabsTrigger>
+                <TabsTrigger value="documents" className="rounded-lg">
+                  Документи
+                </TabsTrigger>
               </TabsList>
 
               {/* Description Tab */}
@@ -312,7 +353,11 @@ export function SingleServiceTemplate({
                   </CardHeader>
                   <CardContent>
                     <div className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
-                      <div dangerouslySetInnerHTML={{ __html: service.description }} />
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: service.description,
+                        }}
+                      />
                     </div>
 
                     {service.additionalInfo && (
@@ -322,7 +367,11 @@ export function SingleServiceTemplate({
                           Додатне информације
                         </h4>
                         <div className="text-blue-800 dark:text-blue-200">
-                          <div dangerouslySetInnerHTML={{ __html: service.additionalInfo }} />
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: service.additionalInfo,
+                            }}
+                          />
                         </div>
                       </div>
                     )}
@@ -339,14 +388,18 @@ export function SingleServiceTemplate({
                       Потребна документа
                     </CardTitle>
                     <CardDescription>
-                      Документа која треба да приложите за оставривање ове услуге
+                      Документа која треба да приложите за оставривање ове
+                      услуге
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {service.requirements && service.requirements.length > 0 ? (
                       <div className="space-y-4">
                         {service.requirements.map((requirement, index) => (
-                          <div key={index} className="flex items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <div
+                            key={index}
+                            className="flex items-start p-4 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                          >
                             <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center text-sm font-semibold mr-4 mt-1">
                               {index + 1}
                             </div>
@@ -365,7 +418,8 @@ export function SingleServiceTemplate({
                           Нема посебних захтева
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400">
-                          За ову услугу нису потребни посебни документи или услови.
+                          За ову услугу нису потребни посебни документи или
+                          услови.
                         </p>
                       </div>
                     )}
@@ -415,7 +469,8 @@ export function SingleServiceTemplate({
                           Једноставан поступак
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400">
-                          Контактирајте нас директно за више информација о поступку.
+                          Контактирајте нас директно за више информација о
+                          поступку.
                         </p>
                       </div>
                     )}
@@ -439,7 +494,10 @@ export function SingleServiceTemplate({
                     {isLoading ? (
                       <div className="space-y-4">
                         {[...Array(3)].map((_, i) => (
-                          <div key={i} className="animate-pulse flex items-center space-x-4 p-4 border rounded-lg">
+                          <div
+                            key={i}
+                            className="animate-pulse flex items-center space-x-4 p-4 border rounded-lg"
+                          >
                             <div className="w-10 h-10 bg-gray-200 rounded"></div>
                             <div className="flex-1 space-y-2">
                               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -451,7 +509,10 @@ export function SingleServiceTemplate({
                     ) : documents.length > 0 ? (
                       <div className="grid gap-4 md:grid-cols-2">
                         {documents.map((document) => (
-                          <Card key={document.id} className="hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
+                          <Card
+                            key={document.id}
+                            className="hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                          >
                             <CardContent className="p-6">
                               <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
@@ -476,7 +537,7 @@ export function SingleServiceTemplate({
                                 <span>{document.downloadCount} преузимања</span>
                               </div>
 
-                              <Button 
+                              <Button
                                 onClick={() => downloadDocument(document)}
                                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
                               >
@@ -530,7 +591,10 @@ export function SingleServiceTemplate({
                     <Phone className="h-5 w-5 mr-3 text-green-500" />
                     <div>
                       <div className="text-sm text-gray-500">Телефон</div>
-                      <a href={`tel:${service.contactPhone}`} className="font-medium text-green-600 hover:text-green-700">
+                      <a
+                        href={`tel:${service.contactPhone}`}
+                        className="font-medium text-green-600 hover:text-green-700"
+                      >
                         {service.contactPhone}
                       </a>
                     </div>
@@ -542,7 +606,10 @@ export function SingleServiceTemplate({
                     <Mail className="h-5 w-5 mr-3 text-blue-500" />
                     <div>
                       <div className="text-sm text-gray-500">Email</div>
-                      <a href={`mailto:${service.contactEmail}`} className="font-medium text-blue-600 hover:text-blue-700 break-all">
+                      <a
+                        href={`mailto:${service.contactEmail}`}
+                        className="font-medium text-blue-600 hover:text-blue-700 break-all"
+                      >
                         {service.contactEmail}
                       </a>
                     </div>
@@ -620,11 +687,11 @@ export function SingleServiceTemplate({
                     Контактирајте нас за додатне информације о овој услузи
                   </p>
                 </div>
-                
+
                 <div className="space-y-3">
                   {service.contactPhone && (
-                    <Button 
-                      asChild 
+                    <Button
+                      asChild
                       className="w-full bg-green-600 hover:bg-green-700"
                     >
                       <a href={`tel:${service.contactPhone}`}>
@@ -633,13 +700,9 @@ export function SingleServiceTemplate({
                       </a>
                     </Button>
                   )}
-                  
+
                   {service.contactEmail && (
-                    <Button 
-                      asChild 
-                      variant="outline" 
-                      className="w-full"
-                    >
+                    <Button asChild variant="outline" className="w-full">
                       <a href={`mailto:${service.contactEmail}`}>
                         <Mail className="h-4 w-4 mr-2" />
                         Пошаљите email

@@ -1,20 +1,26 @@
 // templates/services/services-template.tsx - Updated with correct routing
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { 
-  Search, 
+} from "@/components/ui/select";
+import {
+  Search,
   Filter,
   Clock,
   MapPin,
@@ -33,19 +39,19 @@ import {
   Zap,
   DollarSign,
   CheckCircle,
-  AlertCircle
-} from 'lucide-react';
-import Link from 'next/link';
-import { servicesApi } from '@/lib/api';
-import { 
-  Service, 
-  ServiceType, 
-  ServicePriority, 
+  AlertCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { servicesApi } from "@/lib/api";
+import {
+  Service,
+  ServiceType,
+  ServicePriority,
   ServiceStatus,
-  Page, 
-  Post 
-} from '@/lib/types';
-import { PostsSection } from '@/components/frontend/posts-section';
+  Page,
+  Post,
+} from "@/lib/types";
+import { PostsSection } from "@/components/frontend/posts-section";
 
 interface ServicesTemplateProps {
   page: Page;
@@ -55,40 +61,42 @@ interface ServicesTemplateProps {
 }
 
 const serviceTypeLabels = {
-  [ServiceType.ADMINISTRATIVE]: 'Административне услуге',
-  [ServiceType.CONSULTING]: 'Саветодавне услуге',
-  [ServiceType.TECHNICAL]: 'Техничке услуге',
-  [ServiceType.LEGAL]: 'Правне услуге',
-  [ServiceType.EDUCATIONAL]: 'Образовне услуге',
-  [ServiceType.HEALTH]: 'Здравствене услуге',
-  [ServiceType.SOCIAL]: 'Социјалне услуге',
-  [ServiceType.CULTURAL]: 'Културне услуге',
-  [ServiceType.OTHER]: 'Остало'
+  [ServiceType.ADMINISTRATIVE]: "Административне услуге",
+  [ServiceType.CONSULTING]: "Саветодавне услуге",
+  [ServiceType.TECHNICAL]: "Техничке услуге",
+  [ServiceType.LEGAL]: "Правне услуге",
+  [ServiceType.EDUCATIONAL]: "Образовне услуге",
+  [ServiceType.HEALTH]: "Здравствене услуге",
+  [ServiceType.SOCIAL]: "Социјалне услуге",
+  [ServiceType.CULTURAL]: "Културне услуге",
+  [ServiceType.OTHER]: "Остало",
 };
 
 const servicePriorityLabels = {
-  [ServicePriority.LOW]: 'Низак приоритет',
-  [ServicePriority.MEDIUM]: 'Средњи приоритет',
-  [ServicePriority.HIGH]: 'Висок приоритет',
-  [ServicePriority.URGENT]: 'Хитне услуге'
+  [ServicePriority.LOW]: "Низак приоритет",
+  [ServicePriority.MEDIUM]: "Средњи приоритет",
+  [ServicePriority.HIGH]: "Висок приоритет",
+  [ServicePriority.URGENT]: "Хитне услуге",
 };
 
 const priorityColors = {
-  [ServicePriority.LOW]: 'bg-gray-100 text-gray-800',
-  [ServicePriority.MEDIUM]: 'bg-blue-100 text-blue-800',
-  [ServicePriority.HIGH]: 'bg-orange-100 text-orange-800',
-  [ServicePriority.URGENT]: 'bg-red-100 text-red-800'
+  [ServicePriority.LOW]: "bg-gray-100 text-gray-800",
+  [ServicePriority.MEDIUM]: "bg-blue-100 text-blue-800",
+  [ServicePriority.HIGH]: "bg-orange-100 text-orange-800",
+  [ServicePriority.URGENT]: "bg-red-100 text-red-800",
 };
 
 export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState<ServiceType | 'all'>('all');
-  const [selectedPriority, setSelectedPriority] = useState<ServicePriority | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState<ServiceType | "all">("all");
+  const [selectedPriority, setSelectedPriority] = useState<
+    ServicePriority | "all"
+  >("all");
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [appointmentOnly, setAppointmentOnly] = useState(false);
-  
+
   useEffect(() => {
     fetchServices();
   }, [searchTerm, selectedType, selectedPriority, onlineOnly, appointmentOnly]);
@@ -102,44 +110,49 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
       };
 
       if (searchTerm) params.search = searchTerm;
-      if (selectedType !== 'all') params.type = selectedType;
-      if (selectedPriority !== 'all') params.priority = selectedPriority;
+      if (selectedType !== "all") params.type = selectedType;
+      if (selectedPriority !== "all") params.priority = selectedPriority;
       if (onlineOnly) params.isOnline = true;
       if (appointmentOnly) params.requiresAppointment = true;
 
       const response = await servicesApi.getPublished(params);
       setServices(response.services);
     } catch (error) {
-      console.error('Error fetching services:', error);
+      console.error("Error fetching services:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedType('all');
-    setSelectedPriority('all');
+    setSearchTerm("");
+    setSelectedType("all");
+    setSelectedPriority("all");
     setOnlineOnly(false);
     setAppointmentOnly(false);
   };
 
-  const hasActiveFilters = searchTerm || selectedType !== 'all' || selectedPriority !== 'all' || onlineOnly || appointmentOnly;
+  const hasActiveFilters =
+    searchTerm ||
+    selectedType !== "all" ||
+    selectedPriority !== "all" ||
+    onlineOnly ||
+    appointmentOnly;
 
   const handleServiceRequest = async (slug: string) => {
     try {
       await servicesApi.incrementRequestCount(slug);
     } catch (error) {
-      console.error('Error incrementing request count:', error);
+      console.error("Error incrementing request count:", error);
     }
   };
 
-  const formatPrice = (price: number, currency: string = 'RSD') => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
+  const formatPrice = (price: number, currency: string = "RSD") => {
+    return new Intl.NumberFormat("sr-RS", {
+      style: "currency",
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(price);
   };
 
@@ -153,14 +166,14 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
             <Building className="h-5 w-5 mr-2" />
             <span className="text-sm font-medium">Услуге за грађане</span>
           </div>
-          
+
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
             Све услуге на једном месту
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Пружамо широк спектар квалитетних услуга за наше грађане. 
-            Све услуге можете обавити лично или онлајн, брзо и ефикасно.
+            Пружамо широк спектар квалитетних услуга за наше грађане. Све услуге
+            можете обавити лично или онлајн, брзо и ефикасно.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 text-sm text-blue-100">
@@ -215,14 +228,19 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Тип услуге
               </label>
-              <Select value={selectedType} onValueChange={(value: any) => setSelectedType(value)}>
+              <Select
+                value={selectedType}
+                onValueChange={(value: any) => setSelectedType(value)}
+              >
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Сви типови" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Сви типови</SelectItem>
                   {Object.entries(serviceTypeLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -233,14 +251,19 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Приоритет
               </label>
-              <Select value={selectedPriority} onValueChange={(value: any) => setSelectedPriority(value)}>
+              <Select
+                value={selectedPriority}
+                onValueChange={(value: any) => setSelectedPriority(value)}
+              >
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Сви приоритети" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Сви приоритети</SelectItem>
                   {Object.entries(servicePriorityLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -270,19 +293,21 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
           {/* Active Filters */}
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-              <span className="text-sm text-gray-500 mr-2">Активни филтери:</span>
+              <span className="text-sm text-gray-500 mr-2">
+                Активни филтери:
+              </span>
               {searchTerm && (
                 <Badge variant="secondary" className="gap-1">
                   <Search className="h-3 w-3" />
                   {searchTerm}
                 </Badge>
               )}
-              {selectedType !== 'all' && (
+              {selectedType !== "all" && (
                 <Badge variant="secondary">
                   {serviceTypeLabels[selectedType as ServiceType]}
                 </Badge>
               )}
-              {selectedPriority !== 'all' && (
+              {selectedPriority !== "all" && (
                 <Badge variant="secondary">
                   {servicePriorityLabels[selectedPriority as ServicePriority]}
                 </Badge>
@@ -331,27 +356,35 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
-                <Card 
-                  key={service.id} 
+                <Card
+                  key={service.id}
                   className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 bg-white dark:bg-gray-800 border-0 shadow-lg overflow-hidden"
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between mb-3">
-                      <Badge 
-                        variant="secondary" 
-                        className={`${priorityColors[service.priority]} text-xs font-medium`}
+                      <Badge
+                        variant="secondary"
+                        className={`${
+                          priorityColors[service.priority]
+                        } text-xs font-medium`}
                       >
                         {servicePriorityLabels[service.priority]}
                       </Badge>
                       <div className="flex gap-1">
                         {service.isOnline && (
-                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-green-50 text-green-700 border-green-200"
+                          >
                             <Globe className="h-3 w-3 mr-1" />
                             Онлајн
                           </Badge>
                         )}
                         {service.requiresAppointment && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                          >
                             <Calendar className="h-3 w-3 mr-1" />
                             Термин
                           </Badge>
@@ -362,7 +395,7 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
                     <CardTitle className="text-xl group-hover:text-blue-600 transition-colors line-clamp-2">
                       {service.name}
                     </CardTitle>
-                    
+
                     <CardDescription className="text-gray-600 dark:text-gray-300 line-clamp-3">
                       {service.shortDescription || service.description}
                     </CardDescription>
@@ -396,7 +429,9 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
                         {service.responsibleDepartment && (
                           <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                             <User className="h-4 w-4 mr-2 text-gray-400" />
-                            <span className="line-clamp-1">{service.responsibleDepartment}</span>
+                            <span className="line-clamp-1">
+                              {service.responsibleDepartment}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -413,7 +448,9 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
                           {service.contactEmail && (
                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                               <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                              <span className="line-clamp-1">{service.contactEmail}</span>
+                              <span className="line-clamp-1">
+                                {service.contactEmail}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -422,7 +459,7 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
                       {/* Action Button - Updated routing */}
                       <div className="pt-2">
                         <Link href={`/${service.slug}`}>
-                          <Button 
+                          <Button
                             className="w-full group/btn bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                             onClick={() => handleServiceRequest(service.slug)}
                           >
@@ -456,13 +493,12 @@ export function ServicesTemplate({ page, posts }: ServicesTemplateProps) {
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-lg">
               <AlertCircle className="mx-auto h-16 w-16 text-gray-400 mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                {hasActiveFilters ? 'Нема резултата' : 'Нема доступних услуга'}
+                {hasActiveFilters ? "Нема резултата" : "Нема доступних услуга"}
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
-                {hasActiveFilters 
-                  ? 'Покушајте са другачијим критеријумима претраге или уклоните неке филтере.' 
-                  : 'Тренутно нема објављених услуга за грађане.'
-                }
+                {hasActiveFilters
+                  ? "Покушајте са другачијим критеријумима претраге или уклоните неке филтере."
+                  : "Тренутно нема објављених услуга за грађане."}
               </p>
               {hasActiveFilters && (
                 <Button onClick={clearFilters} variant="outline">

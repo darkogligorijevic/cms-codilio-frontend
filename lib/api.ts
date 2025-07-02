@@ -1295,7 +1295,7 @@ export const servicesApi = {
   incrementRequestCount: async (slug: string): Promise<void> => {
     await api.patch(`/services/${slug}/request`);
   },
-
+  
   // Statistics
   getStatistics: async (): Promise<ServiceStatistics> => {
     const response: AxiosResponse<ServiceStatistics> = await api.get('/services/statistics');

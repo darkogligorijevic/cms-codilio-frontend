@@ -1,22 +1,16 @@
 // components/frontend/header.tsx - Transparent header with scroll background
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSettings } from '@/lib/settings-context';
-import { Button } from '@/components/ui/button';
-import { 
-  Menu,
-  X,
-  Building,
-  ExternalLink,
-  ChevronDown
-} from 'lucide-react';
-import Link from 'next/link';
-import { mediaApi } from '@/lib/api';
-import { ModeToggle } from '@/components/ui/mode-toggle';
-import type { Page } from '@/lib/types';
-import { useAuth } from '@/lib/auth-context';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import { useSettings } from "@/lib/settings-context";
+import { Button } from "@/components/ui/button";
+import { Menu, X, Building, ExternalLink, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { mediaApi } from "@/lib/api";
+import { ModeToggle } from "@/components/ui/mode-toggle";
+import type { Page } from "@/lib/types";
+import { useAuth } from "@/lib/auth-context";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   pages: Page[];
@@ -36,8 +30,8 @@ export function Header({ pages }: HeaderProps) {
       setIsScrolled(scrollTop > 10); // Change background after 10px scroll
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const institutionData = {
@@ -50,18 +44,26 @@ export function Header({ pages }: HeaderProps) {
     return !!(page.children && page.children.length > 0);
   };
 
-  // Helper function to get root pages
   const getRootPages = (pageList: Page[]): Page[] => {
-    return pageList.filter(page => !page.parentId);
+    return pageList
+      .filter((page) => !page.parentId)
+      .filter((page) => page.status === "published")
+      .sort((a, b) => a.sortOrder - b.sortOrder);
   };
 
   // Custom Hover Dropdown Component
-  const HoverDropdown = ({ page, isMobile = false }: { page: Page; isMobile?: boolean }) => {
+  const HoverDropdown = ({
+    page,
+    isMobile = false,
+  }: {
+    page: Page;
+    isMobile?: boolean;
+  }) => {
     const pageHasChildren = hasChildren(page);
 
     if (pageHasChildren) {
       return (
-        <div 
+        <div
           className="relative group"
           onMouseEnter={() => !isMobile && setHoveredDropdown(page.id)}
           onMouseLeave={() => !isMobile && setHoveredDropdown(null)}
@@ -70,42 +72,45 @@ export function Header({ pages }: HeaderProps) {
             href={`/${page.slug}`}
             className={cn(
               "flex items-center space-x-1 transition-colors duration-200",
-              isMobile 
-                ? "w-full px-3 py-2 text-left hover:bg-white/10 rounded-md" 
+              isMobile
+                ? "w-full px-3 py-2 text-left hover:bg-white/10 rounded-md"
                 : "px-3 py-2",
               // Dynamic text colors based on scroll state
-              isScrolled || isMobile 
-                ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic" 
+              isScrolled || isMobile
+                ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic"
                 : "text-white hover:text-gray-200"
             )}
             onClick={() => isMobile && setIsMobileMenuOpen(false)}
           >
             <span>{page.title}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
-              hoveredDropdown === page.id || isMobile ? 'rotate-180' : ''
-            }`} />
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                hoveredDropdown === page.id || isMobile ? "rotate-180" : ""
+              }`}
+            />
           </Link>
-          
+
           {/* Desktop Hover Dropdown */}
           {!isMobile && (
-            <div className={`
+            <div
+              className={`
               absolute top-full left-0 min-w-[250px] bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden z-50
               transition-all duration-300 ease-out
-              ${hoveredDropdown === page.id 
-                ? 'opacity-100 visible transform translate-y-0' 
-                : 'opacity-0 invisible transform -translate-y-2'
+              ${
+                hoveredDropdown === page.id
+                  ? "opacity-100 visible transform translate-y-0"
+                  : "opacity-0 invisible transform -translate-y-2"
               }
-            `}>
+            `}
+            >
               {/* Parent Page Link */}
               <Link
                 href={`/${page.slug}`}
                 className="block px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 border-b border-gray-100 dark:border-gray-600 font-medium"
               >
-                <div className="flex items-center">
-                  {page.title}
-                </div>
+                <div className="flex items-center">{page.title}</div>
               </Link>
-              
+
               {/* Children Pages */}
               <div className="py-2">
                 {page.children?.map((child, index) => (
@@ -114,7 +119,9 @@ export function Header({ pages }: HeaderProps) {
                     href={`/${child.slug}`}
                     className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-dynamic transition-colors duration-150"
                   >
-                    <span className="w-6 h-4 flex items-center justify-start text-gray-400 mr-2">└─</span>
+                    <span className="w-6 h-4 flex items-center justify-start text-gray-400 mr-2">
+                      └─
+                    </span>
                     <span>{child.title}</span>
                   </Link>
                 ))}
@@ -148,10 +155,12 @@ export function Header({ pages }: HeaderProps) {
         href={`/${page.slug}`}
         className={cn(
           "transition-colors duration-200",
-          isMobile ? "block px-3 py-2 hover:bg-white/10 rounded-md" : "px-3 py-2",
+          isMobile
+            ? "block px-3 py-2 hover:bg-white/10 rounded-md"
+            : "px-3 py-2",
           // Dynamic text colors based on scroll state
-          isScrolled || isMobile 
-            ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic" 
+          isScrolled || isMobile
+            ? "text-gray-700 dark:text-gray-300 hover:text-primary-dynamic"
             : "text-white hover:text-gray-200"
         )}
         onClick={() => isMobile && setIsMobileMenuOpen(false)}
@@ -174,9 +183,13 @@ export function Header({ pages }: HeaderProps) {
             className="w-full flex items-center justify-between px-3 py-2 text-white hover:bg-white/10 rounded-md"
           >
             <span>{page.title}</span>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
           </button>
-          
+
           {isOpen && (
             <div className="ml-4 mt-2 space-y-1">
               <Link
@@ -184,9 +197,7 @@ export function Header({ pages }: HeaderProps) {
                 className="block px-3 py-2 text-white hover:bg-white/10 rounded-md text-sm font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="flex items-center">
-                  {page.title}
-                </div>
+                <div className="flex items-center">{page.title}</div>
               </Link>
               {page.children?.map((child, index) => (
                 <Link
@@ -218,70 +229,68 @@ export function Header({ pages }: HeaderProps) {
 
   // Get root pages and limit for display
   const rootPages = getRootPages(pages);
-  const desktopPages = rootPages.slice(0, 3);
+  const desktopPages = rootPages; 
   const mobilePages = rootPages;
 
   return (
-    <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-      isScrolled 
-        ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg " 
-        : "bg-black/15 backdrop-blur-sm "
-    )}>
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
+        isScrolled
+          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg "
+          : "bg-black/15 backdrop-blur-sm "
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             {settings?.siteLogo ? (
-              <img 
-                src={mediaApi.getFileUrl(settings.siteLogo)} 
-                alt={settings.siteName || 'Лого'} 
+              <img
+                src={mediaApi.getFileUrl(settings.siteLogo)}
+                alt={settings.siteName || "Лого"}
                 className="h-16 w-16 object-contain"
               />
             ) : (
-              <div className='flex items-center gap-2'>
-                <Building className={cn(
-                  "h-8 w-8 transition-colors duration-200",
-                  isScrolled ? "text-primary-dynamic" : "text-white"
-                )}
+              <div className="flex items-center gap-2">
+                <Building
+                  className={cn(
+                    "h-8 w-8 transition-colors duration-200",
+                    isScrolled ? "text-primary-dynamic" : "text-white"
+                  )}
                 />
-                        
-                <h1 
+
+                <h1
                   className={cn(
                     "text-lg font-bold transition-colors duration-200",
                     isScrolled ? "text-gray-900 dark:text-white" : "text-white"
                   )}
-                  style={{ fontFamily: settings?.themeFontFamily || 'Inter' }}
+                  style={{ fontFamily: settings?.themeFontFamily || "Inter" }}
                 >
                   {institutionData.name}
                 </h1>
               </div>
-              
             )}
-
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2">
-            
             {/* Dynamic pages navigation */}
             {desktopPages.map((page, index) => (
               <HoverDropdown key={`desktop-${page.id}-${index}`} page={page} />
             ))}
 
-            
             <div className="flex items-center space-x-4 ml-4">
-              {settings?.themeDarkMode && (
-                <ModeToggle />
-              )}
+              {settings?.themeDarkMode && <ModeToggle />}
               {context?.isAuthenticated && (
-                <Button 
-                  variant={isScrolled ? "outline" : "secondary"} 
-                  size="sm" 
+                <Button
+                  variant={isScrolled ? "outline" : "secondary"}
+                  size="sm"
                   asChild
                   className={cn(
                     "transition-all duration-200",
-                    !isScrolled && "bg-white/20 border-white/30 text-white hover:bg-white/30"
+                    !isScrolled &&
+                      "bg-white/20 border-white/30 text-white hover:bg-white/30"
                   )}
                 >
                   <Link href="/dashboard">
@@ -294,17 +303,15 @@ export function Header({ pages }: HeaderProps) {
           </nav>
 
           {/* Mobile Controls */}
-          <div className='justify-end gap-2 items-center md:hidden flex'>
-            {settings?.themeDarkMode && (
-              <ModeToggle />
-            )}
-            
+          <div className="justify-end gap-2 items-center md:hidden flex">
+            {settings?.themeDarkMode && <ModeToggle />}
+
             {/* Mobile menu button */}
             <button
               className={cn(
                 "md:hidden p-2 transition-colors duration-200",
-                isScrolled 
-                  ? "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" 
+                isScrolled
+                  ? "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   : "text-white hover:text-gray-200"
               )}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -322,21 +329,23 @@ export function Header({ pages }: HeaderProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-white/30 bg-black/70 backdrop-blur-lg rounded-b-lg mx-4">
             <div className="space-y-2">
-              
               {/* Dynamic pages navigation for mobile */}
               {mobilePages.map((page, index) => (
-                <MobileNavigationItem key={`mobile-main-${page.id}-${index}`} page={page} />
+                <MobileNavigationItem
+                  key={`mobile-main-${page.id}-${index}`}
+                  page={page}
+                />
               ))}
-              <Link 
-                href="/objave" 
+              <Link
+                href="/objave"
                 className="block px-3 py-2 text-white hover:bg-white/10 rounded-md"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Објаве
               </Link>
-              
-              <Link 
-                href="/dashboard" 
+
+              <Link
+                href="/dashboard"
                 className="block px-3 py-2 text-blue-300 hover:bg-white/10 rounded-md"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

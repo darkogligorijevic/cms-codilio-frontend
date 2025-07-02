@@ -137,7 +137,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         } catch (galleryError) {
           console.log('Gallery not found, checking for service...');
           
-          // FIFTH: Try to find a service with this slug
+    
           try {
             const serviceData = await servicesApi.getBySlug(pageSlug);
             setService(serviceData);
