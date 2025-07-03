@@ -1,7 +1,38 @@
-// lib/section-field-configs.ts - CORRECTED Posts Carousel Configuration
+// lib/section-field-configs.ts - Updated with video hero without buttons
 import { SectionType, SectionFieldConfig } from "@/lib/types";
 
-// POSTS_CAROUSEL configuration - FIXED
+// HERO_VIDEO configuration - UPDATED without button fields
+const HERO_VIDEO_CONFIG = {
+  required: ["title", "videoUrl"],
+  fields: [
+    {
+      key: "title",
+      type: "text" as const,
+      label: "Naslov",
+      placeholder: "Glavni naslov",
+    },
+    { 
+      key: "subtitle", 
+      type: "text" as const, 
+      label: "Podnaslov" 
+    },
+    { 
+      key: "description", 
+      type: "textarea" as const, 
+      label: "Opis", 
+      rows: 3 
+    },
+    {
+      key: "videoUrl",
+      type: "text" as const,
+      label: "URL videa",
+      placeholder: "https://youtube.com/watch?v=... ili direktan MP4 link",
+    },
+    // Buttons removed - search component is automatically included
+  ],
+};
+
+// POSTS_CAROUSEL configuration - EXISTING
 const POSTS_CAROUSEL_CONFIG = {
   required: ["title", "categoryId"],
   fields: [
@@ -21,7 +52,7 @@ const POSTS_CAROUSEL_CONFIG = {
     },
     {
       key: "categoryId",
-      type: "categorySelect" as const, // THIS IS THE KEY!
+      type: "categorySelect" as const,
       label: "Категорија објава",
       required: true,
     },
@@ -48,12 +79,13 @@ const POSTS_CAROUSEL_CONFIG = {
   ],
 };
 
-// Specific fields for each section type (WITHOUT layout fields)
+// Base section configs - Updated with new HERO_VIDEO
 const BASE_SECTION_CONFIGS: Record<
   SectionType,
   Omit<SectionFieldConfig, "commonFields">
 > = {
   [SectionType.POSTS_CAROUSEL]: POSTS_CAROUSEL_CONFIG,
+  [SectionType.HERO_VIDEO]: HERO_VIDEO_CONFIG, // Updated config
 
   [SectionType.HERO_STACK]: {
     required: ["title"],
@@ -159,28 +191,7 @@ const BASE_SECTION_CONFIGS: Record<
     ],
   },
 
-  [SectionType.HERO_VIDEO]: {
-    required: ["title", "videoUrl"],
-    fields: [
-      {
-        key: "title",
-        type: "text",
-        label: "Naslov",
-        placeholder: "Glavni naslov",
-      },
-      { key: "subtitle", type: "text", label: "Podnaslov" },
-      { key: "description", type: "textarea", label: "Opis", rows: 3 },
-      {
-        key: "videoUrl",
-        type: "text",
-        label: "URL videa",
-        placeholder: "https://youtube.com/watch?v=...",
-      },
-      { key: "buttonText", type: "text", label: "Tekst dugmeta" },
-      { key: "buttonLink", type: "text", label: "Link dugmeta" },
-    ],
-  },
-
+  // ... rest of the configurations remain the same
   [SectionType.CARD_TOP]: {
     required: ["title"],
     fields: [
@@ -520,10 +531,9 @@ const HEIGHT_FIELD = {
 const SECTION_LAYOUT_OVERRIDES: Partial<
   Record<SectionType, typeof COMMON_LAYOUT_FIELDS>
 > = {
-  // Posts Carousel gets standard layout options
   [SectionType.POSTS_CAROUSEL]: COMMON_LAYOUT_FIELDS,
 
-  // All hero sections get height + layout + text color
+  // Hero sections get height + layout + text color
   [SectionType.HERO_STACK]: [
     {
       key: "layout",
@@ -613,7 +623,6 @@ const SECTION_LAYOUT_OVERRIDES: Partial<
   ],
 
   [SectionType.CTA_ONE]: [
-    // CTA needs special background handling
     ...COMMON_LAYOUT_FIELDS.filter((field) => field.key !== "backgroundColor"),
     {
       key: "backgroundColor",
@@ -640,7 +649,7 @@ function combineConfig(sectionType: SectionType): SectionFieldConfig {
   };
 }
 
-// Export the final configurations (automatically combines base + layout)
+// Export the final configurations
 export const SECTION_FIELD_CONFIGS: Record<SectionType, SectionFieldConfig> =
   Object.keys(BASE_SECTION_CONFIGS).reduce((acc, sectionType) => {
     acc[sectionType as SectionType] = combineConfig(sectionType as SectionType);

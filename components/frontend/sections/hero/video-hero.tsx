@@ -1,8 +1,8 @@
-// components/frontend/sections/hero/video-hero.tsx - Updated with better video handling and loading optimization
+// components/frontend/sections/hero/video-hero.tsx - Updated with search component instead of buttons
 import { SectionData } from '@/lib/types';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
+import { SearchComponent } from '../../search/search-component';
 
 interface HeroVideoSectionProps {
   data: SectionData;
@@ -14,6 +14,7 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
   const [isVideoReady, setIsVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  
   // Extract video ID from various YouTube URL formats
   const getYouTubeId = (url: string) => {
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -41,7 +42,6 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
 
       const handleCanPlay = () => {
         setIsVideoReady(true);
-        // Ensure video starts playing
         video.play().catch(console.error);
       };
 
@@ -61,7 +61,7 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
       const timer = setTimeout(() => {
         setIsVideoLoaded(true);
         setIsVideoReady(true);
-      }, 1500); // Give YouTube time to load
+      }, 1500);
 
       return () => clearTimeout(timer);
     }
@@ -71,16 +71,15 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
     <div
       className={cn(
         `relative w-full flex items-center justify-center text-white overflow-hidden`,
-        // Apply height from data or default
         data.height === '100%' ? 'min-h-screen' :
         data.height === '75%' ? 'min-h-[75vh]' :
         data.height === '50%' ? 'min-h-[50vh]' :
         data.height === '25%' ? 'min-h-[25vh]' :
-        'min-h-[60vh]', // default height
+        'min-h-[60vh]',
         className
       )}
     >
-      {/* Loading State - Show while video is loading */}
+      {/* Loading State */}
       {!isVideoReady && (videoId || isDirectVideo) && (
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center z-5">
           <div className="text-center">
@@ -134,7 +133,7 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-700"></div>
       )}
 
-      {/* Dark Overlay - Only show when video is ready */}
+      {/* Dark Overlay */}
       <div className={cn(
         "absolute inset-0 bg-black opacity-60 z-0 transition-opacity duration-1000",
         isVideoReady || (!videoId && !isDirectVideo) ? "opacity-60" : "opacity-0"
@@ -161,21 +160,14 @@ export function HeroVideoSection({ data, className }: HeroVideoSectionProps) {
             </p>
           )}
 
-          {data.buttonText && data.buttonLink && (
-            <div>
-              <Button 
-                asChild
-                size="lg"
-                variant={data.buttonStyle === 'secondary' ? 'secondary' : 
-                        data.buttonStyle === 'outline' ? 'outline' : 'primary'}
-                className="text-black font-black text-md md:text-lg shadow-lg dark:border-white dark:text-white"
-              >
-                <a href={data.buttonLink}>
-                  {data.buttonText}
-                </a>
-              </Button>
-            </div>
-          )}
+          {/* Search Component instead of buttons */}
+          <div className="max-w-md mx-auto">
+            <SearchComponent 
+              variant="compact"
+              placeholder="Претражите наш садржај..."
+              className="text-left shadow-2xl"
+            />
+          </div>
         </div>
       </div>
 
