@@ -22,7 +22,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'dev', 
+                git branch: 'main', 
                     url: 'https://github.com/darkogligorijevic/cms-codilio-frontend.git'
             }
         }
