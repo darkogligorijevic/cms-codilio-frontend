@@ -16,10 +16,8 @@ const nextConfig: NextConfig = {
   // 🚀 CRITICAL: Enable standalone output for Docker deployment
   output: 'standalone',
   
-  // Optional: Configure tracing for better debugging
-  experimental: {
-    outputFileTracingRoot: process.cwd(),
-  },
+  // Moved from experimental to main level
+  outputFileTracingRoot: process.cwd(),
 };
 
 export default nextConfig;
