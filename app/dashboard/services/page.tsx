@@ -576,7 +576,7 @@ export default function ServicesPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className='max-w-4xl'>
           <DialogHeader>
             <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>

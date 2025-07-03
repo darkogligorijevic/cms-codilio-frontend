@@ -492,6 +492,67 @@ export default function RelofIndexDashboard() {
         </Card>
       </div>
 
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Брзе акције</CardTitle>
+          <CardDescription>
+            Често коришћене функције за управљање Релоф Индексом
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+              onClick={() => window.location.href = '/dashboard/relof-index/requirements'}
+            >
+              <FileText className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Захтеви</div>
+                <div className="text-xs text-gray-500">Преглед свих захтева</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+              onClick={() => window.location.href = '/dashboard/relof-index/recommendations'}
+            >
+              <Target className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Препоруке</div>
+                <div className="text-xs text-gray-500">Акциони планови</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+              onClick={() => window.location.href = '/dashboard/relof-index/statistics'}
+            >
+              <BarChart3 className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Статистике</div>
+                <div className="text-xs text-gray-500">Детаљне анализе</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+              onClick={() => window.location.href = '/dashboard/relof-index/categories'}
+            >
+              <Users className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Категорије</div>
+                <div className="text-xs text-gray-500">По областима</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Critical Issues and Recommendations */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Critical Issues */}
@@ -636,66 +697,6 @@ export default function RelofIndexDashboard() {
         </Card>
       )}
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Брзе акције</CardTitle>
-          <CardDescription>
-            Често коришћене функције за управљање Релоф Индексом
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button 
-              variant="outline" 
-              className="h-auto p-4 flex flex-col items-center space-y-2"
-              onClick={() => window.location.href = '/dashboard/relof-index/requirements'}
-            >
-              <FileText className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">Захтеви</div>
-                <div className="text-xs text-gray-500">Преглед свих захтева</div>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="h-auto p-4 flex flex-col items-center space-y-2"
-              onClick={() => window.location.href = '/dashboard/relof-index/recommendations'}
-            >
-              <Target className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">Препоруке</div>
-                <div className="text-xs text-gray-500">Акциони планови</div>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="h-auto p-4 flex flex-col items-center space-y-2"
-              onClick={() => window.location.href = '/dashboard/relof-index/statistics'}
-            >
-              <BarChart3 className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">Статистике</div>
-                <div className="text-xs text-gray-500">Детаљне анализе</div>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="h-auto p-4 flex flex-col items-center space-y-2"
-              onClick={() => window.location.href = '/dashboard/relof-index/categories'}
-            >
-              <Users className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium">Категорије</div>
-                <div className="text-xs text-gray-500">По областима</div>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

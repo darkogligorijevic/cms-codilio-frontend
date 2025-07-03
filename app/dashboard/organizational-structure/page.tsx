@@ -680,7 +680,7 @@ export default function OrganizationalStructurePage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className='max-w-4xl'>
           <DialogHeader>
             <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
