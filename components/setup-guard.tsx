@@ -1,7 +1,7 @@
 'use client';
 
 import { useSetup } from '@/lib/setup-context';
-import { EnhancedSetupWizard } from './setup-wizard';
+import { SetupWizard } from './setup-wizard';
 import { useEffect, useState } from 'react';
 
 interface SetupGuardProps {
@@ -38,7 +38,7 @@ export function SetupGuard({ children }: SetupGuardProps) {
 
   // Show setup wizard if setup is not completed
   if (showSetup) {
-    return <EnhancedSetupWizard />;
+    return <SetupWizard />;
   }
 
   // Show normal app if setup is completed
