@@ -62,26 +62,7 @@ RUN apk add --no-cache curl wget dumb-init
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files
-COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-
-# Enhanced health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
-
-# 🚀 ENHANCED: Startup script with better error handling
+# 🚀 ENHANCED: Create startup script BEFORE switching to nextjs user
 RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'echo "🚀 Starting Codilio Frontend"' >> /app/startup.sh && \
     echo 'echo "🔗 Client API URL: $NEXT_PUBLIC_API_URL"' >> /app/startup.sh && \
@@ -95,6 +76,29 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'echo "🚀 Starting Next.js server with dumb-init..."' >> /app/startup.sh && \
     echo 'exec node server.js' >> /app/startup.sh && \
     chmod +x /app/startup.sh
+
+# Copy necessary files
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# 🔧 KRITIČNO: Change ownership of startup.sh to nextjs user
+RUN chown nextjs:nodejs /app/startup.sh
+
+# NOW switch to nextjs user
+USER nextjs
+
+EXPOSE 3000
+
+# Enhanced health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
