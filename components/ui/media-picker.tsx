@@ -1,4 +1,4 @@
-// components/ui/media-picker.tsx - Ažurirana verzija sa kategorijama
+// components/ui/media-picker.tsx - Ажурирана верзија са категоријама
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -57,20 +57,20 @@ interface MediaPickerProps {
 }
 
 const categories = [
-  { value: MediaCategory.PROCUREMENT, label: 'Javne nabavke', icon: Building },
-  { value: MediaCategory.FINANCIAL, label: 'Finansijski izvještaji', icon: DollarSign },
-  { value: MediaCategory.DECISIONS, label: 'Odluke', icon: FileCheck },
-  { value: MediaCategory.PLANS, label: 'Planovi', icon: Clipboard },
-  { value: MediaCategory.REPORTS, label: 'Izvještaji', icon: BarChart3 },
-  { value: MediaCategory.OTHER, label: 'Ostalo', icon: Folder }
+  { value: MediaCategory.PROCUREMENT, label: 'Јавне набавке', icon: Building },
+  { value: MediaCategory.FINANCIAL, label: 'Финансијски извештаји', icon: DollarSign },
+  { value: MediaCategory.DECISIONS, label: 'Одлуке', icon: FileCheck },
+  { value: MediaCategory.PLANS, label: 'Планови', icon: Clipboard },
+  { value: MediaCategory.REPORTS, label: 'Извештаји', icon: BarChart3 },
+  { value: MediaCategory.OTHER, label: 'Остало', icon: Folder }
 ];
 
 export function MediaPicker({
   isOpen,
   onClose,
   onSelect,
-  title = "Izaberite medijski fajl",
-  description = "Izaberite postojeći fajl ili učitajte novi",
+  title = "Изаберите медијски фајл",
+  description = "Изаберите постојећи фајл или учитајте нови",
   allowedTypes = ['image/*'],
   allowedCategories,
   showPublicOnly = false
@@ -129,7 +129,7 @@ export function MediaPicker({
       setMedia(filteredMedia);
     } catch (error) {
       console.error('Error fetching media:', error);
-      toast.error('Greška pri učitavanju medijskih fajlova');
+      toast.error('Грешка при учитавању медијских фајлова');
     } finally {
       setIsLoading(false);
     }
@@ -156,10 +156,10 @@ export function MediaPicker({
         setMedia(prev => [newMedia, ...prev]);
       }
       
-      toast.success('Fajl je uspešno učitan');
+      toast.success('Фајл је успешно учитан');
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('Greška pri učitavanju fajla');
+      toast.error('Грешка при учитавању фајла');
       throw error;
     } finally {
       setIsUploading(false);
@@ -181,10 +181,10 @@ export function MediaPicker({
   };
 
   const getFileTypeLabel = (mimeType: string) => {
-    if (mimeType.startsWith('image/')) return 'Slika';
+    if (mimeType.startsWith('image/')) return 'Слика';
     if (mimeType.includes('pdf')) return 'PDF';
-    if (mimeType.includes('document')) return 'Dokument';
-    return 'Fajl';
+    if (mimeType.includes('document')) return 'Документ';
+    return 'Фајл';
   };
 
   const getCategoryIcon = (category: MediaCategory) => {
@@ -195,7 +195,7 @@ export function MediaPicker({
 
   const getCategoryLabel = (category: MediaCategory) => {
     const categoryInfo = categories.find(cat => cat.value === category);
-    return categoryInfo?.label || 'Ostalo';
+    return categoryInfo?.label || 'Остало';
   };
 
   const formatFileSize = (bytes: number) => {
@@ -235,7 +235,7 @@ export function MediaPicker({
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Pretraži postojeće fajlove..."
+                placeholder="Претражи постојеће фајлове..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -245,10 +245,10 @@ export function MediaPicker({
             {availableCategories.length > 1 && (
               <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as MediaCategory | 'all')}>
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sve kategorije" />
+                  <SelectValue placeholder="Све категорије" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Sve kategorije</SelectItem>
+                  <SelectItem value="all">Све категорије</SelectItem>
                   {categories
                     .filter(cat => availableCategories.includes(cat.value))
                     .map((category) => (
@@ -371,12 +371,12 @@ export function MediaPicker({
               <div className="text-center py-12">
                 <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {searchTerm || categoryFilter !== 'all' ? 'Nema rezultata' : 'Nema fajlova'}
+                  {searchTerm || categoryFilter !== 'all' ? 'Нема резултата' : 'Нема фајлова'}
                 </h3>
                 <p className="text-gray-500 mb-4">
                   {searchTerm || categoryFilter !== 'all'
-                    ? `Nema fajlova koji odgovaraju filterima`
-                    : 'Učitajte prvi fajl koristeći drag & drop ili dugme za učitavanje'
+                    ? `Нема фајлова који одговарају филтерима`
+                    : 'Учитајте први фајл користећи drag & drop или дугме за учитавање'
                   }
                 </p>
                 {(searchTerm || categoryFilter !== 'all') && (
@@ -388,7 +388,7 @@ export function MediaPicker({
                     }}
                   >
                     <Filter className="mr-2 h-4 w-4" />
-                    Očisti filtere
+                    Очисти филтере
                   </Button>
                 )}
               </div>
@@ -398,13 +398,13 @@ export function MediaPicker({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Otkaži
+            Откажи
           </Button>
           <Button 
             onClick={handleSelect} 
             disabled={!selectedFile}
           >
-            Izaberi fajl
+            Изабери фајл
           </Button>
         </DialogFooter>
       </DialogContent>

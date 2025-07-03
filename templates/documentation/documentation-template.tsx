@@ -31,40 +31,40 @@ import { toast } from 'sonner';
 // Category mapping for icons and labels
 const categoryConfig = {
   [MediaCategory.PROCUREMENT]: {
-    label: 'Javne nabavke',
+    label: 'Јавне набавке',
     icon: Building,
     color: 'bg-blue-100 text-blue-800',
-    description: 'Dokumenti vezani za javne nabavke i tendere'
+    description: 'Документи везани за јавне набавке и тендере'
   },
   [MediaCategory.FINANCIAL]: {
-    label: 'Finansijski izveštaji',
+    label: 'Финансијски извештаји',
     icon: DollarSign,
     color: 'bg-green-100 text-green-800',
-    description: 'Budžeti, finansijski planovi i izveštaji'
+    description: 'Буџети, финансијски планови и извештаји'
   },
   [MediaCategory.DECISIONS]: {
-    label: 'Odluke',
+    label: 'Одлуке',
     icon: FileCheck,
     color: 'bg-purple-100 text-purple-800',
-    description: 'Odluke donesene na sastancima i sednicama'
+    description: 'Одлуке донесене на састанцима и седницама'
   },
   [MediaCategory.PLANS]: {
-    label: 'Planovi',
+    label: 'Планови',
     icon: Clipboard,
     color: 'bg-orange-100 text-orange-800',
-    description: 'Godišnji planovi rada i razvoja'
+    description: 'Годишњи планови рада и развоја'
   },
   [MediaCategory.REPORTS]: {
-    label: 'Izveštaji',
+    label: 'Извештаји',
     icon: BarChart3,
     color: 'bg-red-100 text-red-800',
-    description: 'Izveštaji o radu uprave i drugih organa'
+    description: 'Извештаји о раду управе и других органа'
   },
   [MediaCategory.OTHER]: {
-    label: 'Ostalo',
+    label: 'Остало',
     icon: Folder,
     color: 'bg-gray-100 text-gray-800',
-    description: 'Ostali dokumenti i mediji'
+    description: 'Остали документи и медији'
   }
 };
 
@@ -80,11 +80,11 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
   const getCategoryFromPageTitle = (title: string): MediaCategory | null => {
     const titleLower = title.toLowerCase();
     
-    if (titleLower.includes('javne nabavke')) return MediaCategory.PROCUREMENT;
-    if (titleLower.includes('finansijski')) return MediaCategory.FINANCIAL;
-    if (titleLower.includes('odluke')) return MediaCategory.DECISIONS;
-    if (titleLower.includes('planovi')) return MediaCategory.PLANS;
-    if (titleLower.includes('izveštaji')) return MediaCategory.REPORTS;
+    if (titleLower.includes('јавне набавке')) return MediaCategory.PROCUREMENT;
+    if (titleLower.includes('финансијски')) return MediaCategory.FINANCIAL;
+    if (titleLower.includes('одлуке')) return MediaCategory.DECISIONS;
+    if (titleLower.includes('планови')) return MediaCategory.PLANS;
+    if (titleLower.includes('извештаји')) return MediaCategory.REPORTS;
     
     return null;
   };
@@ -139,7 +139,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
       
     } catch (error) {
       console.error('Error fetching documents:', error);
-      toast.error('Greška pri učitavanju dokumenata');
+      toast.error('Грешка при учитавању докумената');
     } finally {
       setIsLoading(false);
     }
@@ -231,10 +231,10 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
           <CardHeader>
             <CardTitle className="flex items-center">
               <Search className="mr-2 h-5 w-5" />
-              Pretraga dokumenata
+              Претрага докумената
             </CardTitle>
             <CardDescription>
-              Pronađite dokumente pomoću pretrage ili filtera po kategorijama
+              Пронађите документе помоћу претраге или филтера по категоријама
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -243,7 +243,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Pretraži dokumente po nazivu ili opisu..."
+                    placeholder="Претражи документе по називу или опису..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
@@ -257,7 +257,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                   onChange={(e) => setSelectedCategory(e.target.value as MediaCategory | 'all')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="all">Sve kategorije</option>
+                  <option value="all">Све категорије</option>
                   {categories.map(({ category, count }) => {
                     const config = getCategoryConfig(category);
                     return (
@@ -273,7 +273,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
             {(searchTerm || selectedCategory !== 'all') && (
               <div className="mt-4 flex items-center justify-between">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Prikazuje se {filteredDocuments.length} od {documents.length} dokumenata
+                  Приказује се {filteredDocuments.length} од {documents.length} докумената
                 </p>
                 <Button
                   variant="outline"
@@ -282,7 +282,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                   className="flex items-center"
                 >
                   <X className="mr-1 h-4 w-4" />
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               </div>
             )}
@@ -318,7 +318,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{count}</div>
-                  <p className="text-xs text-gray-500">dokumenata</p>
+                  <p className="text-xs text-gray-500">докумената</p>
                 </CardContent>
               </Card>
             );
@@ -331,14 +331,14 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">
             {isSubpage 
-              ? `Dokumenti - ${page.title}` 
+              ? `Документи - ${page.title}` 
               : searchTerm || selectedCategory !== 'all' 
-                ? 'Rezultati pretrage' 
-                : 'Svi dokumenti'
+                ? 'Резултати претраге' 
+                : 'Сви документи'
             }
           </h2>
           <Badge variant="outline" className="text-sm">
-            {filteredDocuments.length} dokumenata
+            {filteredDocuments.length} докумената
           </Badge>
         </div>
 
@@ -388,7 +388,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                       </Badge>
                       <Badge variant="outline" className="text-xs">
                         <Eye className="mr-1 h-3 w-3" />
-                        Javno
+                        Јавно
                       </Badge>
                     </div>
                   </CardHeader>
@@ -402,11 +402,11 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
 
                     <div className="space-y-2 text-xs text-gray-500">
                       <div className="flex items-center justify-between">
-                        <span>Veličina:</span>
+                        <span>Величина:</span>
                         <span>{formatFileSize(doc.size)}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span>Datum:</span>
+                        <span>Датум:</span>
                         <span className="flex items-center">
                           <Calendar className="mr-1 h-3 w-3" />
                           {formatDate(doc.createdAt)}
@@ -420,7 +420,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                       size="sm"
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      Preuzmi dokument
+                      Преузми документ
                     </Button>
                   </CardContent>
                 </Card>
@@ -433,18 +433,18 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
               <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 {searchTerm || selectedCategory !== 'all' 
-                  ? 'Nema rezultata' 
+                  ? 'Нема резултата' 
                   : isSubpage 
-                    ? 'Nema dokumenata u ovoj kategoriji'
-                    : 'Nema dokumenata'
+                    ? 'Нема докумената у овој категорији'
+                    : 'Нема докумената'
                 }
               </h3>
               <p className="text-gray-500 mb-4">
                 {searchTerm || selectedCategory !== 'all'
-                  ? 'Pokušajte sa drugačijim filterima ili pretragom'
+                  ? 'Покушајте са другачијим филтерима или претрагом'
                   : isSubpage
-                    ? 'Dokumenti će biti prikazani kada budu učitani u sistem'
-                    : 'Trenutno nema dostupnih dokumenata'
+                    ? 'Документи ће бити приказани када буду учитани у систем'
+                    : 'Тренутно нема доступних докумената'
                 }
               </p>
               {(searchTerm || selectedCategory !== 'all') && (
@@ -454,7 +454,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                   className="mt-2"
                 >
                   <Filter className="mr-2 h-4 w-4" />
-                  Očisti filtere
+                  Очисти филтере
                 </Button>
               )}
             </CardContent>
@@ -466,9 +466,9 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
       {!isSubpage && (
         <Card>
           <CardHeader>
-            <CardTitle>Brze veze</CardTitle>
+            <CardTitle>Брзе везе</CardTitle>
             <CardDescription>
-              Često traženi dokumenti i informacije
+              Често тражени документи и информације
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -478,28 +478,28 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
                 className="flex items-center p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <Building className="mr-3 h-5 w-5 text-blue-600" />
-                <span className="font-medium">Javne nabavke</span>
+                <span className="font-medium">Јавне набавке</span>
               </a>
               <a 
                 href="/finansijski-izvestaji" 
                 className="flex items-center p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <DollarSign className="mr-3 h-5 w-5 text-green-600" />
-                <span className="font-medium">Budžet</span>
+                <span className="font-medium">Буџет</span>
               </a>
               <a 
                 href="/odluke" 
                 className="flex items-center p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <FileCheck className="mr-3 h-5 w-5 text-purple-600" />
-                <span className="font-medium">Odluke</span>
+                <span className="font-medium">Одлуке</span>
               </a>
               <a 
                 href="/izvestaji" 
                 className="flex items-center p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <BarChart3 className="mr-3 h-5 w-5 text-red-600" />
-                <span className="font-medium">Izveštaji</span>
+                <span className="font-medium">Извештаји</span>
               </a>
             </div>
           </CardContent>
@@ -509,15 +509,15 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
       {/* Contact Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Kontakt za dodatne informacije</CardTitle>
+          <CardTitle>Контакт за додатне информације</CardTitle>
           <CardDescription>
-            Za pitanja o dokumentima ili zahteve za dodatne informacije
+            За питања о документима или захтеве за додатне информације
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <h4 className="font-medium mb-2">Opšte informacije</h4>
+              <h4 className="font-medium mb-2">Опште информације</h4>
               <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <p>{institutionData.phone}</p>
                 <p>{institutionData.email}</p>
@@ -525,7 +525,7 @@ export function DocumentationTemplate({ page, institutionData, settings }: Templ
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-2">Adresa</h4>
+              <h4 className="font-medium mb-2">Адреса</h4>
               <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <p>{institutionData.address}</p>
               </div>
