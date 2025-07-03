@@ -38,7 +38,7 @@ function getWebSocketUrl(): string {
 
   const hostname = window.location.hostname;
   
-  // Production environments - UVEK koristi production WebSocket
+  // Production environments
   if (hostname === 'codilio2.sbugarin.com' || hostname === 'codilio.sbugarin.com') {
     const wsUrl = 'wss://api-codilio.sbugarin.com';
     console.log('🔗 Using production WebSocket URL:', wsUrl);
@@ -47,25 +47,13 @@ function getWebSocketUrl(): string {
 
   // Local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Konvertuj NEXT_PUBLIC_API_URL u WebSocket URL
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl) {
-      const wsUrl = apiUrl
-        .replace('https://', 'wss://')
-        .replace('http://', 'ws://')
-        .replace('/api', '');
-      console.log('🔗 Using local WebSocket URL from env:', wsUrl);
-      return wsUrl;
-    }
-    
-    // Fallback za localhost
-    const localWsUrl = 'ws://localhost:3001';
-    console.log('🔗 Using localhost WebSocket fallback:', localWsUrl);
+    const localWsUrl = process.env.NEXT_PUBLIC_API_URL?.replace('http', 'ws').replace('/api', '') || 'ws://localhost:3001';
+    console.log('🔗 Using local WebSocket URL:', localWsUrl);
     return localWsUrl;
   }
 
-  // Docker environment ili nepoznati hostname - koristi production
-  const fallbackWsUrl = 'wss://api-codilio.sbugarin.com';
+  // Docker environment or fallback
+  const fallbackWsUrl = process.env.NEXT_PUBLIC_API_URL?.replace('https', 'wss').replace('http', 'ws').replace('/api', '') || 'wss://api-codilio.sbugarin.com';
   console.log('🔗 Using fallback WebSocket URL:', fallbackWsUrl);
   return fallbackWsUrl;
 }
@@ -134,10 +122,10 @@ export function useActivityTracker({ onActivityUpdate, enabled = true }: UseActi
       socket.on('connect_error', (error: any) => {
         console.error('❌ WebSocket connection error:', error);
         
-        // Try fallback URL if primary fails (samo za development)
-        if (!wsUrl.includes('api-codilio2') && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-          console.log('🔄 Trying fallback WebSocket URL for localhost...');
-          const fallbackUrl = 'ws://localhost:3001';
+        // Try fallback URL if primary fails
+        if (!wsUrl.includes('api-codilio2')) {
+          console.log('🔄 Trying fallback WebSocket URL...');
+          const fallbackUrl = 'wss://api-codilio2.sbugarin.com';
           socket.disconnect();
           
           socket = io(`${fallbackUrl}/relof-index`, {
