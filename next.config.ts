@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  
+  // 🚀 CRITICAL: Enable standalone output for Docker deployment
+  output: 'standalone',
+  
+  // Optional: Configure tracing for better debugging
+  experimental: {
+    outputFileTracingRoot: process.cwd(),
+  },
 };
 
 export default nextConfig;
