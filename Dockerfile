@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# 🚀 KRITIČNO: Environment variables za build-time
+#  KRITIČNO: Environment variables za build-time
 ARG NEXT_PUBLIC_API_URL=https://api-codilio.sbugarin.com/api
 ARG NODE_ENV=production
 ARG NEXT_TELEMETRY_DISABLED=1
@@ -29,7 +29,7 @@ ENV NEXT_TELEMETRY_DISABLED=$NEXT_TELEMETRY_DISABLED
 RUN echo "🔧 Building with API URL: $NEXT_PUBLIC_API_URL"
 RUN echo "🔧 Node environment: $NODE_ENV"
 
-# 🔍 ENHANCED: Pre-build verification of source files
+#  ENHANCED: Pre-build verification of source files
 RUN echo "🕵️ Pre-build verification - checking for localhost references in source..."
 RUN find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
     grep -v node_modules | \
@@ -38,7 +38,7 @@ RUN find . -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | \
 # Build the application
 RUN npm run build
 
-# 🔍 ENHANCED: Post-build verification
+#  ENHANCED: Post-build verification
 RUN echo "🕵️ Post-build verification - checking compiled JavaScript..."
 RUN find /app/.next -name "*.js" -exec grep -l "localhost:3001" {} \; 2>/dev/null | head -3 || echo "✅ No localhost:3001 in compiled JS"
 RUN find /app/.next -name "*.js" -exec grep -l "api-codilio.sbugarin.com" {} \; 2>/dev/null | head -1 && echo "✅ Production API URL found in compiled JS" || echo "⚠️ Production API URL not found"
@@ -50,7 +50,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# 🌐 PRODUCTION Environment Variables - these will be overriden by docker-compose
+#  PRODUCTION Environment Variables - these will be overriden by docker-compose
 ENV NEXT_PUBLIC_API_URL=https://api-codilio.sbugarin.com/api
 ENV API_URL=http://backend:3001/api
 ENV PORT=3000
@@ -73,7 +73,7 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# 🚀 ENHANCED: Create startup script BEFORE switching to nextjs user
+#  ENHANCED: Create startup script BEFORE switching to nextjs user
 RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'echo "🚀 Starting Codilio Frontend"' >> /app/startup.sh && \
     echo 'echo "🔗 Client API URL: $NEXT_PUBLIC_API_URL"' >> /app/startup.sh && \
