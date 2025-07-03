@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { postsApi, pagesApi, mediaApi } from '@/lib/api';
+import { transliterate } from '@/lib/transliterate';
 import type { Post, Page } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +35,64 @@ interface SearchResults {
   posts: Post[];
   pages: Page[];
 }
+
+// Function to convert Latin to Cyrillic
+const latinToCyrillic = (text: string): string => {
+  const map: Record<string, string> = {
+    'A': 'А', 'B': 'Б', 'V': 'В', 'G': 'Г', 'D': 'Д',
+    'Dj': 'Ђ', 'DJ': 'Ђ', 'E': 'Е', 'Ž': 'Ж', 'Z': 'З', 'I': 'И',
+    'J': 'Ј', 'K': 'К', 'L': 'Л', 'Lj': 'Љ', 'LJ': 'Љ', 'M': 'М',
+    'N': 'Н', 'Nj': 'Њ', 'NJ': 'Њ', 'O': 'О', 'P': 'П', 'R': 'Р',
+    'S': 'С', 'T': 'Т', 'Ć': 'Ћ', 'C': 'Ц', 'U': 'У', 'F': 'Ф',
+    'H': 'Х', 'Č': 'Ч', 'Dž': 'Џ', 'DŽ': 'Џ', 'Š': 'Ш',
+    'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д',
+    'dj': 'ђ', 'e': 'е', 'ž': 'ж', 'z': 'з', 'i': 'и',
+    'j': 'ј', 'k': 'к', 'l': 'л', 'lj': 'љ', 'm': 'м',
+    'n': 'н', 'nj': 'њ', 'o': 'о', 'p': 'п', 'r': 'р',
+    's': 'с', 't': 'т', 'ć': 'ћ', 'c': 'ц', 'u': 'у', 'f': 'ф',
+    'h': 'х', 'č': 'ч', 'dž': 'џ', 'š': 'ш'
+  };
+
+  // First handle multi-character combinations
+  let result = text;
+  
+  // Handle two-letter combinations first (order matters)
+  const twoLetterCombos = ['Dj', 'DJ', 'Lj', 'LJ', 'Nj', 'NJ', 'Dž', 'DŽ', 'dj', 'lj', 'nj', 'dž'];
+  twoLetterCombos.forEach(combo => {
+    const regex = new RegExp(combo, 'g');
+    result = result.replace(regex, map[combo] || combo);
+  });
+
+  // Then handle single characters
+  result = result.split('').map(char => map[char] || char).join('');
+
+  return result;
+};
+
+// Enhanced search function that handles both Cyrillic and Latin input
+const enhancedSearch = (content: string, query: string): boolean => {
+  const queryLower = query.toLowerCase();
+  const contentLower = content.toLowerCase();
+  
+  // Search in original form
+  if (contentLower.includes(queryLower)) {
+    return true;
+  }
+  
+  // Convert query from Latin to Cyrillic and search
+  const cyrillicQuery = latinToCyrillic(queryLower);
+  if (contentLower.includes(cyrillicQuery)) {
+    return true;
+  }
+  
+  // Convert content from Cyrillic to Latin and search with original query
+  const latinContent = transliterate(contentLower);
+  if (latinContent.includes(queryLower)) {
+    return true;
+  }
+  
+  return false;
+};
 
 export function SearchComponent({
   placeholder = "Унесите кључне речи...",
@@ -84,17 +143,17 @@ export function SearchComponent({
         pagesApi.getPublished()
       ]);
 
-      const searchLower = query.toLowerCase();
+      // Enhanced filtering using the new search function
       const filteredPosts = postsResponse.posts.filter(post =>
-        post.title.toLowerCase().includes(searchLower) ||
-        post.excerpt?.toLowerCase().includes(searchLower) ||
-        post.content.toLowerCase().includes(searchLower) ||
-        post.category?.name.toLowerCase().includes(searchLower)
+        enhancedSearch(post.title, query) ||
+        enhancedSearch(post.excerpt || '', query) ||
+        enhancedSearch(post.content, query) ||
+        enhancedSearch(post.category?.name || '', query)
       ).slice(0, 5);
 
       const filteredPages = pagesResponse.filter(page =>
-        page.title.toLowerCase().includes(searchLower) ||
-        String(page.content).toLowerCase().includes(searchLower)
+        enhancedSearch(page.title, query) ||
+        enhancedSearch(String(page.content), query)
       ).slice(0, 3);
 
       setSearchResults({
@@ -129,17 +188,30 @@ export function SearchComponent({
     setShowSearchResults(false);
   };
 
+  // Enhanced highlight function that works with both scripts
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
-    const regex = new RegExp(`(${query})`, 'gi');
-    const parts = text.split(regex);
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
-          {part}
-        </span>
-      ) : part
+    
+    // Create patterns for both original query and transliterated versions
+    const patterns = [
+      query,
+      latinToCyrillic(query),
+      transliterate(query)
+    ].filter((pattern, index, arr) => 
+      pattern && pattern !== query || index === 0
     );
+    
+    let result = text;
+    patterns.forEach(pattern => {
+      if (pattern && pattern !== text) {
+        const regex = new RegExp(`(${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        result = result.replace(regex, (match) => 
+          `<mark class="bg-yellow-200 px-1 rounded font-semibold">${match}</mark>`
+        );
+      }
+    });
+    
+    return <span dangerouslySetInnerHTML={{ __html: result }} />;
   };
 
   const formatDate = (dateString: string) => {
