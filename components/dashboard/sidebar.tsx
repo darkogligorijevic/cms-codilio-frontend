@@ -22,7 +22,7 @@ import {
 
 const menuItems = [
   {
-    title: 'Dashboard',
+    title: 'Контролна табла',
     href: '/dashboard',
     icon: LayoutDashboard,
   },

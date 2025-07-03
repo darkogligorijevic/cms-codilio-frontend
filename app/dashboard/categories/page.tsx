@@ -105,7 +105,7 @@ export default function CategoriesPage() {
       setCategories(response);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      toast.error('Greška pri učitavanju kategorija');
+      toast.error('Грешка при учитавању категорија');
     } finally {
       setIsLoading(false);
     }
@@ -121,17 +121,17 @@ export default function CategoriesPage() {
 
       if (editingCategory) {
         await categoriesApi.update(editingCategory.id, categoryData as UpdateCategoryDto);
-        toast.success('Kategorija je uspešno ažurirana');
+        toast.success('Категорија је успешно ажурирана');
       } else {
         await categoriesApi.create(categoryData as CreateCategoryDto);
-        toast.success('Kategorija je uspešno kreirana');
+        toast.success('Категорија је успешно креирана');
       }
 
       fetchCategories();
       handleCloseDialog();
     } catch (error) {
       console.error('Error saving category:', error);
-      toast.error('Greška pri čuvanju kategorije');
+      toast.error('Грешка при чувању категорије');
     }
   };
 
@@ -148,13 +148,13 @@ export default function CategoriesPage() {
 
     try {
       await categoriesApi.delete(categoryToDelete.id);
-      toast.success('Kategorija je uspešno obrisana');
+      toast.success('Категорија је успешно обрисана');
       fetchCategories();
       setIsDeleteDialogOpen(false);
       setCategoryToDelete(null);
     } catch (error) {
       console.error('Error deleting category:', error);
-      toast.error('Greška pri brisanju kategorije. Možda se koristi u objavama.');
+      toast.error('Грешка при брисању категорије. Можда се користи у објавама.');
     }
   };
 
@@ -189,39 +189,39 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Kategorije</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Категорије</h1>
           <p className="text-muted-foreground">
-            Organizujte objave po kategorijama za lakše navigiranje građana
+            Организујте објаве по категоријама за лакше навигирање грађана
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant={theme === "light" ? "default" : "secondaryDefault"}>
               <Plus className="mr-2 h-4 w-4" />
-              Nova kategorija
+              Нова категорија
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <form onSubmit={handleSubmit(onSubmit)}>
               <DialogHeader>
                 <DialogTitle>
-                  {editingCategory ? 'Uredi kategoriju' : 'Nova kategorija'}
+                  {editingCategory ? 'Уреди категорију' : 'Нова категорија'}
                 </DialogTitle>
                 <DialogDescription>
                   {editingCategory 
-                    ? 'Uredite informacije o kategoriji' 
-                    : 'Kreirajte novu kategoriju za organizovanje objava'
+                    ? 'Уредите информације о категорији' 
+                    : 'Креирајте нову категорију за организовање објава'
                   }
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Naziv kategorije</Label>
+                  <Label htmlFor="name">Назив категорије</Label>
                   <Input
                     id="name"
-                    placeholder="Npr. Gradski projekti"
-                    {...register('name', { required: 'Naziv je obavezan' })}
+                    placeholder="Нпр. Градски пројекти"
+                    {...register('name', { required: 'Назив је обавезан' })}
                   />
                   {errors.name && (
                     <p className="text-sm text-red-600 flex items-center">
@@ -236,7 +236,7 @@ export default function CategoriesPage() {
                   <Input
                     id="slug"
                     placeholder="gradski-projekti"
-                    {...register('slug', { required: 'Slug je obavezan' })}
+                    {...register('slug', { required: 'Slug је обавезан' })}
                   />
                   {errors.slug && (
                     <p className="text-sm text-red-600 flex items-center">
@@ -250,25 +250,25 @@ export default function CategoriesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Opis (opciono)</Label>
+                  <Label htmlFor="description">Опис (опционо)</Label>
                   <Textarea
                     id="description"
-                    placeholder="Kratki opis kategorije..."
+                    placeholder="Кратак опис категорије..."
                     rows={3}
                     {...register('description')}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Opis će biti prikazan građanima na stranici kategorije
+                    Опис ће бити приказан грађанима на страници категорије
                   </p>
                 </div>
               </div>
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                  Otkaži
+                  Откажи
                 </Button>
                 <Button type="submit" disabled={isSubmitting} variant={theme === "light" ? "default" : "secondaryDefault"}>
-                  {isSubmitting ? 'Čuva se...' : (editingCategory ? 'Sačuvaj izmene' : 'Kreiraj kategoriju')}
+                  {isSubmitting ? 'Чува се...' : (editingCategory ? 'Сачувај измене' : 'Креирај категорију')}
                 </Button>
               </DialogFooter>
             </form>
@@ -281,14 +281,14 @@ export default function CategoriesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Ukupno kategorija
+              Укупно категорија
             </CardTitle>
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{categories.length}</div>
             <p className="text-xs text-muted-foreground">
-              Aktivne kategorije
+              Активне категорије
             </p>
           </CardContent>
         </Card>
@@ -296,14 +296,14 @@ export default function CategoriesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Kategorizovane objave
+              Категорисане објаве
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalPosts}</div>
             <p className="text-xs text-muted-foreground">
-              Objave u kategorijama
+              Објаве у категоријама
             </p>
           </CardContent>
         </Card>
@@ -311,7 +311,7 @@ export default function CategoriesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Najaktivnija kategorija
+              Најактивнија категорија
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -321,7 +321,7 @@ export default function CategoriesPage() {
               {mostActiveCategory?.name.length > 12 && '...'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {mostActiveCategory?.posts?.length || 0} objava
+              {mostActiveCategory?.posts?.length || 0} објава
             </p>
           </CardContent>
         </Card>
@@ -329,7 +329,7 @@ export default function CategoriesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Prosek po kategoriji
+              Просек по категорији
             </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -338,7 +338,7 @@ export default function CategoriesPage() {
               {categories.length > 0 ? Math.round(totalPosts / categories.length) : 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Objava po kategoriji
+              Објава по категорији
             </p>
           </CardContent>
         </Card>
@@ -347,16 +347,16 @@ export default function CategoriesPage() {
       {/* Search */}
       <Card>
         <CardHeader>
-          <CardTitle>Pretraga kategorija</CardTitle>
+          <CardTitle>Претрага категорија</CardTitle>
           <CardDescription>
-            Pronađite kategorije po nazivu, slug-u ili opisu
+            Пронађите категорије по називу, slug-у или опису
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Pretraži kategorije..."
+              placeholder="Претражи категорије..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -364,7 +364,7 @@ export default function CategoriesPage() {
           </div>
           {searchTerm && (
             <div className="mt-2 text-sm text-muted-foreground">
-              Pronađeno {filteredCategories.length} od {categories.length} kategorija
+              Пронађено {filteredCategories.length} од {categories.length} категорија
             </div>
           )}
         </CardContent>
@@ -375,16 +375,16 @@ export default function CategoriesPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Lista kategorija</CardTitle>
+              <CardTitle>Листа категорија</CardTitle>
               <CardDescription>
-                Ukupno {filteredCategories.length} kategorija
+                Укупно {filteredCategories.length} категорија
               </CardDescription>
             </div>
             {categories.length > 0 && (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/categories" target="_blank">
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Pogledaj na sajtu
+                  Погледај на сајту
                 </Link>
               </Button>
             )}
@@ -408,12 +408,12 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Kategorija</TableHead>
+                  <TableHead>Категорија</TableHead>
                   <TableHead>Slug</TableHead>
-                  <TableHead>Opis</TableHead>
-                  <TableHead>Broj objava</TableHead>
-                  <TableHead>Kreirana</TableHead>
-                  <TableHead className="text-right">Akcije</TableHead>
+                  <TableHead>Опис</TableHead>
+                  <TableHead>Број објава</TableHead>
+                  <TableHead>Креирана</TableHead>
+                  <TableHead className="text-right">Акције</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -448,7 +448,7 @@ export default function CategoriesPage() {
                           </p>
                         ) : (
                           <span className="text-xs text-muted-foreground italic">
-                            Nema opisa
+                            Нема описа
                           </span>
                         )}
                       </div>
@@ -469,7 +469,7 @@ export default function CategoriesPage() {
                             className="h-6 px-2 text-xs"
                           >
                             <Link href={`/dashboard/posts?category=${category.id}`}>
-                              Pogledaj
+                              Погледај
                             </Link>
                           </Button>
                         )}
@@ -487,7 +487,7 @@ export default function CategoriesPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditCategory(category)}
-                          title="Uredi kategoriju"
+                          title="Уреди категорију"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -498,7 +498,7 @@ export default function CategoriesPage() {
                             setCategoryToDelete(category);
                             setIsDeleteDialogOpen(true);
                           }}
-                          title="Obriši kategoriju"
+                          title="Обриши категорију"
                           className="text-red-600 hover:text-red-800 hover:bg-red-50"
                           disabled={(category.posts?.length || 0) > 0}
                         >
@@ -515,44 +515,44 @@ export default function CategoriesPage() {
                         {searchTerm ? (
                           <>
                             <Search className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                            <h3 className="text-lg font-medium">Nema rezultata</h3>
-                            <p>Nema kategorija koje odgovaraju pretrazi "{searchTerm}"</p>
+                            <h3 className="text-lg font-medium">Нема резултата</h3>
+                            <p>Нема категорија које одговарају претрази "{searchTerm}"</p>
                             <Button
                               variant="outline"
                               onClick={() => setSearchTerm('')}
                               className="mt-2"
                             >
-                              Očisti pretragu
+                              Очисти претрагу
                             </Button>
                           </>
                         ) : (
                           <>
                             <FolderOpen className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                            <h3 className="text-lg font-medium">Nema kategorija</h3>
-                            <p>Počnite kreiranjem prve kategorije za organizovanje sadržaja</p>
+                            <h3 className="text-lg font-medium">Нема категорија</h3>
+                            <p>Почните креирањем прве категорије за организовање садржаја</p>
                             <Dialog>
                               <DialogTrigger asChild>
                                 <Button className="mt-4">
                                   <Plus className="mr-2 h-4 w-4" />
-                                  Kreiraj prvu kategoriju
+                                  Креирај прву категорију
                                 </Button>
                               </DialogTrigger>
                               <DialogContent className="sm:max-w-md">
                                 <form onSubmit={handleSubmit(onSubmit)}>
                                   <DialogHeader>
-                                    <DialogTitle>Nova kategorija</DialogTitle>
+                                    <DialogTitle>Нова категорија</DialogTitle>
                                     <DialogDescription>
-                                      Kreirajte prvu kategoriju za organizovanje objava
+                                      Креирајте прву категорију за организовање објава
                                     </DialogDescription>
                                   </DialogHeader>
                                   
                                   <div className="space-y-4 py-4">
                                     <div className="space-y-2">
-                                      <Label htmlFor="name">Naziv kategorije</Label>
+                                      <Label htmlFor="name">Назив категорије</Label>
                                       <Input
                                         id="name"
-                                        placeholder="Npr. Obaveštenja"
-                                        {...register('name', { required: 'Naziv je obavezan' })}
+                                        placeholder="Нпр. Обавештења"
+                                        {...register('name', { required: 'Назив је обавезан' })}
                                       />
                                       {errors.name && (
                                         <p className="text-sm text-red-600 flex items-center">
@@ -567,7 +567,7 @@ export default function CategoriesPage() {
                                       <Input
                                         id="slug"
                                         placeholder="obavestenja"
-                                        {...register('slug', { required: 'Slug je obavezan' })}
+                                        {...register('slug', { required: 'Slug је обавезан' })}
                                       />
                                       {errors.slug && (
                                         <p className="text-sm text-red-600 flex items-center">
@@ -578,10 +578,10 @@ export default function CategoriesPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                      <Label htmlFor="description">Opis (opciono)</Label>
+                                      <Label htmlFor="description">Опис (опционо)</Label>
                                       <Textarea
                                         id="description"
-                                        placeholder="Kratki opis kategorije..."
+                                        placeholder="Кратак опис категорије..."
                                         rows={3}
                                         {...register('description')}
                                       />
@@ -590,7 +590,7 @@ export default function CategoriesPage() {
 
                                   <DialogFooter>
                                     <Button type="submit" disabled={isSubmitting}>
-                                      {isSubmitting ? 'Kreira se...' : 'Kreiraj kategoriju'}
+                                      {isSubmitting ? 'Креира се...' : 'Креирај категорију'}
                                     </Button>
                                   </DialogFooter>
                                 </form>
@@ -612,9 +612,9 @@ export default function CategoriesPage() {
       {categories.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Najpopularnije kategorije</CardTitle>
+            <CardTitle>Најпопуларније категорије</CardTitle>
             <CardDescription>
-              Kategorije sa najviše objava
+              Категорије са највише објава
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -639,7 +639,7 @@ export default function CategoriesPage() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary">
-                        {category.posts?.length || 0} objava
+                        {category.posts?.length || 0} објава
                       </Badge>
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/kategorije/${category.slug}`} target="_blank">
@@ -658,15 +658,15 @@ export default function CategoriesPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potvrdi brisanje</DialogTitle>
+            <DialogTitle>Потврди брисање</DialogTitle>
             <DialogDescription>
-              Da li ste sigurni da želite da obrišete kategoriju "{categoryToDelete?.name}"?
+              Да ли сте сигурни да желите да обришете категорију "{categoryToDelete?.name}"?
               {(categoryToDelete?.posts?.length || 0) > 0 && (
                 <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <AlertCircle className="inline h-4 w-4 mr-2 text-yellow-600" />
                   <span className="text-sm text-yellow-800">
-                    <strong>Upozorenje:</strong> Ova kategorija sadrži {categoryToDelete?.posts?.length} objav(a). 
-                    Prvo prebacite objave u drugu kategoriju ili ih označite kao "bez kategorije".
+                    <strong>Упозорење:</strong> Ова категорија садржи {categoryToDelete?.posts?.length} објав(а). 
+                    Прво пребаците објаве у другу категорију или их означите као "без категорије".
                   </span>
                 </div>
               )}
@@ -676,7 +676,7 @@ export default function CategoriesPage() {
           {categoryToDelete && (
             <div className="py-4 space-y-2 text-sm border rounded-lg p-4 bg-gray-50">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Naziv:</span>
+                <span className="text-muted-foreground">Назив:</span>
                 <span className="font-medium">{categoryToDelete.name}</span>
               </div>
               <div className="flex justify-between">
@@ -686,16 +686,16 @@ export default function CategoriesPage() {
                 </Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Broj objava:</span>
+                <span className="text-muted-foreground">Број објава:</span>
                 <span className="font-medium">{categoryToDelete.posts?.length || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Kreirana:</span>
+                <span className="text-muted-foreground">Креирана:</span>
                 <span>{formatDate(categoryToDelete.createdAt)}</span>
               </div>
               {categoryToDelete.description && (
                 <div className="pt-2 border-t">
-                  <span className="text-muted-foreground text-xs">Opis:</span>
+                  <span className="text-muted-foreground text-xs">Опис:</span>
                   <p className="text-sm mt-1">{categoryToDelete.description}</p>
                 </div>
               )}
@@ -710,14 +710,14 @@ export default function CategoriesPage() {
                 setCategoryToDelete(null);
               }}
             >
-              Otkaži
+              Откажи
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteCategory}
               disabled={(categoryToDelete?.posts?.length || 0) > 0}
             >
-              {(categoryToDelete?.posts?.length || 0) > 0 ? 'Kategorija se koristi' : 'Obriši kategoriju'}
+              {(categoryToDelete?.posts?.length || 0) > 0 ? 'Категорија се користи' : 'Обриши категорију'}
             </Button>
           </DialogFooter>
         </DialogContent>
