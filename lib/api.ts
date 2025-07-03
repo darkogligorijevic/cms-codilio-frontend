@@ -6,35 +6,41 @@ import { InstitutionType } from './institution-templates';
 const getApiBaseUrl = (): string => {
   // Server-side rendering (Next.js) - koristi environment varijable
   if (typeof window === 'undefined') {
-    // Na serveru uvek koristi environment varijable
-    const serverUrl = process.env.API_URL || 
-                     process.env.NEXT_PUBLIC_API_URL || 
-                     'https://api-codilio.sbugarin.com/api';
-    console.log('🖥️ Server-side API URL:', serverUrl);
-    return serverUrl;
+    // Prioritet: specifični env -> fallback env -> hardcoded fallback
+    return process.env.API_URL || 
+           process.env.NEXT_PUBLIC_API_URL || 
+           'https://api-codilio.sbugarin.com/api';
   }
 
-  // Client-side detection - PRVO proveri hostname!
+  // Client-side detection
   const hostname = window.location.hostname;
-  console.log('🔍 Client-side detecting API URL for hostname:', hostname);
   
-  // PRIORITET 1: Production domains - UVEK koristi production API
+  console.log('🔍 Detecting API URL for hostname:', hostname);
+  
+  // Production URLs - glavna logika
   if (hostname === 'codilio2.sbugarin.com' || hostname === 'codilio.sbugarin.com') {
     const apiUrl = 'https://api-codilio.sbugarin.com/api';
     console.log('✅ Detected production domain - using main API:', apiUrl);
     return apiUrl;
   }
 
-  // PRIORITET 2: Localhost development
+  // Local development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     const localApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-    console.log('🏠 Detected localhost - using API URL:', localApiUrl);
+    console.log('✅ Detected localhost - using API URL:', localApiUrl);
     return localApiUrl;
   }
 
-  // PRIORITET 3: Fallback za sve ostalo (Docker ili nepoznati host)
+  // Docker container environment - koristi env varijable
+  if (process.env.NODE_ENV === 'production') {
+    const dockerApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-codilio.sbugarin.com/api';
+    console.log('🐳 Docker production environment - using API URL:', dockerApiUrl);
+    return dockerApiUrl;
+  }
+
+  // Fallback - prioritizuj environment varijable
   const fallbackUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api-codilio.sbugarin.com/api';
-  console.log('🐳 Using fallback API URL for hostname', hostname, ':', fallbackUrl);
+  console.log('⚠️ Using fallback API URL:', fallbackUrl);
   return fallbackUrl;
 };
 
