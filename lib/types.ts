@@ -108,7 +108,7 @@ export interface Page {
   status: PageStatus;
   template: string;
   sortOrder: number;
-  usePageBuilder: boolean; // Add this field
+  usePageBuilder: boolean; 
   createdAt: string;
   updatedAt: string;
   authorId: number;
@@ -117,7 +117,7 @@ export interface Page {
   parent?: Page;
   children?: Page[];
   posts?: Post[];
-  sections?: PageSection[]; // Add this field
+  sections?: PageSection[]; 
 }
 
 export interface Post {
@@ -310,6 +310,7 @@ export interface CreatePageDto {
   template?: string;
   sortOrder?: number;
   parentId?: number; 
+  usePageBuilder?: boolean;
 }
 
 export interface UpdatePageDto extends Partial<CreatePageDto> {}
