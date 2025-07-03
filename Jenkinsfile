@@ -7,13 +7,13 @@ pipeline {
         DEPLOY_PATH = "/home/codilio/codilio-app"
         KEEP_VERSIONS = "3"
         
-        // 🌐 ENVIRONMENT DETECTION AND API URLS
+        //  ENVIRONMENT DETECTION AND API URLS
         FRONTEND_URL = "https://codilio2.sbugarin.com"
         API_URL = "https://api-codilio2.sbugarin.com/api"
         FRONTEND_URL_ALT = "https://codilio.sbugarin.com"
         API_URL_ALT = "https://api-codilio.sbugarin.com/api"
         
-        // 🔧 BUILD-TIME ENVIRONMENT VARIABLES - glavna API URL
+        //  BUILD-TIME ENVIRONMENT VARIABLES - glavna API URL
         NEXT_PUBLIC_API_URL = "https://api-codilio.sbugarin.com/api"
         NODE_ENV = "production"
         NEXT_TELEMETRY_DISABLED = "1"
