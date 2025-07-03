@@ -6,7 +6,6 @@ export enum InstitutionType {
   MUNICIPALITY = 'municipality',
   SCHOOL = 'school',
   CULTURAL_CENTER = 'cultural_center',
-  HOSPITAL = 'hospital',
   LIBRARY = 'library'
 }
 
@@ -246,17 +245,6 @@ export const INSTITUTION_TEMPLATES: Record<InstitutionType, InstitutionTemplate>
     primaryColor: '#7C2D92',
     secondaryColor: '#A855F7',
     fontFamily: 'Poppins',
-    predefinedSections: [],
-    allowedSectionTypes: Object.values(SectionType)
-  },
-
-  [InstitutionType.HOSPITAL]: {
-    type: InstitutionType.HOSPITAL,
-    name: 'Болница/Клиника',
-    description: 'Темплејт за здравствене установе',
-    primaryColor: '#DC2626',
-    secondaryColor: '#EF4444',
-    fontFamily: 'Roboto',
     predefinedSections: [],
     allowedSectionTypes: Object.values(SectionType)
   },

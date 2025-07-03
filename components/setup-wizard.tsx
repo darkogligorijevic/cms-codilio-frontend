@@ -45,7 +45,6 @@ import {
   FileText,
   Share2,
   BarChart3,
-  Hospital,
   School,
   Library,
   Landmark,
@@ -145,13 +144,6 @@ const INSTITUTION_TYPES = [
     description: 'Образовне установе свих нивоа',
     icon: School,
     color: 'from-green-600 to-emerald-600'
-  },
-  {
-    value: InstitutionType.HOSPITAL,
-    label: 'Болница/Клиника',
-    description: 'Здравствене установе и медицински центри',
-    icon: Hospital,
-    color: 'from-red-600 to-pink-600'
   },
   {
     value: InstitutionType.LIBRARY,
